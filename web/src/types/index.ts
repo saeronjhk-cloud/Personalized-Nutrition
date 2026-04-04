@@ -48,7 +48,8 @@ export interface Persona {
   name: string;
   emoji: string;
   description: string;
-  tip: string;
+  tip?: string;
+  tagline?: string;
 }
 
 export interface ScoreBreakdown {

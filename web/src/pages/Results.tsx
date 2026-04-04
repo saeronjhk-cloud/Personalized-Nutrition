@@ -55,9 +55,11 @@ export default function Results({ result, error, onRestart }: Props) {
         <div style={{ fontSize: 56, marginBottom: 8 }}>{persona.emoji}</div>
         <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{persona.name}</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 12 }}>{persona.description}</p>
-        <div className="alert alert-info" style={{ textAlign: 'left', marginBottom: 0 }}>
-          💡 {persona.tip}
-        </div>
+        {(persona.tip || persona.tagline) && (
+          <div className="alert alert-info" style={{ textAlign: 'left', marginBottom: 0 }}>
+            💡 {persona.tip || persona.tagline}
+          </div>
+        )}
       </div>
 
       {/* BMI + 영양 정보 */}

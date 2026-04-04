@@ -24,7 +24,8 @@ function toPersona(p: PersonaData): Persona {
     id: p.id,
     name: p.name,
     emoji: p.emoji,
-    description: p.tagline || p.description || '',
+    description: p.description || p.tagline || '',
+    tagline: p.tagline || '',
     tip: p.tip || '',
   };
 }
