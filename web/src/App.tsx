@@ -13,6 +13,8 @@ import Resources from './pages/Resources'
 import Questions from './pages/Questions'
 import Results from './pages/Results'
 import Loading from './pages/Loading'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 
 const INITIAL_ANSWERS: SurveyAnswers = {
   성별: 'male',
@@ -115,6 +117,8 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/survey" element={<SurveyFlow />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </main>
       <Footer />

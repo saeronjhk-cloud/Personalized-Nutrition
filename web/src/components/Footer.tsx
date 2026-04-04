@@ -25,6 +25,8 @@ export default function Footer() {
             <h4>회사</h4>
             <Link to="/about">회사 소개</Link>
             <Link to="/team">운영진 소개</Link>
+            <Link to="/privacy">개인정보처리방침</Link>
+            <Link to="/terms">이용약관</Link>
           </div>
           <div className="footer-col">
             <h4>문의</h4>
