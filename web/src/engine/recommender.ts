@@ -203,8 +203,8 @@ export function runRecommendation(answers: SurveyAnswers): RecommendationResult 
     cautions: supp.cautions || [],
     drug_interactions: supp.drug_interactions || [],
     symptom_indicators: matched,
-    coupang_url: '',
-    food_avoid: SUPPLEMENT_FOOD_AVOID[supp.id] || [],
+    coupang_url: `https://www.coupang.com/np/search?q=${encodeURIComponent(supp.name + ' 영양제')}&channel=user`,
+    food_avoid: (SUPPLEMENT_FOOD_AVOID[supp.id] || []).map((f: any) => typeof f === 'string' ? f : f.item || ''),
   }));
 
   return {
