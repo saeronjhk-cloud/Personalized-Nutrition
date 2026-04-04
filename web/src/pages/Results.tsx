@@ -24,8 +24,31 @@ export default function Results({ result, error, onRestart }: Props) {
 
   const { persona, recommendations, excluded, score_breakdown, nutrition_info, monthly_summary, warnings } = result
 
+  const handleSavePDF = () => {
+    window.print()
+  }
+
+  const today = new Date()
+  const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`
+
   return (
     <div className="fade-in" style={{ paddingTop: 24, paddingBottom: 60 }}>
+
+      {/* 인쇄 전용 헤더 (화면에서는 숨김) */}
+      <div className="print-header">
+        <h1>🧬 케어앤 맞춤 영양 분석 리포트</h1>
+        <p>{dateStr} 기준 | Care &amp; N by 새론비즈</p>
+      </div>
+
+      {/* PDF 저장 버튼 */}
+      <div className="no-print" style={{ marginBottom: 20 }}>
+        <button className="btn-pdf" onClick={handleSavePDF}>
+          📄 결과를 PDF로 저장하기
+        </button>
+        <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
+          저장 화면에서 "PDF로 저장"을 선택하세요
+        </p>
+      </div>
 
       {/* 페르소나 카드 */}
       <div className="card card-elevated" style={{ textAlign: 'center', marginBottom: 24, background: 'linear-gradient(135deg, var(--primary-light), #f0f9ff)' }}>
@@ -123,11 +146,13 @@ export default function Results({ result, error, onRestart }: Props) {
       )}
 
       {/* 다시 시작 */}
-      <button className="btn btn-secondary" onClick={onRestart} style={{ marginTop: 24 }}>
-        🔄 다시 분석하기
-      </button>
+      <div className="no-print">
+        <button className="btn btn-secondary" onClick={onRestart} style={{ marginTop: 24 }}>
+          🔄 다시 분석하기
+        </button>
+      </div>
 
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
+      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
         본 추천은 식약처 인정 건강기능식품 기능성에 기반한 참고 정보이며, 의학적 진단을 대체하지 않습니다.
       </p>
     </div>

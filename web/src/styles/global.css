@@ -765,3 +765,122 @@ input[type="range"]::-webkit-slider-thumb {
   .section-title { font-size: 20px; }
   .footer-links { flex-direction: column; gap: 20px; }
 }
+
+/* ── PDF 저장 버튼 ── */
+.btn-pdf {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-md);
+}
+.btn-pdf:hover { background: linear-gradient(135deg, #b91c1c, #991b1b); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-pdf:active { transform: translateY(0); }
+
+/* ── 인쇄(PDF) 전용 스타일 ── */
+@media print {
+  /* 화면 전용 요소 숨기기 */
+  .navbar, .site-footer, .nav-toggle, .no-print, .btn-pdf, .coupang-btn {
+    display: none !important;
+  }
+
+  /* 배경색 인쇄 허용 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1e293b;
+  }
+
+  .app-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 카드 스타일 조정 */
+  .card, .card-elevated, .result-card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 12px !important;
+  }
+
+  /* 결과 페이지 레이아웃 */
+  .fade-in {
+    animation: none !important;
+    padding-top: 0 !important;
+  }
+
+  /* PDF 헤더 (인쇄 시에만 보임) */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    padding: 20px 0 16px;
+    border-bottom: 2px solid var(--primary);
+    margin-bottom: 20px;
+  }
+  .print-header h1 {
+    font-size: 20pt;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .print-header p {
+    font-size: 10pt;
+    color: #64748b;
+  }
+
+  /* 페이지 여백 */
+  @page {
+    margin: 15mm 12mm;
+    size: A4;
+  }
+
+  /* 점수 바 색상 유지 */
+  .score-bar-fill {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 페르소나 카드 배경 */
+  .card-elevated {
+    background: #f0f9ff !important;
+  }
+
+  /* 다시 분석 버튼 숨기기 */
+  .btn-secondary {
+    display: none !important;
+  }
+
+  /* 하단 면책 조항 */
+  .disclaimer-text {
+    font-size: 9pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+    margin-top: 20px;
+  }
+}
+
+/* 화면에서는 인쇄 전용 헤더 숨기기 */
+.print-header {
+  display: none;
+}
