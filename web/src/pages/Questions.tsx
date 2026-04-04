@@ -80,13 +80,12 @@ const GOAL_OPTIONS = [
   { id: '피로회복', emoji: '💪', label: '피로회복' },
   { id: '수면개선', emoji: '😴', label: '수면개선' },
   { id: '면역력강화', emoji: '🛡️', label: '면역력강화' },
-  { id: '체중감량', emoji: '⚖️', label: '체중감량' },
+  { id: '체중관리', emoji: '⚖️', label: '체중 / 체지방 관리' },
   { id: '간건강', emoji: '🍺', label: '간건강' },
   { id: '소화장건강', emoji: '🦠', label: '소화장건강' },
   { id: '근육증가', emoji: '🏋️', label: '근육증가' },
   { id: '피부개선', emoji: '✨', label: '피부개선' },
   { id: '혈당관리', emoji: '🩸', label: '혈당관리' },
-  { id: '체지방감소', emoji: '⚖️', label: '체지방감소' },
   { id: '눈건강', emoji: '👁️', label: '눈건강' },
   { id: '심혈관건강', emoji: '❤️', label: '심혈관건강' },
   { id: '갱년기관리', emoji: '🌸', label: '갱년기관리' },
@@ -136,6 +135,21 @@ export default function Questions({ step, answers, onUpdate, onNext, onBack, onS
 
 /* ── Q1: 기본 정보 ── */
 function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpdate: (p: Partial<SurveyAnswers>) => void; onNext: () => void }) {
+  const [heightText, setHeightText] = useState(String(answers.신장 || ''))
+  const [weightText, setWeightText] = useState(String(answers.체중 || ''))
+
+  const handleHeight = (val: string) => {
+    setHeightText(val)
+    const num = parseFloat(val)
+    if (!isNaN(num)) onUpdate({ 신장: num })
+  }
+
+  const handleWeight = (val: string) => {
+    setWeightText(val)
+    const num = parseFloat(val)
+    if (!isNaN(num)) onUpdate({ 체중: num })
+  }
+
   return (
     <div className="card">
       <h2 className="section-title">👤 기본 신체 정보를 알려주세요</h2>
@@ -163,13 +177,15 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
       <div style={{ display: 'flex', gap: 12 }}>
         <div className="input-group" style={{ flex: 1 }}>
           <label>키 (cm)</label>
-          <input type="number" className="input-field" value={answers.신장}
-            onChange={e => onUpdate({ 신장: +e.target.value })} />
+          <input type="number" className="input-field" value={heightText}
+            onChange={e => handleHeight(e.target.value)}
+            onBlur={() => { if (!heightText) { setHeightText('170'); onUpdate({ 신장: 170 }); } }} />
         </div>
         <div className="input-group" style={{ flex: 1 }}>
           <label>몸무게 (kg)</label>
-          <input type="number" className="input-field" step="0.1" value={answers.체중}
-            onChange={e => onUpdate({ 체중: +e.target.value })} />
+          <input type="number" className="input-field" step="0.1" value={weightText}
+            onChange={e => handleWeight(e.target.value)}
+            onBlur={() => { if (!weightText) { setWeightText('65'); onUpdate({ 체중: 65 }); } }} />
         </div>
       </div>
 

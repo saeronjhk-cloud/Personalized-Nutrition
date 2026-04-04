@@ -45,7 +45,7 @@ export function calculateProteinTarget(weight: number, goals: string[]): [number
   if (goals.includes('근육증가')) {
     return [Math.round(weight * 1.6), Math.round(weight * 2.0)];
   }
-  if (goals.includes('체중감량')) {
+  if (goals.includes('체중관리') || goals.includes('체중감량')) {
     return [Math.round(weight * 1.4), Math.round(weight * 1.8)];
   }
   return [Math.round(weight * 1.0), Math.round(weight * 1.4)];
