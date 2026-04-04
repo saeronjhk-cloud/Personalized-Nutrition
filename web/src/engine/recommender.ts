@@ -9,6 +9,7 @@ import {
   PERSONAS,
   SUPPLEMENT_MONTHLY_DATA,
   SUPPLEMENT_FOOD_AVOID,
+  COUPANG_KEYWORDS,
 } from './data';
 import {
   computeScores,
@@ -203,7 +204,7 @@ export function runRecommendation(answers: SurveyAnswers): RecommendationResult 
     cautions: supp.cautions || [],
     drug_interactions: supp.drug_interactions || [],
     symptom_indicators: matched,
-    coupang_url: `https://www.coupang.com/np/search?q=${encodeURIComponent(supp.name + ' 영양제')}&channel=user`,
+    coupang_url: `https://www.coupang.com/np/search?q=${encodeURIComponent(COUPANG_KEYWORDS[supp.id] || supp.name + ' 건강기능식품')}&channel=user&sorter=scoreDesc`,
     food_avoid: (SUPPLEMENT_FOOD_AVOID[supp.id] || []).map((f: any) => typeof f === 'string' ? f : f.item || ''),
   }));
 

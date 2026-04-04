@@ -2293,3 +2293,39 @@ export const SUPPLEMENT_FOOD_AVOID: Record<string, Array<any>> = {
     }
   ]
 };
+
+// ── 쿠팡 검색 키워드 (평점순 정렬 + 정밀 키워드) ──────────────────────────
+// 규칙: 성분명 + 함량/형태 + "건강기능식품"
+// 소비자 평점 높은 순 정렬 → URL에 &sorter=scoreDesc 적용
+export const COUPANG_KEYWORDS: Record<string, string> = {
+  "vitamin_b": "비타민B 컴플렉스 고함량 건강기능식품",
+  "magnesium": "마그네슘 비스글리시네이트 400mg 건강기능식품",
+  "omega3": "오메가3 rTG 1000mg 건강기능식품",
+  "vitamin_d": "비타민D3 2000IU 건강기능식품",
+  "probiotics": "프로바이오틱스 100억 유산균 건강기능식품",
+  "milk_thistle": "밀크씨슬 실리마린 130mg 건강기능식품",
+  "vitamin_c": "비타민C 1000mg 건강기능식품",
+  "lemon_balm": "레몬밤 추출물 건강기능식품",
+  "collagen": "저분자 콜라겐 펩타이드 어류 건강기능식품",
+  "coq10": "코엔자임Q10 100mg 건강기능식품",
+  "iron": "철분 비스글리시네이트 건강기능식품",
+  "zinc": "아연 피콜리네이트 15mg 건강기능식품",
+  "gaba": "가바 GABA 300mg 건강기능식품",
+  "headache_tree": "편두통 피버퓨 건강기능식품",
+  "folic_acid": "엽산 활성형 800mcg 건강기능식품",
+  "vitamin_e": "비타민E 토코페롤 400IU 건강기능식품",
+  "red_ginseng": "홍삼 진세노사이드 건강기능식품",
+  "calcium": "칼슘 마그네슘 비타민D 건강기능식품",
+  "lutein": "루테인 지아잔틴 20mg 건강기능식품",
+  "chromium": "크롬 피콜리네이트 200mcg 건강기능식품",
+  "banaba_leaf": "바나바잎 코로솔산 건강기능식품",
+  "saw_palmetto": "쏘팔메토 320mg 건강기능식품",
+  "gamma_linolenic": "감마리놀렌산 달맞이꽃종자유 건강기능식품",
+  "msm": "MSM 글루코사민 관절 건강기능식품",
+  "garcinia": "가르시니아 HCA 건강기능식품",
+  "vitamin_k2": "비타민K2 MK7 건강기능식품",
+  "selenium": "셀레늄 셀렌 100mcg 건강기능식품",
+  "red_clover": "레드클로버 이소플라본 건강기능식품",
+  "coenzyme_pqq": "PQQ 피롤로퀴놀린퀴논 건강기능식품",
+  "phosphatidylserine": "포스파티딜세린 PS 100mg 건강기능식품",
+};
