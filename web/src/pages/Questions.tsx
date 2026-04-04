@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Step, SurveyAnswers } from '../types'
 import ProgressBar from '../components/ProgressBar'
 
@@ -105,12 +106,13 @@ const FAMILY_HISTORY_LIST = [
 
 export default function Questions({ step, answers, onUpdate, onNext, onBack, onSubmit }: Props) {
   const idx = getStepIndex(step)
+  const navigate = useNavigate()
 
   return (
     <div className="fade-in" style={{ paddingTop: 20, paddingBottom: 40 }}>
       <button className="btn-secondary" onClick={() => {
         const prevIdx = STEPS.indexOf(step) - 1
-        if (prevIdx < 0) onBack('home')
+        if (prevIdx < 0) navigate('/')
         else onBack(STEPS[prevIdx])
       }} style={{ width: 'auto', padding: '8px 16px', fontSize: 14, marginBottom: 8 }}>
         ← 이전
