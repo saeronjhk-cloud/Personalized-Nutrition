@@ -1,7 +1,9 @@
 /**
  * 백엔드 API 클라이언트
+ * 로컬 추천 엔진으로 변경됨 (browser-side processing)
  */
 import type { SurveyAnswers, RecommendationResult, SymptomGroup, GoalItem } from '../types';
+import { runRecommendation } from '../engine';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -17,12 +19,10 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-/** 설문 응답 → 맞춤 추천 */
+/** 설문 응답 → 맞춤 추천 (로컬 엔진 실행) */
 export async function getRecommendation(answers: SurveyAnswers): Promise<RecommendationResult> {
-  return fetchJson<RecommendationResult>('/recommend', {
-    method: 'POST',
-    body: JSON.stringify(answers),
-  });
+  // 로컬 추천 엔진 실행 (동기 처리이지만 async 함수 유지)
+  return Promise.resolve(runRecommendation(answers));
 }
 
 /** 증상 목록 가져오기 */
