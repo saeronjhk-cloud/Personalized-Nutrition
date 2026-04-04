@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
 import Navbar from './components/Navbar'
@@ -32,6 +32,36 @@ function SurveyFlow() {
   const [answers, setAnswers] = useState<SurveyAnswers>({ ...INITIAL_ANSWERS })
   const [result, setResult] = useState<RecommendationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const isPopState = useRef(false)
+
+  // 브라우저 뒤로가기/앞으로가기 처리
+  useEffect(() => {
+    const handlePopState = () => {
+      const stateData = window.history.state?.usr
+      if (stateData?.step) {
+        isPopState.current = true
+        setStep(stateData.step)
+        if (stateData.step !== 'results' && stateData.step !== 'loading') {
+          // 결과/로딩이 아닌 설문 단계로 돌아갈 때
+        }
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // 단계가 바뀔 때 브라우저 히스토리에 기록 (popstate로 인한 변경 제외)
+  useEffect(() => {
+    if (isPopState.current) {
+      isPopState.current = false
+      return
+    }
+    // 로딩 단계는 히스토리에 안 남김
+    if (step !== 'loading') {
+      window.history.pushState({ usr: { step } }, '', '/survey')
+    }
+  }, [step])
 
   const updateAnswers = useCallback((patch: Partial<SurveyAnswers>) => {
     setAnswers(prev => ({ ...prev, ...patch }))
