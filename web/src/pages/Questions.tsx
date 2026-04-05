@@ -12,6 +12,18 @@ interface Props {
   onSubmit: () => void
 }
 
+function WhyTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="why-tooltip-wrap">
+      <button className="why-tooltip-btn" onClick={() => setOpen(!open)}>
+        💡 왜 이 질문을 하나요?
+      </button>
+      {open && <div className="why-tooltip-content">{text}</div>}
+    </div>
+  )
+}
+
 const STEPS: Step[] = ['body', 'symptoms', 'goals', 'sleep', 'stress', 'exercise', 'diet', 'alcohol', 'supplements', 'conditions']
 const TOTAL = STEPS.length
 
@@ -109,14 +121,17 @@ export default function Questions({ step, answers, onUpdate, onNext, onBack, onS
   const navigate = useNavigate()
 
   return (
-    <div className="fade-in" style={{ paddingTop: 20, paddingBottom: 40 }}>
-      <button className="btn-secondary" onClick={() => {
-        const prevIdx = STEPS.indexOf(step) - 1
-        if (prevIdx < 0) navigate('/')
-        else onBack(STEPS[prevIdx])
-      }} style={{ width: 'auto', padding: '8px 16px', fontSize: 14, marginBottom: 8 }}>
-        ← 이전
-      </button>
+    <div className="survey-container fade-in">
+      <div className="survey-nav-row">
+        <button className="survey-back-btn" onClick={() => {
+          const prevIdx = STEPS.indexOf(step) - 1
+          if (prevIdx < 0) navigate('/')
+          else onBack(STEPS[prevIdx])
+        }}>
+          ← {STEPS.indexOf(step) === 0 ? '홈으로' : '이전'}
+        </button>
+        <span className="survey-time-hint">약 3분 소요</span>
+      </div>
 
       <ProgressBar current={idx} total={TOTAL} />
 
@@ -153,9 +168,10 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">👤 기본 신체 정보를 알려주세요</h2>
+    <div className="survey-card">
+      <h2 className="section-title">기본 신체 정보를 알려주세요</h2>
       <p className="section-subtitle">기초대사량과 일일 에너지 소비량을 계산해요</p>
+      <WhyTooltip text="키, 체중, 나이를 기반으로 기초대사량(BMR)과 일일 에너지 소비량(TDEE)을 계산해요. 이 수치가 단백질 목표량과 영양소 필요량의 기준이 됩니다." />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         {['male', 'female'].map(g => (
@@ -235,9 +251,10 @@ function StepSymptoms({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">🩺 요즘 이런 증상이 있나요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">요즘 이런 증상이 있나요?</h2>
       <p className="section-subtitle">해당되는 증상을 모두 선택해 주세요. 없으면 그냥 넘어가도 돼요.</p>
+      <WhyTooltip text="선택하신 증상에 따라 14개 건강 카테고리의 필요도 점수가 계산됩니다. 점수가 높은 카테고리와 관련된 영양제가 우선 추천돼요." />
 
       {SYMPTOM_GROUPS.map(group => (
         <div key={group.group} style={{ marginBottom: 20 }}>
@@ -272,9 +289,10 @@ function StepGoals({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUp
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">🎯 가장 신경 쓰이는 게 뭐예요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">가장 신경 쓰이는 건 뭐예요?</h2>
       <p className="section-subtitle">목표에 따라 핵심 추천 영양소가 달라집니다. 여러 개 선택 가능해요.</p>
+      <WhyTooltip text="목표에 가중치를 부여해서 관련 영양소의 추천 우선순위가 올라갑니다. 여러 개 선택하면 교집합에 해당하는 영양소가 더 높은 점수를 받아요." />
 
       <div className="grid-2">
         {GOAL_OPTIONS.map(g => (
@@ -305,9 +323,10 @@ function StepSleep({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUp
   ]
 
   return (
-    <div className="card">
-      <h2 className="section-title">😴 평소 수면 패턴이 어때요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">평소 수면 패턴이 어때요?</h2>
       <p className="section-subtitle">수면 패턴은 마그네슘·GABA 등 추천 여부에 직결됩니다.</p>
+      <WhyTooltip text="수면 패턴은 마그네슘, GABA, 테아닌 등 수면 관련 영양소의 추천 여부를 결정하는 핵심 지표입니다." />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {options.map(o => (
@@ -335,9 +354,10 @@ function StepStress({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onU
   ]
 
   return (
-    <div className="card">
-      <h2 className="section-title">😤 스트레스 수준이 어느 정도예요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">스트레스 수준이 어느 정도예요?</h2>
       <p className="section-subtitle">스트레스 수준은 비타민B·마그네슘 필요도를 결정합니다.</p>
+      <WhyTooltip text="만성 스트레스는 비타민B군과 마그네슘의 소모를 크게 높여요. 스트레스 수준에 따라 추천 용량도 달라집니다." />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {options.map(o => (
@@ -370,9 +390,10 @@ function StepExercise({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
   ]
 
   return (
-    <div className="card">
-      <h2 className="section-title">🏃 운동 패턴을 알려주세요</h2>
+    <div className="survey-card">
+      <h2 className="section-title">운동 패턴을 알려주세요</h2>
       <p className="section-subtitle">운동 강도와 일조량은 비타민D·코엔자임Q10 필요도에 영향을 줍니다.</p>
+      <WhyTooltip text="운동 강도는 코엔자임Q10, BCAA 등의 필요도를 높이고, 일조량 부족은 비타민D 보충 필요성을 결정합니다." />
 
       <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>운동 빈도</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
@@ -412,9 +433,10 @@ function StepDiet({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
   ]
 
   return (
-    <div className="card">
-      <h2 className="section-title">🍽️ 식사 패턴이 어때요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">식사 패턴이 어때요?</h2>
       <p className="section-subtitle">식습관에 따라 특정 영양소 결핍 가능성이 달라져요.</p>
+      <WhyTooltip text="불규칙한 식사나 편식은 특정 영양소 결핍 위험을 높여요. 식사 패턴에 맞는 보충 전략을 세울 수 있습니다." />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {options.map(o => (
@@ -447,9 +469,10 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
   ]
 
   return (
-    <div className="card">
-      <h2 className="section-title">🍺 음주 / 흡연</h2>
+    <div className="survey-card">
+      <h2 className="section-title">음주와 흡연 습관을 알려주세요</h2>
       <p className="section-subtitle">알코올과 흡연은 비타민B·C 소모량을 크게 높여요.</p>
+      <WhyTooltip text="음주는 비타민B1, 엽산, 마그네슘 흡수를 방해하고, 흡연은 비타민C 소모를 2배 이상 높입니다." />
 
       <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>음주 빈도</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
@@ -505,9 +528,10 @@ function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">💊 현재 드시고 있는 영양제가 있나요?</h2>
+    <div className="survey-card">
+      <h2 className="section-title">현재 드시고 있는 영양제가 있나요?</h2>
       <p className="section-subtitle">중복 복용·과잉 섭취를 방지하고 시너지 나는 성분을 추천해 드려요.</p>
+      <WhyTooltip text="이미 드시고 있는 영양제를 파악해야 중복 복용이나 지용성 비타민 과잉 섭취를 방지할 수 있어요." />
 
       <div className="alert alert-warning">⚠️ 지용성 비타민을 이미 드시고 있다면 추가 보충 시 과잉 섭취 위험이 있어요.</div>
 
@@ -547,9 +571,10 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
   }
 
   return (
-    <div className="card">
-      <h2 className="section-title">🏥 건강 상태를 알려주세요</h2>
+    <div className="survey-card">
+      <h2 className="section-title">건강 상태를 알려주세요</h2>
       <p className="section-subtitle">안전한 추천을 위해 현재 질환과 가족력을 확인합니다.</p>
+      <WhyTooltip text="기저질환에 따라 특정 영양소가 금기이거나 주의가 필요할 수 있어요. 안전한 추천을 위해 꼭 필요합니다." />
 
       <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>현재 기저질환 (해당 사항 선택)</div>
       <div className="grid-2" style={{ marginBottom: 24 }}>

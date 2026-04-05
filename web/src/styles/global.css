@@ -1547,3 +1547,586 @@ input[type="range"]::-webkit-slider-thumb {
 .print-header {
   display: none;
 }
+
+/* ══════════════════════════════════════════════════
+   SURVEY PAGE - 설문 페이지 개선
+   ══════════════════════════════════════════════════ */
+
+.survey-container {
+  padding-top: 12px;
+  padding-bottom: 40px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* 상단 네비 */
+.survey-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+.survey-back-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+}
+.survey-back-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.survey-time-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* 프로그레스 바 강화 */
+.survey-progress {
+  margin-bottom: 24px;
+}
+.survey-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.survey-progress-step {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.survey-progress-pct {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.survey-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.survey-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.survey-progress-dots {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.survey-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.survey-dot.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(45, 90, 39, 0.3);
+}
+.survey-dot.done {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-light);
+  font-size: 12px;
+}
+
+/* 설문 카드 */
+.survey-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  animation: surveySlideIn 0.3s ease;
+}
+@keyframes surveySlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 왜 이 질문을? 툴팁 */
+.why-tooltip-wrap {
+  margin-bottom: 20px;
+}
+.why-tooltip-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 4px 0;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.why-tooltip-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+.why-tooltip-content {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--primary-dark);
+  line-height: 1.7;
+  border-left: 3px solid var(--primary);
+  animation: tooltipFade 0.2s ease;
+}
+@keyframes tooltipFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════
+   RESULTS PAGE - 결과 페이지 개선
+   ══════════════════════════════════════════════════ */
+
+.results-page {
+  padding-top: 24px;
+  padding-bottom: 60px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* 결과 헤더 */
+.results-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 32px 20px;
+  background: linear-gradient(160deg, #e8f5e3 0%, #f0fdf4 100%);
+  border-radius: var(--radius);
+}
+.results-header-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 16px;
+  background: var(--primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.results-header-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.results-header-date {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* 페르소나 카드 */
+.results-persona-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.results-persona-emoji {
+  font-size: 48px;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-light), #f0f9ff);
+  border-radius: 16px;
+}
+.results-persona-info {
+  flex: 1;
+}
+.results-persona-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.results-persona-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.results-persona-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.results-persona-tip {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--primary-dark);
+  line-height: 1.6;
+  border-left: 3px solid var(--primary);
+}
+
+/* 섹션 타이틀 */
+.results-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  margin-top: 32px;
+  color: var(--text);
+}
+.results-section-icon {
+  font-size: 18px;
+}
+.results-section-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+/* 신체 분석 그리드 */
+.results-body-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.results-body-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.results-body-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.results-body-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.results-body-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* 점수 카드 */
+.results-scores-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  margin-bottom: 24px;
+}
+.results-score-row {
+  margin-bottom: 14px;
+}
+.results-score-row:last-child {
+  margin-bottom: 0;
+}
+.results-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.results-score-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.results-score-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.results-score-max {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.results-score-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.results-score-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease;
+}
+
+/* 영양제 카드 v2 */
+.result-card-v2 {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s;
+}
+.result-card-v2:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.result-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.result-card-rank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.result-card-name-wrap {
+  flex: 1;
+}
+.result-card-name {
+  font-size: 18px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+.result-card-mfds {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+}
+.result-card-evidence {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.result-card-dosage {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+.result-card-dosage-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.result-card-dosage-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.result-card-caution {
+  font-size: 12px;
+  color: #92400e;
+  padding: 8px 12px;
+  background: var(--warning-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+.result-card-avoid {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* 월간 비용 */
+.results-cost-card {
+  background: linear-gradient(135deg, var(--primary-light), #f0fdf4);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  margin-top: 32px;
+  border: 1px solid rgba(45, 90, 39, 0.15);
+}
+.results-cost-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--primary-dark);
+}
+.results-cost-amount {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.results-cost-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* 제외 후보 */
+.results-excluded {
+  margin-top: 32px;
+  padding: 20px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-light);
+}
+.results-excluded-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  margin-top: -8px;
+}
+.results-excluded-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.results-excluded-item:last-child {
+  border-bottom: none;
+}
+.results-excluded-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.results-excluded-reason {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════════
+   MOBILE RESPONSIVE - 추가 반응형
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Survey 모바일 */
+  .survey-progress-dots {
+    display: none;
+  }
+  .survey-card {
+    padding: 20px 16px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Results 모바일 */
+  .results-persona-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .results-persona-tip {
+    text-align: left;
+  }
+  .results-body-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .results-body-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-align: left;
+  }
+  .results-body-value {
+    font-size: 22px;
+    order: 2;
+  }
+  .results-body-label {
+    order: 1;
+  }
+  .results-body-sub {
+    display: none;
+  }
+  .result-card-dosage {
+    grid-template-columns: 1fr;
+  }
+  .results-header-title {
+    font-size: 22px;
+  }
+  .results-cost-amount {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .survey-container {
+    padding-top: 8px;
+  }
+  .survey-dot {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+  .results-excluded-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
