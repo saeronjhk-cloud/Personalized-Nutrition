@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { RecommendationResult, Supplement, ScoreBreakdown } from '../types'
 
 interface Props {
@@ -19,6 +20,14 @@ export default function Results({ result, error, onRestart }: Props) {
       </div>
     )
   }
+
+  // 누적 분석 건수 카운터 증가
+  useEffect(() => {
+    if (result) {
+      const current = parseInt(localStorage.getItem('analysis_count') || '847', 10)
+      localStorage.setItem('analysis_count', String(current + 1))
+    }
+  }, [result])
 
   if (!result) return null
 

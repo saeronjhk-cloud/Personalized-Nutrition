@@ -959,6 +959,215 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .footer-bottom p { font-size: 12px; color: #64748b; }
 
+/* ── 히어로 누적 카운터 ── */
+.hero-counter {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.6);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+.hero-counter strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* ── 건강 고민 카테고리 그리드 ── */
+.goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.goal-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.goal-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+.goal-icon { font-size: 24px; flex-shrink: 0; }
+.goal-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.goal-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+/* ── 결과 미리보기 목업 ── */
+.preview-mockup {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.preview-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.preview-section-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+.preview-persona {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.preview-emoji { font-size: 36px; }
+.preview-persona-name { font-size: 18px; font-weight: 800; color: var(--text); }
+.preview-persona-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+.preview-supp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.preview-supp-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+}
+.preview-rank {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.preview-supp-name { font-size: 14px; font-weight: 700; }
+.preview-supp-reason { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.preview-score {
+  margin-left: auto;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.preview-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.preview-extras span {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  padding: 6px 12px;
+  border-radius: 16px;
+}
+
+/* ── 연구 깊이 수치 ── */
+.research-stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  max-width: 520px;
+  margin: 0 auto 28px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+}
+.research-stat { text-align: center; flex: 1; }
+.research-number { font-size: 28px; font-weight: 800; color: var(--primary); }
+.research-unit { font-size: 14px; font-weight: 600; }
+.research-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+/* ── 사용자 후기 ── */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 780px;
+  margin: 24px auto 0;
+}
+.review-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  transition: all 0.2s;
+}
+.review-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.review-stars { color: #f59e0b; font-size: 14px; margin-bottom: 12px; letter-spacing: 2px; }
+.review-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+.review-author { display: flex; align-items: center; gap: 8px; }
+.review-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.review-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── FAQ ── */
+.faq-list {
+  max-width: 640px;
+  margin: 24px auto 0;
+}
+.faq-item {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-card);
+}
+.faq-item:hover { border-color: var(--primary-light); }
+.faq-item.open { border-color: var(--primary-light); }
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.faq-toggle {
+  font-size: 20px;
+  color: var(--primary);
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+.faq-answer {
+  padding: 0 20px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
 /* ── 반응형 ── */
 @media (max-width: 768px) {
   .grid-3 { grid-template-columns: 1fr; }
@@ -991,6 +1200,10 @@ input[type="range"]::-webkit-slider-thumb {
   .hero-trust-row { flex-wrap: wrap; gap: 10px; justify-content: center; }
   .compare-header, .compare-row { grid-template-columns: 1fr 0.8fr 1.2fr; }
   .compare-col { padding: 10px 10px; font-size: 12px; }
+  .goal-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .review-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .research-stats { gap: 16px; flex-wrap: wrap; }
+  .preview-extras { gap: 6px; }
 }
 
 @media (max-width: 480px) {
