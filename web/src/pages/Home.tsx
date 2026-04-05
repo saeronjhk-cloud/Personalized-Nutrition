@@ -122,32 +122,29 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-visual">
-            <img src="/supp-hero.jpg" alt="다양한 건강기능식품" className="hero-main-img" />
-            <div className="hero-mockup-overlay">
-              <div className="hero-mockup-badge">맞춤 분석 결과</div>
-              <div className="hero-mockup-persona">
-                <div className="hero-mockup-persona-icon">🔥</div>
-                <div>
-                  <div className="hero-mockup-persona-name">번아웃 직장인형</div>
-                  <div className="hero-mockup-persona-desc">에너지 소모가 큰 유형</div>
-                </div>
+          <div className="hero-mockup">
+            <div className="hero-mockup-badge">맞춤 분석 결과</div>
+            <div className="hero-mockup-persona">
+              <div className="hero-mockup-persona-icon">🔥</div>
+              <div>
+                <div className="hero-mockup-persona-name">번아웃 직장인형</div>
+                <div className="hero-mockup-persona-desc">에너지 소모가 큰 유형</div>
               </div>
-              <div className="hero-mockup-supp">
-                <span className="hero-mockup-rank">1</span>
-                <span className="hero-mockup-name">마그네슘</span>
-                <span className="hero-mockup-score">92점</span>
-              </div>
-              <div className="hero-mockup-supp">
-                <span className="hero-mockup-rank">2</span>
-                <span className="hero-mockup-name">비타민 B군</span>
-                <span className="hero-mockup-score">88점</span>
-              </div>
-              <div className="hero-mockup-supp">
-                <span className="hero-mockup-rank">3</span>
-                <span className="hero-mockup-name">오메가-3</span>
-                <span className="hero-mockup-score">85점</span>
-              </div>
+            </div>
+            <div className="hero-mockup-supp">
+              <span className="hero-mockup-rank">1</span>
+              <span className="hero-mockup-name">마그네슘</span>
+              <span className="hero-mockup-score">92점</span>
+            </div>
+            <div className="hero-mockup-supp">
+              <span className="hero-mockup-rank">2</span>
+              <span className="hero-mockup-name">비타민 B군</span>
+              <span className="hero-mockup-score">88점</span>
+            </div>
+            <div className="hero-mockup-supp">
+              <span className="hero-mockup-rank">3</span>
+              <span className="hero-mockup-name">오메가-3</span>
+              <span className="hero-mockup-score">85점</span>
             </div>
           </div>
         </div>
