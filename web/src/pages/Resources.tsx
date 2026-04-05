@@ -88,9 +88,12 @@ export default function Resources() {
 
   return (
     <div className="page fade-in">
-      <section className="hero-section" style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%)' }}>
-        <h1>유용한 링크</h1>
-        <p className="hero-sub">신뢰할 수 있는 영양·건강 관련 기관과 도구 모음</p>
+      <section className="hero-section hero-with-img">
+        <img src="/supp-overhead.jpg" alt="" className="hero-bg-img" aria-hidden="true" />
+        <div className="hero-overlay">
+          <h1>유용한 링크</h1>
+          <p className="hero-sub">신뢰할 수 있는 영양·건강 관련 기관과 도구 모음</p>
+        </div>
       </section>
 
       <section className="content-section">

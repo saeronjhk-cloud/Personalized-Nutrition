@@ -2130,3 +2130,248 @@ input[type="range"]::-webkit-slider-thumb {
     gap: 2px;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   SUPPLEMENT IMAGE STYLES
+   ═══════════════════════════════════════════════════ */
+
+/* ── Hero visual: image + mockup overlay ── */
+.hero-visual {
+  position: relative;
+  flex: 1;
+  min-width: 320px;
+  max-width: 480px;
+}
+.hero-main-img {
+  width: 100%;
+  border-radius: 20px;
+  object-fit: cover;
+  aspect-ratio: 3/2;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.hero-mockup-overlay {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  background: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  width: 260px;
+  z-index: 2;
+}
+.hero-mockup-overlay .hero-mockup-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+  padding: 3px 10px;
+  background: var(--primary-light, #eef2ff);
+  border-radius: 20px;
+  display: inline-block;
+}
+.hero-mockup-overlay .hero-mockup-persona {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.hero-mockup-overlay .hero-mockup-supp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+/* ── Hero with background image (About, Blog, Resources) ── */
+.hero-with-img {
+  position: relative;
+  overflow: hidden;
+  background: none !important;
+}
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.hero-overlay {
+  position: relative;
+  z-index: 1;
+  background: rgba(0,0,0,0.45);
+  padding: 60px 24px;
+  text-align: center;
+}
+.hero-overlay h1 {
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.hero-overlay .hero-sub {
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* ── "왜 필요한가요" section: text + image side by side ── */
+.why-visual-row {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.why-text {
+  flex: 1;
+}
+.why-img {
+  width: 320px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+/* ── Section with background image ── */
+.section-with-bg {
+  position: relative;
+  overflow: hidden;
+}
+.section-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.07;
+  z-index: 0;
+  pointer-events: none;
+}
+.section-with-bg > *:not(.section-bg-img) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Final CTA with background image ── */
+.final-cta-with-img {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+.final-cta-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.final-cta-content {
+  position: relative;
+  z-index: 1;
+  background: rgba(0,0,0,0.55);
+  padding: 64px 24px;
+  text-align: center;
+}
+.final-cta-content h2 {
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.final-cta-content p {
+  color: rgba(255,255,255,0.9);
+}
+.final-cta-content .cta-disclaimer {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ── About intro image row ── */
+.about-intro-row {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+.about-intro-img {
+  width: 260px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+/* ── Blog card with thumbnail ── */
+.blog-card.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.blog-card-thumb {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+.blog-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.blog-card:hover .blog-card-img {
+  transform: scale(1.05);
+}
+.blog-card-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.blog-card-body .blog-card-cat {
+  align-self: flex-start;
+}
+.blog-card-body .blog-card-title {
+  margin-top: 8px;
+}
+.blog-card-body .blog-card-summary {
+  flex: 1;
+}
+
+/* ── MOBILE: supplement image styles ── */
+@media (max-width: 768px) {
+  .hero-visual {
+    min-width: unset;
+    max-width: 100%;
+  }
+  .hero-mockup-overlay {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 100%;
+    margin-top: -30px;
+  }
+  .why-visual-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .why-img {
+    width: 100%;
+    height: 200px;
+  }
+  .about-intro-row {
+    flex-direction: column;
+  }
+  .about-intro-img {
+    width: 100%;
+    height: 200px;
+  }
+  .blog-card-thumb {
+    height: 140px;
+  }
+  .hero-overlay {
+    padding: 40px 20px;
+  }
+}

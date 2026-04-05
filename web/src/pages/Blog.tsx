@@ -8,6 +8,7 @@ interface BlogEntry {
   category: string
   date: string
   emoji: string
+  thumb: string
   readMin: number
 }
 
@@ -19,6 +20,7 @@ const POSTS: BlogEntry[] = [
     category: '비타민',
     date: '2026-03-28',
     emoji: '\u2600\ufe0f',
+    thumb: '/supp-bowls.jpg',
     readMin: 5,
   },
   {
@@ -28,6 +30,7 @@ const POSTS: BlogEntry[] = [
     category: '오메가-3',
     date: '2026-03-22',
     emoji: '\ud83d\udc1f',
+    thumb: '/supp-overhead.jpg',
     readMin: 6,
   },
   {
@@ -37,6 +40,7 @@ const POSTS: BlogEntry[] = [
     category: '유산균',
     date: '2026-03-15',
     emoji: '\ud83e\uddec',
+    thumb: '/supp-bottles.jpg',
     readMin: 7,
   },
   {
@@ -46,6 +50,7 @@ const POSTS: BlogEntry[] = [
     category: '미네랄',
     date: '2026-03-08',
     emoji: '\ud83d\udca4',
+    thumb: '/supp-hero.jpg',
     readMin: 5,
   },
   {
@@ -55,6 +60,7 @@ const POSTS: BlogEntry[] = [
     category: '복용법',
     date: '2026-03-01',
     emoji: '\u23f0',
+    thumb: '/supp-natural.jpg',
     readMin: 4,
   },
   {
@@ -64,6 +70,7 @@ const POSTS: BlogEntry[] = [
     category: '미네랄',
     date: '2026-02-22',
     emoji: '\ud83e\ude78',
+    thumb: '/supp-capsule.jpg',
     readMin: 5,
   },
 ]
@@ -76,9 +83,12 @@ export default function Blog() {
 
   return (
     <div className="page fade-in">
-      <section className="hero-section" style={{ background: 'linear-gradient(135deg, #ecfdf5 0%, #dbeafe 100%)' }}>
-        <h1>영양정보 블로그</h1>
-        <p className="hero-sub">과학적 근거에 기반한 건강기능식품 정보를 전해드립니다</p>
+      <section className="hero-section hero-with-img">
+        <img src="/supp-bowls.jpg" alt="" className="hero-bg-img" aria-hidden="true" />
+        <div className="hero-overlay">
+          <h1>영양정보 블로그</h1>
+          <p className="hero-sub">과학적 근거에 기반한 건강기능식품 정보를 전해드립니다</p>
+        </div>
       </section>
 
       <section className="content-section">
@@ -99,13 +109,17 @@ export default function Blog() {
         <div className="blog-grid">
           {filtered.map(post => (
             <Link key={post.slug} to={`/blog/${post.slug}`} className="blog-card card">
-              <div className="blog-card-emoji">{post.emoji}</div>
+              <div className="blog-card-thumb">
+                <img src={post.thumb} alt="" className="blog-card-img" />
+              </div>
+              <div className="blog-card-body">
               <span className="blog-card-cat">{post.category}</span>
               <h3 className="blog-card-title">{post.title}</h3>
               <p className="blog-card-summary">{post.summary}</p>
               <div className="blog-card-meta">
                 <span>{post.date}</span>
                 <span>{post.readMin}분 읽기</span>
+              </div>
               </div>
             </Link>
           ))}

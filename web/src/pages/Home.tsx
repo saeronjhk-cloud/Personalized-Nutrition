@@ -122,29 +122,32 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="hero-mockup">
-            <div className="hero-mockup-badge">맞춤 분석 결과</div>
-            <div className="hero-mockup-persona">
-              <div className="hero-mockup-persona-icon">🔥</div>
-              <div>
-                <div className="hero-mockup-persona-name">번아웃 직장인형</div>
-                <div className="hero-mockup-persona-desc">에너지 소모가 큰 유형</div>
+          <div className="hero-visual">
+            <img src="/supp-hero.jpg" alt="다양한 건강기능식품" className="hero-main-img" />
+            <div className="hero-mockup-overlay">
+              <div className="hero-mockup-badge">맞춤 분석 결과</div>
+              <div className="hero-mockup-persona">
+                <div className="hero-mockup-persona-icon">🔥</div>
+                <div>
+                  <div className="hero-mockup-persona-name">번아웃 직장인형</div>
+                  <div className="hero-mockup-persona-desc">에너지 소모가 큰 유형</div>
+                </div>
               </div>
-            </div>
-            <div className="hero-mockup-supp">
-              <span className="hero-mockup-rank">1</span>
-              <span className="hero-mockup-name">마그네슘</span>
-              <span className="hero-mockup-score">92점</span>
-            </div>
-            <div className="hero-mockup-supp">
-              <span className="hero-mockup-rank">2</span>
-              <span className="hero-mockup-name">비타민 B군</span>
-              <span className="hero-mockup-score">88점</span>
-            </div>
-            <div className="hero-mockup-supp">
-              <span className="hero-mockup-rank">3</span>
-              <span className="hero-mockup-name">오메가-3</span>
-              <span className="hero-mockup-score">85점</span>
+              <div className="hero-mockup-supp">
+                <span className="hero-mockup-rank">1</span>
+                <span className="hero-mockup-name">마그네슘</span>
+                <span className="hero-mockup-score">92점</span>
+              </div>
+              <div className="hero-mockup-supp">
+                <span className="hero-mockup-rank">2</span>
+                <span className="hero-mockup-name">비타민 B군</span>
+                <span className="hero-mockup-score">88점</span>
+              </div>
+              <div className="hero-mockup-supp">
+                <span className="hero-mockup-rank">3</span>
+                <span className="hero-mockup-name">오메가-3</span>
+                <span className="hero-mockup-score">85점</span>
+              </div>
             </div>
           </div>
         </div>
@@ -215,16 +218,22 @@ export default function Home() {
           <h2 className="section-title" style={{ textAlign: 'center' }}>
             영양제, 아직도 감으로 고르시나요?
           </h2>
-          <p className="section-desc">
-            한국인의 70% 이상이 1가지 이상의 영양소가 부족하지만,
-            대부분 자신에게 필요한 영양제가 무엇인지 모릅니다.
-            광고나 주변 추천에 의존한 선택은 효과도 없고 돈만 낭비될 수 있습니다.
-          </p>
+          <div className="why-visual-row">
+            <div className="why-text">
+              <p className="section-desc" style={{ textAlign: 'left', marginBottom: 0 }}>
+                한국인의 70% 이상이 1가지 이상의 영양소가 부족하지만,
+                대부분 자신에게 필요한 영양제가 무엇인지 모릅니다.
+                광고나 주변 추천에 의존한 선택은 효과도 없고 돈만 낭비될 수 있습니다.
+              </p>
+            </div>
+            <img src="/supp-capsule.jpg" alt="영양제 캡슐 컨셉" className="why-img" />
+          </div>
         </div>
       </section>
 
       {/* ━━ 작동 방식 ━━ */}
-      <section className="content-section section-animate" style={{ paddingTop: 48 }}>
+      <section className="content-section section-animate section-with-bg" style={{ paddingTop: 48 }}>
+        <img src="/supp-fitness.jpg" alt="" className="section-bg-img" aria-hidden="true" />
         <div className="section-category">이용 방법</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
           3단계로 완성되는 맞춤 추천
@@ -499,7 +508,9 @@ export default function Home() {
       </section>
 
       {/* ━━ 최종 CTA ━━ */}
-      <section className="final-cta">
+      <section className="final-cta final-cta-with-img">
+        <img src="/supp-fruits.jpg" alt="" className="final-cta-bg" aria-hidden="true" />
+        <div className="final-cta-content">
         <h2>지금 바로 나에게 맞는 영양제를 찾아보세요</h2>
         <p>회원가입 없이 3분이면 끝납니다. 결과는 PDF로 저장할 수 있어요.</p>
         <Link to="/survey" className="btn btn-primary hero-cta">
@@ -507,6 +518,7 @@ export default function Home() {
         </Link>
         <div className="cta-disclaimer">
           본 서비스는 의학적 진단을 대체하지 않습니다. 질환이 있으신 분은 전문의와 상담하세요.
+        </div>
         </div>
       </section>
     </div>
