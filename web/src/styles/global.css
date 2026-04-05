@@ -2138,26 +2138,26 @@ input[type="range"]::-webkit-slider-thumb {
 /* ── Hero visual: image + mockup overlay ── */
 .hero-visual {
   position: relative;
-  flex: 1;
-  min-width: 320px;
-  max-width: 480px;
+  flex: 0 1 380px;
+  min-width: 260px;
+  max-width: 380px;
 }
 .hero-main-img {
   width: 100%;
-  border-radius: 20px;
+  border-radius: 16px;
   object-fit: cover;
-  aspect-ratio: 3/2;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  aspect-ratio: 4/3;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
 }
 .hero-mockup-overlay {
   position: absolute;
-  bottom: -20px;
-  right: -20px;
+  bottom: -16px;
+  right: -16px;
   background: white;
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: 14px;
+  padding: 14px 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  width: 260px;
+  width: 240px;
   z-index: 2;
 }
 .hero-mockup-overlay .hero-mockup-badge {
