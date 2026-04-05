@@ -382,21 +382,21 @@ export default function Home() {
 
           <div className="expert-grid">
             <div className="expert-card">
-              <div className="expert-avatar-placeholder">김</div>
+              <img src="/team-kim.jpg" alt="김재환" className="expert-avatar-img" />
               <div className="expert-info">
                 <div className="expert-name">김재환 <span className="expert-role">대표</span></div>
                 <div className="expert-cred">식품영양학 박사 · 특허 14건 · 2019 대통령 표창</div>
               </div>
             </div>
             <div className="expert-card">
-              <div className="expert-avatar-placeholder">서</div>
+              <img src="/team-seo.jpg" alt="서형주" className="expert-avatar-img" />
               <div className="expert-info">
                 <div className="expert-name">서형주 <span className="expert-role">자문</span></div>
                 <div className="expert-cred">고려대 교수 역임 · 일본 RIKEN 연구원 · 수면과학 전문</div>
               </div>
             </div>
             <div className="expert-card">
-              <div className="expert-avatar-placeholder">장</div>
+              <img src="/team-jang.jpg" alt="장은재" className="expert-avatar-img" />
               <div className="expert-info">
                 <div className="expert-name">장은재 <span className="expert-role">자문</span></div>
                 <div className="expert-cred">동덕여대 교수 역임 · 비만연구센터장 · 임상영양 전문</div>

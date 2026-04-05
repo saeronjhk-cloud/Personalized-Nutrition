@@ -604,6 +604,14 @@ input[type="range"]::-webkit-slider-thumb {
   font-weight: 700;
   flex-shrink: 0;
 }
+.expert-avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--primary-light);
+}
 .expert-info { flex: 1; }
 .expert-name { font-size: 15px; font-weight: 700; }
 .expert-role {
@@ -725,6 +733,15 @@ input[type="range"]::-webkit-slider-thumb {
   justify-content: center;
   font-size: 28px;
   flex-shrink: 0;
+}
+.team-avatar-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid var(--primary-light);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .team-role-badge {
   display: inline-block;

@@ -3,7 +3,7 @@ export default function Team() {
     {
       role: '대표',
       name: '김재환',
-      emoji: '👨‍💼',
+      photo: '/team-kim.jpg',
       title: '새론비즈 대표 / 서박사의 영양공식 총괄',
       bio: [
         '고려대학교 식품공학 학사 · 식품가공 석사 · 식품영양학 박사',
@@ -18,7 +18,7 @@ export default function Team() {
     {
       role: '자문위원',
       name: '서형주',
-      emoji: '👨‍🔬',
+      photo: '/team-seo.jpg',
       title: '고려대학교 보건과학대학 교수 (전)',
       bio: [
         '고려대학교 식품공학 학사 · 식품가공학/미생물학 석사 · 박사',
@@ -32,7 +32,7 @@ export default function Team() {
     {
       role: '자문위원',
       name: '장은재',
-      emoji: '👩‍🔬',
+      photo: '/team-jang.jpg',
       title: '동덕여자대학교 식품영양학과 교수 (전)',
       bio: [
         '고려대학교 식품공학 학사 · 석사',
@@ -58,7 +58,7 @@ export default function Team() {
         {members.map((m, i) => (
           <div key={i} className="card team-card" style={{ marginBottom: 24 }}>
             <div className="team-header">
-              <div className="team-avatar">{m.emoji}</div>
+              <img src={m.photo} alt={m.name} className="team-avatar-photo" />
               <div>
                 <span className="team-role-badge">{m.role}</span>
                 <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>{m.name}</h2>
