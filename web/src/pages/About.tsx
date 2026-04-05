@@ -12,16 +12,37 @@ export default function About() {
         </div>
       </section>
 
-      {/* 비전 */}
+      {/* 새론비즈 소개 */}
       <section className="content-section">
-        <h2 className="section-title">🏢 새론비즈 소개</h2>
-        <div className="card" style={{ marginBottom: 24 }}>
-          <p style={{ lineHeight: 1.8, fontSize: 15 }}>
-            새론비즈는 20년 이상의 식품·건강기능식품 산업 경험을 바탕으로
-            설립된 헬스케어 테크 기업입니다. 대표 김재환은 (주)네오크레마를
-            창업하여 기능성 식품소재 분야의 글로벌 기업으로 성장시킨 경험을
-            바탕으로, 이제 소비자가 직접 자신에게 맞는 영양제를 찾을 수 있는
-            지능형 추천 시스템을 만들고 있습니다.
+        <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 8 }}>우리가 모인 이유</h2>
+        <p className="section-desc" style={{ textAlign: 'center', maxWidth: 640, margin: '0 auto 32px' }}>
+          학계와 산업계에서 평생을 바친 전문가들이 하나의 질문 앞에 모였습니다.
+        </p>
+
+        <div className="about-story-card card" style={{ padding: '40px 32px', marginBottom: 32 }}>
+          <blockquote className="about-quote">
+            "사람들은 왜 자기 몸에 필요한 영양소조차 제대로 모를까?"
+          </blockquote>
+          <p style={{ lineHeight: 1.9, fontSize: 15, color: 'var(--text-secondary)', marginTop: 24 }}>
+            연구실에서 성분을 분석하던 사람, 공장에서 원료를 만들던 사람,
+            강단에서 영양학을 가르치던 사람 — 각자의 자리에서 수십 년을 보낸
+            전문가들이 같은 문제의식을 품고 있었습니다.
+          </p>
+          <p style={{ lineHeight: 1.9, fontSize: 15, color: 'var(--text-secondary)', marginTop: 16 }}>
+            건강기능식품 시장은 매년 커지는데, 정작 소비자는 광고와 입소문에
+            의존해 영양제를 고릅니다. 내 몸에 진짜 필요한 게 뭔지 알려주는 곳은
+            어디에도 없었습니다.
+          </p>
+          <p style={{ lineHeight: 1.9, fontSize: 15, marginTop: 16 }}>
+            <strong>새론비즈</strong>는 그 답을 만들기 위해 모인 팀입니다.
+            식품영양학 박사, 임상영양 전문가, 수면과학 연구자가 의기투합하여
+            과학적 근거와 실제 데이터에 기반한 맞춤 영양제 추천 시스템을
+            설계하고 있습니다.
+          </p>
+          <p style={{ lineHeight: 1.9, fontSize: 15, color: 'var(--text-secondary)', marginTop: 16 }}>
+            우리의 목표는 단순합니다. 누구나 자기 몸에 맞는 영양소를 쉽고
+            정확하게 찾을 수 있는 세상. 광고가 아니라 과학이 추천하는 세상.
+            그것이 새론비즈가 꿈꾸는 건강한 세상입니다.
           </p>
         </div>
 
@@ -37,26 +58,6 @@ export default function About() {
                 <div style={{ fontSize: 36, marginBottom: 12 }}>{item.icon}</div>
                 <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>{item.title}</h3>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 연혁 */}
-        <h2 className="section-title">📅 주요 연혁</h2>
-        <div className="card">
-          <div className="timeline">
-            {[
-              { year: '2007', text: '(주)네오크레마 설립 — 기능성 식품소재 개발 시작' },
-              { year: '2014', text: '유기농 갈락토올리고당 세계 최초 개발, 특허 등록' },
-              { year: '2019', text: '대한민국 기술대상 대통령 표창 수상' },
-              { year: '2022', text: '네오크레마 경영 일선 은퇴' },
-              { year: '2025', text: '새론비즈 설립, 서박사의 영양공식 서비스 기획 시작' },
-              { year: '2026', text: '서박사의 영양공식 맞춤 영양제 추천 서비스 베타 런칭' },
-            ].map((item, i) => (
-              <div key={i} className="timeline-item">
-                <span className="timeline-year">{item.year}</span>
-                <span className="timeline-text">{item.text}</span>
               </div>
             ))}
           </div>

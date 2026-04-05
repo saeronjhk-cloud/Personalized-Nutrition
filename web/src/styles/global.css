@@ -2287,6 +2287,17 @@ input[type="range"]::-webkit-slider-thumb {
   color: rgba(255,255,255,0.7);
 }
 
+/* ── About quote ── */
+.about-quote {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--primary);
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 20px;
+  border-left: 4px solid var(--primary);
+}
+
 /* ── About intro image row ── */
 .about-intro-row {
   display: flex;
