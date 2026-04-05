@@ -1169,34 +1169,33 @@ input[type="range"]::-webkit-slider-thumb {
   line-height: 1.8;
 }
 
-/* ── 스크롤 애니메이션 ── */
+/* ── 스크롤 애니메이션 (개별 요소용) ── */
 .reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
-.reveal-left {
+
+/* 섹션 래퍼는 항상 보이고 내부 제목/카드만 애니메이트 */
+.section-animate .section-category,
+.section-animate .section-title,
+.section-animate .section-desc {
   opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
-.reveal-left.visible {
+.section-animate.visible .section-category,
+.section-animate.visible .section-title,
+.section-animate.visible .section-desc {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0);
 }
-.reveal-right {
-  opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal-right.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
+.section-animate.visible .section-title { transition-delay: 0.1s; }
+.section-animate.visible .section-desc { transition-delay: 0.2s; }
 
 /* ── 숫자 카운트업 애니메이션 핵심 ── */
 .count-up {
