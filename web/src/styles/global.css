@@ -1,12 +1,12 @@
 /* ── 디자인 시스템: 깔끔하고 의료적인 느낌 ── */
 
 :root {
-  /* 메인 컬러 */
-  --primary: #2563eb;        /* 의료 블루 */
-  --primary-light: #dbeafe;
-  --primary-dark: #1d4ed8;
-  --accent: #059669;         /* 건강 그린 */
-  --accent-light: #d1fae5;
+  /* 메인 컬러 — 브랜드 그린 기반 */
+  --primary: #2D5A27;        /* 브랜드 다크그린 */
+  --primary-light: #e8f5e3;
+  --primary-dark: #1e3d1a;
+  --accent: #4a9e3f;         /* 밝은 그린 액센트 */
+  --accent-light: #e8f5e3;
 
   /* 뉴트럴 */
   --bg: #f8fafc;
@@ -141,7 +141,7 @@ body {
   user-select: none;
   background: var(--bg-card);
 }
-.check-card:hover { border-color: var(--primary-light); background: #fafbff; }
+.check-card:hover { border-color: var(--primary-light); background: #f5faf5; }
 .check-card.selected {
   border-color: var(--primary);
   background: var(--primary-light);
@@ -450,12 +450,12 @@ input[type="range"]::-webkit-slider-thumb {
   display: inline-block;
   padding: 6px 16px;
   border-radius: 20px;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(45, 90, 39, 0.1);
   color: var(--primary);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(45, 90, 39, 0.2);
 }
 .hero-cta {
   max-width: 340px;
@@ -474,7 +474,7 @@ input[type="range"]::-webkit-slider-thumb {
 .hero-home {
   padding-top: 72px;
   padding-bottom: 56px;
-  background: linear-gradient(160deg, #dbeafe 0%, #f0fdf4 40%, #ede9fe 100%);
+  background: linear-gradient(160deg, #e8f5e3 0%, #f0fdf4 40%, #f5f7f0 100%);
 }
 
 /* ── 신뢰 지표 바 ── */
@@ -651,7 +651,7 @@ input[type="range"]::-webkit-slider-thumb {
 .compare-item { font-weight: 600; color: var(--text); }
 .compare-old { color: var(--text-muted); }
 .compare-new { color: var(--primary-dark); font-weight: 500; }
-.compare-header .compare-new { color: white; background: var(--primary); }
+.compare-header .compare-new { color: white; background: var(--primary); font-weight: 700; }
 .compare-header .compare-old { color: rgba(255,255,255,0.7); }
 
 /* ── 최종 CTA ── */
@@ -659,7 +659,7 @@ input[type="range"]::-webkit-slider-thumb {
   text-align: center;
   padding: 56px 20px 48px;
   margin-top: 32px;
-  background: linear-gradient(160deg, #dbeafe 0%, #f0fdf4 100%);
+  background: linear-gradient(160deg, #e8f5e3 0%, #f0fdf4 100%);
   border-radius: var(--radius);
 }
 .final-cta h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; line-height: 1.4; }
@@ -1169,6 +1169,197 @@ input[type="range"]::-webkit-slider-thumb {
   line-height: 1.8;
 }
 
+/* ── 스크롤 애니메이션 ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── 숫자 카운트업 애니메이션 핵심 ── */
+.count-up {
+  display: inline-block;
+}
+
+/* ── 건강 카테고리 SVG 아이콘 ── */
+.goal-icon-svg {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--primary-light);
+}
+.goal-icon-svg svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--primary);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── 풀폭 배경 섹션 ── */
+.section-alt-bg {
+  background: #f5f9f4;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+/* ── 비교 테이블 강화 ── */
+.compare-check { color: var(--primary); font-weight: 700; }
+.compare-x { color: var(--text-muted); }
+
+/* ── 호버 카드 효과 강화 ── */
+.diff-card {
+  position: relative;
+  overflow: hidden;
+}
+.diff-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  transform-origin: bottom;
+}
+.diff-card:hover::before {
+  transform: scaleY(1);
+}
+
+/* ── 히어로 목업 ── */
+.hero-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.hero-text { text-align: left; flex: 1; }
+.hero-mockup {
+  flex-shrink: 0;
+  width: 280px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  padding: 20px;
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.4s ease;
+}
+.hero-mockup:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+.hero-mockup-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+.hero-mockup-persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.hero-mockup-persona-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff3e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+.hero-mockup-persona-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+.hero-mockup-persona-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.hero-mockup-supp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+.hero-mockup-rank {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.hero-mockup-name {
+  font-size: 12px;
+  font-weight: 700;
+  flex: 1;
+}
+.hero-mockup-score {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+/* ── 섹션 한글 카테고리 라벨 ── */
+.section-category {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
 /* ── 반응형 ── */
 @media (max-width: 768px) {
   .grid-3 { grid-template-columns: 1fr; }
@@ -1201,6 +1392,10 @@ input[type="range"]::-webkit-slider-thumb {
   .hero-trust-row { flex-wrap: wrap; gap: 10px; justify-content: center; }
   .compare-header, .compare-row { grid-template-columns: 1fr 0.8fr 1.2fr; }
   .compare-col { padding: 10px 10px; font-size: 12px; }
+  .hero-layout { flex-direction: column; gap: 32px; }
+  .hero-text { text-align: center; }
+  .hero-mockup { width: 260px; transform: none; }
+  .hero-mockup:hover { transform: none; }
   .goal-grid { grid-template-columns: 1fr; max-width: 400px; }
   .review-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
   .research-stats { gap: 16px; flex-wrap: wrap; }
