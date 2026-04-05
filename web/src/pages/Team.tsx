@@ -4,6 +4,7 @@ export default function Team() {
       role: '대표',
       name: '김재환',
       photo: '/team-kim.jpg',
+      photoPos: '65% 20%',
       title: '새론비즈 대표 / 서박사의 영양공식 총괄',
       bio: [
         '고려대학교 식품공학 학사 · 식품가공 석사 · 식품영양학 박사',
@@ -58,7 +59,7 @@ export default function Team() {
         {members.map((m, i) => (
           <div key={i} className="card team-card" style={{ marginBottom: 24 }}>
             <div className="team-header">
-              <img src={m.photo} alt={m.name} className="team-avatar-photo" />
+              <img src={m.photo} alt={m.name} className="team-avatar-photo" style={m.photoPos ? { objectPosition: m.photoPos } : undefined} />
               <div>
                 <span className="team-role-badge">{m.role}</span>
                 <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>{m.name}</h2>

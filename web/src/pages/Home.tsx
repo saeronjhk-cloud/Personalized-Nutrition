@@ -382,7 +382,7 @@ export default function Home() {
 
           <div className="expert-grid">
             <div className="expert-card">
-              <img src="/team-kim.jpg" alt="김재환" className="expert-avatar-img" />
+              <img src="/team-kim.jpg" alt="김재환" className="expert-avatar-img" style={{ objectPosition: '65% 20%' }} />
               <div className="expert-info">
                 <div className="expert-name">김재환 <span className="expert-role">대표</span></div>
                 <div className="expert-cred">식품영양학 박사 · 특허 14건 · 2019 대통령 표창</div>

@@ -605,10 +605,11 @@ input[type="range"]::-webkit-slider-thumb {
   flex-shrink: 0;
 }
 .expert-avatar-img {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center 15%;
   flex-shrink: 0;
   border: 2px solid var(--primary-light);
 }
@@ -735,10 +736,11 @@ input[type="range"]::-webkit-slider-thumb {
   flex-shrink: 0;
 }
 .team-avatar-photo {
-  width: 72px;
-  height: 72px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center 15%;
   flex-shrink: 0;
   border: 3px solid var(--primary-light);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
