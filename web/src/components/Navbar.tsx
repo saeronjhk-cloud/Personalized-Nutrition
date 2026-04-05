@@ -18,11 +18,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <span className="brand-icon">💊</span>
-          <div>
-            <div className="brand-name">케어앤</div>
-            <div className="brand-sub">Care &amp; N</div>
-          </div>
+          <img src="/logo.png" alt="서박사의 영양공식" className="brand-logo" />
         </Link>
 
         <button className="nav-toggle" onClick={() => setOpen(!open)} aria-label="메뉴">

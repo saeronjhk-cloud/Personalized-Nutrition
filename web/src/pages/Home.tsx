@@ -76,7 +76,7 @@ export default function Home() {
           어떤 건강 고민이든, 맞춤 분석해드립니다
         </h2>
         <p className="section-desc" style={{ marginBottom: 24 }}>
-          내 고민에 해당하는 항목이 있다면, 케어앤이 도움을 줄 수 있습니다
+          내 고민에 해당하는 항목이 있다면, 서박사의 영양공식이 도움을 줄 수 있습니다
         </p>
         <div className="goal-grid">
           {[
@@ -109,7 +109,7 @@ export default function Home() {
 
       {/* ━━ 문제 제기 섹션 ━━ */}
       <section className="content-section" style={{ paddingTop: 48 }}>
-        <div className="section-eyebrow">WHY CARE & N</div>
+        <div className="section-eyebrow">WHY DR. SEO'S FORMULA</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
           영양제, 아직도 감으로 고르시나요?
         </h2>
@@ -214,7 +214,7 @@ export default function Home() {
       <section className="content-section" style={{ paddingTop: 48 }}>
         <div className="section-eyebrow">WHAT MAKES US DIFFERENT</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
-          케어앤만의 차별점
+          서박사의 영양공식만의 차별점
         </h2>
         <div className="diff-grid">
           <div className="diff-card">
@@ -307,13 +307,13 @@ export default function Home() {
       <section className="content-section">
         <div className="section-eyebrow">COMPARISON</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
-          기존 방식 vs 케어앤
+          기존 방식 vs 서박사의 영양공식
         </h2>
         <div className="compare-table">
           <div className="compare-header">
             <div className="compare-col">항목</div>
             <div className="compare-col compare-old">약국·지인 추천</div>
-            <div className="compare-col compare-new">케어앤</div>
+            <div className="compare-col compare-new">서박사의 영양공식</div>
           </div>
           {[
             ['분석 기준', '문진 몇 가지', '36가지 증상 + 생활습관 + 질환'],
@@ -400,7 +400,7 @@ export default function Home() {
           />
           <FaqItem
             q="의학적 진단을 대체할 수 있나요?"
-            a="아닙니다. 케어앤은 건강기능식품 선택을 돕는 참고 도구이며, 질환의 진단이나 치료를 대체하지 않습니다. 건강에 이상이 있으시면 반드시 전문의와 상담하세요."
+            a="아닙니다. 서박사의 영양공식은 건강기능식품 선택을 돕는 참고 도구이며, 질환의 진단이나 치료를 대체하지 않습니다. 건강에 이상이 있으시면 반드시 전문의와 상담하세요."
           />
         </div>
       </section>

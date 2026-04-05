@@ -6,7 +6,7 @@ export default function About() {
       {/* 히어로 */}
       <section className="hero-section" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #ecfdf5 100%)' }}>
         <h1>바른 먹거리로 건강한 세상을 이룬다</h1>
-        <p className="hero-sub">케어앤(Care &amp; N)은 과학적 근거에 기반한 맞춤형 건강기능식품 추천 서비스입니다.</p>
+        <p className="hero-sub">서박사의 영양공식은 과학적 근거에 기반한 맞춤형 건강기능식품 추천 서비스입니다.</p>
       </section>
 
       {/* 비전 */}
@@ -45,8 +45,8 @@ export default function About() {
               { year: '2014', text: '유기농 갈락토올리고당 세계 최초 개발, 특허 등록' },
               { year: '2019', text: '대한민국 기술대상 대통령 표창 수상' },
               { year: '2022', text: '네오크레마 경영 일선 은퇴' },
-              { year: '2025', text: '새론비즈 설립, 케어앤(Care & N) 서비스 기획 시작' },
-              { year: '2026', text: '케어앤 맞춤 영양제 추천 서비스 베타 런칭' },
+              { year: '2025', text: '새론비즈 설립, 서박사의 영양공식 서비스 기획 시작' },
+              { year: '2026', text: '서박사의 영양공식 맞춤 영양제 추천 서비스 베타 런칭' },
             ].map((item, i) => (
               <div key={i} className="timeline-item">
                 <span className="timeline-year">{item.year}</span>

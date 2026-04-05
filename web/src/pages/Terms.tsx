@@ -6,7 +6,7 @@ export default function Terms() {
       <div className="card" style={{ lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제1조 (목적)</h3>
         <p style={{ marginBottom: 16 }}>
-          본 약관은 새론비즈(이하 "회사")가 운영하는 케어앤(Care & N) 서비스(이하 "서비스")의 이용에 관한
+          본 약관은 새론비즈(이하 "회사")가 운영하는 서박사의 영양공식 서비스(이하 "서비스")의 이용에 관한
           기본적인 사항을 규정하는 것을 목적으로 합니다.
         </p>
 

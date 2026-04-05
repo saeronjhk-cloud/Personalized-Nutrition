@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <div style={{ fontSize: 20, fontWeight: 700 }}>💊 케어앤 <span style={{ fontWeight: 400, fontSize: 14 }}>Care &amp; N</span></div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>🧬 서박사의 영양공식</div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
             바른 먹거리로 건강한 세상을 이룬다
           </p>

@@ -45,8 +45,8 @@ export default function Results({ result, error, onRestart }: Props) {
 
       {/* 인쇄 전용 헤더 (화면에서는 숨김) */}
       <div className="print-header">
-        <h1>🧬 케어앤 맞춤 영양 분석 리포트</h1>
-        <p>{dateStr} 기준 | Care &amp; N by 새론비즈</p>
+        <h1>🧬 서박사의 영양공식 맞춤 분석 리포트</h1>
+        <p>{dateStr} 기준 | 서박사의 영양공식 by 새론비즈</p>
       </div>
 
       {/* PDF 저장 버튼 */}
