@@ -189,6 +189,9 @@ export default function Results({ result, error, onRestart }: Props) {
       <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
         본 추천은 식약처 인정 건강기능식품 기능성에 기반한 참고 정보이며, 의학적 진단을 대체하지 않습니다.
       </p>
+      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 8 }}>
+        이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+      </p>
     </div>
   )
 }
