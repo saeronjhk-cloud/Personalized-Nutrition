@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
+import PageMeta from '../components/PageMeta'
 
 /* ── 누적 분석 카운터: localStorage 기반 ── */
 function useAnalysisCount() {
@@ -99,6 +100,7 @@ export default function Home() {
 
   return (
     <div className="page fade-in">
+      <PageMeta />
       {/* ━━ 히어로 섹션 ━━ */}
       <section className="hero-section hero-home">
         <div className="hero-layout">

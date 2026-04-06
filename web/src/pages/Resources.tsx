@@ -1,3 +1,5 @@
+import PageMeta from '../components/PageMeta'
+
 export default function Resources() {
   const sections = [
     {
@@ -88,6 +90,7 @@ export default function Resources() {
 
   return (
     <div className="page fade-in">
+      <PageMeta title="유용한 링크" description="식약처, 한국영양학회, PubMed 등 신뢰할 수 있는 영양·건강 관련 기관과 도구 모음입니다." />
       <section className="hero-section hero-with-img">
         <img src="/supp-overhead.jpg" alt="" className="hero-bg-img" aria-hidden="true" />
         <div className="hero-overlay">

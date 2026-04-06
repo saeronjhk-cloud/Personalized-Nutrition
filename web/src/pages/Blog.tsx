@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
+import PageMeta from '../components/PageMeta'
 
 interface BlogEntry {
   slug: string
@@ -83,6 +84,7 @@ export default function Blog() {
 
   return (
     <div className="page fade-in">
+      <PageMeta title="영양정보 블로그" description="비타민, 오메가-3, 유산균, 마그네슘 등 건강기능식품에 대한 과학적 근거 기반 정보를 전해드립니다." />
       <section className="hero-section hero-with-img">
         <img src="/supp-bowls.jpg" alt="" className="hero-bg-img" aria-hidden="true" />
         <div className="hero-overlay">

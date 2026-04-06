@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
+import PageMeta from '../components/PageMeta'
 
 export default function About() {
   return (
     <div className="page fade-in">
+      <PageMeta title="회사 소개" description="새론비즈는 학계와 산업계 전문가들이 모여 과학적 근거 기반의 맞춤 영양제 추천 시스템을 만들고 있습니다." />
       {/* 히어로 */}
       <section className="hero-section hero-with-img">
         <img src="/supp-wellness.jpg" alt="" className="hero-bg-img" aria-hidden="true" />

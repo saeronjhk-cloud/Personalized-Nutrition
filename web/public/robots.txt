@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /survey
+
+Sitemap: https://nutriformula.co.kr/sitemap.xml

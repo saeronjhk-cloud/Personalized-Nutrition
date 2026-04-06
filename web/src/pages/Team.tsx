@@ -1,3 +1,5 @@
+import PageMeta from '../components/PageMeta'
+
 export default function Team() {
   const members = [
     {
@@ -50,6 +52,7 @@ export default function Team() {
 
   return (
     <div className="page fade-in">
+      <PageMeta title="운영진 소개" description="식품영양학 박사, 임상영양 전문가, 수면과학 연구자 — 서박사의 영양공식을 설계하는 전문가 팀을 소개합니다." />
       <section className="hero-section" style={{ background: 'linear-gradient(135deg, #ede9fe 0%, #dbeafe 100%)' }}>
         <h1>운영진 소개</h1>
         <p className="hero-sub">식품·영양 분야 전문가들이 함께 만듭니다</p>
