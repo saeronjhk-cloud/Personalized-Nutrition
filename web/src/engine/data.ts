@@ -2329,3 +2329,38 @@ export const COUPANG_KEYWORDS: Record<string, string> = {
   "coenzyme_pqq": "PQQ 피롤로퀴놀린퀴논 건강기능식품",
   "phosphatidylserine": "포스파티딜세린 PS 100mg 건강기능식품",
 };
+
+// 쿠팡 파트너스 간편 링크 (파트너스 대시보드에서 생성한 추적 링크)
+// 링크가 있으면 파트너스 URL 사용, 없으면 일반 검색 URL로 폴백
+export const COUPANG_PARTNER_LINKS: Record<string, string> = {
+  "vitamin_b": "https://link.coupang.com/a/ekxcnh",
+  "magnesium": "https://link.coupang.com/a/ekxfQk",
+  "omega3": "https://link.coupang.com/a/ekxg5w",
+  "vitamin_d": "https://link.coupang.com/a/ekxh87",
+  "probiotics": "https://link.coupang.com/a/ekxi94",
+  "milk_thistle": "https://link.coupang.com/a/ekxkhZ",
+  "vitamin_c": "https://link.coupang.com/a/ekxlew",
+  "lemon_balm": "https://link.coupang.com/a/ekxl3x",
+  "collagen": "https://link.coupang.com/a/ekxmVm",
+  "coq10": "https://link.coupang.com/a/ekxnKW",
+  "iron": "https://link.coupang.com/a/ekxoWG",
+  "zinc": "https://link.coupang.com/a/ekxpMG",
+  "gaba": "https://link.coupang.com/a/ekxqAL",
+  "headache_tree": "https://link.coupang.com/a/ekxrC4",
+  "folic_acid": "https://link.coupang.com/a/ekxst1",
+  "vitamin_e": "https://link.coupang.com/a/ekxtoO",
+  "red_ginseng": "https://link.coupang.com/a/ekxt81",
+  "calcium": "https://link.coupang.com/a/ekxuYD",
+  "lutein": "https://link.coupang.com/a/ekxvO2",
+  "chromium": "https://link.coupang.com/a/ekxwxQ",
+  "banaba_leaf": "https://link.coupang.com/a/ekxxrR",
+  "saw_palmetto": "https://link.coupang.com/a/ekxyqF",
+  "gamma_linolenic": "https://link.coupang.com/a/ekxzeW",
+  "msm": "https://link.coupang.com/a/ekxz3Y",
+  "garcinia": "https://link.coupang.com/a/ekxAYQ",
+  "vitamin_k2": "https://link.coupang.com/a/ekxBL7",
+  "selenium": "https://link.coupang.com/a/ekxCEK",
+  "red_clover": "https://link.coupang.com/a/ekxDuq",
+  "coenzyme_pqq": "https://link.coupang.com/a/ekxEwm",
+  "phosphatidylserine": "https://link.coupang.com/a/ekxFnI",
+};
