@@ -1756,8 +1756,13 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: var(--shadow-md);
   border: 1px solid var(--border-light);
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   align-items: flex-start;
+}
+.results-persona-info {
+  min-width: 0;
+  flex: 1 1 200px;
 }
 .results-persona-emoji {
   font-size: 48px;
@@ -1769,9 +1774,6 @@ input[type="range"]::-webkit-slider-thumb {
   justify-content: center;
   background: linear-gradient(135deg, var(--primary-light), #f0f9ff);
   border-radius: 16px;
-}
-.results-persona-info {
-  flex: 1;
 }
 .results-persona-label {
   font-size: 11px;
