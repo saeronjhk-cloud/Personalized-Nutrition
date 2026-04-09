@@ -1,8 +1,9 @@
 {
+  "id": "/",
   "name": "서박사의 영양공식 — 맞춤 영양제 추천",
   "short_name": "영양공식",
   "description": "식약처 인정 건강기능식품 기반 맞춤 영양제 추천 서비스. 3분 설문으로 나에게 필요한 영양제를 찾아보세요.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#f0f7f0",
   "theme_color": "#2d5a27",
@@ -34,7 +35,39 @@
       "purpose": "maskable"
     }
   ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "서박사의 영양공식 홈 화면"
+    },
+    {
+      "src": "/screenshots/survey.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "맞춤 설문 화면"
+    },
+    {
+      "src": "/screenshots/results.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "맞춤 추천 결과 화면"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "영양제 분석 시작",
+      "short_name": "분석 시작",
+      "url": "/survey",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "categories": ["health", "lifestyle", "medical"],
   "lang": "ko",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": false
 }
