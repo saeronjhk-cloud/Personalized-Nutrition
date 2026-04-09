@@ -144,7 +144,26 @@ export default function Results({ result, error, onRestart }: Props) {
         맞춤 추천 영양제
         <span className="results-section-count">{recommendations.length}종</span>
       </div>
-      {recommendations.map((supp: Supplement) => (
+      {recommendations.length === 0 ? (
+        <div className="results-no-recs" style={{
+          background: 'linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%)',
+          border: '1px solid #c6f6d5',
+          borderRadius: 16,
+          padding: '28px 24px',
+          textAlign: 'center',
+          margin: '12px 0',
+        }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🌿</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: '#276749', marginBottom: 8 }}>
+            현재 특별히 보충이 필요한 영양소가 없습니다
+          </div>
+          <div style={{ fontSize: 14, color: '#4a5568', lineHeight: 1.6 }}>
+            분석 결과, 지금 상태에서 영양제를 따로 챙기실 필요가 적습니다.<br />
+            균형 잡힌 식사와 규칙적인 생활 습관을 유지하시면 충분합니다.<br />
+            <span style={{ color: '#718096', fontSize: 13 }}>증상이 생기거나 건강 목표가 바뀌면 다시 분석해보세요.</span>
+          </div>
+        </div>
+      ) : recommendations.map((supp: Supplement) => (
         <SupplementCard key={supp.id} supp={supp} />
       ))}
 

@@ -182,6 +182,7 @@ export function getRecommendations(
   }
 
   scored.sort((a, b) => b.total - a.total);
+
   return scored.slice(0, max_recs).map((s) => [s.supp, s.matched]);
 }
 
