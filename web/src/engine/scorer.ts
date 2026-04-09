@@ -100,6 +100,47 @@ export function computeScores(answers: SurveyAnswers): Record<string, number> {
     }
   }
 
+  // 4. 음주 기반 보정
+  const alcohol = answers.음주 || '거의_안함';
+  if (alcohol === '주1-2회') {
+    scores['간건강'] = (scores['간건강'] || 0) + 1;
+  } else if (alcohol === '주3-4회') {
+    scores['간건강'] = (scores['간건강'] || 0) + 4;
+  } else if (alcohol === '매일') {
+    scores['간건강'] = (scores['간건강'] || 0) + 6;
+  }
+
+  // 5. 흡연 기반 보정
+  if (answers.흡연 === '현재흡연') {
+    scores['면역력'] = (scores['면역력'] || 0) + 2;
+    scores['피부'] = (scores['피부'] || 0) + 1;
+  }
+
+  // 6. 목표 기반 보정 — 사용자가 선택한 관심 영역에 가중치
+  const goalBoostMap: Record<string, Record<string, number>> = {
+    '피로회복': { '피로': 2 },
+    '수면개선': { '수면': 2 },
+    '면역력강화': { '면역력': 2 },
+    '체중관리': { '체중관리': 2, '혈당대사': 1 },
+    '간건강': { '간건강': 3 },
+    '소화장건강': { '장건강': 2 },
+    '근육증가': { '근육관절': 2 },
+    '피부개선': { '피부': 2 },
+    '혈당관리': { '혈당대사': 2 },
+    '눈건강': { '눈건강': 2 },
+    '심혈관건강': { '심혈관': 2 },
+    '갱년기관리': { '갱년기': 3 },
+    '인지력향상': { '인지기능': 2 },
+  };
+  for (const goal of answers.목표 || []) {
+    const boosts = goalBoostMap[goal];
+    if (boosts) {
+      for (const [cat, val] of Object.entries(boosts)) {
+        scores[cat] = (scores[cat] || 0) + val;
+      }
+    }
+  }
+
   return scores;
 }
 

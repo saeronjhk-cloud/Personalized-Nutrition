@@ -41,7 +41,7 @@ export function getPersona(answers: SurveyAnswers, scores: Record<string, number
   const age = answers.나이 || 30;
   const gender = answers.성별 || 'male';
   const conditions = answers.기저질환 || [];
-  const alcohol = answers.음주 || '거의_안마심';
+  const alcohol = answers.음주 || '거의_안함';
   const exercise = answers.운동 || '거의_안함';
 
   // 절대 우선순위
@@ -52,18 +52,67 @@ export function getPersona(answers: SurveyAnswers, scores: Record<string, number
   const topCat = sorted[0]?.[0];
   const totalScore = Object.values(scores).reduce((s, v) => s + v, 0);
 
-  if (totalScore < 6) return findPersona('general_wellness');
+  // 증상이 1개 이하이면 전반적 건강 관리형
+  const symptomCount = (answers.증상 || []).length;
+  if (totalScore < 8 || symptomCount <= 1) return findPersona('general_wellness');
 
-  if (topCat === '간건강' && alcohol !== '거의_안마심') return findPersona('dine_out_drinker');
-  if (topCat === '갱년기' && gender === 'female') return findPersona('menopause_woman');
+  const topScore = sorted[0]?.[1] || 0;
+  const scoreOf = (cat: string) => scores[cat] || 0;
+  const isFemale = gender === 'female' || gender === '여성';
+  const isMale = gender === 'male' || gender === '남성';
+  const drinksOften = alcohol === '주3-4회' || alcohol === '매일';
+  const exercisesOften = exercise === '주3-4회' || exercise === '거의_매일';
+
+  // ── 우선 체크: 음주자 + 간건강 점수가 상위권이면 즉흥 외식형 ──
+  if (drinksOften && scoreOf('간건강') >= topScore - 2) return findPersona('dine_out_drinker');
+  if (alcohol !== '거의_안함' && topCat === '간건강') return findPersona('dine_out_drinker');
+
+  // ── 우선 체크: 운동 자주 + 근육관절 상위권이면 근력 마니아 ──
+  if (exercisesOften && scoreOf('근육관절') >= topScore - 2) return findPersona('fitness_lover');
+
+  // 간건강 — 비음주자 (불규칙 생활)
+  if (topCat === '간건강') return findPersona('low_willpower');
+
+  // 갱년기
+  if (topCat === '갱년기' && isFemale) return findPersona('menopause_woman');
+  if (topCat === '갱년기' && isMale && age >= 40) return findPersona('middle_aged_man');
+
+  // 혈당대사
   if (topCat === '혈당대사') return findPersona('blood_sugar_manager');
-  if (topCat === '심혈관' && gender === 'male' && age >= 40) return findPersona('middle_aged_man');
+
+  // 심혈관
+  if (topCat === '심혈관' && isMale && age >= 40) return findPersona('middle_aged_man');
+  if (topCat === '심혈관') return findPersona(age >= 50 ? 'senior_wellness' : 'burnout');
+
+  // 수면
   if (topCat === '수면') return findPersona('poor_sleeper');
-  if (topCat === '스트레스' || (topCat === '피로' && (scores['스트레스'] || 0) > 3)) return findPersona('burnout');
-  if (topCat === '근육관절' && (exercise === '주3-4회' || exercise === '거의_매일')) return findPersona('fitness_lover');
+
+  // 스트레스 / 피로
+  if (topCat === '스트레스') return findPersona('burnout');
+  if (topCat === '피로') return findPersona('burnout');
+
+  // 근육관절 (운동 안 하는 경우)
+  if (topCat === '근육관절') return findPersona(age >= 50 ? 'senior_wellness' : 'burnout');
+
+  // 피부
   if (topCat === '피부') return findPersona('skin_influencer');
+
+  // 장건강
   if (topCat === '장건강') return findPersona('gut_health_sensitive');
+
+  // 면역력
   if (topCat === '면역력') return findPersona('immunity_worrier');
+
+  // 눈건강
+  if (topCat === '눈건강') return findPersona('burnout');
+
+  // 체중관리
+  if (topCat === '체중관리') return findPersona('dieter');
+
+  // 인지기능
+  if (topCat === '인지기능') return findPersona(age >= 50 ? 'senior_wellness' : 'burnout');
+
+  // 나이 기반 폴백
   if (age >= 50) return findPersona('senior_wellness');
 
   return findPersona('general_wellness');
@@ -98,7 +147,7 @@ export function getRecommendations(
     }
 
     // 음주 부스트
-    if (supp.drink_boost && answers.음주 && answers.음주 !== '거의_안마심') {
+    if (supp.drink_boost && answers.음주 && answers.음주 !== '거의_안함') {
       total += supp.drink_boost;
     }
 

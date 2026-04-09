@@ -46,11 +46,13 @@ export const SYMPTOM_SCORE_MAP: Record<string, Record<string, number>> = {
   },
   "afternoon_slump": {
     "피로": 3,
-    "면역력": 1
+    "면역력": 1,
+    "인지기능": 1
   },
   "brain_fog": {
     "피로": 2,
-    "스트레스": 1
+    "스트레스": 1,
+    "인지기능": 3
   },
   "eye_fatigue": {
     "피로": 2,
@@ -104,7 +106,8 @@ export const SYMPTOM_SCORE_MAP: Record<string, Record<string, number>> = {
     "장건강": 4
   },
   "bloating": {
-    "장건강": 3
+    "장건강": 3,
+    "간건강": 1
   },
   "muscle_cramps": {
     "근육관절": 3,
@@ -170,6 +173,27 @@ export const SYMPTOM_SCORE_MAP: Record<string, Record<string, number>> = {
   "vaginal_dryness": {
     "갱년기": 4,
     "피부": 2
+  },
+  "joint_pain": {
+    "근육관절": 4
+  },
+  "muscle_weakness": {
+    "근육관절": 3,
+    "피로": 1
+  },
+  "frequent_cold": {
+    "면역력": 5
+  },
+  "slow_wound": {
+    "면역력": 3,
+    "피부": 1
+  },
+  "irritability": {
+    "스트레스": 3,
+    "갱년기": 1
+  },
+  "heart_palpitations": {
+    "심혈관": 4
   }
 };
 
@@ -1850,7 +1874,7 @@ export const PERSONAS: PersonaData[] = [
     "id": "general_wellness",
     "name": "전반적 건강 관리형",
     "tagline": "지금 당장 큰 문제는 없지만, 예방이 최고의 치료예요",
-    "max_recommendations": 2,
+    "max_recommendations": 3,
     "category_boosts": {},
     "emoji": "🌱",
     "description": "크게 아픈 곳은 없지만, 건강을 미리미리 챙기는 현명한 분이시네요.",
