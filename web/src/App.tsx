@@ -2,9 +2,11 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
+import { submitSurveyAnalytics } from './lib/analytics'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import InstallPrompt from './components/InstallPrompt'
+import DataCollectionNotice from './components/DataCollectionNotice'
 import Home from './pages/Home'
 import About from './pages/About'
 import Team from './pages/Team'
@@ -77,6 +79,8 @@ function SurveyFlow() {
       const data = await getRecommendation(answers)
       setResult(data)
       setStep('results')
+      // 익명 분석 수집 (fire-and-forget, 실패해도 UI 영향 없음)
+      submitSurveyAnalytics(answers, data)
     } catch (e: any) {
       setError(e.message || '추천 결과를 가져오는 데 실패했습니다.')
       setStep('results')
@@ -124,6 +128,7 @@ export default function App() {
       </main>
       <Footer />
       <InstallPrompt />
+      <DataCollectionNotice />
     </BrowserRouter>
   )
 }
