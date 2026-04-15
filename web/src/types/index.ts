@@ -108,6 +108,14 @@ export interface GoalItem {
   label: string;
 }
 
+/* ── 설문 기록 (before/after 비교용) ── */
+export interface SurveyRecord {
+  id: string;
+  date: string;             // ISO 8601
+  answers: SurveyAnswers;
+  result: RecommendationResult;
+}
+
 /* ── UI 상태 ── */
 export type Step =
   | 'home'

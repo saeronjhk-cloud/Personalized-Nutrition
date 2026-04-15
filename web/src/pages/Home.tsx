@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import PageMeta from '../components/PageMeta'
+import NewBlogPopup from '../components/NewBlogPopup'
+import { shouldPromptResurvey, daysSinceLastSurvey, getSurveyHistory } from '../lib/surveyHistory'
 
 /* ── 누적 분석 카운터: localStorage 기반 ── */
 function useAnalysisCount() {
@@ -101,6 +103,25 @@ export default function Home() {
   return (
     <div className="page fade-in">
       <PageMeta />
+      <NewBlogPopup />
+
+      {/* ━━ 재설문 유도 배너 (30일 이상 경과 시) ━━ */}
+      {shouldPromptResurvey() && (
+        <div className="resurvey-banner reveal">
+          <div className="resurvey-banner__icon">🔄</div>
+          <div className="resurvey-banner__text">
+            <strong>건강 변화를 확인해보세요!</strong>
+            <span>마지막 분석 후 {daysSinceLastSurvey()}일이 지났어요. 다시 분석하고 변화를 비교해보세요.</span>
+          </div>
+          <div className="resurvey-banner__actions">
+            <Link to="/survey" className="resurvey-banner__btn resurvey-banner__btn--primary">재분석 하기</Link>
+            {getSurveyHistory().length >= 2 && (
+              <Link to="/health-report" className="resurvey-banner__btn resurvey-banner__btn--secondary">변화 리포트 보기</Link>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ━━ 히어로 섹션 ━━ */}
       <section className="hero-section hero-home">
         <div className="hero-layout">

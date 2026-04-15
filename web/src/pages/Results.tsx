@@ -1,13 +1,16 @@
 import { useEffect } from 'react'
-import type { RecommendationResult, Supplement, ScoreBreakdown } from '../types'
+import { Link } from 'react-router-dom'
+import type { RecommendationResult, SurveyAnswers, Supplement, ScoreBreakdown } from '../types'
+import { saveSurveyRecord, getSurveyHistory } from '../lib/surveyHistory'
 
 interface Props {
   result: RecommendationResult | null
+  answers: SurveyAnswers | null
   error: string | null
   onRestart: () => void
 }
 
-export default function Results({ result, error, onRestart }: Props) {
+export default function Results({ result, answers, error, onRestart }: Props) {
   if (error) {
     return (
       <div className="fade-in" style={{ paddingTop: '15vh', textAlign: 'center' }}>
@@ -21,11 +24,16 @@ export default function Results({ result, error, onRestart }: Props) {
     )
   }
 
-  // 누적 분석 건수 카운터 증가
+  // 누적 분석 건수 카운터 증가 + 설문 기록 저장
   useEffect(() => {
     if (result) {
       const current = parseInt(localStorage.getItem('analysis_count') || '847', 10)
       localStorage.setItem('analysis_count', String(current + 1))
+
+      // before/after 비교용 설문 기록 저장
+      if (answers) {
+        saveSurveyRecord(answers, result)
+      }
     }
   }, [result])
 
@@ -198,11 +206,16 @@ export default function Results({ result, error, onRestart }: Props) {
         </div>
       )}
 
-      {/* 다시 시작 */}
-      <div className="no-print">
-        <button className="btn btn-secondary" onClick={onRestart} style={{ marginTop: 24 }}>
+      {/* 다시 시작 + 건강 변화 리포트 */}
+      <div className="no-print" style={{ marginTop: 24 }}>
+        <button className="btn btn-secondary" onClick={onRestart}>
           🔄 다시 분석하기
         </button>
+        {getSurveyHistory().length >= 2 && (
+          <Link to="/health-report" className="btn btn-primary" style={{ display: 'block', marginTop: 12, textAlign: 'center', textDecoration: 'none' }}>
+            📊 건강 변화 리포트 보기
+          </Link>
+        )}
       </div>
 
       <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>

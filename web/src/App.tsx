@@ -18,6 +18,7 @@ import Results from './pages/Results'
 import Loading from './pages/Loading'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import HealthReport from './pages/HealthReport'
 
 const INITIAL_ANSWERS: SurveyAnswers = {
   성별: 'male',
@@ -95,7 +96,7 @@ function SurveyFlow() {
   }, [])
 
   if (step === 'loading') return <Loading />
-  if (step === 'results') return <Results result={result} error={error} onRestart={restart} />
+  if (step === 'results') return <Results result={result} answers={answers} error={error} onRestart={restart} />
 
   return (
     <Questions
@@ -122,6 +123,7 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/survey" element={<SurveyFlow />} />
+          <Route path="/health-report" element={<HealthReport />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
         </Routes>
