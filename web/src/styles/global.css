@@ -2567,3 +2567,216 @@ input[type="range"]::-webkit-slider-thumb {
 .resurvey-banner__btn--secondary:hover {
   background: var(--primary-light);
 }
+
+/* ── 결과 페이지: 건강 추적 안내 카드 ── */
+.health-tracking-card {
+  margin-top: 24px;
+  padding: 24px 20px;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #eff6ff 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+}
+.health-tracking-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.health-tracking-card__icon {
+  font-size: 24px;
+}
+.health-tracking-card__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.health-tracking-card__desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.health-tracking-card__tip {
+  font-size: 13px;
+  color: var(--primary);
+  background: rgba(45, 90, 39, 0.06);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  line-height: 1.7;
+  margin-top: 16px;
+  text-align: center;
+}
+.health-tracking-card__btn {
+  display: block;
+  text-align: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.health-tracking-card__btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+.health-tracking-card__btn--primary:hover {
+  background: var(--primary-dark);
+}
+
+/* 타임라인 */
+.health-tracking-timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  padding: 8px 0;
+}
+.health-tracking-timeline__step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+.health-tracking-timeline__dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--border);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--border);
+  margin-bottom: 10px;
+  z-index: 1;
+}
+.health-tracking-timeline__step--done .health-tracking-timeline__dot {
+  background: var(--success);
+  box-shadow: 0 0 0 2px var(--success);
+}
+.health-tracking-timeline__line {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 2px;
+  background: var(--border);
+  margin-top: 7px;
+}
+.health-tracking-timeline__label strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.health-tracking-timeline__label span {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── 홈페이지: 건강 추적 기능 소개 ── */
+.health-tracking-section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+.health-tracking-steps-home {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  justify-content: center;
+}
+.health-tracking-step-home {
+  flex: 1;
+  text-align: center;
+  padding: 20px 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.health-tracking-step-home__num {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.health-tracking-step-home__icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.health-tracking-step-home h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.health-tracking-step-home p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.health-tracking-step-home__arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  margin-top: 40px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .health-tracking-steps-home {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .health-tracking-step-home__arrow {
+    display: none;
+  }
+  .health-tracking-step-home {
+    display: flex;
+    align-items: center;
+    text-align: left;
+    gap: 14px;
+    padding: 16px;
+  }
+  .health-tracking-step-home__num {
+    position: static;
+    transform: none;
+    flex-shrink: 0;
+  }
+  .health-tracking-step-home__icon {
+    font-size: 28px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .health-tracking-timeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-left: 8px;
+  }
+  .health-tracking-timeline__step {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 12px;
+  }
+  .health-tracking-timeline__dot {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .health-tracking-timeline__line {
+    width: 2px;
+    height: 20px;
+    margin-top: 0;
+    margin-left: 7px;
+  }
+}

@@ -512,6 +512,46 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ━━ 건강 추적 기능 소개 ━━ */}
+      <section className="health-tracking-section section-animate">
+        <div className="section-category">건강 추적</div>
+        <h2 className="section-title" style={{ textAlign: 'center' }}>
+          꾸준히 관리하면, 변화가 보입니다
+        </h2>
+        <p className="section-subtitle" style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: 32 }}>
+          분석 결과를 자동 저장하고, 다음 분석과 비교해드려요
+        </p>
+
+        <div className="health-tracking-steps-home">
+          <div className="health-tracking-step-home">
+            <div className="health-tracking-step-home__num">1</div>
+            <div className="health-tracking-step-home__icon">🧬</div>
+            <h4>맞춤 분석 받기</h4>
+            <p>3분 설문으로 나에게 필요한 영양제를 확인하세요. 결과는 자동 저장됩니다.</p>
+          </div>
+          <div className="health-tracking-step-home__arrow">→</div>
+          <div className="health-tracking-step-home">
+            <div className="health-tracking-step-home__num">2</div>
+            <div className="health-tracking-step-home__icon">💊</div>
+            <h4>영양제 꾸준히 섭취</h4>
+            <p>추천받은 영양제를 30~90일간 꾸준히 복용해보세요.</p>
+          </div>
+          <div className="health-tracking-step-home__arrow">→</div>
+          <div className="health-tracking-step-home">
+            <div className="health-tracking-step-home__num">3</div>
+            <div className="health-tracking-step-home__icon">📊</div>
+            <h4>건강 변화 확인</h4>
+            <p>다시 분석하면 이전과 비교한 건강 변화 리포트를 받아볼 수 있어요.</p>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <Link to="/survey" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+            첫 분석 시작하기 →
+          </Link>
+        </div>
+      </section>
+
       {/* ━━ FAQ ━━ */}
       <section className="content-section section-animate" style={{ paddingTop: 48 }}>
         <div className="section-category">자주 묻는 질문</div>

@@ -206,16 +206,65 @@ export default function Results({ result, answers, error, onRestart }: Props) {
         </div>
       )}
 
-      {/* 다시 시작 + 건강 변화 리포트 */}
-      <div className="no-print" style={{ marginTop: 24 }}>
+      {/* 건강 추적 안내 카드 — 항상 노출 */}
+      <div className="health-tracking-card no-print">
+        <div className="health-tracking-card__header">
+          <span className="health-tracking-card__icon">📈</span>
+          <h3 className="health-tracking-card__title">건강 변화를 추적하세요</h3>
+        </div>
+
+        {getSurveyHistory().length >= 2 ? (
+          <>
+            <p className="health-tracking-card__desc">
+              이전 분석 기록이 있어요! 지금 바로 건강 변화 리포트를 확인해보세요.
+            </p>
+            <Link to="/health-report" className="health-tracking-card__btn health-tracking-card__btn--primary">
+              📊 건강 변화 리포트 보기
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="health-tracking-card__desc">
+              오늘의 분석 결과가 자동 저장되었습니다.
+            </p>
+            <div className="health-tracking-timeline">
+              <div className="health-tracking-timeline__step health-tracking-timeline__step--done">
+                <div className="health-tracking-timeline__dot" />
+                <div className="health-tracking-timeline__label">
+                  <strong>오늘</strong>
+                  <span>첫 번째 분석 완료</span>
+                </div>
+              </div>
+              <div className="health-tracking-timeline__line" />
+              <div className="health-tracking-timeline__step">
+                <div className="health-tracking-timeline__dot" />
+                <div className="health-tracking-timeline__label">
+                  <strong>30~90일 후</strong>
+                  <span>추천 영양제 섭취 후 재분석</span>
+                </div>
+              </div>
+              <div className="health-tracking-timeline__line" />
+              <div className="health-tracking-timeline__step">
+                <div className="health-tracking-timeline__dot" />
+                <div className="health-tracking-timeline__label">
+                  <strong>건강 변화 리포트</strong>
+                  <span>카테고리별 개선도 확인</span>
+                </div>
+              </div>
+            </div>
+            <p className="health-tracking-card__tip">
+              💡 영양제를 꾸준히 섭취하신 뒤 다시 분석하면,<br />
+              어떤 부분이 개선되었는지 한눈에 비교할 수 있어요.
+            </p>
+          </>
+        )}
+      </div>
+
+      {/* 다시 시작 */}
+      <div className="no-print" style={{ marginTop: 16 }}>
         <button className="btn btn-secondary" onClick={onRestart}>
           🔄 다시 분석하기
         </button>
-        {getSurveyHistory().length >= 2 && (
-          <Link to="/health-report" className="btn btn-primary" style={{ display: 'block', marginTop: 12, textAlign: 'center', textDecoration: 'none' }}>
-            📊 건강 변화 리포트 보기
-          </Link>
-        )}
       </div>
 
       <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
