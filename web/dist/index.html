@@ -2,17 +2,85 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/pill.svg" />
+
+    <!-- Google Analytics (GA4) — G-6ZK26CT1DC 부분을 실제 측정 ID로 교체하세요 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6ZK26CT1DC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6ZK26CT1DC');
+    </script>
+
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="내 몸에 맞는 영양제 찾기 — 식약처 인정 기능성 기반 맞춤 추천" />
-    <title>내 몸에 맞는 영양제 찾기</title>
+    <meta name="description" content="서박사의 영양공식 — 36가지 신체 신호를 분석하여 식약처 인정 건강기능식품 기반 맞춤 영양제를 추천합니다. 3분 무료 설문으로 나에게 필요한 영양제를 찾아보세요." />
+    <meta name="keywords" content="맞춤 영양제, 영양제 추천, 건강기능식품, 식약처, 영양제 분석, 개인 맞춤 영양제, 비타민, 오메가3, 마그네슘, 유산균, 서박사의 영양공식" />
+    <meta name="author" content="새론비즈" />
+    <link rel="canonical" href="https://nutriformula.co.kr/" />
+
+    <!-- Open Graph (카카오톡, 페이스북 공유용) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="서박사의 영양공식 | 맞춤 영양제 추천" />
+    <meta property="og:description" content="36가지 신체 신호를 분석하여 나에게 딱 맞는 영양제를 추천합니다. 3분 무료 설문, 회원가입 불필요." />
+    <meta property="og:image" content="https://nutriformula.co.kr/icon-512.png" />
+    <meta property="og:url" content="https://nutriformula.co.kr/" />
+    <meta property="og:site_name" content="서박사의 영양공식" />
+    <meta property="og:locale" content="ko_KR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="서박사의 영양공식 | 맞춤 영양제 추천" />
+    <meta name="twitter:description" content="36가지 신체 신호를 분석하여 나에게 딱 맞는 영양제를 추천합니다. 3분 무료 설문." />
+    <meta name="twitter:image" content="https://nutriformula.co.kr/icon-512.png" />
+
+    <!-- 네이버 서치어드바이저 -->
+    <meta name="naver-site-verification" content="667e844c47783d2f8b5441ff5838cfdf43c4ba4c" />
+
+    <meta name="theme-color" content="#2d5a27" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="영양공식" />
+    <title>서박사의 영양공식 | 맞춤 영양제 추천</title>
+
+    <!-- 구조화 데이터 (Google 검색 결과 강화) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "서박사의 영양공식",
+      "url": "https://nutriformula.co.kr",
+      "description": "식약처 인정 건강기능식품 기반 맞춤 영양제 추천 서비스",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "새론비즈",
+        "url": "https://nutriformula.co.kr/about"
+      }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/assets/index-DN2qmXy9.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-z1x63v2j.css">
+    <script type="module" crossorigin src="/assets/index-qloPCBB-.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-B_uRAOMm.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+        })
+      }
+    </script>
   </body>
 </html>

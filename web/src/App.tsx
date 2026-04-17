@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { App as CapApp } from '@capacitor/app'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
 import { submitSurveyAnalytics } from './lib/analytics'
@@ -110,9 +111,33 @@ function SurveyFlow() {
   )
 }
 
+/** 안드로이드 하드웨어 뒤로가기 버튼 처리 */
+function BackButtonHandler() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const handler = CapApp.addListener('backButton', ({ canGoBack }) => {
+      // 홈 화면이면 앱 종료
+      if (location.pathname === '/' && !canGoBack) {
+        CapApp.exitApp()
+      } else if (canGoBack) {
+        window.history.back()
+      } else {
+        navigate('/')
+      }
+    })
+
+    return () => { handler.then(h => h.remove()) }
+  }, [location.pathname, navigate])
+
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <BackButtonHandler />
       <Navbar />
       <main className="app-container">
         <Routes>
