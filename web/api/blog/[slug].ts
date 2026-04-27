@@ -12,7 +12,15 @@ import {
  * Slug로 특정 블로그 글의 전체 콘텐츠를 반환합니다.
  */
 export default async function handler(req: any, res: any) {
+  // CORS — 앱(Capacitor)에서 외부 요청 시 preflight 허용 필요
   res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
 
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' })
