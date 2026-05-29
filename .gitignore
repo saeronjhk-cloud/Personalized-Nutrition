@@ -19,3 +19,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Secrets - never commit
+.env.local
+web/.env.local
+.env*.local
