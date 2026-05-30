@@ -20,10 +20,18 @@ export default function LoginEmail() {
     setStatus("sending");
     setErrorMessage("");
 
+    const lastSessionId = (() => {
+      try { return localStorage.getItem("last_session_id"); } catch { return null; }
+    })();
+    const redirectUrl = new URL(window.location.origin + "/auth/callback");
+    if (lastSessionId) {
+      redirectUrl.searchParams.set("session_id", lastSessionId);
+    }
+
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: window.location.origin + "/auth/callback",
+        emailRedirectTo: redirectUrl.toString(),
       },
     });
 

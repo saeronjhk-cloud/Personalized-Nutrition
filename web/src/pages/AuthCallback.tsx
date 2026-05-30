@@ -15,12 +15,20 @@ export default function AuthCallback() {
         return;
       }
 
-      const lastSessionId = localStorage.getItem("last_session_id");
-      if (lastSessionId) {
-        await supabase
+      const sessionId = (() => {
+        const fromUrl = new URLSearchParams(window.location.search).get("session_id");
+        if (fromUrl) return fromUrl;
+        try { return localStorage.getItem("last_session_id"); } catch { return null; }
+      })();
+
+      if (sessionId) {
+        const { error } = await supabase
           .from("anon_sessions")
           .update({ linked_user_id: session.user.id })
-          .eq("session_id", lastSessionId);
+          .eq("session_id", sessionId);
+
+        if (error) console.error("[AuthCallback] link failed:", error);
+        else console.log("[AuthCallback] linked session", sessionId, "to user", session.user.id);
       }
 
       navigate("/", { replace: true });
