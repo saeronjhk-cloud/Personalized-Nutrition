@@ -24,3 +24,13 @@ Thumbs.db
 .env.local
 web/.env.local
 .env*.local
+
+node_modules/
+web/node_modules/
+.vite/
+web/.vite/
+
+
+°á°ú/
+*.pdf
+
