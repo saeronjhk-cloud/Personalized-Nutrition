@@ -34,3 +34,8 @@ web/.vite/
 °á°ú/
 *.pdf
 
+
+API Keys.txt
+*Keys.txt
+.env*
+
