@@ -20,6 +20,8 @@ import Loading from './pages/Loading'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import HealthReport from './pages/HealthReport'
+import LoginEmail from "./components/auth/LoginEmail";
+import AuthCallback from "./pages/AuthCallback";
 
 const INITIAL_ANSWERS: SurveyAnswers = {
   성별: 'male',
@@ -151,6 +153,8 @@ export default function App() {
           <Route path="/health-report" element={<HealthReport />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/login" element={<LoginEmail />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
       </main>
       <Footer />
