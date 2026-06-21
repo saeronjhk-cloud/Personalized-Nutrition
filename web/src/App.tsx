@@ -27,6 +27,7 @@ import ViewCheckup from './components/checkup/ViewCheckup'
 import SurveyManage from './pages/SurveyManage'
 import SurveyResultView from './components/survey/SurveyResultView'
 import Dashboard from './pages/Dashboard'
+import Recommend from './pages/Recommend'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 
@@ -152,6 +153,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/recommend" element={<Recommend />} />
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
           <Route path="/blog" element={<Blog />} />

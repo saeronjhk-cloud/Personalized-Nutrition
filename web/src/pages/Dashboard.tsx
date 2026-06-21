@@ -195,12 +195,12 @@ export default function Dashboard() {
           type="button"
           className="btn btn-accent"
           style={{ marginTop: 24, width: "100%", fontSize: 16 }}
-          onClick={() => navigate("/survey")}
+          onClick={() => navigate("/recommend")}
         >
           맞춤 추천 받기
         </button>
         <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", marginTop: 10, lineHeight: 1.6 }}>
-          입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (입력이 많을수록 정밀해집니다)
+          입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)
         </p>
       </div>
     </div>

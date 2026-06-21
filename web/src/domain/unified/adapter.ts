@@ -22,10 +22,14 @@ export const FUNCTIONAL_NEED_TO_CATEGORY: Record<string, string> = {
   비타민D보충: "면역력",
 };
 
-/** watch/low(비referral) 1건이 카테고리에 더하는 점수 */
-const SCORE_PER_SIGNAL = 4;
-/** 카테고리당 검진 기여 상한 (과추천 방지) */
-const CATEGORY_CAP = 8;
+/**
+ * watch/low(비referral) 1건이 카테고리에 더하는 점수.
+ * 확정된 검사 이상치는 강한 신호 → getRecommendations 임계값(영양제 점수 12)을
+ * affinity 2짜리 영양제도 넘기도록 8점(8×2=16 ≥ 12). 설문 카테고리 스케일(~10)과도 정합.
+ */
+const SCORE_PER_SIGNAL = 8;
+/** 카테고리당 검진 기여 상한 (과추천 방지, 설문 max_score=10과 정합) */
+const CATEGORY_CAP = 10;
 
 export interface CheckupSignalResult {
   /** 카테고리별 검진 기여 점수 (referral 카테고리는 제외됨) */
