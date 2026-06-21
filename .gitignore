@@ -30,12 +30,15 @@ web/node_modules/
 .vite/
 web/.vite/
 
+# 빌드 산출물 (추적 안 함)
+dist/
+web/dist/
 
-���/
+# 결과 PDF 등
+결과/
 *.pdf
 
-
+# API 키 파일
 API Keys.txt
 *Keys.txt
 .env*
-
