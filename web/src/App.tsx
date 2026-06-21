@@ -26,6 +26,7 @@ import EditCheckup from './components/checkup/EditCheckup'
 import ViewCheckup from './components/checkup/ViewCheckup'
 import SurveyManage from './pages/SurveyManage'
 import SurveyResultView from './components/survey/SurveyResultView'
+import Dashboard from './pages/Dashboard'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 
@@ -150,6 +151,7 @@ export default function App() {
       <main className="app-container">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
           <Route path="/blog" element={<Blog />} />

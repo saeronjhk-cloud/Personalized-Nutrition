@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 const NAV_ITEMS = [
   { path: '/', label: '홈' },
+  { path: '/dashboard', label: '내 건강' },
   { path: '/survey', label: '영양제 추천' },
   { path: '/blog', label: '영양정보' },
   { path: '/about', label: '회사 소개' },
