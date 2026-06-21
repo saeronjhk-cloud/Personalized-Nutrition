@@ -20,6 +20,10 @@ import Loading from './pages/Loading'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import HealthReport from './pages/HealthReport'
+import Checkup from './pages/Checkup'
+import CheckupManage from './pages/CheckupManage'
+import EditCheckup from './components/checkup/EditCheckup'
+import ViewCheckup from './components/checkup/ViewCheckup'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 
@@ -150,6 +154,10 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/survey" element={<SurveyFlow />} />
+          <Route path="/checkup" element={<Checkup />} />
+          <Route path="/checkup/manage" element={<CheckupManage />} />
+          <Route path="/checkup/edit/:recordId" element={<EditCheckup />} />
+          <Route path="/checkup/view/:recordId" element={<ViewCheckup />} />
           <Route path="/health-report" element={<HealthReport />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
