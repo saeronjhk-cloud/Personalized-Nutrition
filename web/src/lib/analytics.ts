@@ -138,6 +138,7 @@ export async function submitSurveyAnalytics(
           conditions: answers.기저질환 ?? [],
           family_history: answers.가족력 ?? [],
           persona_id: payload.personaId || null,
+          answers: answers ?? null,   // 전체 답변 보존 (내 설문 기록 결과보기 정확 재현용)
         })
         if (error) console.error('[supabase] survey_responses insert failed:', error)
       } else {

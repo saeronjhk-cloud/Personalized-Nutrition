@@ -8,9 +8,20 @@ interface Props {
   answers: SurveyAnswers | null
   error: string | null
   onRestart: () => void
+  /** false면 과거 기록 조회 모드: localStorage 저장·카운터 증가 등 부작용을 막음 */
+  persistHistory?: boolean
+  /** 조회 모드에서 하단 버튼 라벨 (기본: 다시 분석하기) */
+  restartLabel?: string
 }
 
-export default function Results({ result, answers, error, onRestart }: Props) {
+export default function Results({
+  result,
+  answers,
+  error,
+  onRestart,
+  persistHistory = true,
+  restartLabel = '🔄 다시 분석하기',
+}: Props) {
   if (error) {
     return (
       <div className="fade-in" style={{ paddingTop: '15vh', textAlign: 'center' }}>
@@ -24,9 +35,9 @@ export default function Results({ result, answers, error, onRestart }: Props) {
     )
   }
 
-  // 누적 분석 건수 카운터 증가 + 설문 기록 저장
+  // 누적 분석 건수 카운터 증가 + 설문 기록 저장 (실제 새 분석일 때만)
   useEffect(() => {
-    if (result) {
+    if (persistHistory && result) {
       const current = parseInt(localStorage.getItem('analysis_count') || '847', 10)
       localStorage.setItem('analysis_count', String(current + 1))
 
@@ -260,10 +271,21 @@ export default function Results({ result, answers, error, onRestart }: Props) {
         )}
       </div>
 
+      {/* 내 설문 기록 관리 진입 */}
+      <div className="no-print" style={{ marginTop: 12 }}>
+        <Link
+          to="/survey/manage"
+          className="btn btn-secondary"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+        >
+          📋 내 설문 기록 관리
+        </Link>
+      </div>
+
       {/* 다시 시작 */}
       <div className="no-print" style={{ marginTop: 16 }}>
         <button className="btn btn-secondary" onClick={onRestart}>
-          🔄 다시 분석하기
+          {restartLabel}
         </button>
       </div>
 

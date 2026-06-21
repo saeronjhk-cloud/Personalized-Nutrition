@@ -24,6 +24,8 @@ import Checkup from './pages/Checkup'
 import CheckupManage from './pages/CheckupManage'
 import EditCheckup from './components/checkup/EditCheckup'
 import ViewCheckup from './components/checkup/ViewCheckup'
+import SurveyManage from './pages/SurveyManage'
+import SurveyResultView from './components/survey/SurveyResultView'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 
@@ -154,6 +156,8 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/survey" element={<SurveyFlow />} />
+          <Route path="/survey/manage" element={<SurveyManage />} />
+          <Route path="/survey/view/:responseId" element={<SurveyResultView />} />
           <Route path="/checkup" element={<Checkup />} />
           <Route path="/checkup/manage" element={<CheckupManage />} />
           <Route path="/checkup/edit/:recordId" element={<EditCheckup />} />
