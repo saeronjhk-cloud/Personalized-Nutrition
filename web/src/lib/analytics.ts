@@ -1,10 +1,10 @@
 /**
  * 익명 분석 수집 클라이언트
  *
- * - 설문 완료 후 단 한 번, fire-and-forget 방식으로 /api/survey-submit 호출
+ * - 설문 완료 후 단 한 번(opt-in 동의 시), Supabase에 설문 응답/익명 세션 저장
  * - 실패해도 UI는 영향 받지 않음 (catch 후 무시)
- * - 사용자가 '데이터 수집 안내' 배너에서 '거부' 선택했으면 호출하지 않음
- *   (고지형이라 기본값은 수집이지만, 향후 거부 옵션 추가 시 대비)
+ * - opt-in 동의(sf_data_consent = accepted) 없으면 저장하지 않음
+ * - [컴플라이언스] 외부 Google Sheets 전송 경로는 제거됨(민감정보 이중보관·미고지 수탁자 P0). 통계는 Supabase 익명 집계로 대체(작업지시서 58).
  */
 
 import type { SurveyAnswers, RecommendationResult } from '../types'
@@ -37,9 +37,40 @@ export function hasDeclinedCollection(): boolean {
   }
 }
 
+// opt-in: 명시적으로 'accepted'인 경우에만 수집/저장한다(기본 미수집).
+export function hasConsentedCollection(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === 'accepted'
+  } catch {
+    return false
+  }
+}
+
 export function markConsentAcknowledged(): void {
   try {
     localStorage.setItem(CONSENT_KEY, 'accepted')
+  } catch {
+    // 무시
+  }
+}
+
+// --- 검진(건강검진 해석) 민감정보 수집·이용 동의 (동의 항목 #3) ---
+// 설문 동의(#2)와 별개의 독립 동의. 처리방침 v4.7 §3-3 / 약관 §6조의2와 1:1.
+// CHECKUP_ENABLED 플래그가 켜졌을 때만 실제로 사용된다(검진 기능 진입 게이트).
+const CHECKUP_CONSENT_KEY = 'sf_checkup_consent'  // 'accepted' | null
+
+// opt-in: 명시적으로 'accepted'인 경우에만 검진 입력·저장 허용(기본 미동의).
+export function hasConsentedCheckup(): boolean {
+  try {
+    return localStorage.getItem(CHECKUP_CONSENT_KEY) === 'accepted'
+  } catch {
+    return false
+  }
+}
+
+export function markCheckupConsent(): void {
+  try {
+    localStorage.setItem(CHECKUP_CONSENT_KEY, 'accepted')
   } catch {
     // 무시
   }
@@ -94,7 +125,7 @@ export async function submitSurveyAnalytics(
   result: RecommendationResult | null,
 ): Promise<void> {
   if (!result) return
-  if (hasDeclinedCollection()) return
+  if (!hasConsentedCollection()) return  // opt-in: 동의(accepted) 없으면 저장 안 함
 
   try {
     const recommendations = (result.recommendations || []).map((s: any) => ({
@@ -167,20 +198,11 @@ export async function submitSurveyAnalytics(
       console.error('[supabase] sync failed:', err)
     }
 
-    // 브라우저 언로드에도 안전한 sendBeacon 우선 시도
-    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
-      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' })
-      const ok = (navigator as any).sendBeacon('/api/survey-submit', blob)
-      if (ok) return
-    }
-
-    // fallback
-    await fetch('/api/survey-submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true,
-    })
+    // [컴플라이언스 2026-07-08] 구 /api/survey-submit -> Google Sheets 전송 경로 제거.
+    // 사유: 개인별 설문(민감정보)이 처리방침 미고지 수탁자(Google, 미국)로 이중 전송되고
+    //       삭제권이 미치지 않던 P0 갭. 원본은 Supabase(위 insert)에만 저장한다.
+    //       통계는 Supabase 익명 집계(뷰/RPC, k-익명성)로 대체 — 작업지시서 58.
+    void payload; // (전송 페이로드 미사용 — Supabase 저장으로 일원화)
   } catch {
     // fire-and-forget: 어떤 에러도 UI에 영향 주지 않음
   }
