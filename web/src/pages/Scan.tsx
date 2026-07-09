@@ -30,6 +30,8 @@ const NUTRIENTS: { key: keyof NonNullable<MsProductResult['nutrition']>; label: 
 ]
 
 const COLOR_HEX: Record<string, string> = { green: '#4a9e3f', yellow: '#f59e0b', orange: '#ea580c', red: '#ef4444' }
+// 먹선 위해성 평가(MFRAS) 4색 의미 — 서버 SCORE_LABEL과 동일.
+const COLOR_LABEL: Record<string, string> = { green: '안전', yellow: '허용', orange: '주의', red: '위해' }
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']
 
 function scanSupported(): boolean {
@@ -335,7 +337,7 @@ export default function Scan() {
               <div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)' }}>{result.product.product_name}</h3>
                 <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                  {[result.product.brand, result.product.manufacturer, result.product.food_category].filter(Boolean).join(' · ')}
+                  {[result.product.brand, result.product.manufacturer, result.product.food_category].filter(Boolean).filter((s) => s !== 'general').join(' · ')}
                 </p>
               </div>
             </div>
@@ -344,14 +346,27 @@ export default function Scan() {
           {additives && (
             <div className="survey-card" style={{ marginBottom: 16 }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>첨가물 {additives.risk_summary.total}종</h3>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {(['green', 'yellow', 'orange', 'red'] as const).map((c) => (
-                  <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: COLOR_HEX[c] }} />
-                    {additives.risk_summary.by_color[c]}
-                  </span>
-                ))}
-              </div>
+              {additives.risk_summary.total === 0 ? (
+                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>등록된 첨가물 정보가 없어요.</p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '2px 0 12px', lineHeight: 1.6 }}>
+                    첨가물 안전성을 4색으로 나타내요 (먹선 위해성 평가 기준).{' '}
+                    <strong style={{ color: COLOR_HEX.green }}>초록 안전</strong> → 노랑 허용 → 주황 주의 → <strong style={{ color: COLOR_HEX.red }}>빨강 위해</strong>.
+                  </p>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {(['green', 'yellow', 'orange', 'red'] as const).map((c) => {
+                      const n = additives.risk_summary.by_color[c]
+                      return (
+                        <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 999, background: n ? `${COLOR_HEX[c]}1a` : 'var(--border-light)', color: n ? 'var(--text)' : 'var(--text-muted)' }}>
+                          <span style={{ width: 9, height: 9, borderRadius: '50%', background: COLOR_HEX[c] }} />
+                          {COLOR_LABEL[c]} <strong>{n}</strong>
+                        </span>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
