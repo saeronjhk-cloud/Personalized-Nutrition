@@ -7,6 +7,7 @@ import {
   fetchRanges,
 } from "../lib/checkup_api";
 import { fetchSurveyResponses, fetchSurveyResponseDetail } from "../lib/survey_api";
+import { CHECKUP_ENABLED } from "../lib/flags";
 import { runEngine, type Range, type CategoryResult, type BiomarkerInput } from "../domain/checkup/engine";
 import { runUnifiedRecommendation, type UnifiedResult } from "../domain/unified/recommend";
 import type { SurveyAnswers } from "../types";
@@ -117,7 +118,9 @@ export default function Recommend() {
           </p>
           {error && <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 12 }}>{error}</p>}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 280, margin: "0 auto" }}>
-            <button type="button" className="btn btn-primary" onClick={() => navigate("/checkup")}>검진 수치 입력</button>
+            {CHECKUP_ENABLED && (
+              <button type="button" className="btn btn-primary" onClick={() => navigate("/checkup")}>검진 수치 입력</button>
+            )}
             <button type="button" className="btn btn-primary" onClick={() => navigate("/survey")}>설문하기</button>
             <button type="button" className="btn btn-secondary" onClick={() => navigate("/dashboard")}>내 건강으로</button>
           </div>

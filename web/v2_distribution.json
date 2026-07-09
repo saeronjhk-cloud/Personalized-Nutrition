@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-07-09T10:42:50.220Z",
+  "api": "https://meokseon-server-production.up.railway.app",
+  "min_n": 30,
+  "delay_ms": 250,
+  "n_barcodes": 362,
+  "n_products": 141,
+  "n_confident": 141,
+  "n_openfoodfacts": 0,
+  "note": "v2_suggestion은 confident 서브셋 보고값 분포 기준의 \"제안\". 정책 확정 아님. n>=min_n + v1 색변화율 검토 + false-green 수동확인 + 64.jsonl 17/17 회귀 후에만 승격.",
+  "nutrients": {
+    "sodium": {
+      "reported_all": {
+        "count": 107,
+        "removed_outliers": 15,
+        "p50": 50,
+        "p75": 381,
+        "p90": 677,
+        "p95": 800
+      },
+      "reported_confident": {
+        "count": 107,
+        "removed_outliers": 15,
+        "p50": 50,
+        "p75": 381,
+        "p90": 677,
+        "p95": 800
+      },
+      "v1_threshold": 600,
+      "v1_over_share_confident": 0.12149532710280374,
+      "v2_suggestion_p75_confident": 381,
+      "keep_v1": false,
+      "promote": false
+    },
+    "total_sugars": {
+      "reported_all": {
+        "count": 113,
+        "removed_outliers": 9,
+        "p50": 7.5,
+        "p75": 11,
+        "p90": 13.35,
+        "p95": 17
+      },
+      "reported_confident": {
+        "count": 113,
+        "removed_outliers": 9,
+        "p50": 7.5,
+        "p75": 11,
+        "p90": 13.35,
+        "p95": 17
+      },
+      "v1_threshold": 15,
+      "v1_over_share_confident": 0.09734513274336283,
+      "v2_suggestion_p75_confident": 11,
+      "keep_v1": false,
+      "promote": false
+    },
+    "total_carbs": {
+      "reported_all": {
+        "count": 122,
+        "removed_outliers": 0,
+        "p50": 28.67,
+        "p75": 67.2,
+        "p90": 83.33,
+        "p95": 87.5
+      },
+      "reported_confident": {
+        "count": 122,
+        "removed_outliers": 0,
+        "p50": 28.67,
+        "p75": 67.2,
+        "p90": 83.33,
+        "p95": 87.5
+      },
+      "v1_threshold": 45,
+      "v1_over_share_confident": 0.45081967213114754,
+      "v2_suggestion_p75_confident": 67.2,
+      "keep_v1": false,
+      "promote": false
+    },
+    "saturated_fat": {
+      "reported_all": {
+        "count": 122,
+        "removed_outliers": 0,
+        "p50": 2.33,
+        "p75": 5.83,
+        "p90": 7.27,
+        "p95": 9.09
+      },
+      "reported_confident": {
+        "count": 122,
+        "removed_outliers": 0,
+        "p50": 2.33,
+        "p75": 5.83,
+        "p90": 7.27,
+        "p95": 9.09
+      },
+      "v1_threshold": 5,
+      "v1_over_share_confident": 0.3114754098360656,
+      "v2_suggestion_p75_confident": 5.83,
+      "keep_v1": false,
+      "promote": false
+    },
+    "trans_fat": {
+      "reported_all": {
+        "count": 100,
+        "removed_outliers": 20,
+        "p50": 0,
+        "p75": 0,
+        "p90": 0,
+        "p95": 0
+      },
+      "reported_confident": {
+        "count": 100,
+        "removed_outliers": 20,
+        "p50": 0,
+        "p75": 0,
+        "p90": 0,
+        "p95": 0
+      },
+      "v1_threshold": 0.1,
+      "v1_over_share_confident": 0,
+      "v2_suggestion_p75_confident": 0,
+      "keep_v1": false,
+      "promote": false
+    },
+    "cholesterol": {
+      "reported_all": {
+        "count": 114,
+        "removed_outliers": 8,
+        "p50": 0,
+        "p75": 12.67,
+        "p90": 30,
+        "p95": 35
+      },
+      "reported_confident": {
+        "count": 114,
+        "removed_outliers": 8,
+        "p50": 0,
+        "p75": 12.67,
+        "p90": 30,
+        "p95": 35
+      },
+      "v1_threshold": 60,
+      "v1_over_share_confident": 0,
+      "v2_suggestion_p75_confident": 12.67,
+      "keep_v1": false,
+      "promote": false
+    },
+    "calories": {
+      "reported_all": {
+        "count": 141,
+        "removed_outliers": 0,
+        "p50": 243,
+        "p75": 394,
+        "p90": 428,
+        "p95": 438
+      },
+      "reported_confident": {
+        "count": 141,
+        "removed_outliers": 0,
+        "p50": 243,
+        "p75": 394,
+        "p90": 428,
+        "p95": 438
+      },
+      "v1_threshold": 400,
+      "v1_over_share_confident": 0.23404255319148937,
+      "v2_suggestion_p75_confident": 394,
+      "keep_v1": false,
+      "promote": false
+    }
+  }
+}

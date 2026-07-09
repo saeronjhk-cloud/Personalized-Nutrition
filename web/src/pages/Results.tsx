@@ -343,9 +343,15 @@ function SupplementCard({ supp }: { supp: Supplement }) {
       )}
 
       {supp.coupang_url && (
-        <a href={supp.coupang_url} target="_blank" rel="noopener noreferrer" className="coupang-btn">
-          🛒 쿠팡에서 최저가 보기
-        </a>
+        <>
+          <a href={supp.coupang_url} target="_blank" rel="noopener noreferrer" className="coupang-btn">
+            🛒 쿠팡에서 최저가 보기
+          </a>
+          {/* 추천 근거와 제휴 링크 분리 표시 (신뢰 정렬) */}
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5 }}>
+            제휴 링크 · 추천 순위는 건강 분석 결과로만 정해지며, 구매 시 회사가 일정 수수료를 받을 수 있습니다.
+          </p>
+        </>
       )}
     </div>
   )

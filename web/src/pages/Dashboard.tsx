@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchMyProfile, fetchCheckupRecords } from "../lib/checkup_api";
 import { fetchSurveyResponses } from "../lib/survey_api";
+import { CHECKUP_ENABLED } from "../lib/flags";
 
 interface ModuleStatus {
   checkupCount: number;
@@ -128,7 +129,8 @@ export default function Dashboard() {
             gap: 16,
           }}
         >
-          {/* 건강진단 */}
+          {/* checkup module gated by compliance flag (flags.ts) */}
+          {CHECKUP_ENABLED && (
           <ModuleCard emoji="🩺" title="건강진단" desc="검진 수치를 입력하면 식약처 인정 기능성에 맞춘 추천을 받아요.">
             <div>
               {loading ? (
@@ -148,6 +150,7 @@ export default function Dashboard() {
               </button>
             )}
           </ModuleCard>
+          )}
 
           {/* 증상·목표 (설문) */}
           <ModuleCard emoji="📝" title="증상·목표" desc="증상과 건강 목표, 생활 습관을 설문으로 알려주세요.">

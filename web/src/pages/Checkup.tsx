@@ -1,8 +1,23 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BiomarkerForm from "../components/checkup/BiomarkerForm";
+import CheckupConsentGate from "../components/CheckupConsentGate";
+import { hasConsentedCheckup, markCheckupConsent } from "../lib/analytics";
 
 export default function Checkup() {
   const navigate = useNavigate();
+  const [consented, setConsented] = useState(hasConsentedCheckup());
+
+  // 검진 민감정보 수집·이용 opt-in 동의(#3) 게이트. 미동의 시 입력 화면 진입 차단.
+  if (!consented) {
+    return (
+      <CheckupConsentGate
+        onAccept={() => { markCheckupConsent(); setConsented(true); }}
+        onDecline={() => navigate("/")}
+      />
+    );
+  }
+
   return (
     <div className="survey-container fade-in">
       <div className="survey-card">

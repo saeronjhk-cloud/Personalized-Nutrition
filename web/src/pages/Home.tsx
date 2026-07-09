@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import PageMeta from '../components/PageMeta'
 import NewBlogPopup from '../components/NewBlogPopup'
 import { shouldPromptResurvey, daysSinceLastSurvey, getSurveyHistory } from '../lib/surveyHistory'
+import { MEOKSEON_ENABLED } from '../lib/flags'
 
 /* ── 누적 분석 카운터: localStorage 기반 ── */
 function useAnalysisCount() {
@@ -120,6 +121,24 @@ export default function Home() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ━━ 제품 스캔 후킹 배너 (scan-first, MEOKSEON_ENABLED 시) — 결정 IP 61/62 ━━ */}
+      {MEOKSEON_ENABLED && (
+        <section className="hero-section" style={{ paddingBottom: 0 }}>
+          <div style={{ background: 'var(--primary-light)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 20px', textAlign: 'center', maxWidth: 520, margin: '0 auto' }}>
+            <div className="hero-badge" style={{ marginBottom: 10 }}>NEW · 제품 스캔</div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary-dark)', marginBottom: 8 }}>
+              내가 먹는 가공식품, 10초 해석
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+              바코드나 제품 이름으로 성분·첨가물·영양을 바로 확인하세요. 회원가입 없이 무료.
+            </p>
+            <Link to="/scan" className="btn btn-primary" style={{ maxWidth: 280, margin: '0 auto' }}>
+              제품 스캔하기 →
+            </Link>
+          </div>
+        </section>
       )}
 
       {/* ━━ 히어로 섹션 ━━ */}

@@ -23,10 +23,13 @@ import {
   SUPPLEMENT_FOOD_AVOID,
 } from "../../engine";
 import { checkupResultsToScores, mergeScores } from "./adapter";
+import { dietToScores, type DietDailyAvg } from "./diet_adapter";
 
 export interface UnifiedInput {
   surveyAnswers?: SurveyAnswers | null;
   checkupResults?: CategoryResult[] | null;
+  /** 최근 7일 식이 일평균 (meal_records 집계) */
+  dietSummary?: DietDailyAvg | null;
   profile?: { sex?: string | null; age?: number | null } | null;
 }
 
@@ -35,7 +38,9 @@ export interface UnifiedResult extends RecommendationResult {
   hasSignal: boolean;
   /** 전문가 상담 권장(중증) 검진 항목 */
   referralKeys: string[];
-  sources: { survey: boolean; checkup: boolean };
+  /** 식이 기록 부족(신호화 안 됨) — UI 확신도↓ 표기용 */
+  dietLowConfidence: boolean;
+  sources: { survey: boolean; checkup: boolean; diet: boolean };
 }
 
 export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
@@ -46,12 +51,6 @@ export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
   const checkupSig = checkup
     ? checkupResultsToScores(checkup)
     : { scores: {}, referralCategories: [] as string[], referralKeys: [] as string[] };
-
-  const merged = mergeScores(surveyScores, checkupSig.scores);
-  // 중증 카테고리 억제 (검진 force_medical_referral)
-  for (const cat of checkupSig.referralCategories) delete merged[cat];
-
-  const hasSignal = Object.values(merged).some((v) => v > 0);
 
   // baseAnswers: 설문 있으면 그대로, 없으면 profile 기반 최소 객체
   const baseAnswers: SurveyAnswers = survey ?? {
@@ -67,21 +66,37 @@ export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
     가족력: [],
   };
 
-  const persona = getPersona(baseAnswers, merged);
-  const personaData = PERSONAS.find((p) => p.id === persona.id) || null;
-  const current_ids = new Set(baseAnswers.현재복용영양제 || []);
-  const raw_recs = getRecommendations(baseAnswers, merged, personaData, { current_ids });
-
-  // 신체 정보 (설문 있으면 정확, 없으면 가능 범위)
+  // 신체 정보 (식이 열량/단백 기준 + 아래 nutrition_info에서 공용 재사용)
   const height = baseAnswers.신장 || 170;
   const weight = baseAnswers.체중 || 65;
   const gender = baseAnswers.성별 || "male";
   const age = baseAnswers.나이 || 30;
   const activity = baseAnswers.운동 || "거의_안함";
-  const bmi = calculateBMI(weight, height);
-  const { label: bmi_label, color: bmi_color, advice: bmi_advice } = getBMICategory(bmi);
   const bmr = calculateBMR(gender, weight, height, age);
   const tdee = calculateTDEE(bmr, activity);
+
+  // 식이 신호 (최근 7일 일평균 → 카테고리 점수). 기록 부족 시 신호 0 + lowConfidence.
+  // Step 4: 나트륨·당류 재가동(enableMicroSignals). 실제 발화는 dietSummary의 데이터 가드
+  // (sodium_known/sugar_known)도 통과해야 함. 식이섬유는 커버리지 낮아 계속 OFF.
+  const dietSig = input.dietSummary
+    ? dietToScores(input.dietSummary, { sex: gender, weightKg: weight, kcalTarget: tdee, enableMicroSignals: true })
+    : { scores: {} as Record<string, number>, lowConfidence: false };
+
+  // 설문 + 검진 + 식이 병합
+  const merged = mergeScores(mergeScores(surveyScores, checkupSig.scores), dietSig.scores);
+  // 중증 카테고리 억제 (검진 force_medical_referral)
+  for (const cat of checkupSig.referralCategories) delete merged[cat];
+
+  const hasSignal = Object.values(merged).some((v) => v > 0);
+
+  const persona = getPersona(baseAnswers, merged);
+  const personaData = PERSONAS.find((p) => p.id === persona.id) || null;
+  const current_ids = new Set(baseAnswers.현재복용영양제 || []);
+  const raw_recs = getRecommendations(baseAnswers, merged, personaData, { current_ids });
+
+  // 신체 정보 (위에서 계산한 bmr/tdee 재사용)
+  const bmi = calculateBMI(weight, height);
+  const { label: bmi_label, color: bmi_color, advice: bmi_advice } = getBMICategory(bmi);
   const [protein_min, protein_max] = calculateProteinTarget(weight, baseAnswers.목표 || []);
 
   const nutrition_info = {
@@ -147,6 +162,7 @@ export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
     warnings,
     hasSignal,
     referralKeys: checkupSig.referralKeys,
-    sources: { survey: !!survey, checkup: !!checkup },
+    dietLowConfidence: dietSig.lowConfidence,
+    sources: { survey: !!survey, checkup: !!checkup, diet: !!input.dietSummary },
   };
 }

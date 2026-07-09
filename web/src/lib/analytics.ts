@@ -54,6 +54,27 @@ export function markConsentAcknowledged(): void {
   }
 }
 
+// --- 설문 기반 민감정보(건강 관련) 수집·이용 별도 동의 ---
+// 일반 개인정보 동의(CONSENT_KEY)와 분리된 독립 동의. 설문은 건강 민감정보를 포함하므로,
+// 설문 진행 전 두 동의(개인정보 + 민감정보)를 각각 명시적으로 받는다(보호법상 별도 동의, 처리방침 §1 민감정보).
+const SENSITIVE_CONSENT_KEY = 'sf_sensitive_consent' // 'accepted' | null
+
+export function hasConsentedSensitive(): boolean {
+  try {
+    return localStorage.getItem(SENSITIVE_CONSENT_KEY) === 'accepted'
+  } catch {
+    return false
+  }
+}
+
+export function markSensitiveConsent(): void {
+  try {
+    localStorage.setItem(SENSITIVE_CONSENT_KEY, 'accepted')
+  } catch {
+    // 무시
+  }
+}
+
 // --- 검진(건강검진 해석) 민감정보 수집·이용 동의 (동의 항목 #3) ---
 // 설문 동의(#2)와 별개의 독립 동의. 처리방침 v4.7 §3-3 / 약관 §6조의2와 1:1.
 // CHECKUP_ENABLED 플래그가 켜졌을 때만 실제로 사용된다(검진 기능 진입 게이트).

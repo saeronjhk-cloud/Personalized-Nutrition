@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { App as CapApp } from '@capacitor/app'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
-import { submitSurveyAnalytics } from './lib/analytics'
+import { submitSurveyAnalytics, hasConsentedCollection, markConsentAcknowledged } from './lib/analytics'
+import { CHECKUP_ENABLED, INSIGHTS_ENABLED, MEOKSEON_ENABLED } from './lib/flags'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import InstallPrompt from './components/InstallPrompt'
-import DataCollectionNotice from './components/DataCollectionNotice'
+import ConsentGate from './components/ConsentGate'
 import Home from './pages/Home'
 import About from './pages/About'
 import Team from './pages/Team'
@@ -28,8 +29,11 @@ import SurveyManage from './pages/SurveyManage'
 import SurveyResultView from './components/survey/SurveyResultView'
 import Dashboard from './pages/Dashboard'
 import Recommend from './pages/Recommend'
+import Insights from './pages/Insights'
+import Scan from './pages/Scan'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
+import Account from "./pages/Account";
 
 const INITIAL_ANSWERS: SurveyAnswers = {
   성별: 'male',
@@ -51,6 +55,7 @@ function SurveyFlow() {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const isPopState = useRef(false)
+  const [consented, setConsented] = useState(hasConsentedCollection())
 
   // 브라우저 뒤로가기/앞으로가기 처리
   useEffect(() => {
@@ -85,6 +90,12 @@ function SurveyFlow() {
   }, [])
 
   const submitSurvey = useCallback(async () => {
+    // 만 14세 미만 아동 이용 제한(처리방침 §9 · 백스톱). 제출 차단.
+    if ((answers.나이 ?? 0) < 14) {
+      setError('본 서비스는 만 14세 미만은 이용할 수 없습니다. 나이를 확인해 주세요.')
+      setStep('results')
+      return
+    }
     setStep('loading')
     setError(null)
     try {
@@ -105,6 +116,15 @@ function SurveyFlow() {
     setError(null)
     setStep('body')
   }, [])
+
+  if (!consented) {
+    return (
+      <ConsentGate
+        onAccept={() => { markConsentAcknowledged(); setConsented(true) }}
+        onDecline={() => navigate('/')}
+      />
+    )
+  }
 
   if (step === 'loading') return <Loading />
   if (step === 'results') return <Results result={result} answers={answers} error={error} onRestart={restart} />
@@ -154,6 +174,12 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/recommend" element={<Recommend />} />
+          {INSIGHTS_ENABLED && (
+            <Route path="/insights" element={<Insights />} />
+          )}
+          {MEOKSEON_ENABLED && (
+            <Route path="/scan" element={<Scan />} />
+          )}
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
           <Route path="/blog" element={<Blog />} />
@@ -162,20 +188,26 @@ export default function App() {
           <Route path="/survey" element={<SurveyFlow />} />
           <Route path="/survey/manage" element={<SurveyManage />} />
           <Route path="/survey/view/:responseId" element={<SurveyResultView />} />
-          <Route path="/checkup" element={<Checkup />} />
-          <Route path="/checkup/manage" element={<CheckupManage />} />
-          <Route path="/checkup/edit/:recordId" element={<EditCheckup />} />
-          <Route path="/checkup/view/:recordId" element={<ViewCheckup />} />
+          {/* checkup routes gated by compliance flag (flags.ts / VITE_CHECKUP_ENABLED) */}
+          {CHECKUP_ENABLED && (
+            <>
+              <Route path="/checkup" element={<Checkup />} />
+              <Route path="/checkup/manage" element={<CheckupManage />} />
+              <Route path="/checkup/edit/:recordId" element={<EditCheckup />} />
+              <Route path="/checkup/view/:recordId" element={<ViewCheckup />} />
+            </>
+          )}
           <Route path="/health-report" element={<HealthReport />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<LoginEmail />} />
+          <Route path="/account" element={<Account />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Footer />
       <InstallPrompt />
-      <DataCollectionNotice />
     </BrowserRouter>
   )
 }
