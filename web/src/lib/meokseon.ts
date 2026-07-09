@@ -105,8 +105,28 @@ async function getJson(path: string): Promise<any> {
   return json.data
 }
 
+// 먹선 서버는 PostgreSQL numeric 컬럼을 "문자열"로 반환한다(node-pg 기본).
+// 클라이언트 경계에서 숫자로 정규화 — 영양 표시·개인화·이력 전부 실수치 확보.
+const MS_NUM_FIELDS: (keyof MsNutrition)[] = [
+  'calories', 'total_fat', 'saturated_fat', 'trans_fat', 'cholesterol',
+  'sodium', 'total_carbs', 'total_sugars', 'dietary_fiber', 'protein',
+]
+function coerceNum(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string' && v.trim() !== '') { const n = Number(v); return Number.isFinite(n) ? n : null }
+  return null
+}
+function normalizeNutrition(n: MsNutrition | null | undefined): MsNutrition | null {
+  if (!n) return n ?? null
+  const out: MsNutrition = { ...n }
+  for (const k of MS_NUM_FIELDS) (out as any)[k] = coerceNum(n[k])
+  return out
+}
+
 export async function getProduct(barcode: string): Promise<MsProductResult> {
-  return await getJson(`/api/products/${encodeURIComponent(barcode)}`)
+  const data = (await getJson(`/api/products/${encodeURIComponent(barcode)}`)) as MsProductResult
+  if (data) data.nutrition = normalizeNutrition(data.nutrition)
+  return data
 }
 
 export async function getAdditiveSummary(barcode: string): Promise<MsAdditiveSummary> {
