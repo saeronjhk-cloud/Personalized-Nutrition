@@ -178,6 +178,7 @@ export async function saveMeal(params: {
   clientMealId: string
   mealSlot?: string
   eatenAt?: string
+  mealSessionId?: string
 }): Promise<{ ok: boolean; error?: string }> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: '로그인이 필요합니다' }
@@ -191,6 +192,7 @@ export async function saveMeal(params: {
     client_meal_id: params.clientMealId,
     eaten_at: params.eatenAt ?? new Date().toISOString(),
     meal_slot: params.mealSlot ?? null,
+    meal_session_id: params.mealSessionId ?? null,
     foods: params.result.foods,
     summary: params.result.summary,
     photo_path: path,

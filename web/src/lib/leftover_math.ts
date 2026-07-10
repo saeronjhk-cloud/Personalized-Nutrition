@@ -46,6 +46,15 @@ export function buildSliderBody(preMealLogId: string, eatenRatio: number) {
   }
 }
 
+/** 정찬 세션 전체 슬라이더 요청 바디(종료된 세션 대상). */
+export function buildSessionSliderBody(preMealSessionId: string, sessionEatenRatio: number) {
+  return {
+    pre_meal_session_id: preMealSessionId,
+    leftover_method: 'slider' as const,
+    session_eaten_ratio: clampRatio(sessionEatenRatio),
+  }
+}
+
 /** 에러코드 → 사용자용 한글 문구. */
 export function friendlyLeftoverError(code?: string): string {
   return LEFTOVER_ERR_MSG[(code as LeftoverErrorCode)] || LEFTOVER_ERR_MSG.UNKNOWN
@@ -70,4 +79,47 @@ export function genIdemKey(): string {
   const c = (typeof crypto !== 'undefined' ? (crypto as any) : undefined)
   if (c && typeof c.randomUUID === 'function') return c.randomUUID()
   return 'k-' + Date.now().toString(36) + '-' + Math.random().toString(16).slice(2)
+}
+
+// ───────── Path B (식후사진 AI) 순수 헬퍼 ─────────
+
+/** suggest(제안) 요청 바디. after_image는 base64(접두사 제외). */
+export function buildPhotoAiSuggestBody(preMealLogId: string, afterImageBase64: string, mime = 'image/jpeg') {
+  return {
+    pre_meal_log_id: preMealLogId,
+    leftover_method: 'photo_ai' as const,
+    after_image: afterImageBase64,
+    after_image_mime: mime,
+  }
+}
+
+/** confirm(확인) 요청 바디. 결정론(원본×confirmed_ratio). */
+export function buildPhotoAiConfirmBody(preMealLogId: string, confirmedEatenRatio: number) {
+  return {
+    pre_meal_log_id: preMealLogId,
+    leftover_method: 'photo_ai' as const,
+    confirmed_eaten_ratio: clampRatio(confirmedEatenRatio),
+  }
+}
+
+export interface PhotoAiSuggestion {
+  state?: string
+  estimatedEatenRatio: number
+  confidence: number
+  requiresConfirmation: boolean
+  suggestedNote: string
+  /** 미리보기 전용(아직 저장 아님) */
+  previewSummary: any
+}
+
+/** suggest 응답 data 정규화. 확인은 항상 거치므로 requiresConfirmation 기본 true(안전). */
+export function parsePhotoAiSuggest(data: any): PhotoAiSuggestion {
+  return {
+    state: data?.state,
+    estimatedEatenRatio: clampRatio(Number(data?.estimated_eaten_ratio)),
+    confidence: Number.isFinite(Number(data?.confidence)) ? Number(data?.confidence) : 0,
+    requiresConfirmation: data?.requires_user_confirmation !== false,
+    suggestedNote: String(data?.suggested_note ?? '남긴 양을 확인해 주세요.'),
+    previewSummary: data?.adjusted_summary ?? null,
+  }
 }

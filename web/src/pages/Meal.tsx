@@ -9,6 +9,11 @@ import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
 import { hasConsentedMeal } from '../lib/mealConsent'
+import {
+  openMealSession, closeMealSession, getCurrentOpenSession,
+  type SessionSummary,
+} from '../lib/mealSession'
+import { sessionBadgeText } from '../lib/session_math'
 
 // NutriLens 사진 식사기록 — 사진 한 장 → 분석(칼로리·영양) → 저장. 로그인 필요(Edge JWT).
 //   사진은 촬영/갤러리 지원(재인코딩으로 EXIF 제거·축소). 결과는 추정치. 근거 IP: 66~75.
@@ -27,6 +32,9 @@ export default function Meal() {
   const [slot, setSlot] = useState<Slot>(defaultMealSlot())
   const [saved, setSaved] = useState(false)
   const [historyKey, setHistoryKey] = useState(0)
+  const [session, setSession] = useState<SessionSummary | null>(null)
+  const [sessionBusy, setSessionBusy] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
   const blobRef = useRef<Blob | null>(null)
   const shaRef = useRef<string | null>(null)
@@ -35,6 +43,10 @@ export default function Meal() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setAuthed(!!data.user))
   }, [])
+
+  useEffect(() => {
+    if (authed && consented) getCurrentOpenSession().then(setSession).catch(() => {})
+  }, [authed, consented])
 
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
 
@@ -79,12 +91,39 @@ export default function Meal() {
       const r = await saveMeal({
         blob: blobRef.current, result, photo_sha256: shaRef.current,
         clientMealId: mealIdRef.current, mealSlot: slot,
+        mealSessionId: session?.session_id,
       })
-      if (r.ok) { setSaved(true); setHistoryKey((k) => k + 1) }
+      if (r.ok) { setSaved(true); setHistoryKey((k) => k + 1); if (session) await refreshSession() }
       else setError(r.error || '저장에 실패했어요.')
     } finally {
       setBusy(false)
     }
+  }
+
+  async function refreshSession() {
+    const s = await getCurrentOpenSession().catch(() => null)
+    setSession(s)
+  }
+  async function startSession() {
+    setSessionBusy(true); setToast(null); setError(null)
+    try {
+      const r = await openMealSession(slot)
+      if (r.auto_closed) setToast('이전 정찬이 자동 종료되었어요.')
+      await refreshSession()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally { setSessionBusy(false) }
+  }
+  async function endSession() {
+    if (!session) return
+    setSessionBusy(true); setError(null)
+    try {
+      await closeMealSession(session.session_id)
+      setSession(null)
+      setToast('정찬을 종료했어요. 남긴 양은 기록 카드에서 조절할 수 있어요.')
+    } catch (e) {
+      setError((e as Error).message)
+    } finally { setSessionBusy(false) }
   }
 
   if (!nutrilensConfigured()) {
@@ -125,6 +164,34 @@ export default function Meal() {
 
   return (
     <div className="survey-container fade-in">
+      {toast && (
+        <div className="survey-card" style={{ marginBottom: 12, background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: '10px 14px' }}>
+          {toast}
+        </div>
+      )}
+
+      {!result && (
+        <div className="survey-card" style={{ marginBottom: 16 }}>
+          {session ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 {sessionBadgeText(session.plate_count, session.total_calories_kcal)}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>사진을 계속 찍으면 이 정찬에 접시가 쌓여요.</div>
+              </div>
+              <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 14px', flexShrink: 0 }} onClick={endSession}>정찬 종료</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 모드</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>한 끼에 여러 접시를 한 세션으로 묶어 기록해요.</div>
+              </div>
+              <button type="button" className="btn btn-primary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 14px', flexShrink: 0 }} onClick={startSession}>정찬 시작</button>
+            </div>
+          )}
+        </div>
+      )}
+
       {!result && (
         <div className="survey-card" style={{ marginBottom: 16 }}>
           <h2 className="survey-step-title">사진으로 식사 기록</h2>
