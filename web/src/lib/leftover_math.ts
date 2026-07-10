@@ -147,3 +147,8 @@ export function splitRatio(eatenRatio: number, people: number): number {
   const n = Number.isFinite(people) && people >= 1 ? Math.floor(people) : 1
   return clampRatio(eatenRatio / n)
 }
+
+/** C-min(정밀) suggest 바디 — 식후만 전송(식전은 서버가 저장분 crop 참조). leftover_method=photo_ai_hybrid. */
+export function buildPhotoAiHybridSuggestBody(preMealLogId: string, afterImageBase64: string, mime = 'image/jpeg') {
+  return { pre_meal_log_id: preMealLogId, leftover_method: 'photo_ai_hybrid' as const, after_image: afterImageBase64, after_image_mime: mime }
+}

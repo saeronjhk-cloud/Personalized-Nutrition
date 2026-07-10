@@ -3,7 +3,8 @@ import {
   listMeals, deleteMeal, summarizeMeals, slotLabel, titleOf, kcalOf,
   type MealRecord, type MealStat,
 } from '../lib/mealHistory'
-import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, confirmPhotoAi, foodItemId, splitRatio } from '../lib/mealLeftover'
+import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, suggestPhotoAiHybrid, confirmPhotoAi, foodItemId, splitRatio } from '../lib/mealLeftover'
+import { MEAL_CMIN_ENABLED } from '../lib/flags'
 import type { MealSummary, MealFood } from '../lib/nutrilens'
 
 // 내 최근 식사(리텐션). 각 카드 '먹은 양' 보정:
@@ -77,7 +78,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
   async function onPickAfter(r: MealRecord, file: File) {
     patch(r.id, { busy: true, err: undefined })
     try {
-      const sug = await suggestPhotoAi(r.id, file)
+      const sug = await (MEAL_CMIN_ENABLED ? suggestPhotoAiHybrid : suggestPhotoAi)(r.id, file)
       patch(r.id, {
         busy: false, photoMode: true,
         ratioPct: Math.round(sug.estimatedEatenRatio * 100),

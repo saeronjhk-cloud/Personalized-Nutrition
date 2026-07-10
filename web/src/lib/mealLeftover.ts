@@ -6,14 +6,14 @@
 import { supabase } from './supabase'
 import type { MealSummary } from './nutrilens'
 import {
-  buildSliderBody, buildSessionSliderBody, buildPerFoodBody, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody,
+  buildSliderBody, buildSessionSliderBody, buildPerFoodBody, buildPhotoAiSuggestBody, buildPhotoAiHybridSuggestBody, buildPhotoAiConfirmBody,
   parsePhotoAiSuggest, isValidRatio, parseLeftoverEnvelope, genIdemKey, LEFTOVER_ERR_MSG,
   type PhotoAiSuggestion,
 } from './leftover_math'
 import { reencodeImage } from './nutrilens'
 
 export type { LeftoverErrorCode, ParsedEnvelope } from './leftover_math'
-export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPerFoodBody, foodItemId, splitRatio, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
+export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPerFoodBody, foodItemId, splitRatio, buildPhotoAiSuggestBody, buildPhotoAiHybridSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
 export type { PhotoAiSuggestion } from './leftover_math'
 
 const BASE = import.meta.env.VITE_SUPABASE_URL || ''
@@ -92,6 +92,22 @@ async function blobToBase64(blob: Blob): Promise<string> {
 }
 
 /** 제안(suggest): 식후사진 → AI 추정 비율/미리보기. 저장 아님(meal_log 미갱신). 실패 시 AI_ESTIMATE_FAILED. */
+/** C-min(정밀) 제안: 식후사진 + 서버의 식전 저장사진 crop 비교. 엔진 미지원/실패 시 상위에서 Path B 폴백 권장. */
+export async function suggestPhotoAiHybrid(preMealLogId: string, file: File | Blob): Promise<PhotoAiSuggestion> {
+  const blob = await reencodeImage(file)
+  const b64 = await blobToBase64(blob)
+  const res = await fetch(`${BASE}/functions/v1/meal-leftover`, {
+    method: 'POST',
+    headers: { ...(await authHeaders()), 'X-Idempotency-Key': genIdemKey() },
+    body: JSON.stringify(buildPhotoAiHybridSuggestBody(preMealLogId, b64, 'image/jpeg')),
+  })
+  let json: any = {}
+  try { json = await res.json() } catch { /* 비-JSON */ }
+  const parsed = parseLeftoverEnvelope(json, res.status)
+  if (!parsed.ok || !parsed.data) throw new Error(parsed.errorMessage || LEFTOVER_ERR_MSG.AI_ESTIMATE_FAILED)
+  return parsePhotoAiSuggest(parsed.data)
+}
+
 export async function suggestPhotoAi(preMealLogId: string, file: File | Blob): Promise<PhotoAiSuggestion> {
   const blob = await reencodeImage(file)
   const b64 = await blobToBase64(blob)
