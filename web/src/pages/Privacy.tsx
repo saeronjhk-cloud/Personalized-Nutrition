@@ -1,3 +1,5 @@
+import { MEAL_ENABLED } from '../lib/flags'
+
 export default function Privacy() {
   return (
     <div className="page fade-in" style={{ paddingTop: 32, paddingBottom: 60 }}>
@@ -146,7 +148,8 @@ export default function Privacy() {
         {[
           {
             name: 'Supabase, Inc.', country: '미국',
-            items: '이메일, 회원 식별 정보, 설문 응답(건강 관련 민감정보 포함), 추천 결과, 제품 스캔 이력(로그인 회원)',
+            items: '이메일, 회원 식별 정보, 설문 응답(건강 관련 민감정보 포함), 추천 결과, 제품 스캔 이력'
+              + (MEAL_ENABLED ? ', 식사 사진 및 그로부터 추정된 음식·영양 정보(식사 기록 기능 이용 시)' : '') + '(로그인 회원)',
             when: '서비스 이용(설문 저장·로그인·스캔 저장) 시 정보통신망(HTTPS)을 통해 전송',
             purpose: '데이터 저장, 회원 인증, 회원 전용 기능 제공',
             keep: '회원 탈퇴·삭제요청 또는 위탁계약 종료 시까지 (설문 기반 민감정보는 최대 730일)',
@@ -160,6 +163,24 @@ export default function Privacy() {
             keep: '서비스 운영에 필요한 기간 또는 위탁계약 종료 시까지',
             contact: 'privacy@vercel.com',
           },
+          ...(MEAL_ENABLED ? [
+            {
+              name: 'Railway Corp.', country: '미국',
+              items: '식사 사진(또는 음식 영역 크롭), 분석 요청 메타데이터',
+              when: '식사 사진 분석 요청 시 정보통신망(HTTPS)을 통해 서버-서버로 전송',
+              purpose: '사진 기반 음식·영양 분석 연산(무상태 처리, 별도 저장하지 않음)',
+              keep: '요청 처리에 필요한 순간까지(연산 후 미보관), 위탁계약 종료 시까지',
+              contact: 'privacy@railway.app',
+            },
+            {
+              name: 'OpenAI, L.L.C.', country: '미국',
+              items: '음식 영역으로 한정한 저해상도 이미지(원본 사진 전송 안 함)',
+              when: '엔진 내 자동 식별이 어려운 경우에 한하여 HTTPS로 전송(식별 가능 시 미전송)',
+              purpose: '사진 속 음식 인식 보조(AI 추론), 엔진 우선 처리로 대체 가능 시 미사용',
+              keep: 'OpenAI API 정책에 따름(모델 학습 미사용·단기 보관 후 삭제 조건 계약 확인 필요)',
+              contact: 'privacy@openai.com',
+            },
+          ] : []),
         ].map((v) => (
           <div key={v.name} className="card" style={{ padding: '12px 14px', marginBottom: 12, fontSize: 13, lineHeight: 1.7 }}>
             <div style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{v.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>· 이전 국가: {v.country}</span></div>
@@ -172,6 +193,12 @@ export default function Privacy() {
           </div>
         ))}
 
+        {MEAL_ENABLED && (
+          <p style={{ marginBottom: 16, fontSize: 13, color: 'var(--text-muted)' }}>
+            ⓘ <strong>식사 사진의 최소 전송</strong> — 회사는 이용자 사진의 국외 이전을 최소화하기 위해, 자체 엔진에서 우선 처리하고
+            자동 식별이 어려운 경우에만 음식 영역으로 한정한 저해상도 이미지를 AI 처리자(OpenAI)에게 전송하며, 원본 사진은 전송하지 않습니다.
+          </p>
+        )}
         <p style={{ marginBottom: 16 }}>
           <strong>국외 이전 거부:</strong> 이용자는 개인정보의 국외 이전을 거부할 수 있으며, 거부 방법·절차는 아래 '8. 개인정보 보호책임자'의
           연락처로 요청하실 수 있습니다. 다만 위 이전은 서비스 제공에 필수적이므로, 거부 시 관련 서비스(회원 기능·저장 등) 이용이 제한될 수 있습니다.
@@ -232,6 +259,7 @@ export default function Privacy() {
         <p>
           본 개인정보처리방침은 2026년 7월 9일부터 시행됩니다. (직전 개정: 2026년 5월 30일)
           중요한 변경 사항이 있을 경우 서비스 내 공지를 통해 사전에 안내합니다.
+          {MEAL_ENABLED && ' 식사 기록 기능과 관련한 국외이전 조항(제4조 Railway·OpenAI)은 식사 기록 기능 출시와 함께 시행되며, 시행일·개정 버전은 출시 시점에 갱신됩니다.'}
         </p>
       </div>
     </div>

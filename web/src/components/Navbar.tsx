@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { MEOKSEON_ENABLED } from '../lib/flags'
+import { MEOKSEON_ENABLED, MEAL_ENABLED } from '../lib/flags'
 
-// '/scan'은 MEOKSEON_ENABLED일 때만 노출(App의 라우트 게이트와 일치 — flag off 시 죽은 링크 방지).
+// 라우트 게이트(App)와 일치 — flag off 시 죽은 링크 방지.
 const NAV_ITEMS = [
   { path: '/', label: '홈' },
   ...(MEOKSEON_ENABLED ? [{ path: '/scan', label: '제품 스캔' }] : []),
+  ...(MEAL_ENABLED ? [{ path: '/meal', label: '식사 기록' }] : []),
   { path: '/dashboard', label: '내 건강' },
   { path: '/survey', label: '영양제 추천' },
   { path: '/blog', label: '영양정보' },
