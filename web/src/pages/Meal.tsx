@@ -218,7 +218,10 @@ export default function Meal() {
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 {sessionBadgeText(session.plate_count, session.total_calories_kcal)}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>사진을 계속 찍으면 이 정찬에 접시가 쌓여요.</div>
               </div>
-              <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 14px', flexShrink: 0 }} onClick={endSession}>정찬 종료</button>
+              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={startSession}>새 정찬</button>
+                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={endSession}>정찬 종료</button>
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
