@@ -141,3 +141,9 @@ export function buildPerFoodBody(preMealLogId: string, perFood: { food_item_id: 
     per_food: perFood.map((x) => ({ food_item_id: x.food_item_id, eaten_ratio: clampRatio(x.eaten_ratio) })),
   }
 }
+
+/** 함께 먹은 인원(N명)으로 나눈 내 몫 비율 = eatenRatio / N. people<1이면 1로 간주. */
+export function splitRatio(eatenRatio: number, people: number): number {
+  const n = Number.isFinite(people) && people >= 1 ? Math.floor(people) : 1
+  return clampRatio(eatenRatio / n)
+}

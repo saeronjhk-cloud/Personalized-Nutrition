@@ -13,7 +13,7 @@ import {
 import { reencodeImage } from './nutrilens'
 
 export type { LeftoverErrorCode, ParsedEnvelope } from './leftover_math'
-export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPerFoodBody, foodItemId, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
+export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPerFoodBody, foodItemId, splitRatio, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
 export type { PhotoAiSuggestion } from './leftover_math'
 
 const BASE = import.meta.env.VITE_SUPABASE_URL || ''

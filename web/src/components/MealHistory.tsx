@@ -3,7 +3,7 @@ import {
   listMeals, deleteMeal, summarizeMeals, slotLabel, titleOf, kcalOf,
   type MealRecord, type MealStat,
 } from '../lib/mealHistory'
-import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, confirmPhotoAi, foodItemId } from '../lib/mealLeftover'
+import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, confirmPhotoAi, foodItemId, splitRatio } from '../lib/mealLeftover'
 import type { MealSummary, MealFood } from '../lib/nutrilens'
 
 // 내 최근 식사(리텐션). 각 카드 '먹은 양' 보정:
@@ -18,6 +18,7 @@ interface AdjustState {
   previewKcal?: number
   perFoodMode?: boolean
   perFoodPct?: number[]      // 음식 인덱스별 %
+  people?: number            // 함께 먹은 인원(1/N)
 }
 
 export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
@@ -48,10 +49,11 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
 
   // 전체 슬라이더(Path A)
   async function applyRatio(r: MealRecord, pct: number) {
+    const people = adj[r.id]?.people ?? 1
     patch(r.id, { ratioPct: pct, busy: true, err: undefined })
     try {
-      const res = await adjustSliderSingle(r.id, pct / 100)
-      setAdj((s) => ({ ...s, [r.id]: { ratioPct: pct, adjusted: res.adjusted_summary, busy: false } }))
+      const res = await adjustSliderSingle(r.id, splitRatio(pct / 100, people))
+      setAdj((s) => ({ ...s, [r.id]: { ratioPct: pct, people, adjusted: res.adjusted_summary, busy: false } }))
     } catch (e) {
       patch(r.id, { ratioPct: pct, busy: false, err: (e as Error).message })
     }
@@ -180,6 +182,14 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                         <span>전체 먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
                       </div>
                       <input type="range" min={0} max={100} step={5} value={pct} onChange={(e) => patch(r.id, { ratioPct: Number(e.target.value) })} style={{ width: '100%' }} aria-label="먹은 양 비율" />
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', margin: '2px 0' }}>
+                        <span>함께 먹은 인원</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '4px 12px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.max(1, (a?.people ?? 1) - 1) })}>−</button>
+                          <strong style={{ color: 'var(--text)', minWidth: 34, textAlign: 'center' }}>{a?.people ?? 1}명</strong>
+                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '4px 12px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.min(12, (a?.people ?? 1) + 1) })}>+</button>
+                        </span>
+                      </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, minWidth: 110, padding: '8px 12px', fontSize: 13 }} onClick={() => applyRatio(r, pct)}>{a?.busy ? '반영 중…' : '전체 반영'}</button>
                         {foods.length > 1 && (
@@ -199,7 +209,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                   )}
                   {a?.err && <div style={{ fontSize: 12, color: 'var(--danger)' }}>{a.err}</div>}
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    남긴 양을 반영하면 실제 섭취로 기록돼요. 계산은 서버가 원본 기준으로 처리합니다.
+                    남긴 양을 반영하면 실제 섭취로 기록돼요. 여러 명이 나눠 먹었다면 인원을 설정하면 내 몫(먹은 양÷인원)으로 계산됩니다.
                   </div>
                 </div>
               )}
