@@ -3,19 +3,21 @@ import {
   listMeals, deleteMeal, summarizeMeals, slotLabel, titleOf, kcalOf,
   type MealRecord, type MealStat,
 } from '../lib/mealHistory'
-import { adjustSliderSingle, suggestPhotoAi, confirmPhotoAi } from '../lib/mealLeftover'
-import type { MealSummary } from '../lib/nutrilens'
+import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, confirmPhotoAi, foodItemId } from '../lib/mealLeftover'
+import type { MealSummary, MealFood } from '../lib/nutrilens'
 
-// 내 최근 식사(리텐션). 각 카드에 '먹은 양' 보정:
-//   Path A 슬라이더(결정론) + Path B 식후사진 AI(제안→확인 2단계). 표시는 서버 adjusted_summary만.
+// 내 최근 식사(리텐션). 각 카드 '먹은 양' 보정:
+//   전체 슬라이더(Path A) · 음식별 조절(per_food) · 식후사진 AI(Path B). 표시는 서버 adjusted_summary만.
 interface AdjustState {
   ratioPct: number
   adjusted?: MealSummary
   busy?: boolean
   err?: string
-  photoMode?: boolean       // suggest 후 확인 대기(미리보기, 미저장)
+  photoMode?: boolean
   suggestedNote?: string
-  previewKcal?: number      // 미리보기(비확정)
+  previewKcal?: number
+  perFoodMode?: boolean
+  perFoodPct?: number[]      // 음식 인덱스별 %
 }
 
 export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
@@ -44,7 +46,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
     setAdj((s) => ({ ...s, [id]: { ...(s[id] || { ratioPct: 100 }), ...p } }))
   }
 
-  // Path A: 슬라이더 결정론 반영
+  // 전체 슬라이더(Path A)
   async function applyRatio(r: MealRecord, pct: number) {
     patch(r.id, { ratioPct: pct, busy: true, err: undefined })
     try {
@@ -55,7 +57,21 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
     }
   }
 
-  // Path B 제안: 식후사진 → AI 추정(미리보기, 미저장)
+  // 음식별 조절(per_food) — 모든 음식 커버
+  async function applyPerFood(r: MealRecord) {
+    const foods = (r.foods ?? []) as MealFood[]
+    const pcts = adj[r.id]?.perFoodPct ?? foods.map(() => 100)
+    patch(r.id, { busy: true, err: undefined })
+    try {
+      const perFood = foods.map((f, i) => ({ food_item_id: foodItemId(f, i), eaten_ratio: (pcts[i] ?? 100) / 100 }))
+      const res = await adjustPerFood(r.id, perFood)
+      setAdj((s) => ({ ...s, [r.id]: { ratioPct: 100, adjusted: res.adjusted_summary, busy: false, perFoodMode: false } }))
+    } catch (e) {
+      patch(r.id, { busy: false, err: (e as Error).message })
+    }
+  }
+
+  // 식후사진 제안(미리보기, 미저장)
   async function onPickAfter(r: MealRecord, file: File) {
     patch(r.id, { busy: true, err: undefined })
     try {
@@ -67,12 +83,10 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
         previewKcal: sug.previewSummary ? Math.round(Number(sug.previewSummary.total_calories_kcal) || 0) : undefined,
       })
     } catch (e) {
-      // AI 실패 → 슬라이더 폴백
       patch(r.id, { busy: false, photoMode: false, err: (e as Error).message })
     }
   }
-
-  // Path B 확인: 사용자가 비율 확정 → 저장(카드 확정 갱신)
+  // 식후사진 확인(저장, 카드 확정)
   async function confirmPhoto(r: MealRecord, pct: number) {
     patch(r.id, { ratioPct: pct, busy: true, err: undefined })
     try {
@@ -101,6 +115,9 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
           const pct = a?.ratioPct ?? 100
           const adjusted = !!a?.adjusted
           const photoMode = !!a?.photoMode
+          const perFoodMode = !!a?.perFoodMode
+          const foods = (r.foods ?? []) as MealFood[]
+          const pcts = a?.perFoodPct ?? foods.map(() => 100)
           return (
             <li key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -110,7 +127,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleOf(r)}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {slotLabel(r.meal_slot)} · {shownKcal(r)} kcal{adjusted ? ` (먹은 양 ${pct}%)` : ''} · {new Date(r.eaten_at).toLocaleDateString()}
+                    {slotLabel(r.meal_slot)} · {shownKcal(r)} kcal{adjusted ? ' (보정됨)' : ''} · {new Date(r.eaten_at).toLocaleDateString()}
                   </div>
                 </div>
                 <button type="button" className="btn btn-secondary" aria-label="먹은 양 조절"
@@ -123,44 +140,62 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
 
               {isOpen && (
                 <div style={{ padding: '10px 12px', background: 'var(--border-light)', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {photoMode && (
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                      🤖 {a?.suggestedNote}
-                      {typeof a?.previewKcal === 'number' && <><br />미리보기: 약 {a.previewKcal} kcal (저장 전)</>}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
-                    <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
-                  </div>
-                  <input type="range" min={0} max={100} step={5} value={pct}
-                    onChange={(e) => patch(r.id, { ratioPct: Number(e.target.value) })}
-                    style={{ width: '100%' }} aria-label="먹은 양 비율" />
-
-                  {photoMode ? (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button type="button" className="btn btn-primary" disabled={a?.busy}
-                        style={{ flex: 1, padding: '8px 12px', fontSize: 13 }}
-                        onClick={() => confirmPhoto(r, pct)}>{a?.busy ? '저장 중…' : '이 비율로 저장'}</button>
-                      <button type="button" className="btn btn-secondary" disabled={a?.busy}
-                        style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }}
-                        onClick={() => patch(r.id, { photoMode: false, suggestedNote: undefined, previewKcal: undefined })}>취소</button>
-                    </div>
+                  {perFoodMode ? (
+                    <>
+                      <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>음식별로 먹은 양</div>
+                      {foods.map((f, i) => (
+                        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-secondary)' }}>
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name_ko || `음식 ${i + 1}`}</span>
+                            <strong style={{ color: 'var(--text)' }}>{pcts[i] ?? 100}%</strong>
+                          </div>
+                          <input type="range" min={0} max={100} step={5} value={pcts[i] ?? 100}
+                            onChange={(e) => { const np = [...pcts]; np[i] = Number(e.target.value); patch(r.id, { perFoodPct: np }) }}
+                            style={{ width: '100%' }} aria-label={`${f.name_ko} 먹은 양`} />
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, padding: '8px 12px', fontSize: 13 }} onClick={() => applyPerFood(r)}>{a?.busy ? '반영 중…' : '음식별로 반영'}</button>
+                        <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={() => patch(r.id, { perFoodMode: false })}>취소</button>
+                      </div>
+                    </>
+                  ) : photoMode ? (
+                    <>
+                      <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        🤖 {a?.suggestedNote}
+                        {typeof a?.previewKcal === 'number' && <><br />미리보기: 약 {a.previewKcal} kcal (저장 전)</>}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
+                        <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
+                      </div>
+                      <input type="range" min={0} max={100} step={5} value={pct} onChange={(e) => patch(r.id, { ratioPct: Number(e.target.value) })} style={{ width: '100%' }} aria-label="먹은 양 비율" />
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, padding: '8px 12px', fontSize: 13 }} onClick={() => confirmPhoto(r, pct)}>{a?.busy ? '저장 중…' : '이 비율로 저장'}</button>
+                        <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={() => patch(r.id, { photoMode: false, suggestedNote: undefined, previewKcal: undefined })}>취소</button>
+                      </div>
+                    </>
                   ) : (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button type="button" className="btn btn-primary" disabled={a?.busy}
-                        style={{ flex: 1, minWidth: 120, padding: '8px 12px', fontSize: 13 }}
-                        onClick={() => applyRatio(r, pct)}>{a?.busy ? '반영 중…' : '이 비율로 반영'}</button>
-                      <label className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px', fontSize: 13, cursor: a?.busy ? 'default' : 'pointer' }}>
-                        📷 식후 사진
-                        <input type="file" accept="image/*" capture="environment" disabled={a?.busy} style={{ display: 'none' }}
-                          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onPickAfter(r, f) }} />
-                      </label>
-                      {adjusted && (
-                        <button type="button" className="btn btn-secondary" disabled={a?.busy}
-                          style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }}
-                          onClick={() => applyRatio(r, 100)}>되돌리기</button>
-                      )}
-                    </div>
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
+                        <span>전체 먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
+                      </div>
+                      <input type="range" min={0} max={100} step={5} value={pct} onChange={(e) => patch(r.id, { ratioPct: Number(e.target.value) })} style={{ width: '100%' }} aria-label="먹은 양 비율" />
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, minWidth: 110, padding: '8px 12px', fontSize: 13 }} onClick={() => applyRatio(r, pct)}>{a?.busy ? '반영 중…' : '전체 반영'}</button>
+                        {foods.length > 1 && (
+                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }}
+                            onClick={() => patch(r.id, { perFoodMode: true, perFoodPct: foods.map(() => 100) })}>음식별 조절</button>
+                        )}
+                        <label className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px', fontSize: 13, cursor: a?.busy ? 'default' : 'pointer' }}>
+                          📷 식후 사진
+                          <input type="file" accept="image/*" capture="environment" disabled={a?.busy} style={{ display: 'none' }}
+                            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onPickAfter(r, f) }} />
+                        </label>
+                        {adjusted && (
+                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={() => applyRatio(r, 100)}>되돌리기</button>
+                        )}
+                      </div>
+                    </>
                   )}
                   {a?.err && <div style={{ fontSize: 12, color: 'var(--danger)' }}>{a.err}</div>}
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>

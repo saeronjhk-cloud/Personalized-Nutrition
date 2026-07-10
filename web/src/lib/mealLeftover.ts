@@ -6,14 +6,14 @@
 import { supabase } from './supabase'
 import type { MealSummary } from './nutrilens'
 import {
-  buildSliderBody, buildSessionSliderBody, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody,
+  buildSliderBody, buildSessionSliderBody, buildPerFoodBody, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody,
   parsePhotoAiSuggest, isValidRatio, parseLeftoverEnvelope, genIdemKey, LEFTOVER_ERR_MSG,
   type PhotoAiSuggestion,
 } from './leftover_math'
 import { reencodeImage } from './nutrilens'
 
 export type { LeftoverErrorCode, ParsedEnvelope } from './leftover_math'
-export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
+export { clampRatio, isValidRatio, buildSliderBody, buildSessionSliderBody, buildPerFoodBody, foodItemId, buildPhotoAiSuggestBody, buildPhotoAiConfirmBody, parsePhotoAiSuggest, parseLeftoverEnvelope, friendlyLeftoverError, genIdemKey } from './leftover_math'
 export type { PhotoAiSuggestion } from './leftover_math'
 
 const BASE = import.meta.env.VITE_SUPABASE_URL || ''
@@ -114,6 +114,26 @@ export async function confirmPhotoAi(preMealLogId: string, confirmedEatenRatio: 
     method: 'POST',
     headers: { ...(await authHeaders()), 'X-Idempotency-Key': genIdemKey() },
     body: JSON.stringify(buildPhotoAiConfirmBody(preMealLogId, confirmedEatenRatio)),
+  })
+  let json: any = {}
+  try { json = await res.json() } catch { /* 비-JSON */ }
+  const parsed = parseLeftoverEnvelope(json, res.status)
+  if (!parsed.ok || !parsed.data) throw new Error(parsed.errorMessage || LEFTOVER_ERR_MSG.UNKNOWN)
+  return {
+    adjusted_summary: parsed.data.adjusted_summary as MealSummary,
+    pre_summary: parsed.data.pre_summary as MealSummary,
+    state: parsed.data.state,
+  }
+}
+
+/** 음식별(per_food) 조절 — 단건 meal. per_food는 모든 음식 커버 필요. 서버 결정론(원본×음식별비율). */
+export async function adjustPerFood(preMealLogId: string, perFood: { food_item_id: string; eaten_ratio: number }[]): Promise<LeftoverResult> {
+  if (!perFood.length) throw new Error('음식 정보를 찾을 수 없어요.')
+  for (const x of perFood) if (!isValidRatio(x.eaten_ratio)) throw new Error('먹은 양은 0~100% 사이여야 해요.')
+  const res = await fetch(`${BASE}/functions/v1/meal-leftover`, {
+    method: 'POST',
+    headers: { ...(await authHeaders()), 'X-Idempotency-Key': genIdemKey() },
+    body: JSON.stringify(buildPerFoodBody(preMealLogId, perFood)),
   })
   let json: any = {}
   try { json = await res.json() } catch { /* 비-JSON */ }

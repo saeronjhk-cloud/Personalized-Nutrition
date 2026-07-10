@@ -123,3 +123,21 @@ export function parsePhotoAiSuggest(data: any): PhotoAiSuggestion {
     previewSummary: data?.adjusted_summary ?? null,
   }
 }
+
+// ───────── 음식별 조절(per_food) 순수 헬퍼 ─────────
+
+/** Edge와 동일한 food_item_id 규칙: 저장값 있으면 사용, 없으면 인덱스(food_01..). */
+export function foodItemId(food: any, index: number): string {
+  const id = food?.food_item_id
+  if (typeof id === 'string' && id.trim()) return id.trim()
+  return 'food_' + String(index + 1).padStart(2, '0')
+}
+
+/** 음식별 슬라이더 요청 바디(단건 meal). per_food는 모든 음식 커버 필요(엔진 per_food_incomplete). */
+export function buildPerFoodBody(preMealLogId: string, perFood: { food_item_id: string; eaten_ratio: number }[]) {
+  return {
+    pre_meal_log_id: preMealLogId,
+    leftover_method: 'slider' as const,
+    per_food: perFood.map((x) => ({ food_item_id: x.food_item_id, eaten_ratio: clampRatio(x.eaten_ratio) })),
+  }
+}
