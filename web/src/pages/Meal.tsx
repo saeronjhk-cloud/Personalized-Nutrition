@@ -14,6 +14,7 @@ import {
   type SessionSummary,
 } from '../lib/mealSession'
 import { sessionBadgeText } from '../lib/session_math'
+import { adjustSliderSession } from '../lib/mealLeftover'
 
 // NutriLens 사진 식사기록 — 사진 한 장 → 분석(칼로리·영양) → 저장. 로그인 필요(Edge JWT).
 //   사진은 촬영/갤러리 지원(재인코딩으로 EXIF 제거·축소). 결과는 추정치. 근거 IP: 66~75.
@@ -35,6 +36,11 @@ export default function Meal() {
   const [session, setSession] = useState<SessionSummary | null>(null)
   const [sessionBusy, setSessionBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [closed, setClosed] = useState<{ sessionId: string; plateCount: number; kcal: number } | null>(null)
+  const [closedRatio, setClosedRatio] = useState(100)
+  const [closedBusy, setClosedBusy] = useState(false)
+  const [closedErr, setClosedErr] = useState<string | null>(null)
+  const [closedResultKcal, setClosedResultKcal] = useState<number | null>(null)
 
   const blobRef = useRef<Blob | null>(null)
   const shaRef = useRef<string | null>(null)
@@ -116,14 +122,28 @@ export default function Meal() {
   }
   async function endSession() {
     if (!session) return
+    const snap = { sessionId: session.session_id, plateCount: session.plate_count, kcal: Math.round(session.total_calories_kcal || 0) }
     setSessionBusy(true); setError(null)
     try {
       await closeMealSession(session.session_id)
       setSession(null)
-      setToast('정찬을 종료했어요. 남긴 양은 기록 카드에서 조절할 수 있어요.')
+      setToast(null)
+      setClosed(snap); setClosedRatio(100); setClosedErr(null); setClosedResultKcal(null)
     } catch (e) {
       setError((e as Error).message)
     } finally { setSessionBusy(false) }
+  }
+
+  async function applySessionLeftover() {
+    if (!closed) return
+    setClosedBusy(true); setClosedErr(null)
+    try {
+      const res = await adjustSliderSession(closed.sessionId, closedRatio / 100)
+      setClosedResultKcal(Math.round(Number(res.adjusted_summary.total_calories_kcal) || 0))
+      setHistoryKey((k) => k + 1)
+    } catch (e) {
+      setClosedErr((e as Error).message)
+    } finally { setClosedBusy(false) }
   }
 
   if (!nutrilensConfigured()) {
@@ -167,6 +187,26 @@ export default function Meal() {
       {toast && (
         <div className="survey-card" style={{ marginBottom: 12, background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: '10px 14px' }}>
           {toast}
+        </div>
+      )}
+
+      {closed && !result && (
+        <div className="survey-card" style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 종료됨 · {closed.plateCount}개 접시 · 합계 {closed.kcal} kcal</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 10px' }}>정찬 전체에서 남긴 양이 있으면 반영해 실제 섭취로 기록해요.</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
+            <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{closedRatio}%</strong>
+          </div>
+          <input type="range" min={0} max={100} step={5} value={closedRatio}
+            onChange={(e) => setClosedRatio(Number(e.target.value))} style={{ width: '100%' }} aria-label="정찬 전체 먹은 양" />
+          {closedResultKcal != null && (
+            <div style={{ fontSize: 13, color: 'var(--text)', margin: '6px 0' }}>✅ 실제 섭취 약 {closedResultKcal} kcal로 반영됐어요.</div>
+          )}
+          {closedErr && <div style={{ fontSize: 12, color: 'var(--danger)' }}>{closedErr}</div>}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button type="button" className="btn btn-primary" disabled={closedBusy} style={{ flex: 1, padding: '8px 12px', fontSize: 13 }} onClick={applySessionLeftover}>{closedBusy ? '반영 중…' : '남긴 양 반영'}</button>
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={() => setClosed(null)}>닫기</button>
+          </div>
         </div>
       )}
 
