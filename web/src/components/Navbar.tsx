@@ -6,7 +6,7 @@ import { MEOKSEON_ENABLED, MEAL_ENABLED } from '../lib/flags'
 const NAV_ITEMS = [
   { path: '/', label: '홈' },
   ...(MEOKSEON_ENABLED ? [{ path: '/scan', label: '제품 스캔' }] : []),
-  ...(MEAL_ENABLED ? [{ path: '/meal', label: '식사 기록' }] : []),
+  ...(MEAL_ENABLED ? [{ path: '/meal', label: '식사 기록' }, { path: '/weekly-report', label: '주간 리포트' }] : []),
   { path: '/dashboard', label: '내 건강' },
   { path: '/survey', label: '영양제 추천' },
   { path: '/blog', label: '영양정보' },

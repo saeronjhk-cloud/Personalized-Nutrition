@@ -32,6 +32,7 @@ import Recommend from './pages/Recommend'
 import Insights from './pages/Insights'
 import Scan from './pages/Scan'
 import Meal from './pages/Meal'
+import WeeklyReport from './pages/WeeklyReport'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
@@ -183,6 +184,9 @@ export default function App() {
           )}
           {MEAL_ENABLED && (
             <Route path="/meal" element={<Meal />} />
+          )}
+          {MEAL_ENABLED && (
+            <Route path="/weekly-report" element={<WeeklyReport />} />
           )}
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
