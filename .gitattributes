@@ -1,0 +1,15 @@
+# 저장소 정본 줄바꿈은 LF. 에디터가 CRLF로 저장해도 커밋 시 LF로 정규화(EOL 노이즈 방지).
+* text=auto eol=lf
+# 바이너리/이미지 등은 정규화 제외
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.keystore binary
+*.jar binary

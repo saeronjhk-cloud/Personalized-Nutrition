@@ -53,3 +53,11 @@ Admin_Token.txt
 *Token.txt
 .streamlit/secrets.toml
 secrets/
+
+# --- 2026-07-11 보강: 시크릿 변형/CLI temp/eval 캐시/백업 ---
+*Keys*.txt
+*헬스픽*.txt
+**/.temp/
+supabase/.temp/
+**/.eval_cache/
+web/_bak_disc/
