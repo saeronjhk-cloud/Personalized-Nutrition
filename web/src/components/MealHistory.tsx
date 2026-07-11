@@ -5,6 +5,7 @@ import {
 } from '../lib/mealHistory'
 import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, suggestPhotoAiHybrid, confirmPhotoAi, foodItemId, splitRatio } from '../lib/mealLeftover'
 import { MEAL_CMIN_ENABLED } from '../lib/flags'
+import { track } from '../lib/events'
 import type { MealSummary, MealFood } from '../lib/nutrilens'
 
 // 내 최근 식사(리텐션). 각 카드 '먹은 양' 보정 — 설계 LOCK v2(IP 90):
@@ -86,6 +87,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
   function toggleCard(r: MealRecord) {
     if (openId === r.id) { setOpenId(null); return }
     setOpenId(r.id)
+    track('meal_leftover_open', { mode: 'all' })
     patch(r.id, { mode: 'all', photoPreview: false, suggestedNote: undefined, previewKcal: undefined, err: undefined })
   }
 
@@ -95,6 +97,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
     patch(r.id, { ratioPct: pct, busy: true, err: undefined })
     try {
       const res = await adjustSliderSingle(r.id, splitRatio(pct / 100, people))
+      track('meal_leftover_apply', { method: 'slider', mode: 'all' })
       setAdj((s) => ({ ...s, [r.id]: { ...(s[r.id] || { ratioPct: 100 }), ratioPct: pct, people, adjusted: res.adjusted_summary, busy: false, mode: 'all', adjKind: 'ratio', adjPct: pct, err: undefined } }))
     } catch (e) {
       patch(r.id, { ratioPct: pct, busy: false, err: (e as Error).message })
@@ -109,6 +112,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
     try {
       const perFood = foods.map((f, i) => ({ food_item_id: foodItemId(f, i), eaten_ratio: (pcts[i] ?? 100) / 100 }))
       const res = await adjustPerFood(r.id, perFood)
+      track('meal_leftover_apply', { method: 'slider', mode: 'perfood' })
       setAdj((s) => ({ ...s, [r.id]: { ...(s[r.id] || { ratioPct: 100 }), ratioPct: 100, adjusted: res.adjusted_summary, busy: false, mode: 'all', adjKind: 'perfood', err: undefined } }))
     } catch (e) {
       patch(r.id, { busy: false, err: (e as Error).message })
@@ -135,6 +139,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
     patch(r.id, { ratioPct: pct, busy: true, err: undefined })
     try {
       const res = await confirmPhotoAi(r.id, pct / 100)
+      track('meal_leftover_apply', { method: 'photo_ai', mode: 'photo' })
       setAdj((s) => ({ ...s, [r.id]: { ...(s[r.id] || { ratioPct: 100 }), ratioPct: pct, adjusted: res.adjusted_summary, busy: false, mode: 'all', photoPreview: false, suggestedNote: undefined, previewKcal: undefined, adjKind: 'ratio', adjPct: pct, err: undefined } }))
     } catch (e) {
       patch(r.id, { ratioPct: pct, busy: false, err: (e as Error).message })

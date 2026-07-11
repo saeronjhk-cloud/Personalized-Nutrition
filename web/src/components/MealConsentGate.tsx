@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { track } from '../lib/events'
 import { Link } from 'react-router-dom'
 import { markMealConsent } from '../lib/mealConsent'
 
@@ -17,7 +18,10 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
   const [agreeIntl, setAgreeIntl] = useState(false)
   const canProceed = agreeSensitive && agreeIntl
 
+  useEffect(() => { track('meal_consent_shown') }, [])
+
   function handleAccept() {
+    track('meal_consent_accepted')
     markMealConsent()
     onAccept()
   }

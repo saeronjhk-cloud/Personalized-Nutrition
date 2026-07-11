@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { track } from '../lib/events'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -47,6 +48,7 @@ export default function Meal() {
   const mealIdRef = useRef<string | null>(null)
 
   useEffect(() => {
+    track('meal_page_view')
     supabase.auth.getUser().then(({ data }) => setAuthed(!!data.user))
   }, [])
 
@@ -69,6 +71,7 @@ export default function Meal() {
     if (!file) return
     reset()
     setBusy(true)
+    track('meal_capture_start')
     try {
       const blob = await reencodeImage(file)
       blobRef.current = blob
@@ -80,8 +83,10 @@ export default function Meal() {
       if (state.status === 'done' && state.result) {
         shaRef.current = state.photo_sha256 ?? null
         setResult(state.result)
+        track('meal_analyze_success', { food_count: state.result.foods.length })
       } else {
         setError(state.errorMessage || '분석에 실패했어요. 다른 사진으로 다시 시도해 주세요.')
+        track('meal_analyze_error', { error_kind: 'analyze' })
       }
     } catch (err) {
       setError((err as Error).message || '분석 중 오류가 발생했어요.')
@@ -99,7 +104,7 @@ export default function Meal() {
         clientMealId: mealIdRef.current, mealSlot: slot,
         mealSessionId: session?.session_id,
       })
-      if (r.ok) { setSaved(true); setHistoryKey((k) => k + 1); if (session) await refreshSession() }
+      if (r.ok) { setSaved(true); track('meal_saved', { saved_to: 'cloud' }); setHistoryKey((k) => k + 1); if (session) await refreshSession() }
       else setError(r.error || '저장에 실패했어요.')
     } finally {
       setBusy(false)
@@ -114,6 +119,7 @@ export default function Meal() {
     setSessionBusy(true); setToast(null); setError(null)
     try {
       const r = await openMealSession(slot)
+      track('meal_session_start')
       if (r.auto_closed) setToast('이전 정찬이 자동 종료되었어요.')
       await refreshSession()
     } catch (e) {
@@ -126,6 +132,7 @@ export default function Meal() {
     setSessionBusy(true); setError(null)
     try {
       await closeMealSession(session.session_id)
+      track('meal_session_close', { plate_count: snap.plateCount })
       setSession(null)
       setToast(null)
       setClosed(snap); setClosedRatio(100); setClosedErr(null); setClosedResultKcal(null)
@@ -139,6 +146,7 @@ export default function Meal() {
     setClosedBusy(true); setClosedErr(null)
     try {
       const res = await adjustSliderSession(closed.sessionId, closedRatio / 100)
+      track('meal_leftover_apply', { method: 'slider', mode: 'all' })
       setClosedResultKcal(Math.round(Number(res.adjusted_summary.total_calories_kcal) || 0))
       setHistoryKey((k) => k + 1)
     } catch (e) {
