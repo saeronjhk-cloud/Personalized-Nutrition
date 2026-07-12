@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
 } from 'recharts'
+import { buildPanels, type ScanMetrics, type SurfacePanel } from '../lib/scanMetrics_view'
 
 // get_insights() RPC 데이터 계약 (작업지시서 58 §3). 개인 단위 없음 · k-익명성(셀<5 억제).
 interface CohortRow { age_group: string; gender: string; n: number }
@@ -66,8 +67,37 @@ function HBarCard({ title, data }: { title: string; data: { name: string; n: num
   )
 }
 
+// 익명 이용 퍼널 카드 (get_scan_metrics · surface별). 개인 식별자 없음.
+function FunnelCard({ panel }: { panel: SurfacePanel }) {
+  return (
+    <div className="survey-card" style={{ marginBottom: 14 }}>
+      <h3 className="survey-step-title" style={{ fontSize: 15, marginBottom: 10 }}>
+        {panel.title} <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 400 }}>· 총 {panel.total}건</span>
+      </h3>
+      {panel.empty ? (
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>아직 집계된 이벤트가 없습니다.</p>
+      ) : (
+        <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+          <tbody>
+            {panel.steps.map((s) => (
+              <tr key={s.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                <td style={{ padding: '6px 0', color: 'var(--text-secondary)' }}>{s.label}</td>
+                <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }}>{s.n}</td>
+                <td style={{ padding: '6px 0', textAlign: 'right', width: 56, color: 'var(--text-muted)' }}>
+                  {s.pct == null ? '—' : `${s.pct}%`}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
+
 export default function Insights() {
   const [data, setData] = useState<Insights | null>(null)
+  const [metrics, setMetrics] = useState<ScanMetrics | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -89,6 +119,9 @@ export default function Insights() {
             : '집계를 불러오지 못했습니다: ' + rpcErr.message)
         } else {
           setData(rpc as unknown as Insights)
+          // 이벤트 퍼널(get_scan_metrics) — best-effort. 실패해도 코호트 집계는 표시.
+          const { data: mRpc, error: mErr } = await supabase.rpc('get_scan_metrics', { days: 30, k_min: 5 })
+          if (alive && !mErr && mRpc) setMetrics(mRpc as unknown as ScanMetrics)
         }
       } catch (e: any) {
         if (alive) setError(e?.message || '알 수 없는 오류')
@@ -135,6 +168,7 @@ export default function Insights() {
   }
 
   const genAt = new Date(data.generated_at).toLocaleString('ko-KR')
+  const panels = buildPanels(metrics)
 
   return (
     <div className="survey-container fade-in">
@@ -174,6 +208,18 @@ export default function Insights() {
           ))
         )}
       </div>
+
+      {panels.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <div className="survey-card" style={{ marginBottom: 14 }}>
+            <h2 className="survey-step-title">이용 퍼널 (익명 계측)</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>
+              최근 {metrics?.window_days ?? 30}일 익명 이벤트 집계입니다(개인 식별자 없음). 스캔·식사기록·리포트 표면별 전환.
+            </p>
+          </div>
+          {panels.map((p) => <FunnelCard key={p.surface} panel={p} />)}
+        </div>
+      )}
     </div>
   )
 }
