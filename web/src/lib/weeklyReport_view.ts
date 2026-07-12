@@ -121,3 +121,44 @@ export function parseWeeklyEnvelope(json: unknown): WeeklyReport {
   }
   return env.data
 }
+
+// ── 렌더 모델 (순수 — WeeklyReport.tsx 분기 로직의 단일 출처) ────────
+// 컴포넌트가 이 셀렉터로 어떤 블록을 그릴지 결정한다(테스트된 로직 == 렌더 로직).
+export type WeeklyRenderMode = 'loading' | 'error' | 'empty' | 'insufficient' | 'report'
+export interface WeeklyRenderModel {
+  mode: WeeklyRenderMode
+  errorRetryable: boolean   // error 모드에서만 의미
+  cached: boolean           // "저장된 리포트" 라벨
+  showFoodGroups: boolean   // 음식군 칩 섹션(top_food_groups 있음)
+  flagCount: number         // 영양 flags 개수
+  showFlagsSuccess: boolean // flags 0 → "균형이 잘 잡힌" 배너
+  showP2: boolean           // p2 티저(show && message)
+}
+export interface WeeklyRenderState {
+  loading: boolean
+  error: { retryable?: boolean } | null
+  data: WeeklyReport | null
+}
+/** (loading, error, data) → 렌더 모델. 상호배타 mode + 리포트 하위 블록 플래그. */
+export function weeklyRenderModel(s: WeeklyRenderState): WeeklyRenderModel {
+  const base: WeeklyRenderModel = {
+    mode: 'empty', errorRetryable: false, cached: false,
+    showFoodGroups: false, flagCount: 0, showFlagsSuccess: false, showP2: false,
+  }
+  if (s.loading) return { ...base, mode: 'loading' }
+  if (s.error) return { ...base, mode: 'error', errorRetryable: !!s.error.retryable }
+  const rep = s.data?.report
+  if (!rep) return base // mode 'empty' (헤더·네비만)
+  const cached = !!s.data?.cached
+  if (isInsufficient(rep)) return { ...base, mode: 'insufficient', cached }
+  const flags = rep.macro_balance?.flags ?? []
+  return {
+    mode: 'report',
+    errorRetryable: false,
+    cached,
+    showFoodGroups: (rep.top_food_groups?.length ?? 0) > 0,
+    flagCount: flags.length,
+    showFlagsSuccess: flags.length === 0,
+    showP2: !!(rep.p2_teaser?.show && rep.p2_teaser?.message),
+  }
+}

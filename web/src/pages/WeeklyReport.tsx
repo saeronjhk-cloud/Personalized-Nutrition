@@ -3,7 +3,7 @@ import { fetchWeeklyReport, markWeeklyViewed } from '../lib/weeklyReport'
 import { track } from '../lib/events'
 import {
   lastCompletedWeekStart, prevWeek, nextWeek, isAfterLastCompleted,
-  formatWeekRange, flagView, coverageCaption, isInsufficient,
+  formatWeekRange, flagView, coverageCaption, isInsufficient, weeklyRenderModel,
   WeeklyReportError, type WeeklyReport as WR,
 } from '../lib/weeklyReport_view'
 
@@ -35,6 +35,7 @@ export default function WeeklyReport() {
 
   const canNext = !isAfterLastCompleted(nextWeek(weekStart))
   const report = data?.report
+  const vm = weeklyRenderModel({ loading, error, data })
 
   return (
     <div style={{ maxWidth: 520, margin: '0 auto', padding: '20px 16px 48px' }}>
@@ -49,40 +50,40 @@ export default function WeeklyReport() {
           onClick={() => setWeekStart((w) => prevWeek(w))}>‹</button>
         <div style={{ textAlign: 'center', flex: 1 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{formatWeekRange(weekStart)}</div>
-          {data?.cached && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>저장된 리포트</div>}
+          {vm.cached && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>저장된 리포트</div>}
         </div>
         <button type="button" className="btn btn-secondary" style={{ ...navBtn, opacity: canNext ? 1 : 0.35 }}
           aria-label="다음 주" disabled={!canNext} onClick={() => canNext && setWeekStart((w) => nextWeek(w))}>›</button>
       </div>
 
-      {loading && <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>불러오는 중…</div>}
+      {vm.mode === 'loading' && <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>불러오는 중…</div>}
 
-      {error && !loading && (
+      {vm.mode === 'error' && error && (
         <div style={{ ...card, borderColor: 'var(--danger)' }}>
           <div style={{ color: 'var(--danger)', fontWeight: 700, marginBottom: 6 }}>리포트를 불러오지 못했어요</div>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: error.retryable ? 12 : 0 }}>{error.message}</div>
-          {error.retryable && (
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: vm.errorRetryable ? 12 : 0 }}>{error.message}</div>
+          {vm.errorRetryable && (
             <button type="button" className="btn btn-secondary" style={{ padding: '8px 14px' }}
               onClick={() => load(weekStart, true)}>다시 시도</button>
           )}
         </div>
       )}
 
-      {report && !loading && !error && (
+      {(vm.mode === 'insufficient' || vm.mode === 'report') && report && (
         <>
           {/* coverage */}
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
             {coverageCaption(report.coverage)}
           </div>
 
-          {isInsufficient(report) ? (
+          {vm.mode === 'insufficient' ? (
             <div style={card}>
               <div style={{ fontSize: 15, color: 'var(--text)' }}>{report.next_action.message}</div>
             </div>
           ) : (
             <>
               {/* 1) 음식군 칩 */}
-              {report.top_food_groups.length > 0 && (
+              {vm.showFoodGroups && (
                 <section style={{ marginBottom: 18 }}>
                   <div style={sectionTitle}>이번 주 자주 먹은 음식</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -96,7 +97,7 @@ export default function WeeklyReport() {
               {/* 2) 영양 균형 flags */}
               <section style={{ marginBottom: 18 }}>
                 <div style={sectionTitle}>영양 균형</div>
-                {report.macro_balance.flags.length === 0 ? (
+                {vm.showFlagsSuccess ? (
                   <div style={{ ...card, borderColor: 'var(--success)' }}>
                     <span style={{ color: 'var(--success)', fontWeight: 700 }}>균형이 잘 잡힌 한 주였어요 ✓</span>
                   </div>
@@ -129,7 +130,7 @@ export default function WeeklyReport() {
               </section>
 
               {/* 4) p2 티저 */}
-              {report.p2_teaser.show && report.p2_teaser.message && (
+              {vm.showP2 && (
                 <div style={{ ...card, fontSize: 13, color: 'var(--text-muted)' }}>
                   💡 {report.p2_teaser.message}
                 </div>
