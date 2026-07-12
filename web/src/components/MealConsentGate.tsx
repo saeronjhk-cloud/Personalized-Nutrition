@@ -57,12 +57,14 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
             · 거부권·효과: 동의를 거부할 수 있으며, 거부 시 식사 사진 분석 기능은 이용할 수 없으나 계정 및 다른 서비스는 계속 이용할 수 있습니다.
           </div>
           <div>
-            <strong>[개인정보 국외이전]</strong> 이전받는 자 · 국가 · 항목 · 목적 · 보유기간 · 연락처:<br />
-            · Supabase, Inc. (대한민국 서울 저장 · 운영주체 미국) — 원본 식사 사진 및 분석 결과 저장 / 데이터 저장·회원 기능 / 탈퇴·철회 시까지 / privacy@supabase.com<br />
-            · Railway Corp. (미국) — 분석 요청 이미지·최소 메타데이터 / 무상태 분석(사진 미저장·임의 요청식별자로만 처리) / 요청 처리 기간 / privacy@railway.app<br />
-            · OpenAI OpCo, LLC (미국) — 음식 영역 크롭·저해상도 이미지(조건부) / 음식 인식 AI 추론 / 최대 30일 / privacy@openai.com<br />
+            <strong>[개인정보 국외이전 — 별도 동의 대상]</strong> 이전받는 자 · 국가 · 항목 · 목적 · 보유기간 · 연락처:<br />
+            · Railway Corp. (미국) — 분석 요청 이미지·최소 메타데이터 / 음식·영양 분석 연산(사진 영속저장 안 함·무작위 요청식별자로만 처리) / 요청 처리 기간 / privacy@railway.app<br />
+            · OpenAI OpCo, LLC (미국 및 하위처리자 소재 국가) — 음식 영역 크롭·저해상도 이미지(조건부) / 음식 인식 AI 추론 / 최대 30일 / privacy@openai.com<br />
             · 이전 시기·방법: 이용자가 식사 사진 분석을 요청하는 시점에 암호화된 통신망(HTTPS)으로 전송<br />
-            · 거부 방법·절차·효과: 아래 '동의하지 않음'을 선택하거나 [설정 &gt; 식사 사진 분석 동의 철회]에서 거부·철회할 수 있으며, 거부 시 식사 사진 분석 기능은 이용할 수 없으나 계정 및 다른 서비스는 계속 이용할 수 있습니다<br />
+            · 거부 방법·절차·효과: 아래 '동의하지 않음'을 선택하거나 [설정 &gt; 식사 사진 분석 동의 철회]에서 거부·철회할 수 있으며, 거부 시 식사 사진 분석 기능은 이용할 수 없으나 계정 및 다른 서비스는 계속 이용할 수 있습니다
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <strong>[국내 저장 처리위탁]</strong> Supabase, Inc. — 원본 식사 사진·분석 결과를 <strong>대한민국(서울 리전)</strong>에 저장합니다. 다만 운영·기술지원 과정에서 국외(미국·싱가포르 등 승인된 재수탁자 소재)에서 조회될 수 있어, 「개인정보 보호법」 제28조의8 제1항 제3호 가목(계약 이행에 필요한 처리위탁·보관, 처리방침 공개)에 따라 고지합니다. 연락처 privacy@supabase.com<br />
             자세한 내용은{' '}<Link to="/privacy" style={{ color: '#2563eb', textDecoration: 'underline' }}>개인정보처리방침 제4조</Link>를 확인하세요.
           </div>
         </div>
@@ -72,7 +74,7 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 20, cursor: 'pointer' }}>
           <input type="checkbox" checked={agreeIntl} onChange={(e) => setAgreeIntl(e.target.checked)} style={{ marginTop: 3 }} />
-          <span>[필수] 위에 안내된 <strong>Supabase·Railway·OpenAI로의 개인정보 국외이전(국외 저장 또는 국외 접근 포함)</strong>에 동의합니다. 거부 시 식사 사진 분석 이용이 제한되며, 계정 및 다른 기능은 계속 이용할 수 있습니다.</span>
+          <span>[필수] 위에 안내된 <strong>Railway 및 OpenAI(미국)로의 개인정보 국외이전</strong>에 동의합니다. 거부 시 식사 사진 분석 이용이 제한되며, 계정 및 다른 기능은 계속 이용할 수 있습니다.</span>
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 20, cursor: 'pointer' }}>
           <input type="checkbox" checked={confirmAge} onChange={(e) => setConfirmAge(e.target.checked)} style={{ marginTop: 3 }} />
