@@ -4,7 +4,7 @@ import PageMeta from '../components/PageMeta'
 export default function About() {
   return (
     <div className="page fade-in">
-      <PageMeta title="회사 소개" description="새론비즈는 학계와 산업계 전문가들이 모여 과학적 근거 기반의 맞춤 영양제 추천 시스템을 만들고 있습니다." />
+      <PageMeta title="회사 소개" description="새론미디어는 학계와 산업계 전문가들이 모여 과학적 근거 기반의 맞춤 영양제 추천 시스템을 만들고 있습니다." />
       {/* 히어로 */}
       <section className="hero-section hero-with-img">
         <img src="/supp-wellness.jpg" alt="" className="hero-bg-img" aria-hidden="true" />
@@ -14,7 +14,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* 새론비즈 소개 */}
+      {/* 새론미디어 소개 */}
       <section className="content-section">
         <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 8 }}>우리가 모인 이유</h2>
         <p className="section-desc" style={{ textAlign: 'center', maxWidth: 640, margin: '0 auto 32px' }}>
@@ -36,7 +36,7 @@ export default function About() {
             어디에도 없었습니다.
           </p>
           <p style={{ lineHeight: 1.9, fontSize: 15, marginTop: 16 }}>
-            <strong>새론비즈</strong>는 그 답을 만들기 위해 모인 팀입니다.
+            <strong>새론미디어</strong>는 그 답을 만들기 위해 모인 팀입니다.
             식품영양학 박사, 임상영양 전문가, 수면과학 연구자가 의기투합하여
             과학적 근거와 실제 데이터에 기반한 맞춤 영양제 추천 시스템을
             설계하고 있습니다.
@@ -44,7 +44,7 @@ export default function About() {
           <p style={{ lineHeight: 1.9, fontSize: 15, color: 'var(--text-secondary)', marginTop: 16 }}>
             우리의 목표는 단순합니다. 누구나 자기 몸에 맞는 영양소를 쉽고
             정확하게 찾을 수 있는 세상. 광고가 아니라 과학이 추천하는 세상.
-            그것이 새론비즈가 꿈꾸는 건강한 세상입니다.
+            그것이 새론미디어가 꿈꾸는 건강한 세상입니다.
           </p>
         </div>
 

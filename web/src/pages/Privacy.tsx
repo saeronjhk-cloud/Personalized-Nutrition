@@ -7,7 +7,7 @@ export default function Privacy() {
 
       <div className="card" style={{ lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
         <p style={{ marginBottom: 20 }}>
-          <strong>새론비즈</strong>(이하 "회사")는 이용자의 개인정보를 중요하게 생각하며,
+          <strong>(주)새론미디어</strong>(이하 "회사")는 이용자의 개인정보를 중요하게 생각하며,
           「개인정보 보호법」 등 관련 법령을 준수합니다. 본 방침은 서비스가 <strong>어떤 데이터를 왜 수집하고, 어떻게 보호하는지</strong>를
           투명하게 설명하기 위해 작성되었습니다.
         </p>
@@ -233,10 +233,13 @@ export default function Privacy() {
           요청해 주시기 바랍니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>8. 개인정보 보호책임자</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>8. 개인정보 보호책임자 및 사업자 정보</h3>
         <p style={{ marginBottom: 16 }}>
-          성명: 김재환<br />
-          직책: 대표<br />
+          상호: (주)새론미디어 (Saeron Media Co., Ltd.)<br />
+          대표: 김재환<br />
+          사업자등록번호: 606-86-65033<br />
+          주소: 서울특별시 송파구 중대로 211, 2층(가락동, 나은빌딩)<br />
+          개인정보 보호책임자: 김재환 (대표)<br />
           이메일: saeronjhk@gmail.com
         </p>
 
