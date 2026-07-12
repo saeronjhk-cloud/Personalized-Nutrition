@@ -7,7 +7,7 @@ export default function Team() {
       name: '김재환',
       photo: '/team-kim.jpg',
       photoPos: '65% 20%',
-      title: '새론비즈 대표 / 서박사의 영양공식 총괄',
+      title: '(주)새론미디어 대표 / 서박사의 영양공식 총괄',
       bio: [
         '고려대학교 식품공학 학사 · 식품가공 석사 · 식품영양학 박사',
         '(주)네오크레마 창업자 (2007~2022)',

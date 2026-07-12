@@ -10,7 +10,8 @@ export default function Footer() {
             바른 먹거리로 건강한 세상을 이룬다
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
-            새론비즈 | 대표 김재환
+            (주)새론미디어 | 대표 김재환 | 사업자등록번호 606-86-65033<br />
+            서울특별시 송파구 중대로 211, 2층(가락동, 나은빌딩)
           </p>
         </div>
 
@@ -36,7 +37,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© 2026 새론비즈. All rights reserved.</p>
+        <p>© 2026 (주)새론미디어. All rights reserved.</p>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
           본 서비스는 의학적 진단을 대체하지 않습니다. 질환이 있으신 분은 전문의와 상담하세요.
         </p>
