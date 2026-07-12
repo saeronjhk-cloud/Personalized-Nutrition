@@ -36,7 +36,7 @@ export default function Account() {
       await revokeMealConsentServer()
       revokeMealConsent()
       setMealConsented(false)
-      setMealMsg('식사 사진 분석 동의를 철회했어요. 이후 사진의 국외이전 분석이 중단됩니다.')
+      setMealMsg('식사 사진 분석 동의를 철회했어요. 이후 국외이전 분석이 중단되고, 저장된 식사 사진과 분석 결과가 지체 없이 삭제됩니다. (계정과 다른 기능은 계속 이용할 수 있어요.)')
     } catch {
       setMealMsg('철회 처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.')
     }
@@ -105,7 +105,7 @@ export default function Account() {
               <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--danger)', marginBottom: 8 }}>회원 탈퇴</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
                 탈퇴 시 계정과 개인정보(설문 응답·검진 수치·목표 등)가 영구 삭제되며 되돌릴 수 없습니다.
-                동의 이력은 관계 법령에 따라 일정 기간 보관 후 파기됩니다.
+                다만 동의 사실 증명을 위한 최소 감사기록(건강정보·사진 제외)은 회사의 정당한 이익에 따라 3년간 분리 보관 후 파기됩니다.
               </p>
               {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 12 }}>{error}</p>}
               <button
@@ -131,7 +131,7 @@ export default function Account() {
         danger
         busy={busy}
         title="정말 탈퇴하시겠어요?"
-        description="계정과 모든 개인정보가 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
+        description="계정과 개인정보가 영구 삭제됩니다. 다만 동의 사실 증명을 위한 최소 감사기록(건강정보·사진 제외)은 3년간 분리 보관됩니다. 이 작업은 되돌릴 수 없습니다."
         confirmLabel="영구 삭제"
         cancelLabel="취소"
         onConfirm={handleDelete}

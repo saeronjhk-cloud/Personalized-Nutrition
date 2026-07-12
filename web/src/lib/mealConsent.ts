@@ -101,13 +101,19 @@ export async function markMealConsentServer(ageConfirmed14plus = false): Promise
   }, { onConflict: 'user_id' })
 }
 
-/** 서버 동의 철회(revoked_at 세팅). 철회 즉시 Edge가 이후 국외이전을 차단. */
+/**
+ * 서버 동의 철회 — Edge(meal-consent-revoke)가 원자적으로 처리한다:
+ *   ① meal_consent.revoked_at 세팅(트리거가 감사로그에 revoke 이벤트 적재)
+ *   ② delete_meal_data RPC로 식사 스택(사진 메타·분석·주간리포트) 삭제
+ *   ③ Storage(meal-photos) `{uid}/` 원본 사진 스윕
+ * 철회 즉시 이후 국외이전이 차단되고, 이미 저장된 사진·파생정보도 삭제된다(변호사 2차 검토 반영).
+ * 실패 시 throw → 호출부(Account)가 재시도 안내.
+ */
 export async function revokeMealConsentServer(): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-  await supabase.from('meal_consent')
-    .update({ revoked_at: new Date().toISOString() })
-    .eq('user_id', user.id)
+  const { error } = await supabase.functions.invoke('meal-consent-revoke', { method: 'POST' })
+  if (error) throw error
 }
 
 /** 서버 기준 활성 동의 여부(meal_consent_active RPC). */

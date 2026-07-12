@@ -47,13 +47,32 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>
           사진에 얼굴·타인·주소 등 식별정보가 담기지 않도록 음식 위주로 촬영해 주세요.
         </p>
+        <div style={{ background: 'rgba(142, 202, 230, 0.10)', border: '1px solid rgba(142, 202, 230, 0.30)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 12.5, lineHeight: 1.7, color: 'var(--text)' }}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>동의 전 안내 (법정 고지사항)</div>
+          <div style={{ marginBottom: 8 }}>
+            <strong>[민감정보(건강에 관한 정보)]</strong><br />
+            · 수집·이용 목적: 식사 사진 분석, 음식·섭취량·열량·영양소 추정, 식사기록 및 개인화된 식생활 안내 제공<br />
+            · 민감정보 항목: 식사 사진을 분석하여 생성·추정되는 음식 종류·섭취량·열량·영양소 정보 및 이 정보와 다른 건강 관련 정보의 결합으로 생성되는 식생활·건강 관련 정보<br />
+            · 보유기간: 해당 기록을 삭제하거나 동의를 철회하거나 회원 탈퇴할 때까지(법령상 보존이 필요한 경우 해당 기간까지 분리 보관)<br />
+            · 거부권·효과: 동의를 거부할 수 있으며, 거부 시 식사 사진 분석 기능은 이용할 수 없으나 계정 및 다른 서비스는 계속 이용할 수 있습니다.
+          </div>
+          <div>
+            <strong>[개인정보 국외이전]</strong> 이전받는 자 · 국가 · 항목 · 목적 · 보유기간 · 연락처:<br />
+            · Supabase, Inc. (미국) — 원본 식사 사진 및 분석 결과 저장 / 데이터 저장·회원 기능 / 탈퇴·철회 시까지 / privacy@supabase.com<br />
+            · Railway Corp. (미국) — 분석 요청 이미지·최소 메타데이터 / 무상태 분석 연산(회사 DB 미저장) / 요청 처리 기간 / privacy@railway.app<br />
+            · OpenAI OpCo, LLC (미국) — 음식 영역 크롭·저해상도 이미지(조건부) / 음식 인식 AI 추론 / 최대 30일 / privacy@openai.com<br />
+            · 이전 시기·방법: 이용자가 식사 사진 분석을 요청하는 시점에 암호화된 통신망(HTTPS)으로 전송<br />
+            · 거부 방법·절차·효과: 아래 '동의하지 않음'을 선택하거나 [설정 &gt; 식사 사진 분석 동의 철회]에서 거부·철회할 수 있으며, 거부 시 식사 사진 분석 기능은 이용할 수 없으나 계정 및 다른 서비스는 계속 이용할 수 있습니다<br />
+            자세한 내용은{' '}<Link to="/privacy" style={{ color: '#2563eb', textDecoration: 'underline' }}>개인정보처리방침 제4조</Link>를 확인하세요.
+          </div>
+        </div>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 12, cursor: 'pointer' }}>
           <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 3 }} />
-          <span>[필수] <strong>민감정보(건강에 관한 정보)</strong> 수집·이용에 동의합니다. (식사 사진 및 그로부터 추정된 음식·칼로리·영양 정보)</span>
+          <span>[필수] 위에 안내된 목적·항목·보유기간·거부효과를 확인하였으며, <strong>민감정보(건강에 관한 정보)</strong> 수집·이용에 동의합니다. (식사 사진 및 그로부터 추정된 음식·칼로리·영양 정보)</span>
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 20, cursor: 'pointer' }}>
           <input type="checkbox" checked={agreeIntl} onChange={(e) => setAgreeIntl(e.target.checked)} style={{ marginTop: 3 }} />
-          <span>[필수] <strong>개인정보 국외이전</strong>에 동의합니다. (이전받는 자: Railway·OpenAI 등, 국가: 미국 / 항목: 식사 사진·음식 영역 이미지 / 목적: 음식·영양 분석) 거부 시 식사 사진 분석 이용이 제한되며, 다른 기능은 이용할 수 있습니다.</span>
+          <span>[필수] 위에 안내된 <strong>Supabase, Railway 및 OpenAI(미국)로의 개인정보 국외이전</strong>에 동의합니다. 거부 시 식사 사진 분석 이용이 제한되며, 계정 및 다른 기능은 계속 이용할 수 있습니다.</span>
         </label>
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 20, cursor: 'pointer' }}>
           <input type="checkbox" checked={confirmAge} onChange={(e) => setConfirmAge(e.target.checked)} style={{ marginTop: 3 }} />
