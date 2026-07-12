@@ -11,9 +11,16 @@
  *    보유·이용기간, 거부권·불이익)이 반영되어야 한다. 아래 문구는 그 조항과 1:1 정합시킬 것.
  */
 
+import { supabase } from './supabase'
+
+// 동의 당시 처리방침 버전(서버 기록·감사용).
+export const MEAL_CONSENT_POLICY_VERSION = '13_v5.0'
+
 // 두 동의를 각각 독립 키로 보관(별도 동의 원칙). 둘 다 'accepted'여야 진입 허용.
 const MEAL_SENSITIVE_KEY = 'sf_meal_sensitive_consent' // 'accepted' | null
 const MEAL_INTL_KEY = 'sf_meal_intl_consent'           // 'accepted' | null
+// 동의 당시 방침 버전(재동의 게이트용). 저장값이 현재 버전과 다르면 미동의로 간주 → 게이트 재노출.
+const MEAL_POLICY_VER_KEY = 'sf_meal_consent_policy_version'
 
 function isAccepted(key: string): boolean {
   try {
@@ -33,27 +40,80 @@ export function hasConsentedMealIntl(): boolean {
   return isAccepted(MEAL_INTL_KEY)
 }
 
-/** 촬영 진입 허용 여부 — 두 동의 모두 accepted일 때만 true. */
-export function hasConsentedMeal(): boolean {
-  return hasConsentedMealSensitive() && hasConsentedMealIntl()
+/** 동의 당시 방침 버전이 현재 버전과 일치하는지 — 불일치면 재동의 필요. */
+function policyVersionCurrent(): boolean {
+  try {
+    return localStorage.getItem(MEAL_POLICY_VER_KEY) === MEAL_CONSENT_POLICY_VERSION
+  } catch {
+    return false
+  }
 }
 
-/** 두 동의를 함께 기록. 게이트에서 두 체크박스가 모두 켜졌을 때만 호출한다. */
+/**
+ * 촬영 진입 허용 여부 — 두 동의 모두 accepted이고, 동의 당시 방침 버전이 현재와 같을 때만 true.
+ * 방침이 중요 변경(버전 bump)되면 기존 동의는 무효화되어 게이트가 다시 뜬다(재동의 게이트).
+ */
+export function hasConsentedMeal(): boolean {
+  return hasConsentedMealSensitive() && hasConsentedMealIntl() && policyVersionCurrent()
+}
+
+/** 두 동의를 함께 기록(+동의 시점 방침 버전). 게이트에서 세 체크박스가 모두 켜졌을 때만 호출한다. */
 export function markMealConsent(): void {
   try {
     localStorage.setItem(MEAL_SENSITIVE_KEY, 'accepted')
     localStorage.setItem(MEAL_INTL_KEY, 'accepted')
+    localStorage.setItem(MEAL_POLICY_VER_KEY, MEAL_CONSENT_POLICY_VERSION)
   } catch {
     // 무시(로컬 저장 실패해도 UI는 진행 가능하게 두지 않음 — 아래 게이트가 재확인)
   }
 }
 
-/** 동의 철회(설정/삭제 흐름에서 사용). */
+/** 동의 철회(설정/삭제 흐름에서 사용) — 로컬 캐시 제거. */
 export function revokeMealConsent(): void {
   try {
     localStorage.removeItem(MEAL_SENSITIVE_KEY)
     localStorage.removeItem(MEAL_INTL_KEY)
+    localStorage.removeItem(MEAL_POLICY_VER_KEY)
   } catch {
     // 무시
   }
+}
+
+// ── 서버 기록(권위) — Edge(meal-analysis-jobs)가 호출 전 meal_consent_active로 재검증한다.
+//    localStorage는 UX용 캐시일 뿐, 실제 게이트는 서버가 판단(P0-③ G2).
+
+/**
+ * 두 동의 + 만 14세 이상 확인을 서버(meal_consent)에 기록. 로그인 세션 필요.
+ * age_confirmed_14plus는 게이트에서 3번째 체크(만 14세 이상)가 켜졌을 때만 true로 전달한다.
+ * meal_consent_active(P0-④)가 이 값을 필수 조건으로 재검증한다.
+ */
+export async function markMealConsentServer(ageConfirmed14plus = false): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const now = new Date().toISOString()
+  await supabase.from('meal_consent').upsert({
+    user_id: user.id,
+    sensitive_consented_at: now,
+    intl_consented_at: now,
+    age_confirmed_14plus: ageConfirmed14plus,
+    revoked_at: null,
+    policy_version: MEAL_CONSENT_POLICY_VERSION,
+  }, { onConflict: 'user_id' })
+}
+
+/** 서버 동의 철회(revoked_at 세팅). 철회 즉시 Edge가 이후 국외이전을 차단. */
+export async function revokeMealConsentServer(): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('meal_consent')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('user_id', user.id)
+}
+
+/** 서버 기준 활성 동의 여부(meal_consent_active RPC). */
+export async function hasServerMealConsent(): Promise<boolean> {
+  const { data, error } = await supabase.rpc('meal_consent_active', {
+    p_uid: (await supabase.auth.getUser()).data.user?.id,
+  })
+  return !error && data === true
 }
