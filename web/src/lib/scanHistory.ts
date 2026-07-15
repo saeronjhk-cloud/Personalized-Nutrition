@@ -11,7 +11,12 @@
  * 스키마: supabase/phase_p15_meokseon_events_and_scans_v1.sql
  */
 import { supabase } from './supabase'
-import type { MsProductResult, MsAdditiveSummary, MsNutrition } from './meokseon'
+import type {
+  MsProductResult,
+  MsAdditiveSummary,
+  MsNutrition,
+  TrafficLightColor,
+} from './meokseon'
 
 const LOCAL_KEY = 'meokseon_scan_history'
 const LOCAL_CAP = 50
@@ -34,6 +39,14 @@ export interface ScanRecord {
   image_url: string | null
   nutrition: MsNutrition | null
   additives: ScanAdditiveSummary | null
+  // 먹선 신호등 정본 판정의 스냅샷(IP/136 P1-1). **제품 팩트**이며 사용자와 무관하다
+  //   — 같은 제품이면 모든 사용자에게 동일하므로 아래 프라이버시 doctrine 을 위반하지 않는다.
+  //   nutrition jsonb 에 이미 나트륨·당류 원수치가 있고 색은 그로부터 결정론적으로 도출된 값 →
+  //   새로운 정보 계층이 아니다(IP/136 §6.2-3).
+  // null = "판정 없음"(회색/결측)이며 **"안전"이 아니다**(meokseon.ts:52). 절대 false/green 으로
+  //   메우지 않는다 — 오케스트레이터 producers 는 red 만 카운트한다.
+  sodium_color: TrafficLightColor
+  sugars_color: TrafficLightColor
   // [프라이버시] 스캔 이력에는 "제품 팩트"만 저장. 설문에서 유도된 개인화 플래그(주의 영양소)는
   //   건강상태 추론 파생정보가 될 수 있어 저장하지 않는다. "내 기준으로 보기"는 조회 시점에 재계산.
 }
@@ -47,6 +60,12 @@ function genId(): string {
 }
 
 /** 조회 결과 → 저장용 레코드. 제품 팩트만 저장(설문 파생 개인화는 미저장 — 조회 시 재계산). */
+/** 먹선 정본 판정에서 색만 추출. 자체 임계를 만들지 않는다(meokseon.ts:51). 미판정은 null 유지. */
+function tlColor(result: MsProductResult, key: 'sodium' | 'sugars'): TrafficLightColor {
+  const c = result.traffic_light?.nutrients?.[key]?.color
+  return c === 'green' || c === 'yellow' || c === 'red' ? c : null
+}
+
 export function buildScanRecord(
   result: MsProductResult,
   additives: MsAdditiveSummary | null,
@@ -61,6 +80,8 @@ export function buildScanRecord(
     food_category: result.product.food_category ?? null,
     image_url: result.product.image_url ?? null,
     nutrition: result.nutrition ?? null,
+    sodium_color: tlColor(result, 'sodium'),
+    sugars_color: tlColor(result, 'sugars'),
     additives: additives
       ? {
           total: additives.risk_summary?.total ?? 0,
@@ -121,7 +142,7 @@ export async function saveScan(rec: ScanRecord): Promise<SaveTarget> {
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { error } = await supabase.from('scan_history').insert({
+      const base = {
         user_id: user.id,
         barcode: rec.barcode,
         product_name: rec.product_name,
@@ -130,8 +151,27 @@ export async function saveScan(rec: ScanRecord): Promise<SaveTarget> {
         image_url: rec.image_url,
         nutrition: rec.nutrition,
         additives: rec.additives,
+      }
+      // 색 2필드는 마이그레이션 136 이후에만 존재한다.
+      const { error } = await supabase.from('scan_history').insert({
+        ...base,
+        sodium_color: rec.sodium_color,
+        sugars_color: rec.sugars_color,
       })
       if (!error) return 'cloud'
+
+      // [배포 순서 방어] 마이그레이션 136 미적용 상태에서 이 프론트가 먼저 나가면 42703
+      //   (undefined_column) 이 난다. 그대로 두면 **라이브 사용자의 스캔이 전부 로컬로 떨어져**
+      //   교차기기 이력이 끊긴다(기존 폴백은 '로컬'이라 조용히 열화됨). 색 없이 1회 재시도해
+      //   클라우드 저장을 지켜낸다. 색은 어차피 마이그레이션 후 백필 잡(P0-2)이 채운다.
+      //   정상 배포 순서(마이그레이션 → 프론트)에서는 이 경로를 타지 않는다.
+      if (error.code === '42703') {
+        const retry = await supabase.from('scan_history').insert(base)
+        if (!retry.error) {
+          console.debug('[scanHistory] 색 컬럼 미존재(마이그레이션 136 미적용) — 색 없이 저장')
+          return 'cloud'
+        }
+      }
       console.debug('[scanHistory] cloud insert failed, fallback local:', error.message)
     }
   } catch (e) {
@@ -152,6 +192,9 @@ function mapRow(row: Record<string, any>): ScanRecord {
     food_category: row.food_category ?? null,
     image_url: row.image_url ?? null,
     nutrition: (row.nutrition as MsNutrition) ?? null,
+    // 미마이그레이션 행/구버전 저장분은 색이 없다 → null = 판정 없음(안전 아님).
+    sodium_color: (row.sodium_color as TrafficLightColor) ?? null,
+    sugars_color: (row.sugars_color as TrafficLightColor) ?? null,
     additives: (row.additives as ScanAdditiveSummary) ?? null,
   }
 }
@@ -163,6 +206,11 @@ export async function listScans(limit = 50): Promise<ScanRecord[]> {
     if (user) {
       const { data, error } = await supabase
         .from('scan_history')
+        // [의도적] 색 2필드를 select 하지 않는다. 이력 UI 는 색을 소비하지 않고, 넣으면
+        //   마이그레이션 136 미적용 시 42703 → **이력 조회 전체가 로컬 폴백**되는 읽기 경로
+        //   회귀를 만든다. 색의 소비자는 오케스트레이터(loaders.ts)이며 DB 를 직접 읽는다.
+        //   mapRow 는 색을 방어적으로 매핑해 두었으므로, 훗날 UI 가 필요해지면 이 select 에
+        //   두 컬럼만 추가하면 된다(그때는 마이그레이션이 이미 적용된 뒤다).
         .select('id, scanned_at, barcode, product_name, brand, food_category, image_url, nutrition, additives')
         .eq('user_id', user.id)
         .order('scanned_at', { ascending: false })

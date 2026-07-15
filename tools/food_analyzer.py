@@ -37,9 +37,224 @@ def load_env():
 
 load_env()
 
+# ══════════════════════════════════════════════════════════════════
+#  GI(혈당지수) / GL(혈당부하) 엔진  —  설계서 132 · 검증패킷 133
+# ──────────────────────────────────────────────────────────────────
+#  3계층:
+#    T1 DB 조회   : food_id → gi_table_v1.csv 의 gi (결정론 · 정답 경로)
+#    T2 프록시    : gi 없음 → 가용탄수 게이트 / 카테고리 기본 GI
+#    T3 AI 추정   : DB·카테고리 모두 미상 → AI 값 사용 + 낮은 confidence 플래그
+#  GI는 세기(intensive) → 양 비율을 곱하지 않는다. 양은 GL에서만 반영.
+# ══════════════════════════════════════════════════════════════════
+
+GI_FIELDS = ('gi', 'gi_source', 'gi_confidence', 'gi_ref')
+
+# T2 프록시: 가용탄수가 이 값 미만이면 GI 무의미 → GL≈0 (설계서 §3)
+LOW_CARB_GATE_G = 10.0
+
+# T2 프록시: subcategory → 기본 GI (직접 측정치가 없을 때만 사용)
+CATEGORY_GI = {
+    # 곡류·주식
+    '밥류': 70, '죽류': 85, '면류': 55, '분식류': 70, '정식': 68, '도시락': 70,
+    '빵류': 72, '파스타': 50, '탄수화물': 55,
+    # 단백질·저탄수 (탄수는 대개 양념 유래)
+    '육류': 60, '해산물': 55, '찜류': 60, '전골류': 60, '전류': 65,
+    '탕류': 60, '찌개류': 55, '국류': 55, '반찬류': 55, '양념류': 60,
+    '고단백_저지방': 40, '고단백_중지방': 40, '고단백_고지방': 40, '식물성단백': 20,
+    # 외국·프랜차이즈
+    '일식': 60, '중식': 62, '동남아': 62, '양식': 62, '브런치': 65, '인도': 65,
+    '버거': 66, '샌드위치': 60, '치킨': 60, '피자': 60, '사이드': 60, '기타': 60,
+    # 간식·음료·유제품
+    '샐러드': 45, '과일': 45, '유제품': 35, '우유': 40, '커피': 40, '차': 40,
+    '주스': 50, '탄산음료': 63, '음료': 60, '디저트': 65, '과자': 65,
+    '간식': 60, '보충제': 50,
+}
+CATEGORY_GI_FALLBACK = {
+    'korean': 60, 'foreign_popular': 60, 'franchise': 65,
+    'snack_drink': 60, 'diet_fitness': 50,
+}
+
+GL_LOW_MAX = 10      # ≤10 low
+GL_MED_MAX = 19      # 11~19 med, ≥20 high
+
+
+def _gi_table_paths():
+    """GI 표 탐색 경로: **IP 원본 우선** → 코드 저장소 사본 (원칙3).
+
+    원칙3 은 "IP 가 정본, 코드 저장소엔 사본만" 이다. 따라서 정본이 있으면 정본을 읽어야 한다.
+    (세션30 정정) 이전 구현은 사본을 **먼저** 봤다 — IP 원본만 고치면 엔진이 낡은 사본을 계속
+    쓰면서도 조용히 성공하는 침묵 함정이었다. 두 파일이 어긋나면 아래에서 소리내어 경고한다.
+    사본은 IP 가 동봉되지 않는 배포 환경을 위한 폴백이다.
+    """
+    here = Path(__file__).parent
+    return [
+        here.parent / 'IP' / 'content' / 'gi_table_v1.csv',   # ← 정본
+        here / 'data' / 'gi_table_v1.csv',                    # ← 사본(배포 폴백)
+    ]
+
+
+def _warn_gi_table_drift():
+    """정본과 사본이 어긋나면 경고한다. 조용히 한쪽을 고르지 않는다.
+
+    표류를 CI 에서 잡으려면: python3 tools/build_gi_table_ts.py --check
+    """
+    import hashlib
+
+    canon, copy = _gi_table_paths()
+    if not (canon.exists() and copy.exists()):
+        return
+    def norm(p):   # CRLF/LF 차이는 표류가 아니다
+        return hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+    if norm(canon) != norm(copy):
+        import warnings
+        warnings.warn(
+            f"GI 표 표류 감지: 정본({canon})과 사본({copy})의 내용이 다릅니다. "
+            f"정본을 읽습니다. 사본 갱신: python3 tools/build_gi_table_ts.py",
+            RuntimeWarning, stacklevel=2,
+        )
+
+
+def load_gi_table(path=None):
+    """gi_table_v1.csv → {food_id: {gi, gi_source, gi_confidence, gi_ref}}"""
+    import csv
+
+    if path is None:
+        _warn_gi_table_drift()
+    candidates = [Path(path)] if path else _gi_table_paths()
+    for p in candidates:
+        if not p.exists():
+            continue
+        table = {}
+        with open(p, encoding='utf-8-sig', newline='') as f:
+            for row in csv.DictReader(f):
+                fid = (row.get('food_id') or '').strip()
+                raw_gi = (row.get('gi') or '').strip()
+                if not fid or not raw_gi:
+                    continue          # 공란 = 미상 → T2에 위임
+                try:
+                    gi = int(round(float(raw_gi)))
+                except ValueError:
+                    continue
+                if not 0 <= gi <= 110:
+                    continue
+                table[fid] = {
+                    'gi': gi,
+                    'gi_source': (row.get('gi_source') or 'db_measured').strip(),
+                    'gi_confidence': (row.get('gi_confidence') or 'low').strip(),
+                    'gi_ref': (row.get('gi_ref') or '').strip(),
+                }
+        return table
+    return {}
+
+
+def available_carb(carbs_g, fiber_g):
+    """가용탄수 = 탄수 − 식이섬유 (음수면 0)"""
+    try:
+        return max(float(carbs_g or 0) - float(fiber_g or 0), 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def gl_category(gl):
+    """GL 등급 (당뇨병 표준): ≤10 low · 11~19 med · ≥20 high"""
+    if gl <= GL_LOW_MAX:
+        return 'low'
+    if gl <= GL_MED_MAX:
+        return 'med'
+    return 'high'
+
+
+def resolve_gi(food, db_match=None, gi_table=None):
+    """
+    한 음식의 GI를 3계층으로 해석하여 (gi, source, confidence, ref) 반환.
+    GI는 세기 → 양 비율 미적용.
+    """
+    gi_table = gi_table if gi_table is not None else {}
+
+    # ── T1: DB(food_id) 조회 — 결정론 정답 경로 ──
+    food_id = (db_match or {}).get('food_id') or food.get('db_food_id')
+    if food_id and food_id in gi_table:
+        e = gi_table[food_id]
+        return e['gi'], e['gi_source'], e['gi_confidence'], e['gi_ref']
+
+    # ── T2: 가용탄수 게이트 → 카테고리 프록시 ──
+    src = db_match or food
+    avail = available_carb(src.get('carbs_g'), src.get('fiber_g'))
+    if avail < LOW_CARB_GATE_G:
+        # 가용탄수 ≈ 0 → GI 무의미(고기·기름·채소·저탄수 찌개). GL≈0.
+        return None, 'low_carb', 'na', 'T2: 가용탄수 %.1fg < %.0fg → GI 무의미' % (avail, LOW_CARB_GATE_G)
+
+    subcat = (src.get('subcategory') or '').strip()
+    cat = (src.get('category') or '').strip()
+    if subcat in CATEGORY_GI:
+        return CATEGORY_GI[subcat], 'category', 'low', 'T2: subcategory=%s 기본 GI' % subcat
+    if cat in CATEGORY_GI_FALLBACK:
+        return CATEGORY_GI_FALLBACK[cat], 'category', 'low', 'T2: category=%s 기본 GI' % cat
+
+    # ── T3: AI 추정값이 있으면 사용(최후 · 항상 low + 플래그) ──
+    ai_gi = food.get('gi')
+    if isinstance(ai_gi, (int, float)) and 0 <= ai_gi <= 110:
+        return int(round(ai_gi)), 'ai_estimate', 'low', 'T3: AI 추정 — 검수 필요'
+
+    return None, 'unknown', 'na', 'T1~T3 모두 미상'
+
+
+def compute_glycemic(analysis, gi_table=None):
+    """
+    설계서 §4 결정론 공식으로 음식별 GL + 식사 GL/식사 GI 산출.
+      가용탄수 = carbs_g − fiber_g (음수면 0)
+      음식 GL  = gi × 가용탄수 / 100
+      식사 GL  = Σ(음식 GL)
+      식사 GI  = Σ(gi × 가용탄수) / Σ(가용탄수)   (탄수 가중평균)
+    AI 추론 0. 엔진이 이미 가진 값만으로 계산.
+    """
+    if 'error' in analysis or 'foods' not in analysis:
+        return analysis
+
+    gi_table = gi_table if gi_table is not None else {}
+
+    total_gl = 0.0
+    weighted_gi = 0.0
+    total_avail = 0.0
+
+    for food in analysis['foods']:
+        if not food.get('gi_source'):
+            gi, src, conf, ref = resolve_gi(food, None, gi_table)
+            food['gi'] = gi
+            food['gi_source'] = src
+            food['gi_confidence'] = conf
+            food['gi_ref'] = ref
+
+        avail = available_carb(food.get('carbs_g'), food.get('fiber_g'))
+        gi = food.get('gi')
+        gl = round((gi or 0) * avail / 100, 1)
+
+        food['available_carb_g'] = round(avail, 1)
+        food['gl'] = gl
+        food['gl_category'] = gl_category(gl)
+
+        total_gl += gl
+        if gi is not None:
+            weighted_gi += gi * avail
+            total_avail += avail
+
+    summary = analysis.setdefault('meal_summary', {})
+    meal_gl = round(total_gl, 1)
+    summary['meal_gl'] = meal_gl
+    summary['meal_gl_category'] = gl_category(meal_gl)
+    summary['meal_gi'] = round(weighted_gi / total_avail, 1) if total_avail > 0 else None
+    summary['meal_available_carb_g'] = round(total_avail, 1)
+    # 정직한 불확실성(설계서 §2-5): 코치는 단정 금지
+    confs = [f.get('gi_confidence') for f in analysis['foods'] if f.get('gi') is not None]
+    summary['gi_confidence_min'] = (
+        'low' if 'low' in confs else 'med' if 'med' in confs else 'high' if confs else 'na'
+    )
+    return analysis
+
+
 # ── 음식 DB 로드 ──
-def load_food_db(db_path=None):
-    """엑셀 DB를 로드하여 딕셔너리 리스트로 반환"""
+def load_food_db(db_path=None, gi_table_path=None):
+    """엑셀 DB를 로드하여 딕셔너리 리스트로 반환 (+ gi_table_v1.csv 머지)"""
     try:
         import openpyxl
     except ImportError:
@@ -63,6 +278,14 @@ def load_food_db(db_path=None):
             food = dict(zip(headers, row))
             foods.append(food)
     wb.close()
+
+    # GI 4컬럼 머지 (xlsx에 gi 컬럼이 없어도 CSV 원본에서 붙인다)
+    gi_table = load_gi_table(gi_table_path)
+    for f in foods:
+        entry = gi_table.get(f.get('food_id'))
+        for k in GI_FIELDS:
+            f[k] = entry[k] if entry else None
+
     return foods
 
 
@@ -272,6 +495,13 @@ def match_with_db(analysis, foods_db):
     if "error" in analysis or "foods" not in analysis:
         return analysis
 
+    # food_id → GI 4컬럼 (load_food_db가 이미 머지해둔 값을 인덱싱)
+    gi_table = {
+        db_food['food_id']: {k: db_food.get(k) for k in GI_FIELDS}
+        for db_food in foods_db
+        if db_food.get('food_id') and db_food.get('gi') is not None
+    }
+
     for food in analysis["foods"]:
         ai_name = food.get("name_ko", "")
 
@@ -319,12 +549,23 @@ def match_with_db(analysis, foods_db):
             food['db_matched'] = False
             food['source'] = 'AI_ESTIMATED'
 
+        # ── GI 부착 (T1 DB조회 / T2 프록시 / T3 AI추정) ──
+        # 주의: GI는 세기(intensive) → 양 비율(ratio)을 곱하지 않는다. 양은 GL에서만 반영.
+        gi, gi_src, gi_conf, gi_ref = resolve_gi(food, match, gi_table)
+        food['gi'] = gi
+        food['gi_source'] = gi_src
+        food['gi_confidence'] = gi_conf
+        food['gi_ref'] = gi_ref
+
     # meal_summary 재계산
     if "meal_summary" in analysis:
         analysis["meal_summary"]["total_calories"] = round(sum(f.get("calories_kcal", 0) for f in analysis["foods"]), 1)
         analysis["meal_summary"]["total_protein"] = round(sum(f.get("protein_g", 0) for f in analysis["foods"]), 1)
         analysis["meal_summary"]["total_carbs"] = round(sum(f.get("carbs_g", 0) for f in analysis["foods"]), 1)
         analysis["meal_summary"]["total_fat"] = round(sum(f.get("fat_g", 0) for f in analysis["foods"]), 1)
+
+    # ── GL 계산(음식별 + 식사 합산) — 결정론, AI 추론 0 ──
+    compute_glycemic(analysis, gi_table)
 
     return analysis
 
@@ -347,12 +588,22 @@ def format_result(analysis):
         lines.append(f"    칼로리: {food.get('calories_kcal', '?')} kcal")
         lines.append(f"    단백질: {food.get('protein_g', '?')}g  |  탄수화물: {food.get('carbs_g', '?')}g  |  지방: {food.get('fat_g', '?')}g")
         lines.append(f"    식이섬유: {food.get('fiber_g', '?')}g  |  나트륨: {food.get('sodium_mg', '?')}mg  |  당류: {food.get('sugar_g', '?')}g")
+        gi = food.get('gi')
+        if gi is not None:
+            lines.append(f"    GI: {gi} ({food.get('gi_source', '?')}/{food.get('gi_confidence', '?')})"
+                         f"  |  GL: {food.get('gl', '?')} [{food.get('gl_category', '?')}]")
+        elif food.get('gi_source'):
+            lines.append(f"    GI: — (가용탄수 낮음 → GI 무의미)  |  GL: {food.get('gl', 0)} [low]")
 
     summary = analysis.get("meal_summary", {})
     if summary:
         lines.append(f"\n{'─' * 50}")
         lines.append(f"  총 칼로리: {summary.get('total_calories', '?')} kcal")
         lines.append(f"  단백질 {summary.get('total_protein', '?')}g / 탄수 {summary.get('total_carbs', '?')}g / 지방 {summary.get('total_fat', '?')}g")
+        if summary.get('meal_gl') is not None:
+            lines.append(f"  식사 GL: {summary['meal_gl']} [{summary.get('meal_gl_category', '?')}]"
+                         f"  |  식사 GI(참고): {summary.get('meal_gi', '—')}"
+                         f"  |  GI 신뢰도: {summary.get('gi_confidence_min', '?')}")
         lines.append(f"  식사 유형: {summary.get('meal_type', '?')}  |  건강 점수: {summary.get('health_score', '?')}/10")
         lines.append(f"\n  AI 코멘트: {summary.get('one_line_comment', '')}")
     lines.append("=" * 50)
