@@ -89,7 +89,7 @@ describe("runUnifiedRecommendation (병합 추천)", () => {
     const res = runUnifiedRecommendation({ surveyAnswers: RICH_SURVEY });
     expect(res.hasSignal).toBe(true);
     expect(res.recommendations.length).toBeGreaterThan(0);
-    expect(res.sources).toEqual({ survey: true, checkup: false });
+    expect(res.sources).toEqual({ survey: true, checkup: false, diet: false });
   });
 
   it("3. 검진만(간 watch) → 간 영양제 추천(밀크씨슬)", () => {
@@ -132,7 +132,7 @@ describe("runUnifiedRecommendation (병합 추천)", () => {
       checkupResults: [cr("AST", "watch", ["간건강"]), cr("GGT", "watch", ["간건강"])],
     });
     expect((merged.scores["간건강"] || 0)).toBeGreaterThan(surveyOnly.scores["간건강"] || 0);
-    expect(merged.sources).toEqual({ survey: true, checkup: true });
+    expect(merged.sources).toEqual({ survey: true, checkup: true, diet: false });
   });
 
   it("8. 둘 다 없음 → 신호 없음, 추천 없음", () => {

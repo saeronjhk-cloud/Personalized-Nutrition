@@ -4,7 +4,7 @@ import { App as CapApp } from '@capacitor/app'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
 import { submitSurveyAnalytics, hasConsentedCollection, markConsentAcknowledged } from './lib/analytics'
-import { CHECKUP_ENABLED, INSIGHTS_ENABLED, MEOKSEON_ENABLED } from './lib/flags'
+import { CHECKUP_ENABLED, INSIGHTS_ENABLED, MEOKSEON_ENABLED, MEAL_ENABLED } from './lib/flags'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import InstallPrompt from './components/InstallPrompt'
@@ -31,6 +31,8 @@ import Dashboard from './pages/Dashboard'
 import Recommend from './pages/Recommend'
 import Insights from './pages/Insights'
 import Scan from './pages/Scan'
+import Meal from './pages/Meal'
+import WeeklyReport from './pages/WeeklyReport'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
@@ -179,6 +181,12 @@ export default function App() {
           )}
           {MEOKSEON_ENABLED && (
             <Route path="/scan" element={<Scan />} />
+          )}
+          {MEAL_ENABLED && (
+            <Route path="/meal" element={<Meal />} />
+          )}
+          {MEAL_ENABLED && (
+            <Route path="/weekly-report" element={<WeeklyReport />} />
           )}
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />

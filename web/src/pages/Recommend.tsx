@@ -7,7 +7,9 @@ import {
   fetchRanges,
 } from "../lib/checkup_api";
 import { fetchSurveyResponses, fetchSurveyResponseDetail } from "../lib/survey_api";
-import { CHECKUP_ENABLED } from "../lib/flags";
+import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
+import { loadRecentDietSummary } from "../lib/dietSummary";
+import type { DietDailyAvg } from "../domain/unified/diet_adapter";
 import { runEngine, type Range, type CategoryResult, type BiomarkerInput } from "../domain/checkup/engine";
 import { runUnifiedRecommendation, type UnifiedResult } from "../domain/unified/recommend";
 import type { SurveyAnswers } from "../types";
@@ -68,9 +70,17 @@ export default function Recommend() {
         if (sDetail.detail) surveyAnswers = sDetail.detail.answers;
       }
 
+      // 식이→추천 배선: MEAL_ENABLED일 때만 최근 7일 meal_log를 DietDailyAvg로 로드해 병합.
+      let dietSummary: DietDailyAvg | null = null;
+      if (MEAL_ENABLED) {
+        dietSummary = await loadRecentDietSummary(7);
+        if (cancelled) return;
+      }
+
       const unified = runUnifiedRecommendation({
         surveyAnswers,
         checkupResults,
+        dietSummary,
         profile: { sex, age },
       });
       setResult(unified);
@@ -129,11 +139,17 @@ export default function Recommend() {
     );
   }
 
-  const srcText = result.sources.checkup && result.sources.survey
-    ? "검진 + 설문 결과를 합쳐 추천했어요."
-    : result.sources.checkup
-      ? "검진 결과를 바탕으로 추천했어요. 설문을 더하면 더 정밀해져요."
-      : "설문 결과를 바탕으로 추천했어요. 검진 수치를 더하면 더 정밀해져요.";
+  // 반영된 입력 소스(식이 포함). 식이는 실제 기여했을 때만(저확신 제외) 근거로 표기.
+  const contributors: string[] = [];
+  if (result.sources.checkup) contributors.push("검진");
+  if (result.sources.survey) contributors.push("설문");
+  if (result.sources.diet && !result.dietLowConfidence) contributors.push("식이");
+  const srcText =
+    contributors.length >= 2
+      ? `${contributors.join(" + ")} 결과를 합쳐 추천했어요.`
+      : contributors.length === 1
+        ? `${contributors[0]} 결과를 바탕으로 추천했어요.`
+        : "입력하신 정보를 바탕으로 추천했어요.";
 
   return (
     <div className="survey-container fade-in">
@@ -151,6 +167,23 @@ export default function Recommend() {
       >
         ✅ {srcText}
       </div>
+
+      {MEAL_ENABLED && result.sources.diet && result.dietLowConfidence && (
+        <div
+          className="card"
+          style={{
+            padding: "10px 14px",
+            marginBottom: 16,
+            background: "rgba(255, 183, 3, 0.08)",
+            border: "1px solid rgba(255, 183, 3, 0.25)",
+            fontSize: 13,
+            color: "var(--text-secondary)",
+            lineHeight: 1.6,
+          }}
+        >
+          🍽️ 식사 기록이 아직 부족해(2일 미만) 이번 추천엔 반영하지 못했어요. 며칠만 더 기록하면 식이까지 반영해 더 정밀해집니다.
+        </div>
+      )}
 
       <Results
         result={result}

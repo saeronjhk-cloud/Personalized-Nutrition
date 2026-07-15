@@ -1,0 +1,231 @@
+﻿food_id,name_ko,category,subcategory,serving_size_g,carbs_g,fiber_g,avail_carb_g,gi,gi_source,gi_confidence,gi_ref,gi_note,gl_per_serving
+DF-0052,프로틴 바,diet_fitness,보충제,60,22.0,3.0,19.0,55,db_estimated,low,estimate: protein/energy bar 30-60 중앙(Atkinson2008),※ 제품별 편차 매우 큼,10.4
+DF-0054,프로틴 쿠키,diet_fitness,보충제,75,28.0,2.0,26.0,55,db_estimated,low,estimate: 밀/귀리 + 감미료,※ 제품별 편차 큼,14.3
+DF-0070,그릭 요거트 (무지방),diet_fitness,유제품,150,6.0,0.0,6.0,25,db_estimated,low,"estimate: Atkinson2008 yoghurt, plain/low-fat 14-36 중앙",※ 그릭요거트 직접 측정치 미확보,1.5
+DF-0071,그릭 요거트 (일반),diet_fitness,유제품,150,8.0,0.0,8.0,25,db_estimated,low,"estimate: Atkinson2008 yoghurt, plain 14-36 중앙",※ 직접 측정치 미확보,2.0
+DF-0073,무지방 우유,diet_fitness,유제품,200,10.0,0.0,10.0,37,db_measured,high,"Atkinson2008 milk, skim 37",,3.7
+DF-0074,두유 (무가당),diet_fitness,유제품,200,4.0,0.5,3.5,34,db_measured,med,"Atkinson2008 soy milk, unsweetened 34",,1.2
+DF-0080,무가당 요거트 + 과일,diet_fitness,유제품,200,18.0,1.5,16.5,40,db_estimated,low,"estimate: 요거트25 + 과일(35-55, Atkinson2008)",직접 측정치 없음,6.6
+DF-0081,프로틴 오트밀,diet_fitness,탄수화물,250,35.0,4.0,31.0,50,db_estimated,low,estimate: 오트밀55(Atkinson2008) + 단백질 파우더(GI 하향),직접 측정치 없음,15.5
+DF-0082,치아시드 푸딩,diet_fitness,간식,200,22.0,10.0,12.0,30,db_estimated,low,estimate: 치아시드(저GI/고섬유) + 우유/감미료,직접 측정치 없음,3.6
+DF-0105,곡물 샐러드보울,diet_fitness,샐러드,350,48.0,6.0,42.0,55,db_estimated,low,estimate: 퀴노아53(Atkinson2008) / 현미68 + 채소,구성 가변,23.1
+DF-0110,포케보울,diet_fitness,샐러드,400,50.0,4.0,46.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 생선/채소,직접 측정치 없음,31.3
+DF-0111,닭가슴살 랩,diet_fitness,샐러드,250,25.0,3.0,22.0,60,db_estimated,low,estimate: 또띠아 45-60(Atkinson2008) + 닭가슴살,직접 측정치 없음,13.2
+DF-0130,고구마 (찐 것),diet_fitness,탄수화물,150,32.0,3.5,28.5,61,db_measured,med,Atkinson2008 sweet potato 61 (44-94); LimBJN2019 조리법별 상이,찐 고구마 기준; 품종·조리 편차 큼,17.4
+DF-0131,오트밀 (조리 후),diet_fitness,탄수화물,200,25.0,3.0,22.0,55,db_measured,high,"Atkinson2008 porridge, rolled oats 55",,12.1
+DF-0132,통밀빵 (1장),diet_fitness,탄수화물,40,14.0,2.0,12.0,74,db_measured,high,Atkinson2008,Whole wheat / wholemeal wheat bread — 평균 74,8.9
+DF-0133,귀리밥,diet_fitness,탄수화물,210,58.0,5.0,53.0,55,db_estimated,low,estimate: 통귀리 55(SydneyGI whole oat kernels),귀리밥 직접 측정치 없음,29.1
+DF-0134,곤약밥,diet_fitness,탄수화물,200,12.0,3.0,9.0,50,db_estimated,low,estimate: 백미70(LimBJN2019) + 곤약(GI≈0) 희석,곤약 배합비 미상,4.5
+DF-0135,바나나 (1개),diet_fitness,과일,120,27.0,3.1,23.9,51,db_measured,high,"Atkinson2008 banana, ripe 51",,12.2
+DF-0136,사과 (1개),diet_fitness,과일,180,25.0,4.4,20.6,36,db_measured,high,Atkinson2008 apple 36,,7.4
+DF-0137,블루베리,diet_fitness,과일,100,14.0,2.4,11.6,53,db_measured,low,Atkinson2008 blueberry 53,※ 국제표 내 데이터 희소 — 근거 약함,6.1
+DF-0139,견과류 믹스,diet_fitness,간식,30,6.0,2.0,4.0,20,db_estimated,low,"estimate: 견과류(아몬드/캐슈 15-25, Atkinson2008)",견과 혼합비 미상,0.8
+DF-0140,단호박 (찐 것),diet_fitness,탄수화물,150,20.0,3.0,17.0,55,db_estimated,low,LimBJN2019 찐 단호박 = low GI(≤55) vs Atkinson2008 pumpkin 64,※ 국내/국제 출처 충돌 — 국내 in-vivo 값 채택,9.3
+DF-0141,삶은 옥수수 (1개),diet_fitness,탄수화물,150,27.0,3.0,24.0,52,db_measured,high,Atkinson2008 sweet corn 52,,12.5
+DF-0142,퀴노아,diet_fitness,탄수화물,150,30.0,3.5,26.5,53,db_measured,med,Atkinson2008,"Quinoa, boiled 53",14.0
+DF-0143,통밀 또띠아 (1장),diet_fitness,탄수화물,45,20.0,2.5,17.5,45,db_estimated,low,estimate: 통밀 또띠아(Atkinson2008 wheat tortilla 30 / wholemeal 45-52),제품별 편차 큼,7.9
+DF-0162,두부 (반모),diet_fitness,식물성단백,150,3.0,0.5,2.5,15,db_estimated,low,"estimate: 대두(soybeans 18, Atkinson2008) 프록시",※ 두부 직접 GI 측정치 없음. 가용탄수 2.5g → GL < 0.5로 영향 미미,0.4
+DF-0180,아몬드 (20알),diet_fitness,간식,25,5.0,3.0,2.0,15,db_measured,med,Atkinson2008 almonds 15 (0-15),,0.3
+DF-0182,다크초콜릿 (1조각),diet_fitness,간식,15,7.0,1.5,5.5,35,db_measured,low,"Atkinson2008 chocolate, dark 23-45",카카오 함량별 편차,1.9
+DF-0190,닭가슴살 도시락,diet_fitness,도시락,350,50.0,3.0,47.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배,구성 가변,32.0
+DF-0191,연어 도시락,diet_fitness,도시락,350,52.0,3.0,49.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배,구성 가변,33.3
+DF-0192,곤약면 비빔면,diet_fitness,면류,200,12.0,3.0,9.0,35,db_estimated,low,estimate: 곤약면(GI≈0) + 양념(설탕),탄수 대부분 양념 유래,3.1
+DF-0193,곤약 떡볶이,diet_fitness,면류,250,20.0,4.0,16.0,50,db_estimated,low,estimate: 곤약떡(저GI) + 고추장양념(설탕),직접 측정치 없음,8.0
+FC-0001,빅맥,franchise,버거,200,45.0,3.0,42.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 패티/소스,직접 측정치 없음,27.7
+FC-0002,맥너겟 (6조각),franchise,사이드,100,16.0,1.0,15.0,46,db_measured,med,Atkinson2008 chicken nuggets 46,,6.9
+FC-0003,1955 버거,franchise,버거,250,45.0,2.0,43.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 패티,직접 측정치 없음,28.4
+FC-0004,맥스파이시 상하이 버거,franchise,버거,220,48.0,2.5,45.5,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 치킨패티,직접 측정치 없음,30.0
+FC-0010,싸이버거,franchise,버거,250,48.0,2.0,46.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 치킨패티,직접 측정치 없음,30.4
+FC-0011,불싸이버거,franchise,버거,260,50.0,2.0,48.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 매운소스(설탕),직접 측정치 없음,31.7
+FC-0012,와퍼,franchise,버거,290,49.0,2.0,47.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 패티,직접 측정치 없음,31.0
+FC-0013,치킨 킹,franchise,버거,230,48.0,2.0,46.0,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 치킨패티,직접 측정치 없음,30.4
+FC-0015,불고기버거,franchise,버거,180,42.0,1.5,40.5,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 불고기소스(설탕),직접 측정치 없음,26.7
+FC-0016,새우버거,franchise,버거,190,48.0,1.5,46.5,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 새우패티,직접 측정치 없음,30.7
+FC-0020,터키 브레스트 (15cm),franchise,샌드위치,210,42.0,3.0,39.0,60,db_estimated,low,"estimate: 서브 번(빵류 65-75, Atkinson2008) + 육류(단백질 희석)",직접 측정치 없음,23.4
+FC-0021,로스트 치킨 (15cm),franchise,샌드위치,230,42.0,3.0,39.0,60,db_estimated,low,estimate: 서브 번 + 치킨,직접 측정치 없음,23.4
+FC-0022,BLT (15cm),franchise,샌드위치,200,42.0,3.0,39.0,60,db_estimated,low,estimate: 서브 번 + 베이컨,직접 측정치 없음,23.4
+FC-0023,에그마요 (15cm),franchise,샌드위치,220,44.0,3.0,41.0,60,db_estimated,low,estimate: 서브 번 + 에그마요,직접 측정치 없음,24.6
+FC-0040,후라이드 치킨 (1조각),franchise,치킨,120,10.0,0.5,9.5,60,db_estimated,low,estimate: 탄수 = 밀/전분 튀김옷,※ 가용탄수 9.5g → GL 낮음,5.7
+FC-0041,양념 치킨 (1조각),franchise,치킨,130,16.0,0.5,15.5,65,db_estimated,low,estimate: 튀김옷 + 양념(물엿/설탕),직접 측정치 없음,10.1
+FC-0042,교촌 오리지널 (1조각),franchise,치킨,120,12.0,0.5,11.5,60,db_estimated,low,estimate: 튀김옷 + 간장소스,직접 측정치 없음,6.9
+FC-0043,교촌 허니콤보 (1조각),franchise,치킨,130,18.0,0.5,17.5,68,db_estimated,low,estimate: 튀김옷 + 꿀/물엿(고GI),직접 측정치 없음,11.9
+FC-0044,BBQ 황금올리브 (1조각),franchise,치킨,120,10.0,0.5,9.5,60,db_estimated,low,estimate: 탄수 = 튀김옷,※ 가용탄수 9.5g,5.7
+FC-0050,KFC 오리지널 (1조각),franchise,치킨,130,12.0,0.5,11.5,60,db_estimated,low,estimate: 탄수 = 튀김옷,직접 측정치 없음,6.9
+FC-0051,KFC 핫크리스피 (1조각),franchise,치킨,130,15.0,0.5,14.5,60,db_estimated,low,estimate: 탄수 = 튀김옷,직접 측정치 없음,8.7
+FC-0070,편의점 도시락 (일반),franchise,도시락,350,72.0,2.0,70.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배,도시락 구성 가변,49.0
+FC-0071,편의점 삼각김밥,franchise,도시락,110,32.0,0.5,31.5,72,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 김/식초 소량,직접 측정치 없음,22.7
+FC-0072,편의점 컵라면,franchise,면류,65,40.0,1.0,39.0,56,db_estimated,low,estimate: 라면56(LimBJN2019),컵라면 유탕면,21.8
+FC-0073,편의점 샌드위치,franchise,샌드위치,150,28.0,1.5,26.5,65,db_estimated,low,estimate: 흰 식빵75(Atkinson2008) + 속재료 희석,직접 측정치 없음,17.2
+FC-0081,카페라떼 (톨),franchise,커피,355,15.0,0.0,15.0,35,db_estimated,low,estimate: 우유 유당 37(Atkinson2008 skim milk),탄수 = 우유 유당,5.2
+FC-0082,카라멜 마끼아또 (톨),franchise,커피,355,35.0,0.0,35.0,60,db_estimated,low,estimate: 우유37(Atkinson2008) + 카라멜시럽(sucrose 65),직접 측정치 없음,21.0
+FC-0083,그린티 라떼 (톨),franchise,커피,355,38.0,0.5,37.5,60,db_estimated,low,estimate: 우유37(Atkinson2008) + 가당 파우더(설탕),직접 측정치 없음,22.5
+FC-0090,공차 흑당 밀크티 (M),franchise,음료,450,65.0,0.0,65.0,65,db_estimated,low,"estimate: 흑당시럽(sucrose 65, Atkinson2008) + 우유",※ 타피오카 펄 포함 시 상향,42.2
+FC-0092,이디야 토피넛라떼,franchise,커피,400,42.0,0.0,42.0,60,db_estimated,low,estimate: 우유37(Atkinson2008) + 시럽(설탕),직접 측정치 없음,25.2
+FC-0100,슈퍼 디럭스 (1조각),franchise,피자,130,32.0,2.0,30.0,60,db_measured,low,Atkinson2008 pizza 60,토핑 편차,18.0
+FC-0101,포테이토 피자 (1조각),franchise,피자,130,35.0,1.5,33.5,65,db_estimated,low,estimate: 피자60(Atkinson2008) + 감자토핑(고GI),직접 측정치 없음,21.8
+FC-0102,치즈 크러스트 (1조각),franchise,피자,140,32.0,1.5,30.5,60,db_measured,low,Atkinson2008 pizza 60,토핑 편차,18.3
+FP-0001,크림 파스타,foreign_popular,파스타,350,72.0,2.5,69.5,50,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 크림(지방),직접 측정치 없음,34.8
+FP-0002,토마토 파스타,foreign_popular,파스타,350,75.0,4.0,71.0,50,db_measured,med,"Atkinson2008 spaghetti, white, boiled 49",토마토 소스는 GI 영향 작음,35.5
+FP-0003,오일 파스타 (알리오올리오),foreign_popular,파스타,300,65.0,2.5,62.5,48,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 올리브유,직접 측정치 없음,30.0
+FP-0004,카르보나라,foreign_popular,파스타,350,70.0,2.0,68.0,48,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 계란/베이컨(지방),직접 측정치 없음,32.6
+FP-0005,봉골레 파스타,foreign_popular,파스타,350,65.0,2.0,63.0,48,db_estimated,low,estimate: 스파게티49(Atkinson2008),직접 측정치 없음,30.2
+FP-0006,로제 파스타,foreign_popular,파스타,350,72.0,3.0,69.0,50,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 토마토/크림,직접 측정치 없음,34.5
+FP-0010,미트소스 파스타,foreign_popular,파스타,380,72.0,3.0,69.0,50,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 미트소스,직접 측정치 없음,34.5
+FP-0011,트러플 크림 파스타,foreign_popular,파스타,350,68.0,2.0,66.0,48,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 크림,직접 측정치 없음,31.7
+FP-0012,해물 토마토 파스타,foreign_popular,파스타,380,68.0,3.5,64.5,50,db_estimated,low,estimate: 스파게티49(Atkinson2008) + 토마토,직접 측정치 없음,32.2
+FP-0030,초밥 (모듬 10피스),foreign_popular,일식,300,58.0,1.0,57.0,50,db_measured,med,Atkinson2008 sushi 48-55,초밥(식초밥) 국제표 48-55,28.5
+FP-0031,연어 초밥 (2피스),foreign_popular,일식,60,12.0,0.0,12.0,50,db_measured,med,"Atkinson2008 sushi, salmon 48",,6.0
+FP-0032,돈카츠,foreign_popular,일식,200,25.0,1.5,23.5,60,db_estimated,low,estimate: 빵가루 튀김옷 + 돼지등심(단백질/지방),직접 측정치 없음,14.1
+FP-0033,라멘 (돈코츠),foreign_popular,일식,550,65.0,2.0,63.0,55,db_estimated,low,estimate: 밀면50(LimBJN2019) + 돈코츠 국물(지방),직접 측정치 없음,34.6
+FP-0034,라멘 (쇼유),foreign_popular,일식,500,60.0,2.0,58.0,55,db_estimated,low,estimate: 밀면50(LimBJN2019),직접 측정치 없음,31.9
+FP-0035,우동,foreign_popular,일식,400,62.0,1.5,60.5,62,db_measured,med,Atkinson2008 udon noodles 62,,37.5
+FP-0036,규동 (소고기덮밥),foreign_popular,일식,400,70.0,1.5,68.5,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 소고기/양념,직접 측정치 없음,48.0
+FP-0037,카츠동 (돈카츠덮밥),foreign_popular,일식,450,75.0,2.0,73.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 돈카츠,직접 측정치 없음,51.1
+FP-0038,타코야끼 (6개),foreign_popular,일식,180,32.0,1.0,31.0,65,db_estimated,low,estimate: 밀가루 반죽 + 소스(설탕),직접 측정치 없음,20.1
+FP-0039,에다마메,foreign_popular,일식,100,9.0,5.0,4.0,18,db_measured,med,"Atkinson2008 soybeans, boiled 18",에다마메 = 풋대두,0.7
+FP-0040,사케동 (연어덮밥),foreign_popular,일식,350,60.0,1.0,59.0,68,db_estimated,low,estimate: 초밥밥50 ~ 백미70(LimBJN2019) 중간,직접 측정치 없음,40.1
+FP-0041,회덮밥,foreign_popular,일식,400,58.0,2.0,56.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 회/채소,직접 측정치 없음,38.1
+FP-0042,소바 (냉),foreign_popular,일식,300,58.0,2.5,55.5,54,db_measured,med,Atkinson2008 buckwheat (soba) noodles 54,,30.0
+FP-0043,오코노미야끼,foreign_popular,일식,250,40.0,2.0,38.0,65,db_estimated,low,estimate: 밀가루 반죽 + 소스(설탕),직접 측정치 없음,24.7
+FP-0060,탕수육,foreign_popular,중식,250,40.0,1.0,39.0,70,db_estimated,low,estimate: 전분 튀김옷 + 설탕/식초 소스,직접 측정치 없음,27.3
+FP-0061,깐풍기,foreign_popular,중식,200,22.0,1.0,21.0,65,db_estimated,low,estimate: 전분 튀김옷 + 단맛 소스,직접 측정치 없음,13.7
+FP-0062,마파두부,foreign_popular,중식,250,12.0,2.0,10.0,55,db_estimated,low,estimate: 전분물 + 두부(저GI),직접 측정치 없음,5.5
+FP-0063,볶음밥 (중식),foreign_popular,중식,300,62.0,1.5,60.5,73,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 기름,직접 측정치 없음,44.2
+FP-0065,마라탕,foreign_popular,중식,500,25.0,3.0,22.0,55,db_estimated,low,estimate: 당면60(LimBJN2019) + 채소/육류 희석,직접 측정치 없음,12.1
+FP-0066,마라샹궈,foreign_popular,중식,400,20.0,4.0,16.0,55,db_estimated,low,estimate: 채소/육류 + 전분,직접 측정치 없음,8.8
+FP-0068,딤섬 (하가우 4개),foreign_popular,중식,120,18.0,0.5,17.5,60,db_estimated,low,estimate: 밀/전분 피,직접 측정치 없음,10.5
+FP-0080,쌀국수 (포),foreign_popular,동남아,500,50.0,1.5,48.5,58,db_measured,low,"Atkinson2008 rice noodles, dried, boiled 53-61",쌀국수 국제표 53-61 중앙,28.1
+FP-0081,팟타이,foreign_popular,동남아,300,55.0,2.0,53.0,60,db_estimated,low,estimate: 쌀국수58(Atkinson2008) + 팟타이 소스(설탕),직접 측정치 없음,31.8
+FP-0082,똠양꿍,foreign_popular,동남아,350,12.0,1.0,11.0,50,db_estimated,low,estimate: 탄수 대부분 양념/코코넛밀크 유래,※ 가용탄수 11g → GL 영향 작음,5.5
+FP-0083,카오팟 (태국볶음밥),foreign_popular,동남아,300,58.0,1.0,57.0,73,db_estimated,low,estimate: 자스민쌀 볶음밥(Atkinson2008 jasmine rice 고GI) + 기름 희석,※ 편차 큼,41.6
+FP-0084,나시고렝,foreign_popular,동남아,300,60.0,2.0,58.0,73,db_estimated,low,estimate: 볶음밥계,직접 측정치 없음,42.3
+FP-0085,카오 쏘이,foreign_popular,동남아,400,45.0,2.0,43.0,60,db_estimated,low,estimate: 에그누들 + 코코넛커리,직접 측정치 없음,25.8
+FP-0086,반미 샌드위치,foreign_popular,동남아,250,42.0,2.0,40.0,70,db_estimated,low,estimate: 바게트(Atkinson2008 baguette 고GI) + 속재료 희석,※ 편차 큼,28.0
+FP-0100,햄버거 (클래식),foreign_popular,양식,200,35.0,1.5,33.5,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 패티(단백/지방 희석),햄버거 직접 측정치 없음,22.1
+FP-0101,치즈버거,foreign_popular,양식,220,36.0,1.5,34.5,66,db_estimated,low,estimate: 흰빵 번75(Atkinson2008) + 패티/치즈,직접 측정치 없음,22.8
+FP-0102,피자 (1조각 페퍼로니),foreign_popular,양식,110,30.0,1.5,28.5,60,db_measured,low,"Atkinson2008 pizza, cheese 60 (범위 30-80)",토핑에 따라 편차 큼,17.1
+FP-0103,피자 (1조각 마르게리타),foreign_popular,양식,110,28.0,1.5,26.5,60,db_measured,low,"Atkinson2008 pizza, cheese 60",토핑에 따라 편차 큼,15.9
+FP-0105,피시앤칩스,foreign_popular,양식,300,50.0,2.0,48.0,65,db_estimated,low,estimate: 감자튀김63(Atkinson2008) + 튀김옷 생선,직접 측정치 없음,31.2
+FP-0106,시저 샐러드 (레스토랑),foreign_popular,양식,300,14.0,3.0,11.0,50,db_estimated,low,estimate: 크루통(흰빵) + 채소(저GI),※ 가용탄수 11g,5.5
+FP-0107,감자튀김 (미디엄),foreign_popular,양식,150,48.0,3.5,44.5,63,db_measured,med,Atkinson2008 french fries 63 (범위 54-75),조리·품종 편차 큼,28.0
+FP-0108,타코 (비프),foreign_popular,양식,150,22.0,2.5,19.5,60,db_estimated,low,estimate: 옥수수 또띠아 + 비프,직접 측정치 없음,11.7
+FP-0109,브리또,foreign_popular,양식,350,60.0,6.0,54.0,60,db_estimated,low,estimate: 밀 또띠아 + 밥/콩(저GI),직접 측정치 없음,32.4
+FP-0110,치킨 너겟 (10개),foreign_popular,양식,180,28.0,1.0,27.0,46,db_measured,med,"Atkinson2008 chicken nuggets, frozen, reheated 46",,12.4
+FP-0112,리조또 (버섯),foreign_popular,양식,350,55.0,2.0,53.0,69,db_measured,low,"Atkinson2008 rice, arborio (risotto) 69",아르보리오 쌀 기준,36.6
+FP-0113,그라탕,foreign_popular,양식,300,28.0,1.5,26.5,60,db_estimated,low,estimate: 밀가루 베샤멜 + 치즈(지방),직접 측정치 없음,15.9
+FP-0130,에그 베네딕트,foreign_popular,브런치,250,28.0,1.0,27.0,65,db_estimated,low,estimate: 잉글리시머핀(Atkinson2008 77) + 계란/홀랜다이즈(지방),직접 측정치 없음,17.6
+FP-0131,프렌치 토스트,foreign_popular,브런치,150,42.0,1.0,41.0,70,db_estimated,low,estimate: 흰빵75(Atkinson2008) + 계란/시럽,직접 측정치 없음,28.7
+FP-0132,팬케이크 (3장),foreign_popular,브런치,200,62.0,1.5,60.5,67,db_measured,med,Atkinson2008 pancakes 66-67,,40.5
+FP-0133,아사이볼,foreign_popular,브런치,300,60.0,8.0,52.0,45,db_estimated,low,estimate: 과일/베리(저GI) + 그래놀라(중GI),직접 측정치 없음,23.4
+FP-0134,와플,foreign_popular,브런치,150,48.0,1.0,47.0,76,db_measured,med,Atkinson2008 waffles 76,,35.7
+FP-0135,스무디볼,foreign_popular,브런치,350,55.0,6.0,49.0,45,db_estimated,low,estimate: 과일 지배(저GI),직접 측정치 없음,22.1
+FP-0136,크로플,foreign_popular,브런치,120,35.0,1.0,34.0,70,db_estimated,low,estimate: 크로와상67(Atkinson2008) + 설탕/시럽,직접 측정치 없음,23.8
+FP-0150,버터 치킨 커리,foreign_popular,인도,300,18.0,2.0,16.0,55,db_estimated,low,estimate: 탄수 = 소스(토마토/크림/설탕),※ 가용탄수 16g,8.8
+FP-0151,난 (1장),foreign_popular,인도,90,42.0,1.5,40.5,70,db_estimated,low,"estimate: 흰 밀가루 플랫브레드(빵류 65-75, Atkinson2008)",난 직접 측정치 없음,28.4
+FP-0155,케밥,foreign_popular,기타,300,35.0,3.0,32.0,65,db_estimated,low,estimate: 밀 플랫브레드 + 육류/채소,직접 측정치 없음,20.8
+KR-0001,흰쌀밥,korean,밥류,210,68.7,0.5,68.2,70,db_measured,high,LimBJN2019; RDA-KHU2015,"한국 단립종 쌀밥 in-vivo 69.9±5.7(RDA-KHU2015). LimBJN2019: 백미 조리법별 51-93, 찐 백미=medium대. ※ 국제표 boiled white rice 평균 73과 정합. 검증패킷 v1의 84는 1차 출처 없음",47.7
+KR-0002,현미밥,korean,밥류,210,65.2,2.8,62.4,68,db_measured,high,Atkinson2008,"Rice, brown, boiled — 국제표 평균 68",42.4
+KR-0003,잡곡밥,korean,밥류,210,63.5,3.2,60.3,57,db_estimated,med,estimate: 백미70(LimBJN2019) + 보리50(LimBJN2019) + 현미68(Atkinson2008) 가중,잡곡 배합비 미상 → 3곡 가중 추정,34.4
+KR-0004,보리밥,korean,밥류,210,63.0,4.0,59.0,50,db_measured,med,LimBJN2019,보리 조리법별 35-70; 보리밥 중앙 ~50,29.5
+KR-0005,비빔밥,korean,밥류,450,78.0,4.5,73.5,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배 + 채소/고추장 희석,비빔밥 직접 측정치 없음,50.0
+KR-0006,김밥 (1줄),korean,밥류,250,62.0,2.0,60.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 식초/김/채소,김밥 직접 측정치 없음(식초 → 소폭 하향),40.8
+KR-0007,김치볶음밥,korean,밥류,300,65.0,2.5,62.5,73,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 기름/설탕,볶음밥 직접 측정치 없음,45.6
+KR-0008,참치김밥 (1줄),korean,밥류,260,60.0,2.0,58.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 마요/참치(지방),직접 측정치 없음,39.4
+KR-0009,볶음밥,korean,밥류,300,63.0,1.5,61.5,73,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 기름,직접 측정치 없음,44.9
+KR-0010,오므라이스,korean,밥류,350,62.0,1.5,60.5,73,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 케첩(당),직접 측정치 없음,44.2
+KR-0011,죽 (호박죽),korean,죽류,300,38.0,1.5,36.5,75,db_estimated,low,estimate: 쌀죽 92.5(RDA-KHU2015) + 호박(저GI) 희석,호박죽 직접 측정치 없음,27.4
+KR-0012,죽 (전복죽),korean,죽류,300,35.0,0.5,34.5,88,db_estimated,med,estimate: 쌀죽 92.5(RDA-KHU2015) + 부재료 희석,죽=고GI 확립(RDA 쌀죽 92.5±8.8),30.4
+KR-0013,죽 (닭죽),korean,죽류,300,33.0,0.5,32.5,88,db_estimated,med,estimate: 쌀죽 92.5(RDA-KHU2015) + 닭고기 희석,죽=고GI 확립,28.6
+KR-0020,콩나물밥,korean,밥류,300,62.0,3.0,59.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 콩나물,직접 측정치 없음,40.1
+KR-0021,솥밥 (버섯),korean,밥류,350,70.0,3.0,67.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 버섯,직접 측정치 없음,45.6
+KR-0022,카레라이스,korean,밥류,400,72.0,3.0,69.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 카레루(전분),직접 측정치 없음,48.3
+KR-0023,돌솥비빔밥,korean,밥류,500,82.0,5.0,77.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 채소,직접 측정치 없음,52.4
+KR-0024,치킨마요밥,korean,밥류,350,65.0,1.0,64.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 마요/소스,직접 측정치 없음,44.8
+KR-0053,부대찌개,korean,찌개류,500,25.0,3.0,22.0,55,db_estimated,low,estimate: 라면사리56(LimBJN2019) + 햄/채소,부대찌개 직접 측정치 없음,12.1
+KR-0057,떡국,korean,국류,450,55.0,1.0,54.0,65,db_estimated,low,estimate: 가래떡 50.6(RDA-KHU2015) + 재가열(호화 상승),※ RDA 가래떡(냉각·노화전분) 50.6 vs 뜨겁게 조리한 떡국은 상향. 실측 필요,35.1
+KR-0058,삼계탕,korean,탕류,600,30.0,1.0,29.0,80,db_estimated,low,"estimate: 찹쌀(고GI, LimBJN2019) 지배",※ 삼계탕 직접 측정치 없음,23.2
+KR-0059,감자탕,korean,탕류,500,22.0,3.0,19.0,65,db_estimated,low,"estimate: 감자(78, Atkinson2008) + 국물 희석",직접 측정치 없음,12.3
+KR-0060,설렁탕,korean,탕류,500,15.0,0.5,14.5,70,db_estimated,low,estimate: 소면50 / 밥70(LimBJN2019) 포함,※ 구성 가변,10.2
+KR-0061,갈비탕,korean,탕류,500,12.0,0.5,11.5,60,db_estimated,low,estimate: 당면60(LimBJN2019),※ 가용탄수 11.5g,6.9
+KR-0063,순대국밥,korean,탕류,500,42.0,2.0,40.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배,직접 측정치 없음,28.0
+KR-0064,해장국,korean,탕류,450,15.0,2.0,13.0,65,db_estimated,low,estimate: 밥/콩나물 혼합,※ 구성 가변,8.4
+KR-0071,청국장,korean,찌개류,400,14.0,4.0,10.0,30,db_estimated,low,"estimate: 대두(soybeans 18, Atkinson2008) 발효 + 채소",※ 가용탄수 10g,3.0
+KR-0074,뼈해장국,korean,탕류,500,18.0,2.0,16.0,60,db_estimated,low,estimate: 감자/우거지,직접 측정치 없음,9.6
+KR-0075,매운탕,korean,탕류,450,12.0,2.0,10.0,55,db_estimated,low,estimate: 채소/전분 양념,※ 가용탄수 10g,5.5
+KR-0101,불고기,korean,육류,200,12.0,0.5,11.5,65,db_estimated,low,"estimate: 탄수 = 설탕/배 양념(sucrose 65, Atkinson2008)",고기 자체는 GI 무의미,7.5
+KR-0102,소갈비 (양념),korean,육류,200,15.0,0.5,14.5,65,db_estimated,low,"estimate: 탄수 = 설탕 양념(sucrose 65, Atkinson2008)",고기 자체는 GI 무의미,9.4
+KR-0104,닭갈비,korean,육류,250,18.0,2.0,16.0,65,db_estimated,low,estimate: 고추장/설탕 양념 + 채소,직접 측정치 없음,10.4
+KR-0107,닭볶음탕,korean,육류,300,18.0,2.0,16.0,60,db_estimated,low,estimate: 감자 + 고추장 양념,직접 측정치 없음,9.6
+KR-0109,갈비찜,korean,육류,250,20.0,1.5,18.5,65,db_estimated,low,estimate: 설탕 간장 양념 + 채소,직접 측정치 없음,12.0
+KR-0115,양념갈비 (돼지),korean,육류,200,18.0,0.5,17.5,65,db_estimated,low,"estimate: 탄수 = 설탕 양념(sucrose 65, Atkinson2008)",고기 자체는 GI 무의미,11.4
+KR-0116,소불고기전골,korean,전골류,500,30.0,3.0,27.0,60,db_estimated,low,estimate: 당면60(LimBJN2019) + 설탕 양념,직접 측정치 없음,16.2
+KR-0120,소곱창전골,korean,전골류,500,20.0,3.0,17.0,60,db_estimated,low,estimate: 당면60(LimBJN2019) + 채소,직접 측정치 없음,10.2
+KR-0153,해물파전,korean,해산물,200,30.0,1.5,28.5,65,db_estimated,low,"estimate: 밀가루 전(밀전병계, LimBJN2019) + 해물",직접 측정치 없음,18.5
+KR-0156,오징어볶음,korean,해산물,200,15.0,1.5,13.5,60,db_estimated,low,estimate: 고추장/설탕 양념,※ 가용탄수 13.5g,8.1
+KR-0157,해물찜,korean,해산물,350,15.0,2.0,13.0,60,db_estimated,low,estimate: 콩나물/전분물 + 양념,※ 가용탄수 13g,7.8
+KR-0162,굴전,korean,전류,150,20.0,1.0,19.0,65,db_estimated,low,estimate: 밀가루/계란 옷 + 굴,직접 측정치 없음,12.3
+KR-0163,낙지볶음,korean,해산물,200,12.0,2.0,10.0,55,db_estimated,low,estimate: 고추장 양념 + 채소,※ 가용탄수 10g,5.5
+KR-0200,라면 (봉지),korean,면류,120,62.0,2.0,60.0,56,db_measured,med,LimBJN2019,라면: 국수류 GI 48.2-60.0 범위 상단(GL 44.6으로 최고),33.6
+KR-0201,칼국수,korean,면류,450,65.0,2.5,62.5,48,db_measured,med,LimBJN2019,fresh wheat noodles 48.2,30.0
+KR-0202,잔치국수,korean,면류,400,60.0,2.0,58.0,50,db_measured,med,LimBJN2019,건면(소면) 국수류 48-56,29.0
+KR-0203,비빔국수,korean,면류,350,65.0,2.5,62.5,55,db_estimated,low,estimate: 소면50(LimBJN2019) + 고추장양념(설탕),비빔국수 직접 측정치 없음,34.4
+KR-0204,냉면 (물냉면),korean,면류,500,82.0,2.0,80.0,55,db_estimated,low,estimate: 메밀면54(Atkinson2008) + 전분면,냉면 직접 측정치 없음; 메밀:전분 비율 가변,44.0
+KR-0205,짜장면,korean,면류,550,85.0,3.0,82.0,60,db_estimated,low,estimate: 밀면50(LimBJN2019) + 춘장/설탕/전분,직접 측정치 없음,49.2
+KR-0206,짬뽕,korean,면류,600,62.0,3.5,58.5,55,db_estimated,low,estimate: 밀면50(LimBJN2019) + 국물,직접 측정치 없음,32.2
+KR-0207,만두 (군만두 5개),korean,면류,175,32.0,1.5,30.5,55,db_estimated,low,estimate: 밀피(밀가루계 LimBJN2019) + 튀김기름,만두 직접 측정치 없음,16.8
+KR-0208,만두 (물만두 8개),korean,면류,200,35.0,1.5,33.5,55,db_estimated,low,estimate: 밀피(밀가루계 LimBJN2019),만두 직접 측정치 없음,18.4
+KR-0209,쫄면,korean,면류,350,70.0,2.0,68.0,60,db_estimated,low,estimate: 쫄면사리(밀+전분) + 양념(설탕),직접 측정치 없음,40.8
+KR-0250,떡볶이,korean,분식류,300,72.0,2.0,70.0,75,db_estimated,low,estimate: 쌀떡(가열·호화) + 물엿/설탕 양념. 가래떡 50.6(RDA-KHU2015)와 쌀가공품 고GI 사이 중앙,※ 떡볶이 직접 측정치 없음. 추정 범위 55-85로 넓음 — 전문가 검수 1순위,52.5
+KR-0251,순대,korean,분식류,200,28.0,1.0,27.0,60,db_measured,low,LimBJN2019 당면 60.0,순대 탄수=당면 지배(sweet potato starch vermicelli 60.0),16.2
+KR-0252,어묵탕,korean,분식류,300,18.0,0.5,17.5,60,db_estimated,low,estimate: 어묵(밀/전분 반죽),직접 측정치 없음,10.5
+KR-0253,튀김 (모듬),korean,분식류,200,40.0,2.0,38.0,65,db_estimated,low,estimate: 밀가루 튀김옷 + 기름(GI 하향),직접 측정치 없음,24.7
+KR-0254,호떡,korean,분식류,100,42.0,1.0,41.0,75,db_estimated,low,estimate: 밀가루 반죽 + 흑설탕 소,직접 측정치 없음,30.8
+KR-0260,치즈떡볶이,korean,분식류,350,68.0,2.0,66.0,72,db_estimated,low,estimate: 떡볶이75 + 치즈(지방 → GI 하향),※ 직접 측정치 없음,47.5
+KR-0261,라볶이,korean,분식류,400,78.0,2.5,75.5,70,db_estimated,low,estimate: 떡볶이75 + 라면사리56(LimBJN2019),※ 직접 측정치 없음,52.9
+KR-0262,김떡만,korean,분식류,400,82.0,3.0,79.0,72,db_estimated,low,estimate: 떡볶이75 + 김밥68 + 만두55 가중,※ 직접 측정치 없음,56.9
+KR-0263,오뎅볶음,korean,분식류,150,20.0,1.0,19.0,60,db_estimated,low,estimate: 어묵60 + 양념(설탕),직접 측정치 없음,11.4
+KR-0305,잡채,korean,반찬류,150,32.0,1.5,30.5,62,db_measured,low,LimBJN2019 당면 60.0 + 설탕 양념,잡채 탄수 = 당면 지배,18.9
+KR-0309,감자조림,korean,반찬류,100,22.0,1.5,20.5,70,db_estimated,low,"estimate: 감자(boiled 78, Atkinson2008) + 간장/설탕 조림",※ 조리법 편차 큼,14.3
+KR-0310,어묵볶음,korean,반찬류,80,12.0,0.5,11.5,60,db_estimated,low,estimate: 어묵(밀/전분) + 양념,직접 측정치 없음,6.9
+KR-0328,연근조림,korean,반찬류,80,18.0,2.0,16.0,55,db_estimated,low,estimate: 연근(전분) + 설탕 조림,직접 측정치 없음,8.8
+KR-0329,우엉조림,korean,반찬류,80,16.0,3.0,13.0,50,db_estimated,low,estimate: 우엉(고섬유) + 설탕 조림,직접 측정치 없음,6.5
+KR-0350,김치전,korean,전류,150,25.0,1.5,23.5,65,db_estimated,low,estimate: 밀가루 전 + 김치,직접 측정치 없음,15.3
+KR-0351,감자전,korean,전류,150,28.0,1.5,26.5,70,db_estimated,low,"estimate: 감자(78, Atkinson2008) + 기름(GI 하향)",직접 측정치 없음,18.6
+KR-0353,녹두전,korean,전류,150,22.0,2.0,20.0,50,db_estimated,low,"estimate: 녹두(mung bean 39-45 저GI, Atkinson2008) + 기름",직접 측정치 없음,10.0
+KR-0360,부추전,korean,전류,150,24.0,2.0,22.0,65,db_estimated,low,estimate: 밀가루 전 + 부추,직접 측정치 없음,14.3
+KR-0361,파전,korean,전류,200,28.0,1.5,26.5,65,db_estimated,low,estimate: 밀가루 전 + 파,직접 측정치 없음,17.2
+KR-0362,빈대떡,korean,전류,200,25.0,3.0,22.0,50,db_estimated,low,"estimate: 녹두(저GI, Atkinson2008) + 기름",직접 측정치 없음,11.0
+KR-0400,찜닭,korean,찜류,300,25.0,2.0,23.0,62,db_estimated,low,estimate: 당면60(LimBJN2019) + 설탕 간장,직접 측정치 없음,14.3
+KR-0402,아구찜,korean,찜류,350,18.0,3.0,15.0,60,db_estimated,low,estimate: 콩나물/전분물 + 고추장,※ 가용탄수 15g,9.0
+KR-0410,닭도리탕,korean,찜류,350,18.0,2.5,15.5,60,db_estimated,low,estimate: 감자 + 고추장 양념,직접 측정치 없음,9.3
+KR-0411,코다리조림,korean,찜류,250,12.0,1.0,11.0,60,db_estimated,low,estimate: 물엿/고추장 양념,※ 가용탄수 11g,6.6
+KR-0412,안동찜닭,korean,찜류,350,30.0,2.0,28.0,62,db_estimated,low,estimate: 당면60(LimBJN2019) + 설탕 간장,직접 측정치 없음,17.4
+KR-0413,보리밥 정식,korean,정식,600,95.0,8.0,87.0,55,db_estimated,low,estimate: 보리밥50(LimBJN2019) 지배 + 반찬,정식 구성 가변,47.9
+KR-0414,백반 정식,korean,정식,600,90.0,6.0,84.0,68,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배 + 반찬,정식 구성 가변,57.1
+KR-0415,국밥 (돼지),korean,탕류,500,45.0,1.0,44.0,70,db_estimated,low,estimate: 백미밥70(LimBJN2019) 지배,직접 측정치 없음,30.8
+KR-0416,쌈밥 정식,korean,정식,500,60.0,5.0,55.0,65,db_estimated,low,estimate: 백미밥70(LimBJN2019) + 쌈채소(섬유),정식 구성 가변,35.8
+SD-0002,카페라떼,snack_drink,커피,355,15.0,0.0,15.0,35,db_estimated,low,estimate: 우유37(Atkinson2008),탄수 = 우유 유당,5.2
+SD-0003,콜라 (355ml),snack_drink,탄산음료,355,39.0,0.0,39.0,63,db_measured,high,Atkinson2008 Coca-Cola 63,,24.6
+SD-0005,오렌지 주스 (200ml),snack_drink,주스,200,21.0,0.5,20.5,50,db_measured,high,Atkinson2008 orange juice 50,,10.2
+SD-0006,초코우유 (200ml),snack_drink,우유,200,28.0,1.0,27.0,40,db_measured,low,"Atkinson2008 milk, chocolate flavoured 34-43",제품별 당 함량 편차,10.8
+SD-0007,식빵 (1장),snack_drink,빵류,30,14.0,0.5,13.5,75,db_measured,high,Atkinson2008,White wheat flour bread — 국제표 평균 75,10.1
+SD-0008,크로와상,snack_drink,빵류,60,26.0,1.0,25.0,67,db_measured,med,Atkinson2008,Croissant 67,16.8
+SD-0009,소금빵,snack_drink,빵류,55,22.0,0.5,21.5,70,db_estimated,low,estimate: 흰빵75(Atkinson2008) + 버터(지방 → GI 하향),소금빵 직접 측정치 없음,15.1
+SD-0010,마카롱 (1개),snack_drink,디저트,25,14.0,0.5,13.5,60,db_estimated,low,estimate: 아몬드가루(저GI) + 설탕/머랭(고GI),직접 측정치 없음,8.1
+SD-0011,떡 (송편 2개),snack_drink,디저트,80,32.0,1.0,31.0,60,db_estimated,low,estimate: 쌀떡; 가래떡 50.6(RDA-KHU2015) + 설탕/깨 소,※ 송편 직접 측정치 없음,18.6
+SD-0012,아이스크림 (1스쿱),snack_drink,디저트,70,17.0,0.5,16.5,57,db_measured,med,"Atkinson2008 ice cream, regular 57",,9.4
+SD-0013,붕어빵 (1개),snack_drink,디저트,80,30.0,1.0,29.0,70,db_estimated,low,estimate: 밀가루 반죽 + 팥소(설탕),직접 측정치 없음,20.3
+SD-0014,에너지바,snack_drink,간식,50,30.0,2.0,28.0,60,db_estimated,low,estimate: energy bar 30-70 중 시럽 함유형(Atkinson2008),※ 제품별 편차 큼,16.8
+SD-0021,유자차,snack_drink,차,200,20.0,0.5,19.5,60,db_estimated,low,"estimate: 유자청(sucrose 65, Atkinson2008)",직접 측정치 없음,11.7
+SD-0022,식혜,snack_drink,음료,200,22.0,0.0,22.0,75,db_estimated,low,"estimate: 엿기름 당화 → 맥아당 지배(maltose 105 상단, Atkinson2008)",※ 식혜 직접 측정치 없음. 상향 여지,16.5
+SD-0023,수정과,snack_drink,음료,200,18.0,0.5,17.5,65,db_estimated,low,"estimate: 흑설탕(sucrose 65, Atkinson2008)",직접 측정치 없음,11.4
+SD-0024,에너지 드링크 (레드불),snack_drink,음료,250,28.0,0.0,28.0,68,db_estimated,low,"estimate: 설탕음료(sucrose 65 / soft drink 63-68, Atkinson2008)",직접 측정치 없음,19.0
+SD-0025,스포츠 음료 (500ml),snack_drink,음료,500,32.0,0.0,32.0,78,db_measured,med,Atkinson2008 Gatorade / sports drink 78,,25.0
+SD-0030,호두과자 (3개),snack_drink,간식,60,18.0,1.0,17.0,70,db_estimated,low,estimate: 밀가루 + 설탕 + 팥소,직접 측정치 없음,11.9
+SD-0031,약과 (1개),snack_drink,간식,40,22.0,0.5,21.5,75,db_estimated,low,estimate: 밀가루 + 조청/꿀 + 튀김,직접 측정치 없음,16.1
+SD-0032,떡 (인절미 3개),snack_drink,간식,90,42.0,0.5,41.5,65,db_estimated,low,"estimate: 찹쌀떡(찹쌀=고GI, LimBJN2019) vs 냉각 노화전분(하향) 절충",※ 인절미 직접 측정치 없음. 편차 큼,27.0
+SD-0033,감자칩 (1봉),snack_drink,과자,60,30.0,1.5,28.5,56,db_measured,med,Atkinson2008 potato chips 56,,16.0
+SD-0034,초코파이 (1개),snack_drink,과자,35,21.0,0.5,20.5,65,db_estimated,low,estimate: 밀 + 설탕 + 마시멜로,직접 측정치 없음,13.3
+SD-0035,빼빼로 (1봉),snack_drink,과자,46,30.0,1.0,29.0,65,db_estimated,low,estimate: 밀 비스킷 + 초콜릿,직접 측정치 없음,18.9
+SD-0036,바닐라 라떼 (톨),snack_drink,커피,355,28.0,0.0,28.0,55,db_estimated,low,estimate: 우유37(Atkinson2008) + 바닐라시럽(sucrose 65),직접 측정치 없음,15.4
+SD-0037,딸기 스무디,snack_drink,음료,400,52.0,2.0,50.0,50,db_estimated,low,"estimate: 딸기(strawberry 40, Atkinson2008) + 시럽/우유",직접 측정치 없음,25.0

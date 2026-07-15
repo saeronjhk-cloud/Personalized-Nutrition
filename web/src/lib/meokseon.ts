@@ -6,7 +6,15 @@
 // 배포 URL은 VITE_MEOKSEON_API_URL(Railway). CORS는 먹선 서버 기본 '*'.
 // 소비 대상은 resolved 소비 계층(productModel) — candidate 미노출(통합 안전).
 
-const BASE = import.meta.env.VITE_MEOKSEON_API_URL || ''
+// BASE 정규화: 스킴이 없으면 https:// 자동 부여(스킴 누락 시 상대URL로 해석돼
+//   dev 서버 SPA fallback(HTML)을 받아 조용히 깨지는 footgun 방지). 후행 슬래시 제거.
+function normalizeBase(raw: string): string {
+  const v = (raw || '').trim().replace(/\/+$/, '')
+  if (!v) return ''
+  if (/^https?:\/\//i.test(v)) return v
+  return `https://${v}`
+}
+const BASE = normalizeBase(import.meta.env.VITE_MEOKSEON_API_URL || '')
 
 export interface MsProduct {
   product_id: number
@@ -86,6 +94,9 @@ export interface MsSearchItem {
   product_name: string
   brand?: string | null
   manufacturer?: string | null
+  food_type?: string | null
+  food_category?: string | null
+  image_url?: string | null
 }
 
 /** 제품 미등록(404). 콜드스타트 폴백 분기용. */

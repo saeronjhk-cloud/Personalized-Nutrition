@@ -53,3 +53,14 @@ Admin_Token.txt
 *Token.txt
 .streamlit/secrets.toml
 secrets/
+
+# --- 2026-07-11 보강: 시크릿 변형/CLI temp/eval 캐시/백업 ---
+*Keys*.txt
+*헬스픽*.txt
+**/.temp/
+supabase/.temp/
+**/.eval_cache/
+web/_bak_disc/
+
+# 폴더 통합 2단계: 백엔드(엔진·먹선·Vita50)는 앱 저장소에서 격리(시크릿·중첩repo 포함)
+/backends/

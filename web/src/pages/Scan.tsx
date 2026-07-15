@@ -34,6 +34,20 @@ const COLOR_HEX: Record<string, string> = { green: '#4a9e3f', yellow: '#f59e0b',
 const COLOR_LABEL: Record<string, string> = { green: '안전', yellow: '허용', orange: '주의', red: '위해' }
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']
 
+// 동명 제품 구분용 보조표기: 제조사·브랜드·분류 등에서 빈값/`general`/중복 제거 후 ' · ' 결합.
+function subtitleOf(...parts: (string | null | undefined)[]): string {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of parts) {
+    const v = (raw ?? '').trim()
+    if (!v || v === 'general' || v === 'null') continue
+    const k = v.toLowerCase()
+    if (seen.has(k)) continue
+    seen.add(k); out.push(v)
+  }
+  return out.join(' · ')
+}
+
 function scanSupported(): boolean {
   return typeof window !== 'undefined'
     && 'BarcodeDetector' in window
@@ -277,8 +291,11 @@ export default function Scan() {
                   {r.image_url
                     ? <img src={r.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
                     : <span style={{ width: 28, height: 28, borderRadius: 6, background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🍱</span>}
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-                    {r.product_name}
+                  <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.product_name}</span>
+                    {subtitleOf(r.brand, r.food_category) && (
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitleOf(r.brand, r.food_category)}</span>
+                    )}
                   </span>
                 </button>
                 <button type="button" className="btn btn-secondary" aria-label="이력 삭제"
@@ -316,9 +333,18 @@ export default function Scan() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
               {searchResults.map((it) => (
                 <li key={it.product_id}>
-                  <button type="button" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left' }}
+                  <button type="button" className="btn btn-secondary"
+                    style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10 }}
                     disabled={!it.barcode} onClick={() => it.barcode && lookupBarcode(it.barcode, 'search')}>
-                    {it.product_name}{it.brand ? ` · ${it.brand}` : ''}{!it.barcode ? ' (바코드 없음)' : ''}
+                    {it.image_url
+                      ? <img src={it.image_url} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+                      : <span style={{ width: 32, height: 32, borderRadius: 6, background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🍱</span>}
+                    <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.product_name}{!it.barcode ? ' (바코드 없음)' : ''}</span>
+                      {subtitleOf(it.manufacturer, it.brand, it.food_type) && (
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitleOf(it.manufacturer, it.brand, it.food_type)}</span>
+                      )}
+                    </span>
                   </button>
                 </li>
               ))}

@@ -22,3 +22,19 @@ export const INSIGHTS_ENABLED = import.meta.env.VITE_INSIGHTS_ENABLED === 'true'
  *   - 근거 IP: 통합앱_P1/61(배치결정)·62(화면·계측).
  */
 export const MEOKSEON_ENABLED = import.meta.env.VITE_MEOKSEON_ENABLED === 'true'
+
+/**
+ * MEAL_ENABLED: NutriLens 사진 식사기록(사진→분석→저장) 노출 여부. 기본 false.
+ *   - 로그인 필요(Edge JWT). 배포 시 meal-analysis-jobs·analysis-status Edge 배포 선행(75 가이드).
+ *   - 라이브 DB meal 스택(meal_log·analysis_job·meal-photos 버킷) 선행 필요(73).
+ *   - ⚠️ 출시 게이트: 촬영 전 민감정보(건강추론)+국외이전(OpenAI Vision) 동의 앱 강제.
+ *   - 활성화: 배포 환경변수 VITE_MEAL_ENABLED=true. 근거 IP: 통합앱_P1/66~75.
+ */
+export const MEAL_ENABLED = import.meta.env.VITE_MEAL_ENABLED === 'true'
+
+/**
+ * MEAL_CMIN_ENABLED: 잔반 정밀 비교(C-min, 식전+식후 2장) 노출. 기본 false.
+ *   - 엔진 photo_ai_hybrid + Edge Signed URL 배포 선행 필요(IP 87 작업지시서) + 정밀도 Eval GO.
+ *   - off면 식후 1장(Path B)만. 활성화: 배포 환경변수 VITE_MEAL_CMIN=true.
+ */
+export const MEAL_CMIN_ENABLED = import.meta.env.VITE_MEAL_CMIN === 'true'
