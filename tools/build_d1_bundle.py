@@ -60,7 +60,25 @@ def main() -> int:
     print(f"  {len(SOURCES)}개 정본 · {out.stat().st_size:,} bytes")
     for line in head:
         print("  " + line[3:])
-    print("\n→ Supabase Dashboard > SQL Editor 에 붙여넣고 Run 하세요.")
+
+    # ★ [세션31 사고] 처음엔 `Get-Content .tmp\d1_apply.sql -Raw | Set-Clipboard` 를 안내했다가
+    #   라이브 SQL Editor 에서 42601 이 났다. PowerShell 5.1 의 Get-Content 는 -Encoding 이 없으면
+    #   UTF-8 파일을 **시스템 ANSI(한국어 Windows = cp949)** 로 읽는다 → 한글이 mojibake 가 되고
+    #   그 과정에서 작은따옴표 구조가 무너져 SQL 이 깨진다
+    #   ('나트륨 red 제품 반복 → 저나트륨 대체' → '?샘듞瑜?red ... 泥?,'v1'  → syntax error).
+    #   → 안내문을 사람이 외우게 두지 않는다. **빌더가 정확한 명령을 찍는다.**
+    #   ReadAllText + 명시적 UTF8 인코딩은 PowerShell 5.1/7 양쪽에서 동일하게 안전하다.
+    win = str(out).replace("/", "\\")
+    print("\n" + "=" * 74)
+    print("1) 클립보드로 복사 — 아래를 그대로 붙여넣으세요 (한 줄):")
+    print("=" * 74)
+    print(f'[IO.File]::ReadAllText("{win}", [Text.Encoding]::UTF8) | Set-Clipboard')
+    print("=" * 74)
+    print("   ⚠️ `Get-Content -Raw | Set-Clipboard` 는 쓰지 마세요 — PowerShell 5.1 이")
+    print("      UTF-8 을 cp949 로 읽어 한글을 깨뜨리고 SQL 이 42601 로 죽습니다.")
+    print("      (-Encoding UTF8 을 줘도 되지만 위 방식이 버전 무관하게 확실합니다.)")
+    print("\n2) Supabase Dashboard > 영양공식 > SQL Editor > New query > Ctrl+V > Run")
+    print("3) 검증: python tools\\orchestrator_readiness.py   → 9테이블 전부 OK 기대")
     return 0
 
 
