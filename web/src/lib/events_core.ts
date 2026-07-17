@@ -20,6 +20,8 @@ export type AppEvent =
   | 'scan_report_click'
   | 'scan_share_click'
   | 'scan_saved'
+  | 'scan_promote'            // 비로그인 로컬 스캔 → 서버 승격 결과(IP/146)
+  | 'scan_login_cta_click'    // '이 기기에만 저장' 배너의 로그인 CTA(IP/146)
   // ── meal(NutriLens 식사기록) 퍼널 ──
   | 'meal_page_view'          // 식사 기록 페이지 진입
   | 'meal_consent_shown'      // 촬영 전 동의 게이트 노출

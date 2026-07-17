@@ -181,6 +181,81 @@ export async function saveScan(rec: ScanRecord): Promise<SaveTarget> {
   return 'local'
 }
 
+// ── 승격(비로그인 → 로그인) ─────────────────────────────────────────────
+/**
+ * 비로그인 상태에서 localStorage 에 쌓인 스캔을 로그인 사용자 행으로 **승격**한다.
+ *
+ * ★ 왜 필요한가 (세션31 실측 — IP/145 §8-2 는 이 문제를 과소평가했다):
+ *   §8-2 는 "비로그인 스캔은 로컬에만 저장 → **기기 바꾸면** 사라진다"고 적었다.
+ *   실제로는 **기기를 바꾸지 않아도 로그인하는 순간 사라진다.**
+ *   listScans() 는 로그인 사용자에게 cloud 를 읽는데, cloud 가 0건이어도 PostgREST 는
+ *   data=[] (error=null) 을 주므로 `if (!error && data)` 가 참이 되어 [] 를 리턴한다
+ *   → readLocal() 폴백을 **타지 않는다**. 그래서 이력이 통째로 증발한 것처럼 보인다.
+ *   데이터는 localStorage 에 살아있다 → 유실이 아니라 **미승격**이고, 그래서 복구된다.
+ *
+ * 계약:
+ *   · 멱등. 여러 번 불러도 행이 늘지 않는다(서버 부분 유니크 인덱스 + on conflict do nothing).
+ *   · 로컬이 비었거나 비로그인이면 **no-op**(네트워크 호출 없음). 어디서든 부담 없이 부를 수 있다.
+ *   · **성공했을 때만 로컬을 비운다.** 실패 시 보존 → 다음 진입에서 재시도된다.
+ *   · user_id·promoted_at 은 **서버가 정한다**(RPC). 클라이언트가 못 속인다 — IP/146 참조.
+ */
+export type PromoteStatus = 'noop' | 'promoted' | 'error'
+export interface PromoteResult {
+  status: PromoteStatus
+  attempted: number   // 서버로 보낸 행 수
+  promoted: number    // 실제로 새로 삽입된 행 수(중복 스킵분 제외)
+}
+
+export async function promoteLocalScans(): Promise<PromoteResult> {
+  const local = readLocal()
+  if (local.length === 0) return { status: 'noop', attempted: 0, promoted: 0 }
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { status: 'noop', attempted: 0, promoted: 0 }
+
+    // scanned_at(ISO 문자열) → epoch ms. 서버가 jsonb_typeof='number' 로 쓰레기를 거르지만,
+    // 로컬 포맷의 주인은 클라이언트이므로 여기서 먼저 정규화한다. 파싱 불가 행은 버린다.
+    const rows = local
+      .map((r) => {
+        const ms = new Date(r.scanned_at).getTime()
+        if (!r.barcode || !Number.isFinite(ms)) return null
+        return {
+          scanned_at_ms: ms,
+          barcode: r.barcode,
+          product_name: r.product_name,
+          brand: r.brand,
+          food_category: r.food_category,
+          image_url: r.image_url,
+          nutrition: r.nutrition,
+          additives: r.additives,
+          sodium_color: r.sodium_color,
+          sugars_color: r.sugars_color,
+        }
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+      .slice(0, LOCAL_CAP)   // 서버 상한(50)과 동일한 단일 출처
+
+    if (rows.length === 0) {
+      // 로컬이 전부 손상 — 재시도해도 결과가 같다. 무한 재시도 루프를 만들지 않는다.
+      try { localStorage.removeItem(LOCAL_KEY) } catch { /* 무시 */ }
+      return { status: 'noop', attempted: 0, promoted: 0 }
+    }
+
+    const { data, error } = await supabase.rpc('promote_local_scans', { p_scans: rows })
+    if (error) {
+      // 146 미적용(42883 undefined_function) · 오프라인 등. 로컬을 **비우지 않는다**.
+      console.debug('[scanHistory] 승격 실패 — 로컬 보존, 다음 진입에 재시도:', error.message)
+      return { status: 'error', attempted: rows.length, promoted: 0 }
+    }
+    // ★ 성공한 뒤에만 비운다. 이 순서가 뒤집히면 승격 실패 시 진짜 유실이 된다.
+    try { localStorage.removeItem(LOCAL_KEY) } catch { /* 무시 */ }
+    return { status: 'promoted', attempted: rows.length, promoted: Number(data) || 0 }
+  } catch (e) {
+    console.debug('[scanHistory] 승격 예외 — 로컬 보존:', e)
+    return { status: 'error', attempted: local.length, promoted: 0 }
+  }
+}
+
 // ── 조회 ───────────────────────────────────────────────────────────────
 function mapRow(row: Record<string, any>): ScanRecord {
   return {

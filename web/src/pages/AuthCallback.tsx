@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { promoteLocalScans } from "../lib/scanHistory";
+import { track } from "../lib/events";
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("로그인 처리 중...");
@@ -30,6 +32,17 @@ export default function AuthCallback() {
         } else {
           console.log("[AuthCallback] linked", sessionId, "to user", session.user.id);
         }
+      }
+      // 비로그인 스캔 승격(IP/146). 로그인 직후가 자연스러운 시점이다.
+      // 실패해도 로그인 흐름을 막지 않는다 — 멱등이므로 Scan 진입 시 재시도된다.
+      try {
+        const p = await promoteLocalScans();
+        if (p.status !== "noop") {
+          console.log("[AuthCallback] scan promote:", p);
+          track("scan_promote", { status: p.status, attempted: p.attempted, promoted: p.promoted, at: "auth_callback" });
+        }
+      } catch (e) {
+        console.debug("[AuthCallback] promote skipped:", e);
       }
       sub.subscription.unsubscribe();
       navigate("/", { replace: true });

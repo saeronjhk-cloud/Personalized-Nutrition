@@ -4,9 +4,10 @@ import { getLatestRecord } from '../lib/surveyHistory'
 import { personalizeProduct } from '../domain/meokseon/personalize'
 import { track } from '../lib/events'
 import {
-  buildScanRecord, saveScan, listScans, deleteScan, summarizeScans,
+  buildScanRecord, saveScan, listScans, deleteScan, summarizeScans, promoteLocalScans,
   type ScanRecord, type ScanSummary,
 } from '../lib/scanHistory'
+import { supabase } from '../lib/supabase'
 import {
   getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem,
@@ -73,6 +74,8 @@ export default function Scan() {
 
   const [history, setHistory] = useState<ScanRecord[]>([])
   const [summary, setSummary] = useState<ScanSummary | null>(null)
+  // null = 아직 모름(깜빡임 방지). 비로그인 안내 배너는 false 일 때만 띄운다.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null)
 
   const latestRecord = getLatestRecord()
   // 개인화는 먹선 traffic_light 색을 소비(자체 임계 없음). 근거: 64 재평가 v1.
@@ -81,9 +84,24 @@ export default function Scan() {
     : null
 
   async function refreshHistory() {
+    // ★ 승격을 listScans 보다 **먼저** 부른다(IP/146).
+    //   AuthCallback 의 SIGNED_IN 훅만으로는 부족하다: 이미 세션이 있는 재방문자는
+    //   SIGNED_IN 이 발화하지 않아 로컬 스캔이 **영원히 승격되지 않는다.**
+    //   멱등이고 로컬이 비었으면 no-op(네트워크 호출 없음) → 여기서 불러도 부담 없다.
+    //   순서가 뒤집히면 승격 직후 이력이 한 박자 늦게 뜬다.
+    try {
+      const p = await promoteLocalScans()
+      if (p.status !== 'noop') {
+        track('scan_promote', { status: p.status, attempted: p.attempted, promoted: p.promoted, at: 'scan_page' })
+      }
+    } catch { /* 승격 실패가 이력 조회를 막아선 안 된다 */ }
     const list = await listScans()
     setHistory(list)
     setSummary(summarizeScans(list))
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      setSignedIn(!!user)
+    } catch { setSignedIn(null) }
   }
 
   // 페이지 진입 계측 + 이력 로드
@@ -281,6 +299,26 @@ export default function Scan() {
             이번 주 {summary.thisISOWeek}건 · 최근 7일 {summary.last7Days}건
             {summary.streakWeeks >= 2 ? ` · ${summary.streakWeeks}주 연속 🔥` : ''}
           </p>
+          {/* ★ 비로그인 저장 위치 고지(IP/146). 화면엔 이력이 멀쩡히 보이므로
+              사용자는 저장됐다고 믿는다 — 실제로는 이 기기에만 있다. 그걸 말해준다.
+              로그인하면 promoteLocalScans() 가 이 이력을 서버로 올린다(유실 아님). */}
+          {signedIn === false && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+              padding: '8px 10px', marginBottom: 10, borderRadius: 8,
+              background: 'var(--border-light)', fontSize: 12, lineHeight: 1.5,
+              color: 'var(--text-secondary)',
+            }}>
+              <span style={{ flex: 1, minWidth: 180 }}>
+                이 이력은 지금 <strong>이 기기에만</strong> 저장돼 있어요.
+                로그인하면 그대로 옮겨져 기기를 바꿔도 유지됩니다.
+              </span>
+              <button type="button" className="btn btn-secondary" style={{ fontSize: 12, padding: '4px 10px' }}
+                onClick={() => { track('scan_login_cta_click', { local_n: history.length }); navigate('/login') }}>
+                로그인
+              </button>
+            </div>
+          )}
           <WeekBars weeks={summary.weeks} />
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
             {history.slice(0, 5).map((r) => (
