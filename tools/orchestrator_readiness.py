@@ -34,12 +34,13 @@ OUTPUTS = ["reason_code_registry", "action_candidates", "orchestrator_decisions"
 
 
 def probe(rest, table):
-    """(존재?, 행수). 42P01 = 테이블 없음."""
+    """(존재?, 행수). ★ 한국어 안내문을 문자열 매칭하지 않는다 — 타입·코드로 분류한다.
+    (초안은 str(SystemExit) 에 '42P01' 이 있는지 봤는데, HEAD 응답엔 본문이 없어
+     서버 상세가 비었고 라이브에서 그대로 죽었다.)"""
     try:
         return True, rest.count(table)
-    except SystemExit as e:
-        m = str(e)
-        if "42P01" in m or "does not exist" in m:
+    except bf.RestError as e:
+        if e.missing_relation:
             return False, 0
         raise
 
@@ -77,7 +78,7 @@ def main() -> int:
         print(f"  scan_history {tot:,} 행 · sodium_color 있음 {col:,} · red {red:,}")
         print(f"  → MS_REPEAT_RED_SODIUM 임계 3건. 현재 red {red}건 → "
               f"{'발화 가능' if red >= 3 else '미발화(설계대로)'}")
-    except SystemExit as e:
+    except bf.RestError as e:
         print(f"  (스캔 품질 조회 실패: {str(e).splitlines()[0]})")
 
     print("\n" + "=" * 70)
@@ -98,4 +99,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except bf.RestError as e:
+        sys.exit(str(e))

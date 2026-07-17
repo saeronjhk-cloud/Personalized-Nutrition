@@ -105,6 +105,43 @@ def normalize_base(u: str) -> str:
     return u
 
 
+class RestError(Exception):
+    """PostgREST 오류. **코드를 들고 다닌다.**
+
+    [세션31] 처음엔 SystemExit(친절한 문자열) 만 던졌다. 그래서 호출자가 '테이블 없음'을
+    판별하려면 **한국어 안내문을 문자열 매칭**해야 했고, 실제로 그 방식이 깨졌다
+    (tools/orchestrator_readiness.py 가 라이브에서 죽음). 오류 분류는 문자열이 아니라
+    **타입과 코드**로 한다. CLI 친절함은 __main__ 에서 str(e) 로 유지된다.
+    """
+
+    def __init__(self, code: int, path: str, detail: str = "") -> None:
+        self.code, self.path, self.detail = code, path, detail
+        super().__init__(self.explain())
+
+    @property
+    def missing_relation(self) -> bool:
+        """테이블/뷰 자체가 없다(PostgREST 404 · PGRST205 · 42P01)."""
+        return self.code == 404 or "42P01" in self.detail or "PGRST205" in self.detail
+
+    def explain(self) -> str:
+        if self.code == 401:
+            return ("[중단] Supabase 401 Unauthorized — 키가 거부됐습니다.\n"
+                    "        가장 흔한 원인: SUPABASE_SERVICE_ROLE_KEY 가 실제 키가 아님(플레이스홀더/anon 키/오타).\n"
+                    "        확인: 리포 루트 .env 의 SUPABASE_SERVICE_ROLE_KEY 가 eyJ… 로 시작하고 role=service_role 인지.\n"
+                    f"        서버 응답: {self.detail}")
+        if self.code == 404:
+            return (f"[중단] Supabase 404 — 테이블/뷰가 없습니다 ({self.path}).\n"
+                    f"        서버 응답: {self.detail}")
+        if self.code == 403:
+            return ("[중단] Supabase 403 — 권한 거부. service_role 키가 맞는지, RLS 정책을 확인하세요.\n"
+                    f"        서버 응답: {self.detail}")
+        if self.code == 400 and "42703" in self.detail:
+            return (f"[중단] Supabase 400/42703 — 컬럼이 없습니다 ({self.path}).\n"
+                    "        해당 마이그레이션이 아직 적용되지 않았을 수 있습니다.\n"
+                    f"        서버 응답: {self.detail}")
+        return f"[중단] Supabase HTTP {self.code} ({self.path})\n        서버 응답: {self.detail}"
+
+
 # ── Supabase PostgREST (의존성 없이 표준 라이브러리만) ────────────────────
 class Rest:
     def __init__(self, url: str, key: str):
@@ -124,28 +161,34 @@ class Rest:
                 raw = r.read().decode()
                 return json.loads(raw) if raw.strip() else None
         except urllib.error.HTTPError as e:
-            raise SystemExit(self._explain(e, path)) from None
+            raise self._to_error(e, path, "GET") from None
 
-    @staticmethod
-    def _explain(e: Any, path: str) -> str:
-        """트레이스백 대신 **원인과 다음 행동**을 준다. 미봉책이 아니라 진단이다."""
+    def _to_error(self, e: Any, path: str, method: str) -> RestError:
+        """HTTPError → RestError. **오류 경로에서만** 본문을 확보한다.
+
+        ★ [세션31] count() 를 HEAD 로 바꾼 순간 이게 필요해졌다 — **HEAD 응답엔 본문이 없다.**
+          그래서 서버가 준 42P01/PGRST205 진단이 통째로 사라지고 '서버 응답: ' 이 빈 채로
+          출력됐다. 오류일 때 한 번만 GET 으로 다시 물어 본문을 되찾는다(정상 경로 비용 0).
+        """
         try:
             detail = e.read().decode()[:300]
         except Exception:
             detail = ""
-        if e.code == 401:
-            return ("[중단] Supabase 401 Unauthorized — 키가 거부됐습니다.\n"
-                    "        가장 흔한 원인: SUPABASE_SERVICE_ROLE_KEY 가 실제 키가 아님(플레이스홀더/anon 키/오타).\n"
-                    "        확인: 리포 루트 .env 의 SUPABASE_SERVICE_ROLE_KEY 가 eyJ… 로 시작하고 role=service_role 인지.\n"
-                    f"        서버 응답: {detail}")
-        if e.code == 404:
-            return (f"[중단] Supabase 404 — 테이블/컬럼이 없습니다 ({path}).\n"
-                    "        마이그레이션 136 이 아직 적용되지 않았을 수 있습니다.\n"
-                    f"        서버 응답: {detail}")
-        if e.code == 403:
-            return ("[중단] Supabase 403 — 권한 거부. service_role 키가 맞는지, RLS 정책을 확인하세요.\n"
-                    f"        서버 응답: {detail}")
-        return f"[중단] Supabase HTTP {e.code} ({path})\n        서버 응답: {detail}"
+        if not detail and method == "HEAD":
+            try:
+                req = urllib.request.Request(f"{self.url}/rest/v1/{path}", method="GET")
+                req.add_header("apikey", self.key)
+                req.add_header("Authorization", f"Bearer {self.key}")
+                with urllib.request.urlopen(req, timeout=TIMEOUT):
+                    pass
+            except urllib.error.HTTPError as e2:
+                try:
+                    detail = e2.read().decode()[:300]
+                except Exception:
+                    detail = ""
+            except Exception:
+                detail = ""
+        return RestError(e.code, path, detail)
 
     def select(self, path: str) -> list[dict]:
         return self._req("GET", path) or []
@@ -176,7 +219,7 @@ class Rest:
             with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
                 cr = r.headers.get("Content-Range", "*/0")
         except urllib.error.HTTPError as e:
-            raise SystemExit(self._explain(e, q)) from None
+            raise self._to_error(e, q, "HEAD") from None
         return int(cr.split("/")[-1]) if cr.split("/")[-1].isdigit() else 0
 
     def upsert(self, table: str, rows: list[dict]) -> None:
@@ -350,4 +393,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except RestError as e:
+        sys.exit(str(e))   # 트레이스백 대신 원인. 분류는 타입으로, 표시는 문자열로.
