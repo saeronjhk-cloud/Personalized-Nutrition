@@ -40,6 +40,14 @@ def fetch_spec(url: str, key: str) -> dict:
         return json.loads(r.read().decode())
 
 
+def fetch_rows(url: str, key: str, table: str, limit: int = 20) -> list:
+    req = urllib.request.Request(f"{url.rstrip('/')}/rest/v1/{table}?select=*&limit={limit}", method="GET")
+    req.add_header("apikey", key)
+    req.add_header("Authorization", f"Bearer {key}")
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read().decode())
+
+
 def tables(spec: dict) -> dict[str, dict]:
     # PostgREST 는 버전에 따라 definitions(swagger2) 또는 components.schemas(oas3)
     d = spec.get("definitions")
@@ -52,19 +60,48 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="영양공식 스키마 실측(읽기 전용)")
     ap.add_argument("--all", action="store_true", help="전체 테이블 이름만 나열")
     ap.add_argument("--table", help="특정 테이블 컬럼 상세")
+    ap.add_argument("--sample", help="실행: 그 테이블의 실제 1행에서 jsonb **키**를 뽑는다(값은 안 찍음)")
     args = ap.parse_args()
 
     bf.load_dotenv()
     url = bf.env("SUPABASE_URL")
-    spec = fetch_spec(url, bf.env("SUPABASE_SERVICE_ROLE_KEY"))
-    t = tables(spec)
+    if not args.sample:
+        spec = fetch_spec(url, bf.env("SUPABASE_SERVICE_ROLE_KEY"))
+        t = tables(spec)
+    else:
+        t = {}
     print("=" * 72)
-    print(f"영양공식 스키마 실측 — {url}   (테이블 {len(t)}개)")
+    print(f"영양공식 스키마 실측 — {url}" + (f"   (테이블 {len(t)}개)" if t else ""))
     print("=" * 72)
 
     if args.all:
         for name in sorted(t):
             print(f"  {name}")
+        return 0
+
+    if args.sample:
+        # ★ 왜 필요한가: TypeScript 인터페이스는 **런타임 jsonb 를 구속하지 않는다.**
+        #   nutrilens.ts:11 MealFood 에 gi 가 없다고 해서 meal_log.foods[] 에 gi 가 없는 건 아니다.
+        #   선언이 아니라 **데이터**를 본다. 값은 출력하지 않는다(개인정보) — 키만.
+        rows = fetch_rows(url, bf.env("SUPABASE_SERVICE_ROLE_KEY"), args.sample)
+        print(f"\n[{args.sample}] 실제 행 {len(rows)}건에서 jsonb 키 추출 (★값은 출력 안 함)")
+        if not rows:
+            print("  행 없음 — 표본이 없어 판정 불가.")
+            return 0
+        for col in sorted(rows[0].keys()):
+            vals = [r.get(col) for r in rows]
+            if any(isinstance(v, (dict, list)) for v in vals):
+                keys, n_items = set(), 0
+                for v in vals:
+                    if isinstance(v, dict):
+                        keys |= set(v.keys())
+                    elif isinstance(v, list):
+                        for it in v:
+                            n_items += 1
+                            if isinstance(it, dict):
+                                keys |= set(it.keys())
+                kind = "배열 원소" if any(isinstance(v, list) for v in vals) else "객체"
+                print(f"  {col:<22} [{kind}{f', {n_items}개' if n_items else ''}] 키: {sorted(keys)}")
         return 0
 
     want = [args.table] if args.table else FOCUS
