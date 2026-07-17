@@ -151,9 +151,22 @@ class Rest:
         return self._req("GET", path) or []
 
     def count(self, table: str, where: str = "") -> int:
-        """PostgREST 의 Content-Range 로 정확한 행 수를 센다."""
-        q = f"{table}?select=id&limit=1" + (f"&{where}" if where else "")
-        req = urllib.request.Request(f"{self.url}/rest/v1/{q}", method="GET")
+        """PostgREST 의 Content-Range 로 정확한 행 수를 센다.
+
+        ★ [세션31 수정] 구 구현은 `select=id` 를 하드코딩해 **모든 테이블에 id 컬럼이 있다고
+          가정**했다. meokseon_tl_cache 의 PK 는 barcode 다(IP/136 §1: `barcode text primary key`)
+          → 라이브에서 42703 `column meokseon_tl_cache.id does not exist` 로 죽었다.
+          세션30 이 못 잡은 이유: 파싱 eval 은 **먹선 API 만** 봤고 PostgREST 경로는
+          샌드박스 외부망 차단으로 **한 번도 실행된 적이 없다**(IP/145 §3.3).
+          17/17 통과는 '파싱이 맞다'였지 '잡이 돈다'가 아니었다.
+
+        → HEAD + select=* : 컬럼 이름에 의존하지 않는다. supabase-js 의
+          `.select('*', { count: 'exact', head: true })` 와 같은 관용구다.
+          부수효과로 **행 본문을 가져오지 않는다** — 스캔 이력 원문을 불필요하게 끌어올
+          이유가 없으므로 프라이버시에도 낫다.
+        """
+        q = f"{table}?select=*&limit=1" + (f"&{where}" if where else "")
+        req = urllib.request.Request(f"{self.url}/rest/v1/{q}", method="HEAD")
         req.add_header("apikey", self.key)
         req.add_header("Authorization", f"Bearer {self.key}")
         req.add_header("Prefer", "count=exact")
@@ -216,7 +229,7 @@ def report(rest: Rest) -> dict:
     total = rest.count("scan_history")
     with_bc = rest.count("scan_history", "barcode=not.is.null")
     filled = rest.count("scan_history", "barcode=not.is.null&sodium_color=not.is.null")
-    cached = rest.count("meokseon_tl_cache") if True else 0
+    cached = rest.count("meokseon_tl_cache")
     rate = (filled / with_bc) if with_bc else 0.0
     print("\n" + "=" * 58)
     print("실측 리포트 (IP/136 §1.8 미확인 항목 해소)")
