@@ -72,25 +72,76 @@ def get_json(url: str, timeout: int = 15):
         return json.loads(r.read().decode())
 
 
-def collect(base: str, limit: int) -> list[str]:
+def extract_products(d) -> list:
+    """검색 응답에서 제품 배열을 꺼낸다. **모양을 하나로 단정하지 않는다.**
+
+    ★ [세션31] 초안은 d['products'] 만 봤고(web/src/lib/meokseon.ts:149 와 동일), 응답이
+      다르면 조용히 [] 를 리턴했다. 실측에서 0종이 나왔는데 **오류 메시지가 한 줄도 없었다**
+      — 실패가 성공처럼 보였다. 이 세션 내내 지적한 바로 그 패턴이다.
+      → 알려진 모양을 순서대로 시도하고, 전부 실패하면 **원문을 보여준다.**
+    """
+    if isinstance(d, list):
+        return d
+    if not isinstance(d, dict):
+        return []
+    for k in ("products", "items", "results", "data", "rows", "list"):
+        v = d.get(k)
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict):                     # {data:{products:[...]}}
+            for k2 in ("products", "items", "results"):
+                if isinstance(v.get(k2), list):
+                    return v[k2]
+    return []
+
+
+def barcode_of(p) -> str:
+    if not isinstance(p, dict):
+        return ""
+    for k in ("barcode", "product_barcode", "code", "gtin"):
+        v = p.get(k)
+        if v:
+            return str(v).strip()
+    return ""
+
+
+def collect(base: str, limit: int) -> list[tuple[str, str]]:
     seen: dict[str, str] = {}
     print(f"[1/2] 검색어 {len(TERMS)}종으로 바코드 표집 (목표 {limit}종)...")
+    shown = False
     for t in TERMS:
         if len(seen) >= limit:
             break
+        url = f"{base}/api/products/search?q={urllib.parse.quote(t)}&limit=30"
         try:
-            d = get_json(f"{base}/api/products/search?q={urllib.parse.quote(t)}&limit=30")
-        except Exception as e:
-            print(f"    · '{t}' 검색 실패({type(e).__name__}) — 건너뜀")
+            d = get_json(url)
+        except urllib.error.HTTPError as e:
+            print(f"    · '{t}' HTTP {e.code} — {url}")
             continue
-        for p in (d or {}).get("products", []):
-            bc = (p.get("barcode") or "").strip()
+        except Exception as e:
+            print(f"    · '{t}' 실패({type(e).__name__}) — {url}")
+            continue
+        prods = extract_products(d)
+        if not prods and not shown:
+            # ★ 조용히 0 을 리턴하지 않는다. 왜 0 인지 보여준다.
+            shown = True
+            print(f"    ★ '{t}' 200 OK 인데 제품 배열이 안 잡힘. 응답 원문(앞 400자):")
+            print(f"      URL: {url}")
+            print(f"      {json.dumps(d, ensure_ascii=False)[:400]}")
+            if isinstance(d, dict):
+                print(f"      최상위 키: {list(d.keys())}")
+        for p in prods:
+            bc = barcode_of(p)
             if bc and bc not in seen:
                 seen[bc] = t
             if len(seen) >= limit:
                 break
         time.sleep(0.15)
     print(f"  → 고유 바코드 {len(seen):,}종 확보")
+    if not seen:
+        print("\n  ⚠️ 0종. 위 응답 원문을 보고 파서를 맞추세요.")
+        print("     먹선 API 자체는 살아있다(GET /api/products/:barcode 는 응답함).")
+        print("     검색 엔드포인트의 계약만 web/src/lib/meokseon.ts:149 의 가정과 다르다.")
     return list(seen.items())
 
 
