@@ -100,6 +100,7 @@ def probe(base: str, pairs: list[tuple[str, str]]) -> dict:
     by_term: dict[str, Counter] = defaultdict(Counter)
     n = tl_any = tl_sodium = tl_sugars = 0
     na_sodium_raw = na_sodium_missing = 0
+    reds: list[tuple[str, str]] = []   # MS_REPEAT_RED_SODIUM 실증용 (barcode, 제품명)
     for i, (bc, term) in enumerate(pairs, 1):
         try:
             d = get_json(f"{base}/api/products/{urllib.parse.quote(bc)}")
@@ -114,6 +115,8 @@ def probe(base: str, pairs: list[tuple[str, str]]) -> dict:
             c = (nutrients.get(k) or {}).get("color")
             return c if c in bf.VALID_COLORS else None
         s, g = col("sodium"), col("sugars")
+        if s == "red":
+            reds.append((bc, ((d or {}).get("product") or {}).get("product_name") or "?"))
         has_any = bool(s or g or col("sat_fat"))
         tl_any += has_any; tl_sodium += bool(s); tl_sugars += bool(g)
         by_term[term]["n"] += 1
@@ -127,7 +130,7 @@ def probe(base: str, pairs: list[tuple[str, str]]) -> dict:
         time.sleep(0.15)
     return dict(n=n, tl_any=tl_any, tl_sodium=tl_sodium, tl_sugars=tl_sugars,
                 na_sodium_raw=na_sodium_raw, na_sodium_missing=na_sodium_missing,
-                status=st, by_term=by_term)
+                status=st, by_term=by_term, reds=reds)
 
 
 def line(label: str, k: int, n: int) -> None:
@@ -202,6 +205,25 @@ def main() -> int:
     for t, c in sorted(r["by_term"].items(), key=lambda x: -x[1]["n"])[:14]:
         if c["n"]:
             print(f"     {t:<10} {c['tl']:>3}/{c['n']:<3} = {c['tl']/c['n']*100:5.1f}%")
+
+    # ★ MS_REPEAT_RED_SODIUM 실증 경로 — 세션31 발견:
+    #   이 코드의 태그는 sodium_reduction·food_swap 이고 둘 다 TAG_DATA_REQUIREMENTS 가 [] 다
+    #   ("최소 subset: 프로파일이 없어도 안전한 액션(침묵 방지)", safety.ts:118-119).
+    #   → user_safety_profiles 없이(=fail-closed 상태로) **유일하게 억제를 통과**하는 카드다.
+    #   NL_* 는 전부 ED_SCREEN_TOOL_CONFIRMED=false 때문에 cannot_assess 로 죽는다.
+    #   임계는 7일 내 red 3건(MS_RED_REPEAT_THRESHOLD_7D). 아래 제품을 3개 스캔하면 카드가 뜬다.
+    print("\n" + "=" * 66)
+    print(f"★ 나트륨 red 제품 {len(r['reds'])}종 — 첫 카드 실증용 (7일 내 3개 스캔 시 발화)")
+    print("=" * 66)
+    if r["reds"]:
+        for bc, nm in r["reds"][:15]:
+            print(f"  {bc:<16} {nm[:38]}")
+        if len(r["reds"]) < 3:
+            print(f"\n  ⚠️ {len(r['reds'])}종뿐 — 임계 3건에 미달. --limit 을 올려 더 표집하세요.")
+    else:
+        print("  ★ 0종. 이 표본에선 나트륨 red 판정을 받은 제품이 없다.")
+        print("     → MS_REPEAT_RED_SODIUM 은 실데이터로 실증 불가.")
+        print("       카드를 보려면 서박사 안전문항 확정(NL_* 해금)이 유일한 길이다.")
 
     print("\n" + "=" * 66)
     rate = r["tl_sodium"] / n if n else 0
