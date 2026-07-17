@@ -22,8 +22,11 @@
   scan_history 는 UPDATE 만 하며(색 2칸), 행을 생성/삭제하지 않는다. 신규 결합 없음(IP/136 §6).
 
 사용
+  [세션31] 리포 루트 .env 에 아래 3개가 있으면 **아무것도 지정할 필요 없다**(권장, CLAUDE.md 보안 원칙).
+    SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / MEOKSEON_API_URL
+  셸 환경변수가 항상 우선하므로 임시 override 도 가능하다:
   export SUPABASE_URL=https://lrnuqhpgyuizfggxgxpl.supabase.co
-  export SUPABASE_SERVICE_ROLE_KEY=...        # RLS 우회 필요(scan_history 에 UPDATE 정책이 없음)
+  export SUPABASE_SERVICE_ROLE_KEY=eyJ...     # RLS 우회 필요(scan_history 에 UPDATE 정책이 없음)
   export MEOKSEON_API_URL=https://<railway>   # web 의 VITE_MEOKSEON_API_URL 과 동일 값
   python3 tools/meokseon_tl_backfill.py --dry-run     # 실측만, 쓰기 없음
   python3 tools/meokseon_tl_backfill.py               # 캐시 워밍 + 백필
@@ -36,6 +39,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import pathlib
 import sys
 import time
 import urllib.error
@@ -53,10 +57,43 @@ SLEEP_BETWEEN = 0.15   # 먹선 서버 예의(rate limit 회피)
 
 
 # ── 설정 ──────────────────────────────────────────────────────────────────
+def load_dotenv() -> None:
+    """리포 루트의 .env 를 읽어 **비어 있는** 환경변수만 채운다(기존 env 가 항상 우선).
+
+    [세션31] 이전엔 사용자가 셸에 키를 직접 붙여넣어야 했고, 실제로 플레이스홀더를 그대로
+    붙여넣어 401 이 났다. CLAUDE.md 보안 원칙이 "비밀은 .env 에만"이라고 이미 정해두었으므로
+    정답은 '더 친절한 안내문'이 아니라 **.env 를 읽는 것**이다.
+    """
+    path = pathlib.Path(__file__).resolve().parents[1] / ".env"
+    if not path.exists():
+        return
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raw = path.read_text(encoding="cp949", errors="replace")
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k, v = k.strip(), v.strip().strip('"').strip("'")
+        if k and v and not os.environ.get(k, "").strip():
+            os.environ[k] = v
+
+
 def env(name: str, required: bool = True) -> str:
     v = os.environ.get(name, "").strip()
+    # ★ 플레이스홀더를 그대로 붙여넣은 경우(세션31 실제 사고). 401 로 죽기 전에 여기서 잡는다.
+    #   PowerShell 은 따옴표 안의 '>' 를 리다이렉션으로 보지 않으므로 조용히 통과해 버린다.
+    if v.startswith("<") and v.endswith(">"):
+        sys.exit(f"[중단] {name} 에 플레이스홀더가 그대로 들어갔습니다: {v}\n"
+                 f"        → .env 에 실제 값을 넣거나(권장), 셸에 실제 값을 지정하세요.")
+    if name.endswith("SERVICE_ROLE_KEY") and v and not v.startswith("eyJ"):
+        sys.exit(f"[중단] {name} 가 JWT 형식이 아닙니다(eyJ… 로 시작해야 함). 값 길이={len(v)}\n"
+                 f"        → anon 키나 Project ID 를 잘못 넣었을 수 있습니다.")
     if required and not v:
-        sys.exit(f"[중단] 환경변수 {name} 가 필요합니다. 파일 상단 docstring 참고.")
+        sys.exit(f"[중단] {name} 가 필요합니다. 리포 루트 .env 에 넣거나 환경변수로 지정하세요.\n"
+                 f"        파일 상단 docstring 참고.")
     return v
 
 
@@ -82,9 +119,33 @@ class Rest:
         req.add_header("Content-Type", "application/json")
         for k, v in (extra_headers or {}).items():
             req.add_header(k, v)
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            raw = r.read().decode()
-            return json.loads(raw) if raw.strip() else None
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                raw = r.read().decode()
+                return json.loads(raw) if raw.strip() else None
+        except urllib.error.HTTPError as e:
+            raise SystemExit(self._explain(e, path)) from None
+
+    @staticmethod
+    def _explain(e: Any, path: str) -> str:
+        """트레이스백 대신 **원인과 다음 행동**을 준다. 미봉책이 아니라 진단이다."""
+        try:
+            detail = e.read().decode()[:300]
+        except Exception:
+            detail = ""
+        if e.code == 401:
+            return ("[중단] Supabase 401 Unauthorized — 키가 거부됐습니다.\n"
+                    "        가장 흔한 원인: SUPABASE_SERVICE_ROLE_KEY 가 실제 키가 아님(플레이스홀더/anon 키/오타).\n"
+                    "        확인: 리포 루트 .env 의 SUPABASE_SERVICE_ROLE_KEY 가 eyJ… 로 시작하고 role=service_role 인지.\n"
+                    f"        서버 응답: {detail}")
+        if e.code == 404:
+            return (f"[중단] Supabase 404 — 테이블/컬럼이 없습니다 ({path}).\n"
+                    "        마이그레이션 136 이 아직 적용되지 않았을 수 있습니다.\n"
+                    f"        서버 응답: {detail}")
+        if e.code == 403:
+            return ("[중단] Supabase 403 — 권한 거부. service_role 키가 맞는지, RLS 정책을 확인하세요.\n"
+                    f"        서버 응답: {detail}")
+        return f"[중단] Supabase HTTP {e.code} ({path})\n        서버 응답: {detail}"
 
     def select(self, path: str) -> list[dict]:
         return self._req("GET", path) or []
@@ -98,8 +159,11 @@ class Rest:
         req.add_header("Prefer", "count=exact")
         req.add_header("Range-Unit", "items")
         req.add_header("Range", "0-0")
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            cr = r.headers.get("Content-Range", "*/0")
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+                cr = r.headers.get("Content-Range", "*/0")
+        except urllib.error.HTTPError as e:
+            raise SystemExit(self._explain(e, q)) from None
         return int(cr.split("/")[-1]) if cr.split("/")[-1].isdigit() else 0
 
     def upsert(self, table: str, rows: list[dict]) -> None:
@@ -174,6 +238,7 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=0, help="처리할 최대 바코드 수(0=전체)")
     args = ap.parse_args()
 
+    load_dotenv()   # 셸 env 가 항상 우선. 없으면 리포 루트 .env 에서 채운다.
     rest = Rest(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"))
     base = normalize_base(env("MEOKSEON_API_URL", required=not args.report_only))
 
