@@ -87,7 +87,7 @@ export default function Home() {
       {/* ━━ 4기능 허브 — 앱 진입점 (우선순위: 먹선 → NutriLens → 건강진단 → 영양제) ━━ */}
       <section className="feature-hub section-animate">
         <div className="section-category" style={{ textAlign: 'center' }}>서박사의 영양공식</div>
-        <h2 className="feature-hub-title">먹는 것부터 챙기는 것까지, 한 곳에서</h2>
+        <h2 className="feature-hub-title">먹는 것부터 챙기는 것까지, 한&nbsp;곳에서</h2>
         <p className="feature-hub-sub">
           가공식품 성분을 확인하고, 식사를 기록하고, 내 건강 데이터를 모아
           — 나에게 맞는 영양제까지. 흩어져 있던 건강 관리를 하나로 모았습니다.

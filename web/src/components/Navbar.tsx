@@ -23,7 +23,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
-          <img src="/logo.png" alt="서박사의 영양공식" className="brand-logo" />
+          <img src="/logo-character.png" alt="서박사의 영양공식" className="brand-logo" />
         </Link>
 
         <button className="nav-toggle" onClick={() => setOpen(!open)} aria-label="메뉴">

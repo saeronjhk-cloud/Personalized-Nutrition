@@ -1026,9 +1026,11 @@ input[type="range"]::-webkit-slider-thumb {
 .feature-hub-title {
   text-align: center; font-size: 24px; font-weight: 800;
   color: var(--primary-dark); margin: 4px 0 6px;
+  word-break: keep-all;
 }
 .feature-hub-sub {
   text-align: center; font-size: 14px; color: var(--text-secondary); margin-bottom: 22px;
+  word-break: keep-all;
 }
 .feature-hub-grid {
   display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
