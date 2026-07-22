@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getLatestRecord } from '../lib/surveyHistory'
 import { personalizeProduct } from '../domain/meokseon/personalize'
 import { track } from '../lib/events'
+import { reportScanMiss } from '../lib/scanMiss'
 import {
   buildScanRecord, saveScan, listScans, deleteScan, summarizeScans, promoteLocalScans,
   type ScanRecord, type ScanSummary,
@@ -203,6 +204,8 @@ export default function Scan() {
       } else if (p.reason instanceof MeokseonNotFound) {
         setNotFound(barcode)
         track('scan_lookup_not_found')
+        // A-1 미스 큐: 보강 파이프라인 입력 (익명, 바코드만 — scanMiss.ts 참조)
+        if (source === 'barcode') reportScanMiss(barcode)
       } else {
         setError('제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
         track('scan_lookup_error', { error_kind: 'fetch' })
