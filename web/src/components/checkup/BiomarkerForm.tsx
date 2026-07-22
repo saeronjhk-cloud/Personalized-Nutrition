@@ -27,6 +27,11 @@ import {
 } from "../../domain/checkup/timeseries";
 import RecommendationList from "./RecommendationList";
 import TimeseriesChart from "./TimeseriesChart";
+import {
+  extractPdfText,
+  parseCheckupText,
+  matchToRules,
+} from "../../lib/checkupImport";
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -56,6 +61,9 @@ export default function BiomarkerForm() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyPoints, setHistoryPoints] = useState<HistoryPoint[]>([]);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -108,6 +116,54 @@ export default function BiomarkerForm() {
 
   function handleValueChange(key: string, raw: string) {
     setValues((prev) => ({ ...prev, [key]: raw }));
+  }
+
+  // 검진결과 PDF 가져오기 — 엔진 파싱(AI 없음). The건강보험/정부24 PDF 대상.
+  async function handleImportPdf(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일 재선택 허용
+    if (!file) return;
+
+    setImporting(true);
+    setImportMessage(null);
+    setImportError(null);
+
+    try {
+      const text = await extractPdfText(file);
+      if (text.replace(/\s/g, "").length < 30) {
+        setImportError(
+          "이 PDF에서 글자를 읽을 수 없어요 (사진 스캔본으로 보입니다). 아래에 수기로 입력해 주세요.",
+        );
+        return;
+      }
+
+      const parsed = parseCheckupText(text);
+      const { matched, unmatchedLabels } = matchToRules(parsed, rules);
+      const count = Object.keys(matched).length;
+
+      if (count === 0) {
+        setImportError(
+          "검진 수치를 찾지 못했어요. 건강검진 결과통보서 PDF가 맞는지 확인하시고, 아니면 수기로 입력해 주세요.",
+        );
+        return;
+      }
+
+      setValues((prev) => ({ ...prev, ...matched }));
+      if (parsed.date) setRecordedDate(parsed.date);
+
+      const extra =
+        unmatchedLabels.length > 0
+          ? ` (인식했지만 입력 항목이 없는 값 ${unmatchedLabels.length}개는 제외)`
+          : "";
+      setImportMessage(
+        `${count}개 항목을 불러왔어요${parsed.date ? ` · 검진일 ${parsed.date}` : ""}${extra}. 값을 확인한 뒤 '검진 결과 분석하기'를 눌러주세요.`,
+      );
+    } catch (err) {
+      console.error("[BiomarkerForm] PDF import failed:", err);
+      setImportError("PDF를 여는 데 실패했어요. 파일이 손상되지 않았는지 확인해 주세요.");
+    } finally {
+      setImporting(false);
+    }
   }
 
   function buildBiomarkerInput(): BiomarkerInput {
@@ -338,6 +394,38 @@ export default function BiomarkerForm() {
           </div>
         </section>
       )}
+
+      <section>
+        <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
+          검진결과지 불러오기
+        </h3>
+        <p className="section-subtitle" style={{ marginBottom: 12 }}>
+          The건강보험 앱이나 정부24에서 받은 건강검진 결과 PDF를 올리면 수치를 자동으로 채워드려요.
+        </p>
+        <label
+          className="btn btn-secondary"
+          style={{ display: "block", textAlign: "center", cursor: "pointer" }}
+        >
+          {importing ? "결과지 읽는 중..." : "📄 검진결과 PDF 불러오기"}
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={handleImportPdf}
+            disabled={importing}
+            style={{ display: "none" }}
+          />
+        </label>
+        {importMessage && (
+          <p style={{ color: "#16a34a", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+            {importMessage}
+          </p>
+        )}
+        {importError && (
+          <p style={{ color: "#dc2626", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+            {importError}
+          </p>
+        )}
+      </section>
 
       <section>
         <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
