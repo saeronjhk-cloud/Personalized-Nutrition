@@ -69,3 +69,11 @@ web/_bak_disc/
 DPA/
 # 정리 대기 폴더 (세션31 이전 미추적, 커밋 방지)
 web/_to_delete/
+
+# --- 2026-07-23 세션36: 서명 키·빌드 산출물·vite 정크 커밋 방지 ---
+*.jks
+*.keystore
+키스토어 파일/
+release/
+*.aab
+web/vite.config.ts.timestamp-*.mjs
