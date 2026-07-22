@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { track } from '../lib/events'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
   reencodeImage, analyzeMeal, saveMeal, genMealId, defaultMealSlot, nutrilensConfigured,
@@ -276,6 +276,12 @@ export default function Meal() {
       )}
 
       {!result && <MealHistory reloadKey={historyKey} />}
+
+      {!result && (
+        <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 16 }}>
+          <Link to="/weekly-report" className="text-link">📊 주간 리포트 보기 →</Link>
+        </div>
+      )}
 
       {error && (
         <div className="survey-card" style={{ marginBottom: 16 }}>
