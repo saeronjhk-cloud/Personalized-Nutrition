@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import PageMeta from '../components/PageMeta'
 import NewBlogPopup from '../components/NewBlogPopup'
 import { shouldPromptResurvey, daysSinceLastSurvey, getSurveyHistory } from '../lib/surveyHistory'
-import { MEOKSEON_ENABLED } from '../lib/flags'
+import { MEOKSEON_ENABLED, MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
 
 /* ── 누적 분석 카운터: localStorage 기반 ── */
 function useAnalysisCount() {
@@ -123,23 +123,66 @@ export default function Home() {
         </div>
       )}
 
-      {/* ━━ 제품 스캔 후킹 배너 (scan-first, MEOKSEON_ENABLED 시) — 결정 IP 61/62 ━━ */}
-      {MEOKSEON_ENABLED && (
-        <section className="hero-section" style={{ paddingBottom: 0 }}>
-          <div style={{ background: 'var(--primary-light)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 20px', textAlign: 'center', maxWidth: 520, margin: '0 auto' }}>
-            <div className="hero-badge" style={{ marginBottom: 10 }}>NEW · 제품 스캔</div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary-dark)', marginBottom: 8 }}>
-              내가 먹는 가공식품, 10초 해석
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-              바코드나 제품 이름으로 성분·첨가물·영양을 바로 확인하세요. 회원가입 없이 무료.
-            </p>
-            <Link to="/scan" className="btn btn-primary" style={{ maxWidth: 280, margin: '0 auto' }}>
-              제품 스캔하기 →
+      {/* ━━ 4기능 허브 — 앱 진입점 (우선순위: 먹선 → NutriLens → 건강진단 → 영양제) ━━ */}
+      <section className="feature-hub section-animate">
+        <div className="section-category" style={{ textAlign: 'center' }}>서박사의 영양공식</div>
+        <h2 className="feature-hub-title">먹는 것부터 챙기는 것까지, 한 곳에서</h2>
+        <p className="feature-hub-sub">
+          가공식품 성분을 확인하고, 식사를 기록하고, 내 건강 데이터를 모아
+          — 나에게 맞는 영양제까지. 흩어져 있던 건강 관리를 하나로 모았습니다.
+        </p>
+        <div className="feature-hub-grid">
+          {MEOKSEON_ENABLED && (
+            <Link to="/scan" className="feature-hub-card">
+              <span className="feature-hub-icon" style={{ background: '#e0f2fe' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0369a1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></svg>
+              </span>
+              <div className="feature-hub-body">
+                <div className="feature-hub-name">가공식품 영양정보</div>
+                <div className="feature-hub-desc">가공식품 성분·첨가물·영양을 10초 만에 해석 · 무료</div>
+              </div>
+              <span className="feature-hub-arrow">→</span>
             </Link>
-          </div>
-        </section>
-      )}
+          )}
+
+          {MEAL_ENABLED && (
+            <Link to="/meal" className="feature-hub-card">
+              <span className="feature-hub-icon" style={{ background: '#fef3c7' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.2"/></svg>
+              </span>
+              <div className="feature-hub-body">
+                <div className="feature-hub-name">식사 기록</div>
+                <div className="feature-hub-desc">사진 한 장으로 칼로리·영양을 자동 분석해요</div>
+              </div>
+              <span className="feature-hub-arrow">→</span>
+            </Link>
+          )}
+
+          {CHECKUP_ENABLED && (
+            <Link to="/dashboard" className="feature-hub-card">
+              <span className="feature-hub-icon" style={{ background: '#fce7f3' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="M8 14h2l1-2 1.5 3 1-1H16"/></svg>
+              </span>
+              <div className="feature-hub-body">
+                <div className="feature-hub-name">내 건강 기록</div>
+                <div className="feature-hub-desc">건강검진·설문 등 내 건강 정보를 한곳에서 기록하고 관리해요</div>
+              </div>
+              <span className="feature-hub-arrow">→</span>
+            </Link>
+          )}
+
+          <Link to="/survey" className="feature-hub-card">
+            <span className="feature-hub-icon" style={{ background: '#e8f5e3' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><path d="M8.5 8.5l7 7"/></svg>
+            </span>
+            <div className="feature-hub-body">
+              <div className="feature-hub-name">맞춤 영양제 추천</div>
+              <div className="feature-hub-desc">3분 설문으로 나에게 맞는 영양제 조합을 찾아드려요</div>
+            </div>
+            <span className="feature-hub-arrow">→</span>
+          </Link>
+        </div>
+      </section>
 
       {/* ━━ 히어로 섹션 ━━ */}
       <section className="hero-section hero-home">

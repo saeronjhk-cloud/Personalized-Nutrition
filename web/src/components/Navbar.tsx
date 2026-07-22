@@ -5,7 +5,7 @@ import { MEOKSEON_ENABLED, MEAL_ENABLED } from '../lib/flags'
 // 라우트 게이트(App)와 일치 — flag off 시 죽은 링크 방지.
 const NAV_ITEMS = [
   { path: '/', label: '홈' },
-  ...(MEOKSEON_ENABLED ? [{ path: '/scan', label: '제품 스캔' }] : []),
+  ...(MEOKSEON_ENABLED ? [{ path: '/scan', label: '가공식품' }] : []),
   ...(MEAL_ENABLED ? [{ path: '/meal', label: '식사 기록' }, { path: '/weekly-report', label: '주간 리포트' }] : []),
   { path: '/dashboard', label: '내 건강' },
   { path: '/survey', label: '영양제 추천' },
