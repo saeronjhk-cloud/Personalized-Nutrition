@@ -9,9 +9,11 @@ import {
   type ScanRecord, type ScanSummary,
 } from '../lib/scanHistory'
 import { supabase } from '../lib/supabase'
+import AllergenCard from '../components/AllergenCard'
 import {
   getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
-  type MsProductResult, type MsAdditiveSummary, type MsSearchItem,
+  submitPhotoReport,
+  type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoReportResult,
 } from '../lib/meokseon'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
@@ -66,7 +68,15 @@ export default function Scan() {
   const [result, setResult] = useState<MsProductResult | null>(null)
   const [additives, setAdditives] = useState<MsAdditiveSummary | null>(null)
   const [searchResults, setSearchResults] = useState<MsSearchItem[] | null>(null)
+  // 사진 제보. `reported` 는 **서버가 실제로 받은 뒤에만** true 가 된다.
+  //   2026-08-06 이전에는 버튼이 로컬 상태만 바꾸고 「제보 감사합니다」를 띄웠다(거짓 확인).
   const [reported, setReported] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const [labelImage, setLabelImage] = useState<File | null>(null)
+  const [nutritionImage, setNutritionImage] = useState<File | null>(null)
+  const [reportSending, setReportSending] = useState(false)
+  const [reportError, setReportError] = useState<string | null>(null)
+  const [reportInfo, setReportInfo] = useState<MsPhotoReportResult | null>(null)
   const [scanning, setScanning] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -124,6 +134,23 @@ export default function Scan() {
 
   function reset() {
     setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null); setReported(false)
+    setReportOpen(false); setLabelImage(null); setNutritionImage(null)
+    setReportSending(false); setReportError(null); setReportInfo(null)
+  }
+
+  async function sendPhotoReport() {
+    if (!notFound) return
+    setReportSending(true); setReportError(null)
+    try {
+      const info = await submitPhotoReport({ barcode: notFound, labelImage, nutritionImage })
+      setReportInfo(info)
+      setReported(true)
+      track('scan_report_submit', { saved: info.saved, nutrition_count: info.nutritionCount })
+    } catch (e) {
+      // ★ 실패를 성공처럼 말하지 않는다. 사용자가 다시 시도할 수 있게 사유를 그대로 보여준다.
+      setReportError(e instanceof Error ? e.message : '보내지 못했어요. 잠시 후 다시 시도해 주세요.')
+      track('scan_report_error')
+    } finally { setReportSending(false) }
   }
 
   function stopScan() {
@@ -357,10 +384,74 @@ export default function Scan() {
             바코드 <strong>{notFound}</strong> 는 아직 데이터베이스에 없어요. 제품 앞면과 영양성분·원재료 표기를 찍어 보내주시면
             검토 후 등록해 드릴게요. (등록되면 알려드릴게요.)
           </p>
-          {reported ? (
-            <p style={{ color: 'var(--accent)', fontSize: 14 }}>제보 감사합니다! 검토 후 등록되면 알려드릴게요.</p>
+          {reported && reportInfo ? (
+            <div>
+              <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 6 }}>
+                {reportInfo.saved
+                  ? '제보 감사합니다! 검토 후 등록되면 알려드릴게요.'
+                  : '사진은 잘 받았어요. 다만 자동 등록 기준에 못 미쳐 사람이 직접 확인할게요.'}
+              </p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>
+                읽어낸 내용 — 제품명 {reportInfo.productName || '미인식'} · 영양성분 {reportInfo.nutritionCount}개
+                {reportInfo.allergens.length > 0 && ` · 알레르기 ${reportInfo.allergens.join(', ')}`}
+                {reportInfo.nutritionCount === 0 && ' (영양성분표가 흐릿하면 다시 찍어 주시면 더 정확해져요.)'}
+              </p>
+            </div>
+          ) : !reportOpen ? (
+            <button
+              type="button" className="btn btn-secondary"
+              onClick={() => { setReportOpen(true); track('scan_report_click') }}
+            >이 제품 제보하기</button>
           ) : (
-            <button type="button" className="btn btn-secondary" onClick={() => { setReported(true); track('scan_report_click') }}>이 제품 제보하기</button>
+            <div>
+              {/* 한 장만으로도 보낼 수 있지만, 두 장을 권한다.
+                  법정 알레르기 표기가 영양성분표 «옆»에 인쇄된 제품이 흔해서
+                  라벨 한 장만 보내면 경고를 놓친다(서버 세션44 치명B 실측). */}
+              {/* 입력은 숨기고 label 을 버튼처럼 쓴다 — Meal.tsx 와 같은 패턴. */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                  ① 원재료 · 알레르기 표기 {labelImage && <span style={{ color: 'var(--accent)' }}>✓ 선택됨</span>}
+                </div>
+                <label className={labelImage ? 'btn btn-secondary' : 'btn btn-primary'}
+                  style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
+                  📷 {labelImage ? '다시 찍기' : '촬영 / 사진 고르기'}
+                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+                    onChange={(e) => { setLabelImage(e.target.files?.[0] ?? null); setReportError(null) }} />
+                </label>
+              </div>
+
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                  ② 영양성분표 {nutritionImage && <span style={{ color: 'var(--accent)' }}>✓ 선택됨</span>}
+                </div>
+                <label className={nutritionImage ? 'btn btn-secondary' : 'btn btn-primary'}
+                  style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
+                  📷 {nutritionImage ? '다시 찍기' : '촬영 / 사진 고르기'}
+                  <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+                    onChange={(e) => { setNutritionImage(e.target.files?.[0] ?? null); setReportError(null) }} />
+                </label>
+              </div>
+
+              {reportError && (
+                <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 10 }}>{reportError}</p>
+              )}
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button" className="btn btn-primary" style={{ flex: 1 }}
+                  disabled={reportSending || (!labelImage && !nutritionImage)}
+                  onClick={sendPhotoReport}
+                >{reportSending ? '보내는 중…' : '보내기'}</button>
+                <button
+                  type="button" className="btn btn-secondary"
+                  disabled={reportSending}
+                  onClick={() => { setReportOpen(false); setLabelImage(null); setNutritionImage(null); setReportError(null) }}
+                >취소</button>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 8, lineHeight: 1.5 }}>
+                한 장만 보내도 되지만, 두 장을 다 보내면 알레르기·영양을 훨씬 정확하게 읽어요. (사진당 10MB 이하)
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -409,6 +500,10 @@ export default function Scan() {
               </div>
             </div>
           </div>
+
+          {/* ★ 알레르기는 안전 항목이라 첨가물·영양보다 «먼저» 온다.
+              미수집일 때도 카드를 띄운다 — 침묵은 「없음」으로 읽힌다. */}
+          <AllergenCard result={result} />
 
           {additives && (
             <div className="survey-card" style={{ marginBottom: 16 }}>

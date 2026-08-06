@@ -67,10 +67,33 @@ export interface MsTrafficLight {
   [k: string]: unknown
 }
 
+/**
+ * 알레르기 3분리. 서버가 세션44부터 계산해 왔고 응답에도 실려 있었지만
+ * 이 클라이언트는 «필드의 존재조차 몰랐다»(2026-08-06 확인 — 인터페이스에 아예 없었다).
+ *   contains   직접 함유 — 라벨이 명시적으로 선언한 것
+ *   inferred   원재료 추정 — 원재료명에서 읽어낸 것(실제로 들어 있다)
+ *   mayContain 혼입 가능 — 같은 제조시설·라인. 제품에 «직접» 들어 있다는 뜻이 아니다
+ */
+export interface MsAllergensV2 {
+  contains?: string[] | null
+  inferred?: string[] | null
+  mayContain?: string[] | null
+}
+
 export interface MsProductResult {
   product: MsProduct
   nutrition: MsNutrition | null
   traffic_light?: MsTrafficLight | null
+  /**
+   * 평탄 목록 = contains + inferred. **혼입은 들어 있지 않다.**
+   * ⚠ `null` 은 「없음」이 아니라 「미수집」이다. `allergens_available` 로 구분할 것.
+   */
+  allergens?: string[] | null
+  allergens_v2?: MsAllergensV2 | null
+  /** false = 이 제품의 알레르기 정보를 «수집하지 못했다». 「알레르겐 없음」과 다르다. */
+  allergens_available?: boolean
+  /** false = flat 목록이 전부가 아니다(혼입이 따로 있다). */
+  allergens_flat_complete?: boolean
   mfras?: unknown
   context?: unknown
   sources?: unknown
@@ -147,4 +170,92 @@ export async function getAdditiveSummary(barcode: string): Promise<MsAdditiveSum
 export async function searchProducts(q: string, limit = 20): Promise<MsSearchItem[]> {
   const data = await getJson(`/api/products/search?q=${encodeURIComponent(q)}&limit=${limit}`)
   return (data && data.products) || []
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 사진 제보 (POST /api/ocr/multi-photo)
+ *
+ * 왜 생겼나 (2026-08-06 발견):
+ *   미등록 바코드 화면이 "제품 앞면과 영양성분·원재료 표기를 찍어 보내주시면 검토 후
+ *   등록해 드릴게요" 라고 «약속»하면서, 그 아래 「이 제품 제보하기」 버튼은
+ *   `setReported(true)` 로 로컬 상태만 바꾸고 **서버에 아무것도 보내지 않았다.**
+ *   그러고는 「제보 감사합니다!」를 띄웠다 — 사용자를 향한 거짓 확인이다.
+ *   서버(`meokseon-server`)에는 이 엔드포인트가 처음부터 완비돼 있었다. 화면만 안 붙어 있었다.
+ *
+ * 서버 계약 (src/routes/ocrRoutes.js:457):
+ *   multipart/form-data
+ *     label_image      (선택) 제품 앞면·원재료·알레르기 표기 사진
+ *     nutrition_image  (선택) 영양성분표 사진
+ *     ★ 둘 중 «하나 이상»은 필수. 없으면 400.
+ *     barcode          (선택) 등록 시 키가 된다
+ *     save             'true' 면 크라우드 기여로 저장한다
+ *   응답 { success, data: { analysis, traffic_light, save_result, ... } }
+ *   ⚠ 파일당 10MB 제한(multer). 초과하면 서버가 아니라 미들웨어가 막는다.
+ *
+ * ★ 두 사진은 «합집합»으로 병합된다(세션44 치명B 수정분). 법정 알레르기 표기가
+ *   영양성분표 옆에 인쇄된 제품이 흔해서, 한 장만 보내면 경고를 잃는다.
+ *   → UI 는 두 장 다 받도록 유도하되, 한 장만으로도 보낼 수 있어야 한다.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024
+
+export interface MsPhotoReportResult {
+  /** 서버가 크라우드 기여로 «실제로» 저장했는가. false 면 분석만 된 것이다. */
+  saved: boolean
+  productName: string | null
+  /** 값이 읽힌 영양소 개수(0 이면 영양표를 못 읽은 것) */
+  nutritionCount: number
+  allergens: string[]
+  raw: unknown
+}
+
+export async function submitPhotoReport(params: {
+  barcode?: string | null
+  labelImage?: File | null
+  nutritionImage?: File | null
+}): Promise<MsPhotoReportResult> {
+  if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
+
+  const { barcode, labelImage, nutritionImage } = params
+  if (!labelImage && !nutritionImage) {
+    throw new Error('사진을 한 장 이상 골라 주세요.')
+  }
+  for (const f of [labelImage, nutritionImage]) {
+    if (f && f.size > MAX_IMAGE_BYTES) {
+      throw new Error(`사진이 너무 커요(${(f.size / 1024 / 1024).toFixed(1)}MB). 10MB 이하로 다시 찍어 주세요.`)
+    }
+  }
+
+  const fd = new FormData()
+  if (labelImage) fd.append('label_image', labelImage)
+  if (nutritionImage) fd.append('nutrition_image', nutritionImage)
+  if (barcode) fd.append('barcode', barcode)
+  fd.append('save', 'true')
+
+  const res = await fetch(`${BASE}/api/ocr/multi-photo`, { method: 'POST', body: fd })
+
+  let json: any = null
+  try { json = await res.json() } catch { /* 비-JSON 응답 */ }
+
+  if (!res.ok || !json || json.success !== true) {
+    const msg = (json && (json.message || json.error?.message)) || `서버 오류(${res.status})`
+    throw new Error(msg)
+  }
+
+  const data = json.data || {}
+  const analysis = data.analysis || {}
+  const nutrition = analysis.nutrition || {}
+  const nutritionCount = Object.keys(nutrition).filter((k) => {
+    const v = (nutrition as Record<string, unknown>)[k]
+    return v !== null && v !== undefined && v !== ''
+  }).length
+
+  return {
+    // ★ save_result 가 있어야 «저장됐다». 분석만 되고 저장이 안 될 수 있다(게이트 반려 등).
+    saved: !!data.save_result,
+    productName: (analysis.product_meta && analysis.product_meta.product_name) || null,
+    nutritionCount,
+    allergens: Array.isArray(analysis.allergens) ? analysis.allergens : [],
+    raw: data,
+  }
 }
