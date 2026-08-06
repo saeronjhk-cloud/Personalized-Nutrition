@@ -15,6 +15,18 @@ import type { MsProductResult } from '../lib/meokseon'
  *   혼입 가능  «채우지 않고 점선» — 확정이 아니라는 신호. 같은 모양을 쓰면 과잉경고가 된다
  *
  * ★ 미수집일 때도 카드를 숨기지 않는다. 침묵은 「알레르겐 없음」으로 읽힌다.
+ *
+ * ★★★ 2026-08-06 세션53 — **불완전성 고지를 «항상» 표시한다.**
+ * 외부검증 회신(`IP/외부검증_회신종합_2026-08-06_세션53.md`)의 P0 권고이고,
+ * 그 근거를 세션53에 코드로 재확인했다. 현행 서버 판별기의 실측 상태:
+ *   · `원재료명: 메밀가루` → 「밀」만 나오고 **메밀이 사라진다**(`_matchSet` 소비 매칭)
+ *   · `원재료명: 땅콩기름` → 「대두」만 나오고 **땅콩이 사라진다**
+ *   · `원재료명: 고등어`·`잣` → 법정 19종인데 **원재료 경로에서 검출 자체가 안 된다**
+ *   · 원재료 전문의 밀 551건 중 465건 미검출
+ * 즉 이 카드는 지금 **과소경고 상태**다. 고지 없이 안전 기능처럼 보이게 두면 안 된다.
+ *
+ * ⚠ 이 고지는 P1(구조적 FN) 수정이 운영에 도달하고 19종 경로별 sentinel 이 초록이 된
+ *   뒤에야 내린다. **문구를 지우기 전에 반드시 그 두 조건을 확인할 것.**
  */
 
 const TAG_BASE: CSSProperties = {
@@ -81,12 +93,43 @@ function Body({ view }: { view: AllergenView }) {
   )
 }
 
+/**
+ * 불완전성 고지. **모든 상태에서 보인다** — 미수집·3분리·flat 전부.
+ *
+ * 「미수집」 문구와 별개인 이유: 미수집 문구는 «이 제품은 자료가 없다»는 말이고,
+ * 이 고지는 «자료가 있어도 우리 판별기가 놓치는 게 있다»는 말이다. 서로 다른 사실이다.
+ * 둘을 합치면, 알레르겐이 표시된 제품에서는 고지가 사라져 가장 위험한 경우에 침묵하게 된다.
+ */
+function IncompleteNotice() {
+  return (
+    <p
+      data-testid="allergen-incomplete-notice"
+      style={{
+        fontSize: 12,
+        lineHeight: 1.6,
+        color: '#8a5a00',
+        background: '#fff8e1',
+        border: '1px solid #ffe0a3',
+        borderRadius: 8,
+        padding: '8px 10px',
+        marginTop: 12,
+        marginBottom: 0,
+      }}
+    >
+      이 알레르기 표시는 <strong>아직 검증 중인 기능</strong>이에요.
+      표기가 있어도 <strong>목록에 나오지 않는 알레르겐이 있을 수 있어요.</strong>{' '}
+      알레르기가 있다면 <strong>반드시 포장의 알레르기 표기를 직접 확인</strong>해 주세요.
+    </p>
+  )
+}
+
 export default function AllergenCard({ result }: { result: MsProductResult | null }) {
   const view = describeAllergens(result)
   return (
     <div className="survey-card" style={{ marginBottom: 16 }}>
       <h3 className="survey-step-title" style={{ fontSize: 16 }}>알레르기</h3>
       <Body view={view} />
+      <IncompleteNotice />
     </div>
   )
 }
