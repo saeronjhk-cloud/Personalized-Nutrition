@@ -184,3 +184,62 @@ describe('submitPhotoReport — 응답 요약 (사용자에게 «읽어낸 것»
     expect(r.saved).toBe(false)
   })
 })
+
+/* ★★★★ 세션61 `U60-7`/`U61-4`
+ *
+ * 무엇을 지키나 — 서버는 사진 제보 응답에도 알레르기 4키를 «이미» 실어 보낸다
+ * (`meokseon-server/src/routes/ocrRoutes.js:724` -> `buildAllergenKeys`).
+ * 그런데 이 모듈이 `analysis.allergens`(flat) 하나만 꺼내고 나머지를 **버렸다.**
+ * 그래서 화면(`Scan.tsx`)이 목록이 비면 아무것도 안 그렸다 — 침묵이다.
+ *
+ * 실측(세션61 · 실물 67건): 목록이 비는 라벨 24건(35.8%) 중
+ *   · 실제로 «직접 함유»가 있는 것    7건 (29.2%)
+ *   · 혼입까지 세면 알려줄 게 있는 것 15건 (62.5%)
+ *
+ * ⚠ 이 블록을 지우면 그 세 필드가 조용히 다시 사라진다. 지우지 말 것.
+ */
+describe('submitPhotoReport — 알레르기 3키를 «버리지 않는다» (세션61 U60-7)', () => {
+  it('서버가 보낸 allergens_v2·available·flat_complete 를 그대로 싣는다', async () => {
+    const { submitPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({
+      analysis: {
+        allergens: ['대두'],
+        allergens_v2: { contains: ['대두'], inferred: [], mayContain: ['밀', '우유'] },
+        allergens_available: true,
+        allergens_flat_complete: false,
+      },
+      save_result: { id: 1 },
+    }))
+
+    const r = await submitPhotoReport({ barcode: '1', labelImage: file('a.jpg', 10) })
+    expect(r.allergens_v2).toEqual({ contains: ['대두'], inferred: [], mayContain: ['밀', '우유'] })
+    expect(r.allergens_available).toBe(true)
+    // ★ 혼입이 있으므로 flat 은 «전부가 아니다». 이 값을 잃으면 화면이 그걸 모른다.
+    expect(r.allergens_flat_complete).toBe(false)
+  })
+
+  it('★ 혼입만 있는 라벨 — flat 은 비지만 v2 는 살아 있어야 한다 (침묵 24건 중 8건이 이 형태)', async () => {
+    const { submitPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({
+      analysis: {
+        allergens: [],
+        allergens_v2: { contains: [], inferred: [], mayContain: ['대두', '밀', '우유', '토마토'] },
+        allergens_available: true,
+      },
+      save_result: null,
+    }))
+
+    const r = await submitPhotoReport({ barcode: '1', labelImage: file('a.jpg', 10) })
+    expect(r.allergens).toEqual([])
+    // ⚠ 여기가 핵심 — flat 이 비었다고 «알레르기 정보가 없다»가 아니다.
+    expect(r.allergens_v2?.mayContain).toEqual(['대두', '밀', '우유', '토마토'])
+  })
+
+  it('서버가 안 보내면 undefined 가 아니라 «명시적 null» 로 둔다 (v2)', async () => {
+    const { submitPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ analysis: {}, save_result: null }))
+
+    const r = await submitPhotoReport({ barcode: '1', labelImage: file('a.jpg', 10) })
+    expect(r.allergens_v2).toBeNull()
+  })
+})

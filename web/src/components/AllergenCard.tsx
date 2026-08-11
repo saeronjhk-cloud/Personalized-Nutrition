@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { describeAllergens, type AllergenView } from '../domain/meokseon/allergens'
-import type { MsProductResult } from '../lib/meokseon'
+// ★ 세션61 U60-7 — `MsProductResult` 를 더는 import 하지 않는다.
+//   prop 타입을 `describeAllergens` 의 시그니처에서 유도하므로 필요 없어졌고,
+//   남겨 두면 「이 카드는 바코드 결과 전용」이라는 잘못된 인상을 준다.
 
 /**
  * 알레르기 카드.
@@ -123,7 +125,25 @@ function IncompleteNotice() {
   )
 }
 
-export default function AllergenCard({ result }: { result: MsProductResult | null }) {
+/**
+ * ★★★ 세션61 `U60-7` — prop 타입을 «판정에 실제로 필요한 것»으로 좁힌다.
+ *
+ *   종전에는 `MsProductResult | null` 이었다. 그런데 이 카드가 쓰는 것은
+ *   `describeAllergens` 하나뿐이고, 그 함수가 요구하는 것은 3필드뿐이다
+ *   (`domain/meokseon/allergens.ts:50-52`). `product`·`nutrition` 은 «쓰지 않는다».
+ *
+ *   그 과하게 넓은 타입 때문에 **사진 제보 결과(`MsPhotoReportResult`)에 이 카드를 못 붙였고**,
+ *   그래서 OCR 경로가 침묵했다(`U61-4`: 침묵 24건 중 15건이 알려줄 게 있는 상태).
+ *
+ *   ⇒ 요구 조건을 «함수의 시그니처에서 유도»한다. 앞으로 `describeAllergens` 의 입력이
+ *     바뀌면 여기도 자동으로 따라간다 — 두 곳을 손으로 맞추다 갈라지는 일이 없다.
+ *     (커밋 게이트 목록이 갈라져 5세션을 태운 `U60-8` 과 같은 종류의 방어다.)
+ *
+ * ⚠ 렌더·판정 로직은 **한 글자도 바꾸지 않았다.** 바코드 경로의 동작은 그대로다.
+ */
+type AllergenCardInput = Parameters<typeof describeAllergens>[0]
+
+export default function AllergenCard({ result }: { result: AllergenCardInput }) {
   const view = describeAllergens(result)
   return (
     <div className="survey-card" style={{ marginBottom: 16 }}>

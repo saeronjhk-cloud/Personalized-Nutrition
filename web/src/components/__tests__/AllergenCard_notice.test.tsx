@@ -89,3 +89,46 @@ describe('AllergenCard 불완전성 고지', () => {
     expect(html).toContain(NOTICE_MARK)
   })
 })
+
+/* ★★★★ 세션61 `U60-7` — 이 카드는 «사진 제보 결과»로도 그려져야 한다.
+ *
+ * 종전 prop 타입이 `MsProductResult | null` 이라 `product`·`nutrition` 이 없는
+ * 사진 제보 결과(`MsPhotoReportResult`)에는 붙일 수 없었다. 그래서 OCR 경로가 침묵했다.
+ * 이제 타입을 `describeAllergens` 시그니처에서 유도한다(3필드면 충분).
+ *
+ * ⚠ 아래 케이스는 «타입»이 아니라 «렌더»를 검사한다. 타입만 넓히고 렌더가 깨지면 소용없다.
+ */
+describe('AllergenCard — 사진 제보 결과 모양으로도 그려진다 (세션61 U60-7)', () => {
+  it('product·nutrition 이 «없는» 객체로도 미수집 문구와 고지가 나온다', () => {
+    // 사진 제보 결과의 모양 그대로 — 서버가 선언란을 못 봤을 때
+    const photoLike = { allergens: [], allergens_v2: null, allergens_available: false }
+    const html = renderToStaticMarkup(<AllergenCard result={photoLike} />)
+    expect(html).toContain('알레르겐이 없다는 뜻은 아니에요')
+    expect(html).toContain(NOTICE_MARK)
+  })
+
+  it('★ 혼입만 있는 사진 제보 결과 — 혼입이 «화면에 나온다» (종전에는 한 글자도 안 나왔다)', () => {
+    const photoLike = {
+      allergens: [],
+      allergens_v2: { contains: [], inferred: [], mayContain: ['대두', '밀'] },
+      allergens_available: true,
+    }
+    const html = renderToStaticMarkup(<AllergenCard result={photoLike} />)
+    expect(html).toContain('대두')
+    expect(html).toContain('밀')
+    expect(html).toContain(NOTICE_MARK)
+  })
+
+  it('직접 함유와 혼입이 같이 있어도 «구분해서» 나온다', () => {
+    const photoLike = {
+      allergens: ['대두'],
+      allergens_v2: { contains: ['대두'], inferred: [], mayContain: ['우유'] },
+      allergens_available: true,
+    }
+    const html = renderToStaticMarkup(<AllergenCard result={photoLike} />)
+    expect(html).toContain('대두')
+    expect(html).toContain('우유')
+    // ⚠ 혼입이 «직접 함유»와 같은 모양으로 나오면 과잉경고다(서버 세션44). 구분 문구가 있어야 한다.
+    expect(html).toContain('혼입')
+  })
+})

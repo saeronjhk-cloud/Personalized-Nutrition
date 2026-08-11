@@ -393,9 +393,22 @@ export default function Scan() {
               </p>
               <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>
                 읽어낸 내용 — 제품명 {reportInfo.productName || '미인식'} · 영양성분 {reportInfo.nutritionCount}개
-                {reportInfo.allergens.length > 0 && ` · 알레르기 ${reportInfo.allergens.join(', ')}`}
                 {reportInfo.nutritionCount === 0 && ' (영양성분표가 흐릿하면 다시 찍어 주시면 더 정확해져요.)'}
               </p>
+              {/* ★★★★ 세션61 `U60-7` — 여기 있던 한 줄
+                    {reportInfo.allergens.length > 0 && ` · 알레르기 …`}
+                  이 **목록이 비면 아무것도 그리지 않았다.** 침묵이다.
+                  `domain/meokseon/allergens.ts:15` 가 그걸 경고한다 —
+                  「아무 표시도 안 하면 사용자는 «안전하다»고 읽는다」.
+
+                  실측(세션61 · 실물 67건): 목록이 비는 라벨 24건(35.8%) 중
+                    · 실제로 «직접 함유»가 있는 것    7건 (29.2%)
+                    · 혼입까지 세면 알려줄 게 있는 것 15건 (62.5%)
+                  같은 24건을 바코드 경로로 보면 **전부** 무언가를 말해 준다.
+
+                  ⇒ 바코드 경로와 «같은 카드»를 쓴다. 그래야 두 경로가 갈라지지 않는다.
+                  ⚠ 이 카드를 다시 한 줄짜리 텍스트로 되돌리지 말 것. 되돌리면 침묵이 돌아온다. */}
+              <AllergenCard result={reportInfo} />
             </div>
           ) : !reportOpen ? (
             <button
