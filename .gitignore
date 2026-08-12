@@ -77,3 +77,13 @@ web/_to_delete/
 release/
 *.aab
 web/vite.config.ts.timestamp-*.mjs
+
+# --- 2026-08-01 세션42: 평문키 백업(재발급 후 삭제) ---
+.secrets_backup/
+
+# --- 2026-08-12 세션63: FUSE 잔여물 (U61-1 / U62-5) ---
+# 샌드박스가 마운트된 파일을 «열려 있는 동안» 교체하면 옛 사본이
+# `.fuse_hidden0000001700000001` 같은 이름으로 같은 디렉터리에 남는다.
+# ⚠ 이 규칙은 «커밋 오염»만 막는다. grep 오진(U61-3)은 못 막는다 —
+#    grep 은 gitignore 를 보지 않는다. 소스는 경로를 명시해서 읽을 것.
+.fuse_hidden*
