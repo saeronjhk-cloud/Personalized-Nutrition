@@ -38,6 +38,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 const API = 'https://api.example.test'
 
+/**
+ * ★★ 2026-08-24 세션64c — **제보 두 단계가 인증 필수가 됐다**(제이 확정).
+ *   토큰이 없으면 `analyzePhotoReport`·`confirmPhotoReport` 는 요청을 «보내기 전»에 던진다.
+ *   ⇒ 이 파일의 단정들은 「로그인된 사용자」를 전제하므로 토큰을 하나 세워 둔다.
+ *
+ *   ⚠ 여기서 인증 «자체»를 검증하지 않는다. 그건 `meokseon_auth.test.ts` 가 한다
+ *     (토큰이 헤더에 실리는가 · 없으면 안 보내는가 · 401 이 뭉개지지 않는가 ·
+ *      스캔은 무인증인가). 두 곳에서 같은 것을 보면 한쪽만 고쳐지는 사고가 난다.
+ *   ⚠ `lib/supabase.ts` 는 모듈 로드 시점에 환경변수가 없으면 던진다. 그래서
+ *     실제 클라이언트가 아니라 `lib/meokseonAuth` 를 통째로 목킹한다.
+ */
+vi.mock('../meokseonAuth', () => ({
+  getMeokseonAccessToken: async () => 'tok_test',
+  isMeokseonSignedIn: async () => true,
+}))
+
 async function loadModule() {
   vi.stubEnv('VITE_MEOKSEON_API_URL', API)
   vi.resetModules()

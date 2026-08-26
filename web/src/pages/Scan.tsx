@@ -18,14 +18,25 @@ import {
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
   getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
-  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError,
+  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis,
 } from '../lib/meokseon'
+import { getMeokseonAccessToken } from '../lib/meokseonAuth'
+import { loginPathWithReturn } from '../lib/returnTo'
 import {
   seedProductNameForExisting, canSubmitReport, checkProductName, classifyConfirmFailure, describeReadback,
   classifyPhotoReportOutcome, NUTRITION_RETAKE_CTA,
   CONFIRM_FALLBACK_MESSAGE,
 } from '../domain/meokseon/photoReport'
+import {
+  REPORT_LOGIN_HEADLINE, REPORT_LOGIN_WHY, REPORT_LOGIN_SCAN_OK, REPORT_LOGIN_CTA,
+  REPORT_LOGIN_DISMISS, REPORT_LOGIN_RETURN_NOTICE,
+  AUTH_PHOTO_LOST_NOTICE, AUTH_RELOGIN_CTA,
+} from '../domain/meokseon/reportAuth'
+import {
+  buildReportNutrition, TRAFFIC_LIGHT_CAPTION,
+} from '../domain/meokseon/reportNutrition'
+import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
 // 카메라 스캔은 무의존성 BarcodeDetector(브라우저 네이티브). 미지원/거부 시 이름 검색으로 폴백.
@@ -54,6 +65,18 @@ const COLOR_HEX: Record<AdditiveColor, string> = {
 // ⚠ 여기서 다시 정의하지 않는다(두 곳에 두면 갈라진다).
 const PILL_COLORS: AdditiveColor[] = ['green', 'yellow', 'orange', 'red']
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']
+
+/**
+ * 영양 신호등 색. ⚠ 첨가물 4색(`COLOR_HEX`)과 **다른 축**이다 — 같은 상수를 돌려쓰지 말 것.
+ *   여기 회색이 없는 것은 의도다: 판정되지 않은 항목은 `reportNutrition.ts` 가
+ *   목록에서 «빼고», 그 사실을 «말»로 한다(회색 점을 그리면 「판정했다」로 읽힌다).
+ */
+const LIGHT_HEX: Record<'green' | 'yellow' | 'red', string> = {
+  green: '#4a9e3f', yellow: '#f59e0b', red: '#ef4444',
+}
+
+/** 「내가 보낸 제보」 화면. ⚠ `App.tsx` 의 라우트와 «같은 값»이어야 한다. */
+const MY_REPORTS_PATH = '/scan/reports'
 
 // 동명 제품 구분용 보조표기: 제조사·브랜드·분류 등에서 빈값/`general`/중복 제거 후 ' · ' 결합.
 function subtitleOf(...parts: (string | null | undefined)[]): string {
@@ -111,6 +134,18 @@ export default function Scan() {
     nutritionStatus: string | null
     nutritionRejectCode: string | null
   } | null>(null)
+  /**
+   * ★★ 2026-08-24 세션64c — 「제보하려면 로그인이 필요해요」 패널.
+   *   ⚠ 스캔·조회는 «막지 않는다». 이 게이트는 제보 버튼에만 붙는다(reportAuth.ts ①).
+   *   ⚠ 사진을 «고르기 전»에 뜬다. 폼을 열어 준 뒤 보내기에서 막으면 매직링크 왕복 때문에
+   *     사진이 사라져 두 번 찍게 된다(reportAuth.ts ②).
+   */
+  const [loginGateOpen, setLoginGateOpen] = useState(false)
+  /**
+   * 폼이 «열린 뒤» 세션이 끊겨 401 을 받은 상태. 여기서 우리가 마음대로 로그인 화면으로
+   * 옮기지 않는다 — 옮기는 순간 방금 찍은 사진이 말없이 사라진다(reportAuth.ts ③).
+   */
+  const [authBlocked, setAuthBlocked] = useState(false)
   const [scanning, setScanning] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -183,6 +218,7 @@ export default function Scan() {
   useEffect(() => {
     track('scan_page_view')
     refreshHistory()
+    restoreFromLogin()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -201,6 +237,78 @@ export default function Scan() {
     setReportOpen(false); setLabelImage(null); setNutritionImage(null)
     setReportBusy(null); setReportError(null)
     setAnalysis(null); setProductName(''); setConfirmed(null)
+    setLoginGateOpen(false); setAuthBlocked(false)
+  }
+
+  /* ────────────────────────────────────────────────────────────────────────
+   * 제보 로그인 게이트 (세션64c · 2026-08-24 제이 확정 「제보도 로그인 필수」)
+   *
+   * ★ 판정·문구는 `domain/meokseon/reportAuth.ts` 가 정본이다. 여기서 다시 적지 않는다.
+   * ★ 새 인증 흐름을 «만들지 않았다» — 기존 `/login`(매직링크) → `/auth/callback` 그대로다.
+   *   달라진 것은 복귀 경로를 URL 로 실어 보낸다는 것 하나뿐이다(`lib/returnTo.ts`).
+   * ──────────────────────────────────────────────────────────────────────── */
+
+  /**
+   * 로그인 뒤 돌아올 자리. **바코드를 URL 에 실어야** 사용자가 다시 스캔하지 않는다.
+   * ⚠ 사진(File)은 여기 실을 수 없다. 매직링크는 페이지를 새로 열기 때문이다 —
+   *   그래서 게이트가 사진을 «고르기 전»에 뜬다.
+   */
+  function reportReturnPath(): string {
+    return reportBarcode
+      ? `/scan?barcode=${encodeURIComponent(reportBarcode)}&report=1`
+      : '/scan'
+  }
+
+  /** 제보 폼을 연다. 로그인 안 돼 있으면 폼 «대신» 게이트를 띄운다. */
+  async function openReportForm(source: string) {
+    // 계측은 종전과 같은 이벤트·키를 쓴다(`ALL_APP_EVENTS` 는 DB CHECK 와 1:1 — 이름을 늘리지 않는다).
+    track('scan_report_click', { source })
+    const token = await getMeokseonAccessToken()
+    if (!token) { setLoginGateOpen(true); return }
+    setLoginGateOpen(false); setAuthBlocked(false); setReportOpen(true)
+  }
+
+  /** 로그인 화면으로. 돌아올 자리를 «URL 로» 들고 간다. */
+  function goLoginForReport(source: string) {
+    track('scan_login_cta_click', { source })
+    navigate(loginPathWithReturn(reportReturnPath()))
+  }
+
+  /**
+   * 흐름 «도중»의 401. 폼은 이미 열려 있고 사진도 골라 놨다.
+   * ⚠ 여기서 `navigate('/login')` 을 부르지 «않는다». 부르는 순간 방금 고른 사진이
+   *   말없이 사라진다. 사실(`AUTH_PHOTO_LOST_NOTICE`)을 말하고 버튼으로 «선택»을 준다.
+   * ⚠ 문구는 `MeokseonAuthError` 가 이미 들고 있다(정본은 domain/meokseon/reportAuth.ts).
+   */
+  /**
+   * ★★ 로그인에서 «돌아왔을 때» — `/scan?barcode=…&report=1`.
+   *
+   *   매직링크는 페이지를 새로 열기 때문에 React 상태가 전부 사라진다. 그래서 복귀 지점을
+   *   URL 로 들고 왔다. 여기서 바코드를 다시 조회하고 제보 폼을 «열어 준다» —
+   *   그렇게 하지 않으면 사용자는 로그인만 하고 **바코드부터 다시 스캔**해야 한다.
+   *
+   * ⚠ 사진은 복원할 수 없다(File 은 URL 로 넘길 수 없다). 그래서 게이트가 사진을 고르기
+   *   «전»에 뜨도록 만들어 뒀다 — 이 경로로 오는 사용자는 아직 사진을 고르지 않았다.
+   * ⚠ URL 은 즉시 지운다(`replaceState`). 안 지우면 새로고침·뒤로가기마다 조회가 반복된다.
+   */
+  async function restoreFromLogin() {
+    let sp: URLSearchParams
+    try { sp = new URLSearchParams(window.location.search) } catch { return }
+    const raw = sp.get('barcode') || ''
+    const wantReport = sp.get('report') === '1'
+    const bc = raw.replace(/\D/g, '')
+    if (!/^\d{8,14}$/.test(bc)) return
+    try { window.history.replaceState({}, '', '/scan') } catch { /* 무시 */ }
+    await lookupBarcode(bc)
+    // ⚠ `lookupBarcode` 가 `reset()` 으로 폼을 닫으므로 «그 뒤»에 연다. 순서를 바꾸지 말 것.
+    if (wantReport) await openReportForm('login_return')
+  }
+
+  function handleAuthError(e: MeokseonAuthError, stage: 'analyze' | 'confirm') {
+    setReportError(e.message)
+    setAuthBlocked(true)
+    // 새 이벤트 이름을 만들지 않는다 — 기존 화이트리스트 키 `error_kind` 로 구분한다.
+    track('scan_report_error', { error_kind: `auth_${e.code.toLowerCase()}_${stage}` })
   }
 
   /**
@@ -237,6 +345,8 @@ export default function Scan() {
       // ★ 이미 등록된 제품이면 «등록된 이름»이 OCR 값보다 우선한다(서버 UPDATE 가 덮어쓰지 않으므로).
       setProductName(seedProductNameForExisting(registeredName, a.productName).value)
     } catch (e) {
+      // ★ 401 을 일반 실패로 뭉개지 않는다 — 사용자가 할 일이 「로그인」으로 다르다.
+      if (e instanceof MeokseonAuthError) { handleAuthError(e, 'analyze'); return }
       setReportError(e instanceof Error ? e.message : CONFIRM_FALLBACK_MESSAGE)
       // ⚠ 새 이벤트 이름을 만들지 않는다 — `ALL_APP_EVENTS` 는 DB CHECK 제약과 1:1 이라
       //   여기만 늘리면 INSERT 가 «조용히» 거부된다(events_db_sync.test.ts). 단계는 error_kind 로 구분.
@@ -287,6 +397,9 @@ export default function Scan() {
           : null,
       })
     } catch (e) {
+      // ★ 401 을 «먼저» 가른다. `MeokseonConfirmError` 로 뭉개지면 「잠시 후 다시 시도해 주세요」가
+      //   나가고, 사용자는 로그인하면 될 일을 영영 모른다.
+      if (e instanceof MeokseonAuthError) { handleAuthError(e, 'confirm'); return }
       // ★ 실패를 성공처럼 말하지 않는다. 사용자가 다시 시도할 수 있게 사유를 그대로 보여준다.
       if (e instanceof MeokseonConfirmError) {
         const f = classifyConfirmFailure(e.status, e.serverMessage)
@@ -419,6 +532,50 @@ export default function Scan() {
   }
 
   /**
+   * ★★ 제보 로그인 게이트 — 「제보하려면 로그인이 필요해요」.
+   *
+   * ⚠ 문구를 여기 다시 적지 말 것. 정본은 `domain/meokseon/reportAuth.ts` 한 곳이다.
+   * ⚠ 이 패널이 뜬 자리에는 **사진 입력이 없다.** 사진을 고르게 해 놓고 나중에 막으면
+   *   매직링크 왕복에 사진이 사라져 두 번 찍게 된다(reportAuth.ts ②).
+   * ⚠ 「나중에 할게요」를 «반드시» 남긴다. 닫을 길 없는 벽은 스캔까지 막힌 것처럼 읽힌다.
+   */
+  function renderLoginGate() {
+    return (
+      <div
+        data-testid="report-login-gate"
+        style={{
+          marginTop: 12, padding: '12px 14px', borderRadius: 10,
+          border: '1px solid var(--border-light)', background: 'var(--border-light)',
+        }}
+      >
+        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+          {REPORT_LOGIN_HEADLINE}
+        </p>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 4 }}>
+          {REPORT_LOGIN_WHY}
+        </p>
+        {/* ★ 「스캔은 그대로 된다」를 반드시 함께 말한다. 없으면 사용자는 스캔도 막힌 줄 알고 떠난다. */}
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 4 }}>
+          {REPORT_LOGIN_SCAN_OK}
+        </p>
+        <p style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 10 }}>
+          {REPORT_LOGIN_RETURN_NOTICE}
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button" className="btn btn-primary" style={{ width: 'auto', padding: '10px 16px' }}
+            onClick={() => goLoginForReport('report_gate')}
+          >{REPORT_LOGIN_CTA}</button>
+          <button
+            type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '10px 16px' }}
+            onClick={() => setLoginGateOpen(false)}
+          >{REPORT_LOGIN_DISMISS}</button>
+        </div>
+      </div>
+    )
+  }
+
+  /**
    * ★★ 사진 제보 폼 — **미등록 제품과 등록된 제품이 «같은 화면»을 쓴다.**
    *
    *   `kind: 'new'`      바코드가 DB 에 없다(종전 경로).
@@ -444,6 +601,33 @@ export default function Scan() {
         nutritionRejectCode: confirmed.nutritionRejectCode,
         target: kind,
       })
+      /**
+       * ★★★★ 세션64c — 「제보 직후에 결과를 돌려준다」(제이 지시 2026-08-24).
+       *   서버는 1단계 응답에 원재료·첨가물·영양·신호등을 **처음부터 다 실어 보내고 있었다.**
+       *   `parsePhotoAnalysis` 가 세션64b 에 그것들을 살려 뒀는데, **화면이 아직 안 그렸다.**
+       *   제보자는 사진 두 장을 보내고 「감사합니다 · 원재료 12개」만 받았다.
+       *
+       * ⚠ 영양·신호등은 **저장된 경우에만** 낸다. 판정은 `reportNutrition.ts` 가 한다 —
+       *   여기서 다시 판단하지 않는다. 그 함수는 관문을 두 겹으로 둔다:
+       *     ① 서버가 영양을 저장했는가   ② 표기 기준(basis)을 아는가
+       *   기준을 모르는 수치로 색을 칠하면 **색이 뒤집힌다**(과소경고).
+       * ⚠ 저장 «안» 된 경우의 문구는 위 `outcome.nutritionNote` 가 이미 말한다.
+       *   여기서 또 말하면 화면이 같은 얘기를 두 번 하거나 서로 다른 말을 한다.
+       */
+      const reportNutrition = buildReportNutrition({
+        nutritionStatus: confirmed.nutritionStatus,
+        nutrition: analysis.nutrition,
+        basis: analysis.nutritionBasis,
+        trafficLight: analysis.trafficLight,
+      })
+      /**
+       * 첨가물 — **바코드 경로와 «같은» 컴포넌트·같은 순수함수**를 쓴다.
+       * ⚠ OCR 경로의 행에는 등급·IARC·ADI 가 없다. 그래도 화면이 갈라지지 않는 이유는
+       *   `SHOW_RISK_GRADE` 가 꺼져 있어 이름과 「일반적 용도」만 그리기 때문이다.
+       *   그 상수를 켜기 전에 이 경로를 다시 봐야 한다(등급이 전부 「미상」으로 나간다).
+       * ⚠ `risk_summary` 를 지어내지 않는다 — 없으면 `buildAdditiveList` 가 목록 길이를 쓴다.
+       */
+      const reportAdditives = buildAdditiveList({ additives: analysis.additives })
       return (
         <div>
           <p style={{ color: outcome.kind === 'saved' ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 14, marginBottom: 6 }}>
@@ -490,6 +674,107 @@ export default function Scan() {
               ⇒ 바코드 경로와 «같은 카드»를 쓴다. 그래야 두 경로가 갈라지지 않는다.
               ⚠ 이 카드를 다시 한 줄짜리 텍스트로 되돌리지 말 것. 되돌리면 침묵이 돌아온다. */}
           <AllergenCard result={analysis} />
+
+          {/* ───── 세션64c — 「보여줄 수 있는 부분만 보여주고, 나머지는 나중에」(제이 2026-08-24) ─────
+              원재료 → 첨가물 → 영양·신호등 순. 알레르기가 «먼저»인 것은 안전 항목이기 때문이다. */}
+
+          {/* 원재료 — 라벨 표기 순서 그대로. 못 읽었으면 목록 자체를 그리지 않는다
+              (그 사실은 위 `describeReadback` 의 「원재료 0개」가 이미 말한다). */}
+          {analysis.ingredients.length > 0 && (
+            <div style={{ marginTop: 14 }} data-testid="report-ingredients">
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>원재료</div>
+              <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                {analysis.ingredients.map((it) => (
+                  [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
+                    .filter(Boolean).join(' ')
+                )).join(', ')}
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.55 }}>
+                사진에서 읽어낸 그대로예요. 라벨과 다르면 라벨이 맞아요.
+              </p>
+            </div>
+          )}
+
+          {/* 첨가물 — ⚠ 4색 등급은 계속 «꺼진» 상태다(`SHOW_RISK_GRADE`). 여기서 켜지 않는다.
+              외부 검토 6명이 일치해서 끈 것이다. 화면은 이름과 「일반적 용도」만 그린다. */}
+          {reportAdditives.total > 0 && (
+            <div style={{ marginTop: 14 }} data-testid="report-additives">
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                {SHOW_RISK_GRADE ? `첨가물 ${reportAdditives.total}종` : describeAdditiveCount(reportAdditives.total)}
+              </div>
+              {!SHOW_RISK_GRADE && (
+                <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.6 }}>
+                  {GRADE_HIDDEN_NOTICE}
+                </p>
+              )}
+              <AdditiveList view={reportAdditives} />
+            </div>
+          )}
+
+          {/* ★★★ 영양·신호등 — **`reportNutrition.show` 가 참일 때만** 그린다.
+              그 판정에는 「서버가 저장했는가」와 「표기 기준을 아는가」가 둘 다 들어 있다.
+              여기에 `analysis.nutrition &&` 같은 조건을 «더하지» 말 것 — 관문이 두 곳으로
+              갈라져 한쪽만 고쳐지는 순간 기준 없는 숫자가 새어 나간다. */}
+          {reportNutrition.show && (
+            <div style={{ marginTop: 14 }} data-testid="report-nutrition">
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>영양성분</span>
+                {/* ★ 기준 문구는 숫자와 «항상» 함께 나간다. 없으면 숫자의 뜻이 3~5배 달라진다. */}
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{reportNutrition.basisLabel}</span>
+              </div>
+              <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
+                <tbody>
+                  {reportNutrition.rows.map((r) => (
+                    <tr key={r.key} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                      <td style={{ padding: '6px 0', color: 'var(--text-secondary)' }}>{r.label}</td>
+                      <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }}>
+                        {Math.round(r.value * 10) / 10} {r.unit}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* 신호등 — 판정된 항목만 온다(회색은 `lights` 에 들어오지 않는다). */}
+              {reportNutrition.showLights && (
+                <div style={{ marginTop: 10 }} data-testid="report-traffic-light">
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {reportNutrition.lights.map((l) => (
+                      <span key={l.key} style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13,
+                        padding: '5px 11px', borderRadius: 999,
+                        background: `${LIGHT_HEX[l.color]}1a`, color: 'var(--text)',
+                      }}>
+                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_HEX[l.color] }} />
+                        {l.label}
+                      </span>
+                    ))}
+                  </div>
+                  {/* ★ 초록을 「안전 인증」으로 읽지 않게 하는 한 줄. 색이 뜨면 «항상» 함께 나간다. */}
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.55 }}>
+                    {TRAFFIC_LIGHT_CAPTION}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 신호등을 «못» 그린 이유. ⚠ 조건을 색 목록으로 걸지 않는다 — 침묵이 돌아온다. */}
+          {reportNutrition.note && (
+            <p data-testid="report-nutrition-note" style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.6 }}>
+              {reportNutrition.note}
+            </p>
+          )}
+
+          {/* 「나머지는 나중에 알려드릴게요」로 끝내지 않고 «확인할 자리»를 준다. */}
+          <button
+            type="button"
+            onClick={() => navigate(MY_REPORTS_PATH)}
+            style={{
+              background: 'none', border: 'none', padding: '12px 0 0', cursor: 'pointer',
+              fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+            }}
+          >{CONTRIBUTIONS_TITLE} 보기</button>
         </div>
       )
     }
@@ -567,6 +852,22 @@ export default function Scan() {
 
         {reportError && (
           <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 10 }}>{reportError}</p>
+        )}
+
+        {/* ★★★ 흐름 «도중»의 401. 폼이 열린 뒤 세션이 끊긴 경우다.
+            ⚠ 여기서 자동으로 로그인 화면으로 «옮기지 않는다» — 옮기는 순간 방금 고른 사진이
+              말없이 사라진다. 사실을 먼저 말하고, 이동은 사용자가 «누를» 때만 한다. */}
+        {authBlocked && (
+          <div data-testid="report-auth-blocked" style={{ marginBottom: 10 }}>
+            <p style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 8 }}>
+              {AUTH_PHOTO_LOST_NOTICE}
+            </p>
+            <button
+              type="button" className="btn btn-primary"
+              style={{ width: 'auto', padding: '9px 15px' }}
+              onClick={() => goLoginForReport('report_auth_expired')}
+            >{AUTH_RELOGIN_CTA}</button>
+          </div>
         )}
 
         {/* 왜 못 보내는지를 «누르기 전에» 말한다. 버튼만 막고 침묵하면 고장 난 줄 안다. */}
@@ -652,6 +953,18 @@ export default function Scan() {
             {loading ? '조회 중…' : '검색'}
           </button>
         </form>
+        {/* ★ 세션64c — 「내가 보낸 제보」 진입점. 눈에 띄지 않게 둔다(주 동선은 스캔이다).
+            ⚠ 비로그인이어도 «보인다». 그 화면이 로그인 필요를 스스로 말하는 편이,
+              여기서 링크를 숨겨 「그런 게 있는 줄도 모르게」 만드는 것보다 낫다. */}
+        <button
+          type="button"
+          onClick={() => navigate(MY_REPORTS_PATH)}
+          style={{
+            background: 'none', border: 'none', padding: '12px 0 0', cursor: 'pointer',
+            fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+            display: 'block', margin: '0 auto',
+          }}
+        >{CONTRIBUTIONS_TITLE}</button>
       </div>
 
       {/* ━━ 내 최근 스캔 + 주간 패턴(리텐션 B축) — 결과를 보고 있지 않을 때만 ━━ */}
@@ -724,10 +1037,14 @@ export default function Scan() {
             검토 후 등록해 드릴게요. (등록되면 알려드릴게요.)
           </p>
           {!reportOpen && !confirmed ? (
-            <button
-              type="button" className="btn btn-secondary"
-              onClick={() => { setReportOpen(true); track('scan_report_click', { source: 'not_found' }) }}
-            >이 제품 제보하기</button>
+            <>
+              <button
+                type="button" className="btn btn-secondary"
+                onClick={() => openReportForm('not_found')}
+              >이 제품 제보하기</button>
+              {/* 로그인 게이트는 제보 버튼 «자리»에 뜬다. 사진 입력은 아직 열지 않는다. */}
+              {loginGateOpen && renderLoginGate()}
+            </>
           ) : renderReportForm('new')}
         </div>
       )}
@@ -897,14 +1214,15 @@ export default function Scan() {
                         key={g.kind} type="button" className="btn btn-primary"
                         style={{ width: 'auto', padding: '10px 16px' }}
                         onClick={() => {
-                          setReportOpen(true)
                           // ⚠ 새 이벤트 이름을 만들지 않는다 — `ALL_APP_EVENTS` 는 DB CHECK 와 1:1 이다.
                           //   `source` 는 화이트리스트에 있는 기존 키다(events_core.ts).
-                          track('scan_report_click', { source: `gap_${g.kind}` })
+                          // ★ 세션64c — 폼을 바로 열지 않는다. 로그인 게이트를 먼저 지난다.
+                          openReportForm(`gap_${g.kind}`)
                         }}
                       >{g.cta}</button>
                     ))}
                   </div>
+                  {loginGateOpen && renderLoginGate()}
                 </>
               )}
             </div>
@@ -962,15 +1280,18 @@ export default function Scan() {
               그래도 경로 자체는 있어야 한다: 우리가 아는 결손이 없다는 것이
               「정보가 정확하다」는 뜻은 아니기 때문이다(잘못된 값은 결손이 아니다). */}
           {completeness && completeness.complete && !reportOpen && !confirmed && (
-            <button
-              type="button"
-              onClick={() => { setReportOpen(true); track('scan_report_click', { source: 'gap_none' }) }}
-              style={{
-                background: 'none', border: 'none', padding: '10px 0 0', cursor: 'pointer',
-                fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
-                display: 'block', margin: '0 auto',
-              }}
-            >{completeness.fallbackCta}</button>
+            <>
+              <button
+                type="button"
+                onClick={() => openReportForm('gap_none')}
+                style={{
+                  background: 'none', border: 'none', padding: '10px 0 0', cursor: 'pointer',
+                  fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+                  display: 'block', margin: '0 auto',
+                }}
+              >{completeness.fallbackCta}</button>
+              {loginGateOpen && renderLoginGate()}
+            </>
           )}
         </>
       )}

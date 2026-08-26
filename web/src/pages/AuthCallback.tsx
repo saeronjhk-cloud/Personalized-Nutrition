@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { promoteLocalScans } from "../lib/scanHistory";
 import { track } from "../lib/events";
+import { readReturnPath } from "../lib/returnTo";
+/**
+ * ★★ 2026-08-24 세션64c — 로그인 뒤 «원래 하던 일»로 돌아온다.
+ *   종전에는 언제나 `/` 로 보냈다. 제보에 로그인 게이트가 붙은 뒤로는,
+ *   그러면 사용자가 보던 제품 화면을 잃고 **바코드부터 다시 스캔**해야 한다.
+ *   ⚠ 복귀 경로는 «이메일을 거쳐» 오는 값이다. 반드시 `readReturnPath` 로 검증한다
+ *     (열린 리다이렉트 방지). 쓸 수 없는 값이면 종전대로 `/` 로 간다.
+ */
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("로그인 처리 중...");
@@ -14,6 +22,9 @@ export default function AuthCallback() {
       try { return localStorage.getItem("last_session_id"); } catch { return null; }
     })();
     console.log("[AuthCallback] session_id to link:", sessionId);
+    // 검증을 통과한 «내부 경로»만 쓴다. 아니면 홈(종전 동작).
+    const returnPath = readReturnPath(window.location.search) ?? "/";
+    console.log("[AuthCallback] returnPath:", returnPath);
     let done = false;
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("[AuthCallback] event:", event, "user:", session?.user?.id);
@@ -45,7 +56,7 @@ export default function AuthCallback() {
         console.debug("[AuthCallback] promote skipped:", e);
       }
       sub.subscription.unsubscribe();
-      navigate("/", { replace: true });
+      navigate(returnPath, { replace: true });
     });
     const timeout = setTimeout(() => {
       if (done) return;

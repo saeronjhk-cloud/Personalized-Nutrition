@@ -31,6 +31,7 @@ import Dashboard from './pages/Dashboard'
 import Recommend from './pages/Recommend'
 import Insights from './pages/Insights'
 import Scan from './pages/Scan'
+import MyReports from './pages/MyReports'
 import Meal from './pages/Meal'
 import WeeklyReport from './pages/WeeklyReport'
 import LoginEmail from "./components/auth/LoginEmail";
@@ -180,7 +181,12 @@ export default function App() {
             <Route path="/insights" element={<Insights />} />
           )}
           {MEOKSEON_ENABLED && (
-            <Route path="/scan" element={<Scan />} />
+            <>
+              <Route path="/scan" element={<Scan />} />
+              {/* 「내가 보낸 제보」 — 기존 관례(`/checkup/manage`·`/survey/manage`)를 따라
+                  기능 아래에 둔다. ⚠ 경로는 `pages/Scan.tsx` 의 MY_REPORTS_PATH 와 같아야 한다. */}
+              <Route path="/scan/reports" element={<MyReports />} />
+            </>
           )}
           {MEAL_ENABLED && (
             <Route path="/meal" element={<Meal />} />

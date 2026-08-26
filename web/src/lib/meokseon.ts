@@ -1,3 +1,8 @@
+import { getDeviceId } from './deviceId'
+import { getMeokseonAccessToken } from './meokseonAuth'
+import { normalizeContributionPage, type MyContributionPage } from '../domain/meokseon/contributions'
+import { classifyAuthFailure, type MeokseonAuthCode } from '../domain/meokseon/reportAuth'
+
 // 먹선(가공식품 온톨로지) 공개 API 클라이언트.
 // 무료 후킹(스캔->객관 팩트)은 무인증 공개 엔드포인트만 사용(개인정보 무관).
 //   GET /api/products/:barcode         제품+영양+신호등+첨가물(mfras)
@@ -129,6 +134,11 @@ export function meokseonConfigured(): boolean {
   return !!BASE
 }
 
+/**
+ * ★ 무인증 GET. **여기에 `Authorization` 을 붙이지 말 것.**
+ *   제품 조회(`/api/products/*` · `/search`)는 세션64c 이후에도 «무인증 유지»다
+ *   (서버 담당과 동일 확정). 스캔 앞에 로그인 벽을 세우면 무료 후킹이 통째로 죽는다.
+ */
 async function getJson(path: string): Promise<any> {
   if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
   const res = await fetch(`${BASE}${path}`)
@@ -137,6 +147,59 @@ async function getJson(path: string): Promise<any> {
   const json = await res.json()
   if (!json || json.success !== true) throw new Error('먹선 API 응답 형식 오류')
   return json.data
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 인증 — 제보 계열 전용 (세션64c · 2026-08-24 제이 확정 「제보도 로그인 필수」)
+ *
+ * ★ 계약(서버 담당과 «동일». 임의로 바꾸지 말 것)
+ *     헤더   `Authorization: Bearer <supabase access token>`
+ *     401    `{ success:false, error:{ code:'AUTH_REQUIRED'|'AUTH_INVALID', message:'<한국어>' } }`
+ *   인증 필수: POST /api/ocr/multi-photo · POST /api/ocr/confirm · GET /api/contributions/mine
+ *   무인증  : GET /api/products/* · /search   ← **스캔은 종전대로 로그인 없이 된다**
+ *
+ * ⚠ 2026-08-24 기준 서버의 이 배선은 **구현 중**이다. 이 파일과 테스트는 목(mock) 기반이고
+ *   실제 왕복은 확인하지 못했다.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * 인증 실패. **코드를 잃지 않는다** — 「로그인 안 됨」과 「토큰 만료」는 문구가 다르다.
+ * 문구 판정은 `domain/meokseon/reportAuth.ts:classifyAuthFailure` 가 한다(여기서 하지 않는다).
+ */
+export class MeokseonAuthError extends Error {
+  code: MeokseonAuthCode
+  /** 서버가 준 한국어 원문. 없으면 null — 화면에는 쓰지 않고 진단용으로만 보존한다. */
+  serverMessage: string | null
+  constructor(rawCode: unknown, rawMessage?: unknown) {
+    const f = classifyAuthFailure(rawCode, rawMessage)
+    super(f.message)
+    this.name = 'MeokseonAuthError'
+    this.code = f.code
+    this.serverMessage = f.serverMessage
+  }
+}
+
+/**
+ * Bearer 헤더. 토큰이 없으면 **요청을 보내지 않고** 던진다.
+ *
+ * ★ 왜 미리 막는가 — 사진 두 장을 업로드해 놓고 401 을 받으면 사용자의 데이터 요금만 쓰고
+ *   결과는 같다. 서버 401 은 최후의 방어선이지 1차 방어선이 아니다
+ *   (`photoReport.ts:confirmPhotoReport` 의 제품명 검사와 같은 관용구).
+ */
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await getMeokseonAccessToken()
+  if (!token) throw new MeokseonAuthError('AUTH_REQUIRED')
+  return { Authorization: `Bearer ${token}` }
+}
+
+/**
+ * 401 이면 던진다. **다른 오류 분류보다 «먼저»** 불러야 한다 —
+ * 뒤에 두면 401 이 `MeokseonConfirmError('other')` 로 뭉개져 「잠시 후 다시 시도해 주세요」가
+ * 나가고, 사용자는 로그인하면 될 일을 영영 모른다.
+ */
+function throwIfUnauthorized(res: { status: number }, json: any): void {
+  if (res.status !== 401) return
+  throw new MeokseonAuthError(json?.error?.code, json?.error?.message ?? json?.message)
 }
 
 // 먹선 서버는 PostgreSQL numeric 컬럼을 "문자열"로 반환한다(node-pg 기본).
@@ -257,12 +320,44 @@ export interface MsPhotoAnalysis {
    *   실측상 이 값이 쓸 만한 건 67건 중 33건(49.3%)뿐이다.
    */
   productName: string | null
-  /** 값이 읽힌 영양소 개수(0 이면 영양표를 못 읽은 것) */
+  /** 값이 읽힌 영양소 «개수». ⚠ 세는 대상은 표시 대상 10종뿐이다(아래 parse 주석 참조). */
   nutritionCount: number
   /** 서버 `analysis.ingredient_count` (ocrRoutes.js:716). 못 읽었으면 0. */
   ingredientCount: number
   /** 서버 `analysis.additive_count` (ocrRoutes.js:718). 못 읽었으면 0. */
   additiveCount: number
+
+  /* ── 세션64b 신설 — 「제보 직후에 결과를 돌려준다」 ──────────────────────────
+   *
+   * ★★ 서버는 이것들을 **처음부터 전부 보내고 있었다.** 이 파서가 개수만 뽑고 버렸다.
+   *   제보자는 사진 두 장을 보내고 「감사합니다 · 원재료 12개」만 받았다.
+   *   = 세션61 `U60-7`(알레르기 3키를 버리던 일)과 **정확히 같은 유형**의 소실이다.
+   *
+   * ⚠ 다시 지우지 말 것. 지우는 순간 화면이 도로 개수만 말한다.
+   * ⚠ `raw` 에 이미 다 들어 있었지만 그건 «타입이 없는» 통로다. 화면이 안전하게 읽으려면
+   *   이렇게 «이름 붙은 필드»여야 한다(같은 파일 위 U60-7 주석과 같은 이유).
+   */
+
+  /** 원재료명 목록(표시 순서 = 라벨 표기 순서). 못 읽었으면 빈 배열. */
+  ingredients: MsPhotoIngredient[]
+  /**
+   * 첨가물 «행» 원본. `domain/meokseon/additives.ts:buildAdditiveList` 에 그대로 넘긴다.
+   * ⚠ 바코드 경로의 행(`name_ko`·`mfras_grade`…)과 **모양이 다르다** —
+   *   OCR 경로는 `{ name, category, raw, match_type }` 이다(`ocrParser.js:427`).
+   *   그래서 등급·IARC·ADI 가 **없다**. `SHOW_RISK_GRADE` 가 꺼져 있어 화면은 이름과
+   *   「일반적 용도」만 그리므로 두 경로가 같은 컴포넌트를 쓸 수 있다.
+   */
+  additives: Record<string, unknown>[]
+  /** 읽어낸 영양 수치. 숫자로 좁혀져 있다(바코드 경로와 같은 정규화). */
+  nutrition: MsNutrition | null
+  /** 서버 파서의 표기 기준 원문(`analysis.nutrition._basis`). 'unknown' 일 수 있다. */
+  nutritionBasis: string | null
+  /**
+   * 영양 신호등. ⚠ **이 값만 보고 화면에 색을 칠하지 말 것.**
+   *   표기 기준을 모르면 색이 뒤집힌다 —
+   *   판정은 `domain/meokseon/reportNutrition.ts:buildReportNutrition` 이 한다.
+   */
+  trafficLight: MsTrafficLight | null
   /** 평탄 목록 = contains + inferred. ⚠ **혼입은 들어 있지 않다.** */
   allergens: string[]
   allergens_v2?: MsAllergensV2 | null
@@ -277,12 +372,55 @@ export interface MsPhotoAnalysis {
   raw: unknown
 }
 
+/** 원재료 한 줄. 서버 `analysis.ingredients[]` (`ocrParser.js:2366`). */
+export interface MsPhotoIngredient {
+  name: string
+  /** 「(호주산)」 등. 없으면 null. */
+  origin: string | null
+  /** 「12%」의 12. 없으면 null. */
+  percentage: number | null
+}
+
+/** `analysis.ingredients` → 표시용. 이름이 없는 항목은 버린다(빈 줄을 그리지 않는다). */
+function parseIngredients(raw: unknown): MsPhotoIngredient[] {
+  if (!Array.isArray(raw)) return []
+  const out: MsPhotoIngredient[] = []
+  for (const r of raw) {
+    // 문자열 배열로 오는 경우도 견딘다 — 서버 파서가 바뀌어도 목록이 «조용히» 비지 않게.
+    if (typeof r === 'string') {
+      const s = r.trim()
+      if (s) out.push({ name: s, origin: null, percentage: null })
+      continue
+    }
+    if (!r || typeof r !== 'object') continue
+    const row = r as Record<string, unknown>
+    const name = typeof row.name === 'string' ? row.name.trim() : ''
+    if (!name) continue
+    const pct = typeof row.percentage === 'number' && Number.isFinite(row.percentage) ? row.percentage : null
+    out.push({
+      name,
+      origin: (typeof row.origin === 'string' && row.origin.trim()) ? row.origin.trim() : null,
+      percentage: pct,
+    })
+  }
+  return out
+}
+
 /** 응답 `data` → 화면이 읽을 수 있는 이름 붙은 필드. 1단계 응답 파싱은 여기 «한 곳»이다. */
 function parsePhotoAnalysis(data: any): MsPhotoAnalysis {
   const analysis = data?.analysis || {}
   const nutrition = analysis.nutrition || {}
-  const nutritionCount = Object.keys(nutrition).filter((k) => {
-    const v = (nutrition as Record<string, unknown>)[k]
+  /**
+   * ★★ 2026-08-23 세션64b — 세는 대상을 **표시 대상 10종으로 좁혔다.**
+   *   종전에는 `Object.keys(nutrition)` 을 그냥 셌다. 그런데 서버 파서는 같은 객체에
+   *   `_basis`·`_basis_amount`·`serving_size`·`serving_unit`·`total_content`·`content_unit`·
+   *   `_calorie_noise_removed` 같은 **영양소가 아닌 키**를 함께 담는다(`ocrParser.js:905~945`).
+   *   ⇒ 「영양성분 8개」라고 말해 놓고 표에는 5줄만 그려지는 상태였다.
+   *     세션64b 에 수치 표를 «실제로 그리기» 시작하면서 그 어긋남이 화면에 드러난다.
+   *   ⚠ 「개수를 늘려 보이게 하는 것」이 목적이 아니다. 화면이 그리는 것과 같은 것을 센다.
+   */
+  const nutritionCount = MS_NUM_FIELDS.filter((k) => {
+    const v = (nutrition as Record<string, unknown>)[k as string]
     return v !== null && v !== undefined && v !== ''
   }).length
   const count = (v: unknown, fallback: unknown[]) =>
@@ -304,6 +442,20 @@ function parsePhotoAnalysis(data: any): MsPhotoAnalysis {
     allergens_v2: analysis.allergens_v2 ?? null,
     allergens_available: analysis.allergens_available,
     allergens_flat_complete: analysis.allergens_flat_complete,
+
+    // ★★ 세션64b — 서버가 이미 보내 주던 것들. 여기서 버리면 화면이 개수만 말한다.
+    ingredients: parseIngredients(analysis.ingredients),
+    additives: Array.isArray(analysis.additives)
+      ? (analysis.additives as unknown[]).filter(
+          (r): r is Record<string, unknown> => !!r && typeof r === 'object',
+        )
+      : [],
+    // 바코드 경로와 «같은» 정규화를 쓴다. 한쪽만 문자열로 남으면 화면이 갈라진다.
+    nutrition: normalizeNutrition(analysis.nutrition ?? null),
+    nutritionBasis: typeof nutrition._basis === 'string' ? nutrition._basis : null,
+    // ⚠ `analysis` 아래가 아니라 `data` 최상위다(ocrRoutes.js:800).
+    trafficLight: (data?.traffic_light ?? null) as MsTrafficLight | null,
+
     raw: data,
   }
 }
@@ -331,16 +483,28 @@ export async function analyzePhotoReport(params: {
     }
   }
 
+  // ★ 세션64c — 토큰을 «업로드 전»에 확보한다. 없으면 사진을 보내지 않고 던진다.
+  const headers = await authHeaders()
+
   const fd = new FormData()
   if (labelImage) fd.append('label_image', labelImage)
   if (nutritionImage) fd.append('nutrition_image', nutritionImage)
   if (barcode) fd.append('barcode', barcode)
   fd.append('save', 'false')   // ★ 세션64 — 저장은 2단계(confirm)에서만 일어난다
+  // ★ 세션64b — 제보자 식별자. 이게 없으면 서버 `contributions.device_id` 가 null 로 남고
+  //   「내 제보」가 영원히 빈 목록이 된다(웹 제보는 `user_id` 도 null 이다 — 계정 체계가 다르다).
+  //   ⚠ 이 값은 «먹선 제보 API 로만» 나간다. `track()` props 에 절대 싣지 않는다(lib/events.ts 원칙).
+  fd.append('device_id', getDeviceId())
 
-  const res = await fetch(`${BASE}/api/ocr/multi-photo`, { method: 'POST', body: fd })
+  // ⚠ `Content-Type` 을 «직접 넣지 말 것». FormData 는 브라우저가 boundary 를 붙여야 한다.
+  const res = await fetch(`${BASE}/api/ocr/multi-photo`, { method: 'POST', headers, body: fd })
 
   let json: any = null
   try { json = await res.json() } catch { /* 비-JSON 응답 */ }
+
+  // ★ 401 을 «먼저» 가른다. 아래 일반 오류로 뭉개지면 「잠시 후 다시」가 나가고
+  //   사용자는 로그인하면 될 일을 모른다.
+  throwIfUnauthorized(res, json)
 
   if (!res.ok || !json || json.success !== true) {
     const msg = (json && (json.message || json.error?.message)) || `서버 오류(${res.status})`
@@ -450,17 +614,26 @@ export async function confirmPhotoReport(params: {
   const body: Record<string, unknown> = {
     analysis_token: token,
     product_info: { product_name: productName },
+    // ★ 세션64b — 1단계와 «같은» 값을 보낸다. 두 단계가 다른 값을 보내면
+    //   실제 저장을 하는 이 호출의 기록이 이력에서 빠진다.
+    device_id: getDeviceId(),
   }
   if (params.barcode) body.barcode = params.barcode
 
+  // ★ 세션64c — 저장 호출도 인증 필수다. 토큰이 없으면 여기서 던진다.
+  const auth = await authHeaders()
+
   const res = await fetch(`${BASE}/api/ocr/confirm`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...auth },
     body: JSON.stringify(body),
   })
 
   let json: any = null
   try { json = await res.json() } catch { /* 비-JSON 응답 */ }
+
+  // ★ 401 은 `MeokseonConfirmError` 로 뭉개지 않는다 — 사용자 행동이 «로그인»으로 다르다.
+  throwIfUnauthorized(res, json)
 
   const serverMessage: string | null =
     (json && typeof (json.message || json.error?.message) === 'string')
@@ -511,4 +684,76 @@ export async function confirmPhotoReport(params: {
     nutrientCount,
     raw: data,
   }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 「내 제보」 이력 — GET /api/contributions/mine (세션64b 신설)
+ *
+ * ★ 왜 필요한가: 제보를 보내고 나면 그걸로 끝이었다. 서버에는 기록이 남는데
+ *   **그 기록을 돌려주는 경로가 없었다.** 사용자는 자기가 뭘 보냈는지, 반영됐는지 모른다.
+ *
+ * ★★ 2026-08-24 세션64c — **식별자가 `device_id` 에서 «계정»으로 바뀌었다.**
+ *   세션64b 에는 `?device_id=<uuid>` 를 보냈다. 그때는 앱(Supabase Auth)과 먹선 서버
+ *   (Firebase Auth)의 계정 체계가 연결돼 있지 않아서 그 방법밖에 없었다.
+ *   제이 확정(2026-08-24)으로 서버 인증이 **Supabase 로 전면 교체**되면서
+ *   서버가 토큰에서 사용자를 직접 알아낸다.
+ *
+ *   ⇒ **`device_id` 파라미터는 더 이상 보내지 않는다**(서버 담당과 동일 확정).
+ *     보내면 서버가 무시하거나 400 을 줄 수 있고, 무엇보다 「이 브라우저」와 「이 사람」이
+ *     다른 답을 내면 사용자는 자기 제보가 사라진 줄 안다.
+ *   ⇒ 저장소를 지워도, 기기를 바꿔도 **로그인만 하면 보인다.**
+ *     `deviceId.ts:DEVICE_ID_LIMIT_NOTICE`(「이 기기에만 연결돼 있어요」)가 말하던 한계는
+ *     사라졌다. ⚠ 그 상수는 **화면 어디에도 붙어 있지 않다**(2026-08-24 확인) —
+ *     되살려 쓰지 말 것. 지금 쓸 문구는 `contributions.ts:CONTRIBUTIONS_ACCOUNT_NOTICE` 다.
+ *
+ * ⚠ 2026-08-24 기준 서버에 이 엔드포인트는 **아직 없다**(구현 중). 실제 왕복은 확인 못 했다.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * 이력 조회 실패(401 «아닌» 것). **상태 코드를 잃지 않는다.**
+ * ⚠ 401 은 여기가 아니라 `MeokseonAuthError` 다 — 「못 불러왔다」와 「로그인이 필요하다」는
+ *   사용자가 할 일이 다르다. 한 오류로 합치면 화면이 「잠시 후 다시」만 말하고 끝난다.
+ */
+export class MeokseonContributionsError extends Error {
+  status: number
+  constructor(status: number, message?: string) {
+    super(message || `서버 오류(${status})`)
+    this.name = 'MeokseonContributionsError'
+    this.status = status
+  }
+}
+
+/**
+ * 이 기기가 보낸 제보 목록.
+ *
+ * ⚠ 응답이 비어 있는 것과 실패는 **다르다.** 실패는 반드시 던진다 —
+ *   조용히 빈 배열을 돌려주면 화면이 「아직 보낸 제보가 없어요」라고 «거짓말»을 한다.
+ *   (2026-08-06 「거짓 확인」 사고와 방향만 반대인 같은 유형이다.)
+ */
+export async function listMyContributions(params?: {
+  limit?: number
+  offset?: number
+}): Promise<MyContributionPage> {
+  if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
+
+  const limit = params?.limit ?? 20
+  const offset = params?.offset ?? 0
+
+  // ⚠ `device_id` 를 다시 붙이지 말 것 — 식별자는 토큰이다(위 주석 참조).
+  const qs = `limit=${limit}&offset=${offset}`
+  const headers = await authHeaders()
+  const res = await fetch(`${BASE}/api/contributions/mine?${qs}`, { headers })
+
+  let json: any = null
+  try { json = await res.json() } catch { /* 비-JSON 응답 */ }
+
+  // ★ 401 을 「불러오지 못했어요」로 뭉개지 않는다 — 할 일이 「로그인」으로 다르다.
+  throwIfUnauthorized(res, json)
+
+  if (!res.ok || !json || json.success !== true) {
+    const msg = (json && (json.message || json.error?.message)) || undefined
+    throw new MeokseonContributionsError(res.status, typeof msg === 'string' ? msg : undefined)
+  }
+
+  return normalizeContributionPage(json.data)
 }

@@ -174,4 +174,104 @@ describe('Scan — 사진 제보 결과 알레르기 배선 (세션61 U60-7)', (
     expect(code).toMatch(/retakeNutritionPhoto/)
     expect(code).toMatch(/outcome\.retakeable/)
   })
+
+  /* ════════════════════════════════════════════════════════════════════════
+   * 세션64c (2026-08-24) — 로그인 게이트 + 「제보 직후 결과」 배선.
+   *
+   * ⚠ 여기 단정들도 «약하다» — 소스 문자열을 볼 뿐 렌더 결과를 보지 않는다.
+   *   되돌림 방지 장치이지 동작 증명이 아니다.
+   * ════════════════════════════════════════════════════════════════════════ */
+
+  describe('로그인 게이트 (제이 확정 2026-08-24 「제보도 로그인 필수」)', () => {
+    it('★★★ 제보 버튼이 폼을 «직접» 열지 않는다 — 게이트를 거친다', () => {
+      expect(code).toMatch(/openReportForm\(/)
+      // 종전처럼 버튼 onClick 에서 바로 폼을 여는 형태가 되살아나지 않았다.
+      expect(code).not.toMatch(/onClick=\{\(\)\s*=>\s*\{?\s*setReportOpen\(true\)/)
+    })
+
+    it('★★★ 게이트가 «토큰»을 실제로 확인한다 (상태만 보고 열지 않는다)', () => {
+      expect(code).toMatch(/getMeokseonAccessToken\(/)
+    })
+
+    it('★★★★ 스캔·조회 경로에는 게이트가 «없다» — 무료 후킹을 막지 않는다', () => {
+      // 바코드 조회·검색 함수가 로그인 검사를 거치지 않는다.
+      const lookup = code.slice(code.indexOf('async function lookupBarcode'), code.indexOf('async function doSearch'))
+      expect(lookup.length).toBeGreaterThan(0)
+      expect(lookup).not.toMatch(/getMeokseonAccessToken|openReportForm|loginGateOpen/)
+      // 카메라 시작도 마찬가지다.
+      const start = code.slice(code.indexOf('async function startScan'), code.indexOf('async function lookupBarcode'))
+      expect(start).not.toMatch(/getMeokseonAccessToken|loginGateOpen/)
+    })
+
+    it('★★ 게이트 문구를 화면에서 «다시 적지» 않는다 (정본은 domain/meokseon/reportAuth.ts)', () => {
+      expect(code).toMatch(/REPORT_LOGIN_HEADLINE/)
+      expect(code).toMatch(/REPORT_LOGIN_WHY/)
+      // 「스캔은 그대로 된다」를 반드시 함께 그린다.
+      expect(code).toMatch(/REPORT_LOGIN_SCAN_OK/)
+      expect(code).not.toMatch(/제보하려면 로그인이 필요해요/)
+    })
+
+    it('★★★ 401 을 일반 실패로 뭉개지 않는다', () => {
+      expect(code).toMatch(/MeokseonAuthError/)
+      expect(code).toMatch(/handleAuthError\(/)
+    })
+
+    it('★★★ 흐름 도중 401 에서 «자동으로» 로그인 화면으로 옮기지 않는다 (사진이 사라진다)', () => {
+      // 사실을 말하는 문구와 «버튼»이 있다. 자동 이동이면 이 둘이 필요 없다.
+      expect(code).toMatch(/AUTH_PHOTO_LOST_NOTICE/)
+      expect(code).toMatch(/AUTH_RELOGIN_CTA/)
+      // handleAuthError 안에서 navigate 를 부르지 않는다.
+      const fn = code.slice(code.indexOf('function handleAuthError'))
+      const body = fn.slice(0, fn.indexOf('\n  }') + 4)
+      expect(body).not.toMatch(/navigate\(/)
+    })
+
+    it('★★ 로그인 뒤 «원래 하던 제보»로 돌아온다 — 바코드를 URL 로 들고 간다', () => {
+      expect(code).toMatch(/loginPathWithReturn\(/)
+      expect(code).toMatch(/reportReturnPath\(/)
+      expect(code).toMatch(/restoreFromLogin\(/)
+      expect(code).toMatch(/report=1/)
+    })
+  })
+
+  describe('제보 직후 결과 표시 (제이 지시 2026-08-24 「보여줄 수 있는 부분만」)', () => {
+    it('★★★ 영양·신호등 판정을 화면에서 «다시 하지» 않는다 — 순수함수 한 곳이다', () => {
+      expect(code).toMatch(/buildReportNutrition\(/)
+      // 관문을 두 곳으로 가르지 않는다: 화면은 show 만 본다.
+      expect(code).toMatch(/reportNutrition\.show/)
+      expect(code).toMatch(/reportNutrition\.showLights/)
+    })
+
+    it('★★★★ 「저장된 경우에만」이 지켜진다 — 판정 입력이 서버 nutrition_status 다', () => {
+      const call = code.slice(code.indexOf('buildReportNutrition({'))
+      const body = call.slice(0, call.indexOf('})') + 2)
+      expect(body).toMatch(/nutritionStatus:\s*confirmed\.nutritionStatus/)
+      expect(body).toMatch(/basis:\s*analysis\.nutritionBasis/)
+      expect(body).toMatch(/trafficLight:\s*analysis\.trafficLight/)
+    })
+
+    it('★★ 서버가 이미 주던 것들을 «그린다» — 개수만 말하던 상태로 되돌아가지 않았다', () => {
+      expect(code).toMatch(/analysis\.ingredients/)
+      expect(code).toMatch(/buildAdditiveList\(\{\s*additives:\s*analysis\.additives/)
+    })
+
+    it('★★★ 첨가물 등급(4색)은 «꺼진 채»다 — 화면에서 켜지 않는다', () => {
+      expect(code).toMatch(/SHOW_RISK_GRADE/)
+      // `SHOW_RISK_GRADE = true` 로 덮어쓰는 코드가 없다.
+      expect(code).not.toMatch(/SHOW_RISK_GRADE\s*=\s*true/)
+    })
+
+    it('★★ 신호등이 뜨면 「초록도 안전 인증이 아니다」가 «항상» 함께 나간다', () => {
+      expect(code).toMatch(/TRAFFIC_LIGHT_CAPTION/)
+    })
+
+    it('★★ 신호등을 못 그린 이유를 말한다 — 침묵하지 않는다', () => {
+      expect(code).toMatch(/reportNutrition\.note/)
+    })
+
+    it('★ 「내가 보낸 제보」로 가는 길이 있다', () => {
+      expect(code).toMatch(/MY_REPORTS_PATH/)
+      expect(code).toMatch(/CONTRIBUTIONS_TITLE/)
+    })
+  })
 })
