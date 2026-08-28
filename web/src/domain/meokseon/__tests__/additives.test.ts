@@ -146,10 +146,25 @@ describe('★ ① 4색 «밖»인 첨가물이 화면에서 사라지지 않는�
     expect(v.unlisted).toBe(0)
   })
 
-  it('★ 서버 total 이 목록보다 크면 그 차이를 «unlisted» 로 남긴다 (침묵 금지)', () => {
+  /**
+   * ★★★★ 2026-08-28 세션65 `U65-2` — **이 테스트의 기대값을 «의도적으로» 바꿨다.**
+   *
+   *   종전 기대: `total 7 · items 1` → `unlisted 6`.
+   *   그 기대는 「`unlisted` 를 앱이 `total - items.length` 로 «만들어 낸다»」는 전제였고,
+   *   그 전제 자체가 `U65-2` 의 원인이다 — 서버 `total` 은 「저장되어 조회된 개수」라서
+   *   실제 응답에서는 `items.length` 를 **넘을 수가 없고**, 그래서 이 값이 구조적으로
+   *   항상 0 이었다. 즉 이 테스트만 초록이었고 화면의 경고는 **한 번도 뜬 적이 없다.**
+   *
+   *   ⇒ 계약 세션65 C2-c: `unlisted` 는 **서버가 준 것만** 쓴다. 없으면 0. 추정하지 않는다.
+   *   ⇒ 「목록이 짧다」는 사실을 말하는 책임은 이제 서버의 `risk_summary.unlisted` 가 진다.
+   *     그 축의 테스트는 `additives_unlisted.test.ts` 에 따로 있다.
+   */
+  it('★ 서버가 unlisted 를 «안 주면» 앱이 지어내지 않는다 (총계에서 빼서 추정하지 않는다)', () => {
     const v = buildAdditiveList({ additives: [아스파탐], risk_summary: { total: 7 } })
+    // 화면의 「N개」는 여전히 «줄 수보다 적게» 말하지 않는다.
     expect(v.total).toBe(7)
-    expect(v.unlisted).toBe(6)
+    // ⚠ 종전 구현은 여기서 6 을 만들어 냈다. 근거 없는 수였다.
+    expect(v.unlisted).toBe(0)
   })
 
   it('서버 total 이 목록보다 «작아도» 그려지는 줄 수보다 적게 말하지 않는다', () => {

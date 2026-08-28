@@ -110,9 +110,20 @@ export interface MsAdditiveSummary {
   product_name: string
   additives: Array<Record<string, unknown>>
   risk_summary: {
+    /** 저장되어 «조회된» 개수. ⚠ 라벨에 있던 개수가 아니다(계약 세션65 C2-b). */
     total: number
     by_color: { green: number; yellow: number; orange: number; red: number }
     with_v2_data: number
+    /**
+     * ★ 세션65 신설 — 제보 당시 라벨에서 «검출»된 총 개수(마스터 조인 «전»). 모르면 null.
+     * ⚠ 구버전 서버 응답에는 아예 없다 ⇒ optional.
+     */
+    detected_total?: number | null
+    /**
+     * ★ 세션65 신설 — 서버가 계산한 `max(0, detected_total - total)`.
+     * ⚠ **앱이 다시 계산하지 않는다.** 소비처는 `domain/meokseon/additives.ts:readUnlisted` 한 곳.
+     */
+    unlisted?: number
   }
 }
 

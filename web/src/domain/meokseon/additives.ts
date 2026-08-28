@@ -161,7 +161,11 @@ export interface AdditiveView {
 }
 
 export interface AdditiveListView {
-  /** 서버 `risk_summary.total`. 「현재 인식한 첨가물 N개」의 N. */
+  /**
+   * 서버 `risk_summary.total`. 「현재 인식한 첨가물 N개」의 N.
+   * ⚠ 세션65 계약(C2-b) 기준으로 이것은 **「저장되어 조회된 개수」**다.
+   *   `unlisted` 와 «겹치지 않는다» — `detected_total = total + unlisted` 다.
+   */
   total: number
   /**
    * ★ 등급 표시가 꺼져 있는 동안 화면이 쓰는 **단일 목록**. 이름 가나다순.
@@ -178,9 +182,20 @@ export interface AdditiveListView {
   /** 우리가 «직접 센» 색별 개수. 서버 `by_color` 를 믿지 않는다(4색 밖을 못 센다). */
   counts: Record<AdditiveColor, number>
   /**
-   * ★ 「N종」이라 써 놓고 목록이 그보다 «짧은» 개수.
-   *   서버 `total` 은 `additives.length` 이므로 정상 응답에서는 0 이다.
-   *   0 이 아니면 화면이 무언가를 잃고 있다는 뜻이므로 사용자에게 말해야 한다.
+   * ★★★★ `U65-2` (2026-08-28 세션65) — **서버 `risk_summary.unlisted` 를 그대로 담는다.**
+   *
+   *   뜻: 제보 당시 라벨에서 «검출»됐지만 저장 단계에서 목록에 오르지 못한 첨가물 개수.
+   *       서버가 `max(0, detected_total - total)` 로 «계산해서» 내려준다(계약 C2-b).
+   *
+   *   ⚠ **앱은 빼기를 다시 하지 않는다.** 서버가 안 주면 0 이다. 추정하지 않는다.
+   *   ⚠ `total` 의 «부분집합이 아니다». 겹치지 않는 별개의 수다.
+   *      화면이 「7개」를 그리고 여기가 4 면 라벨에는 11개가 있었다는 뜻이다.
+   *
+   *   왜 이렇게 바뀌었나 — 종전 코드는 `Math.max(serverTotal, items.length) - items.length` 였다.
+   *   `serverTotal` 자체가 「저장되어 조회된 개수」라 `items.length` 를 넘을 수가 없어서
+   *   이 값이 **구조적으로 항상 0** 이었고, `AdditiveList.tsx` 의 경고가 한 번도 뜬 적이 없다.
+   *   그동안 실측으로는 검출된 첨가물의 **66.1%** 가 저장 단계에서 사라지고 있었다
+   *   (`.tmp/s65/U64-3_재측정_판정.md` §1·§4).
    */
   unlisted: number
 }
@@ -230,6 +245,33 @@ export function describeAdditiveCount(n: number): string {
 /** A2 각주 — 왜 「N개」가 전부가 아닌가. 위 33.3% 실측이 근거다. */
 export const ADDITIVE_COUNT_CAVEAT =
   '라벨에 적혀 있어도 아직 대조표에 없는 첨가물은 이 목록에 나오지 않아요. 여기 보이는 것이 전부가 아닐 수 있어요.'
+
+/**
+ * ★★★★ `U65-2` — 목록에 «오르지 못한» 첨가물이 있을 때의 경고 문구. (2026-08-28 세션65)
+ *
+ * 종전 문구(`AdditiveList.tsx` 에 직접 적혀 있었다):
+ *   「N종은 상세 정보를 불러오지 못했어요. 화면에 보이는 목록이 전부가 아니에요.」
+ *
+ * 세 군데가 사실과 어긋나서 고쳤다.
+ *   ① **「N종은」** — 종전 `unlisted` 는 `total` «안»의 일부라는 전제였다(7개 중 6개를 못 불러옴).
+ *      계약 C2-b 이후 `unlisted` 는 `total` 과 **겹치지 않는 별개의 수**다
+ *      (`detected_total 11 = total 7 + unlisted 4`). ⇒ 「N종은」이 아니라 「N개 더」다.
+ *   ② **「상세 정보를 불러오지 못했어요」** — 일시적인 로딩 실패로 읽힌다. 사실이 아니다.
+ *      제보 시점에 라벨에서 «읽어낸» 것이 저장 단계에서 목록에 오르지 못한 것이고,
+ *      앱은 그 이름조차 받지 못한다 — 서버는 **개수만** 내려준다(계약 C2-b).
+ *   ③ **「종」** — 이 섹션의 개수 단위는 「개」로 통일돼 있다(`describeAdditiveCount`).
+ *
+ * ⛔ **원인을 말하지 않는다.** 「대조표에 없어서」라고 쓰면 **틀린 문장**이 된다 —
+ *    실측(`.tmp/s65/U64-3_재측정_판정.md` §2)상 사라진 125건 중 **72%는 마스터에 이미 있는데도**
+ *    사라졌다. 원인은 사전 결손이 아니라 저장 경로의 구조 결함이다. 모르는 것을 단정하지 않는다.
+ * ⚠ 문체는 **해요체**를 유지한다. 이 섹션에서 합니다체는 안내문
+ *   (`GRADE_HIDDEN_NOTICE` · `FUNCTION_MISSING_CAVEAT`) 쪽이다. 임의로 섞지 않는다.
+ * ⚠ 「안전」이라고 읽히게 하지 않는다. 모르는 것을 «모른다»고만 말한다.
+ */
+export function describeUnlistedAdditives(n: number): string {
+  return `라벨에서 읽었지만 이 목록에 넣지 못한 첨가물이 ${n}개 더 있어요. `
+    + '그 이름과 용도는 보여드리지 못해요.'
+}
 
 /** A5 — 「기능」이 아니라 「일반적 용도」다. 화면 문구의 정본은 여기 한 곳. */
 export const FUNCTION_LABEL = '일반적 용도'
@@ -566,7 +608,38 @@ export function toAdditiveView(row: Row, index: number): AdditiveView {
 /** `getAdditiveSummary()` 응답에서 필요한 부분만. 전체 타입에 묶이지 않는다(테스트 편의). */
 export interface AdditiveSummaryLike {
   additives?: unknown
-  risk_summary?: { total?: unknown } | null
+  risk_summary?: {
+    /** 기존 = 저장되어 조회된 개수. 의미 변경 금지(계약 C2-b). */
+    total?: unknown
+    /**
+     * ★ 세션65 신설 — 제보 당시 라벨에서 «검출»된 총 개수(마스터 조인 «전»). 모르면 null.
+     * ⚠ 앱은 **이 값을 읽지 않는다.** 여기 적어 두는 것은 응답 모양을 잃지 않기 위해서다.
+     *   이것으로 빼기를 하면 `unlisted` 계산이 두 곳으로 갈라진다 — 서버 것만 쓴다.
+     */
+    detected_total?: unknown
+    /** ★ 세션65 신설 — 서버가 계산한 `max(0, detected_total - total)`. 없으면 0 으로 본다. */
+    unlisted?: unknown
+  } | null
+}
+
+/**
+ * ★★★★ `U65-2` — 「목록에 넣지 못한 첨가물 개수」. **서버가 준 값만 쓴다.**
+ *
+ * 계약 C2-c(정본: `backends/먹선/meokseon-server/.tmp/s65/계약_세션65.md`):
+ *   · 서버 `risk_summary.unlisted` 를 **그대로** 쓴다. 앱이 빼기를 다시 하지 않는다.
+ *   · 서버가 안 주면(구버전 응답·OCR 제보 직후 경로) **0**. ⛔ 절대 추정하지 않는다.
+ *
+ * ⛔ 여기에 `total - items.length` 를 되살리지 말 것. 그것이 정확히 `U65-2` 의 원인이다 —
+ *    `total` 이 곧 「저장되어 조회된 개수」라서 `items.length` 를 넘을 수가 없고,
+ *    그래서 경고가 **한 번도 뜬 적이 없었다.**
+ *
+ * ⚠ 방어: 음수·NaN·소수는 0 또는 내림으로 좁힌다. 화면에 「-1개」·「3.5개」를 내지 않는다.
+ *   (`num()` 이 문자열도 견딘다 — PG 드라이버가 숫자를 문자열로 주는 경우가 이 저장소에 있다.)
+ */
+export function readUnlisted(summary: AdditiveSummaryLike | null | undefined): number {
+  const raw = num(summary?.risk_summary?.unlisted)
+  if (raw === null || raw <= 0) return 0
+  return Math.floor(raw)
 }
 
 /**
@@ -603,7 +676,7 @@ export function buildAdditiveList(summary: AdditiveSummaryLike | null | undefine
 
   const serverTotal = num(summary?.risk_summary?.total)
   // ⚠ 서버 total 이 없거나 목록보다 «작으면» 목록 길이를 쓴다.
-  //   화면의 「N종」이 실제로 그려지는 줄 수보다 적게 나오는 쪽이 더 나쁜 거짓말이다.
+  //   화면의 「N개」가 실제로 그려지는 줄 수보다 적게 나오는 쪽이 더 나쁜 거짓말이다.
   const total = serverTotal !== null ? Math.max(serverTotal, items.length) : items.length
 
   return {
@@ -612,6 +685,11 @@ export function buildAdditiveList(summary: AdditiveSummaryLike | null | undefine
     alerts: items.filter((it) => it.alert).sort(byRank),
     calm: items.filter((it) => !it.alert).sort(byRank),
     counts,
-    unlisted: Math.max(0, total - items.length),
+    /**
+     * ★★★★ `U65-2` — 종전에는 여기가 `Math.max(0, total - items.length)` 였고
+     *   `total` 이 곧 「저장되어 조회된 개수」라서 **구조적으로 항상 0** 이었다.
+     *   ⇒ 서버가 계산해서 내려준 값을 그대로 쓴다. 앱은 빼기를 다시 하지 않는다.
+     */
+    unlisted: readUnlisted(summary),
   }
 }

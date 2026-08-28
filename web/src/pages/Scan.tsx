@@ -1109,7 +1109,11 @@ export default function Scan() {
                 {/* ⚠ 「첨가물 7종」은 사실보다 강한 주장이다(33.3% 미매칭). 문구 정본은 additives.ts. */}
                 {SHOW_RISK_GRADE ? `첨가물 ${additiveView.total}종` : describeAdditiveCount(additiveView.total)}
               </h3>
-              {additiveView.total === 0 ? (
+              {/* ★★★ `U65-2` — 조건에 `unlisted === 0` 을 «더했다».
+                  종전 조건(`total === 0`)만으로는 「저장 0개 · 라벨에서 검출 11개」인 제품에서
+                  「등록된 첨가물 정보가 없어요」 한 줄만 남는다. 그건 침묵이 아니라 **오정보**다 —
+                  라벨에는 있었고 우리가 그것을 잃은 것이다. 그 경우엔 목록 대신 경고를 낸다. */}
+              {additiveView.total === 0 && additiveView.unlisted === 0 ? (
                 <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>등록된 첨가물 정보가 없어요.</p>
               ) : (
                 <>

@@ -5,6 +5,7 @@ import {
   SHOW_RISK_GRADE, UNKNOWN_COLOR_NOTE,
   FUNCTION_LABEL, FUNCTION_CAVEAT, FUNCTION_MISSING_CAVEAT,
   EVIDENCE_TOGGLE_LABEL, EVIDENCE_SOURCE_NOTE, ADDITIVE_COUNT_CAVEAT,
+  describeUnlistedAdditives,
 } from '../domain/meokseon/additives'
 
 /**
@@ -207,7 +208,13 @@ function GradeSections({ view }: { view: AdditiveListView }) {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export default function AdditiveList({ view }: { view: AdditiveListView }) {
-  if (view.total === 0) return null
+  // ★★★ `U65-2` — 종전 조건은 `view.total === 0` 하나였다.
+  //   서버가 「저장된 것 0개 · 라벨에서 검출된 것 11개」를 내려주는 경우(=100% 소실)에
+  //   그 조건은 컴포넌트를 통째로 지워서 «가장 심한 소실에서 경고가 사라진다».
+  //   ⇒ 그릴 줄이 없어도 «할 말»이 남아 있으면 그린다.
+  // ⚠ 여기에 블록 주석(`/** … */`)을 쓰지 말 것. 여는 중괄호 «바로 뒤»의 블록 주석은
+  //   `additives*.test.ts` 의 주석 스트리퍼가 `{ … */}` 로 오인해 함수 본문을 통째로 걷어낸다.
+  if (view.total === 0 && view.unlisted === 0) return null
 
   return (
     <div style={{ marginTop: 14 }}>
@@ -219,11 +226,12 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
         </ul>
       )}
 
-      {/* ★ 「N개」라 써 놓고 목록이 그보다 짧으면 그 차이를 말한다. 조용히 지우지 않는다. */}
+      {/* ★★★★ `U65-2` — 라벨에서 읽혔는데 목록에 못 오른 것이 있으면 «반드시» 말한다.
+          ⚠ 문구는 여기 적지 않는다. 정본은 `domain/meokseon/additives.ts` 한 곳이다 —
+            화면에 다시 적으면 문구가 갈라지고, 갈라진 쪽은 아무도 검토하지 않는다.
+          ⚠ `view.unlisted` 는 **서버가 계산해 준 값**이다. 여기서 다시 빼지 말 것. */}
       {view.unlisted > 0 && (
-        <p style={{ ...NOTE, marginTop: 10 }}>
-          {view.unlisted}종은 상세 정보를 불러오지 못했어요. 화면에 보이는 목록이 전부가 아니에요.
-        </p>
+        <p style={{ ...NOTE, marginTop: 10 }}>{describeUnlistedAdditives(view.unlisted)}</p>
       )}
 
       {SHOW_RISK_GRADE ? (
