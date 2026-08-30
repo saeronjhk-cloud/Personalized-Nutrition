@@ -9,7 +9,7 @@ import {
 import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
-import { hasConsentedMeal } from '../lib/mealConsent'
+import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
   openMealSession, closeMealSession, getCurrentOpenSession,
   type SessionSummary,
@@ -49,7 +49,25 @@ export default function Meal() {
 
   useEffect(() => {
     track('meal_page_view')
-    supabase.auth.getUser().then(({ data }) => setAuthed(!!data.user))
+    let alive = true
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!alive) return
+      setAuthed(!!data.user)
+      // ★ 2026-08-28: 로그인돼 있으면 «서버가 권위» 다.
+      //   로컬 캐시만 믿으면 계정을 바꿨을 때 갇힌다 —
+      //   로컬 '동의함' + 서버 기록 없음 → 게이트는 안 뜨고 Edge 는 거부.
+      //   실제 사고(2026-08-28): 계정 교체 후 사진 분석이 전면 차단됐고
+      //   Account 의 철회 버튼도 서버 기준이라 비활성이어서 탈출구가 없었다.
+      if (data.user) {
+        const server = await syncMealConsentFromServer()
+        if (!alive) return
+        // null = 서버 확인 실패(네트워크). 그때만 로컬 캐시로 폴백한다.
+        // 최종 게이트는 Edge 가 쥐고 있으므로 «거짓 통과»는 생기지 않는다.
+        setConsented(server ?? hasConsentedMeal())
+      }
+    })()
+    return () => { alive = false }
   }, [])
 
   useEffect(() => {

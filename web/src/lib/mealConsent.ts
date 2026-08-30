@@ -88,10 +88,16 @@ export function revokeMealConsent(): void {
  * meal_consent_active(P0-④)가 이 값을 필수 조건으로 재검증한다.
  */
 export async function markMealConsentServer(ageConfirmed14plus = false): Promise<void> {
+  // ★ 2026-08-28: 예전에는 `if (!user) return` 이었다 — 로그인 세션이 없으면
+  //   «조용히» 아무것도 안 하고 성공한 척했다. 그런데 호출부는 그 직전에
+  //   로컬 캐시에 'accepted' 를 이미 박아 둔다. 결과:
+  //     로컬 = 동의함  /  서버 = 기록 없음  →  게이트는 다시 안 뜨고 Edge 는 계속 거부
+  //   = 사용자가 스스로 빠져나올 수 없는 상태. 실제로 발생했다(2026-08-28).
+  //   실패는 반드시 시끄러워야 한다. 호출부가 로컬 캐시를 되돌릴 수 있게 던진다.
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
+  if (!user) throw new Error('로그인이 필요합니다 — 동의를 서버에 기록할 수 없습니다.')
   const now = new Date().toISOString()
-  await supabase.from('meal_consent').upsert({
+  const { error } = await supabase.from('meal_consent').upsert({
     user_id: user.id,
     sensitive_consented_at: now,
     intl_consented_at: now,
@@ -99,6 +105,8 @@ export async function markMealConsentServer(ageConfirmed14plus = false): Promise
     revoked_at: null,
     policy_version: MEAL_CONSENT_POLICY_VERSION,
   }, { onConflict: 'user_id' })
+  // upsert 실패도 삼키지 않는다. 서버에 안 남았는데 로컬만 동의됨 = 같은 사고다.
+  if (error) throw error
 }
 
 /**
@@ -122,4 +130,34 @@ export async function hasServerMealConsent(): Promise<boolean> {
     p_uid: (await supabase.auth.getUser()).data.user?.id,
   })
   return !error && data === true
+}
+
+/**
+ * ★ 2026-08-28 신설 — 서버를 «권위»로 삼아 로컬 캐시를 맞춘다.
+ *
+ * 왜 필요한가: 로컬 캐시는 브라우저에 남고 계정을 따라다니지 않는다.
+ *   계정 A 로 동의 → 로그아웃 → 계정 B 로 로그인 하면
+ *   로컬은 여전히 '동의함' 인데 서버(계정 B)에는 기록이 없다.
+ *   그러면 게이트가 안 뜨고, Edge 는 계속 거부하고, 사용자는 갇힌다.
+ *   실제로 발생했다(2026-08-28, 계정 교체 후 사진 분석 전면 차단).
+ *
+ * 반환값: 서버 기준 동의 여부. 서버 확인 자체가 실패하면 null.
+ *   null 이면 호출부는 로컬 캐시로 폴백해도 된다 — 최종 게이트는 어차피
+ *   Edge(meal-analysis-jobs)가 쥐고 있으므로 «거짓 통과»는 생기지 않는다.
+ */
+export async function syncMealConsentFromServer(): Promise<boolean | null> {
+  let server: boolean
+  try {
+    server = await hasServerMealConsent()
+  } catch {
+    return null                       // 네트워크·RPC 실패 — 판단하지 않는다
+  }
+  if (server) {
+    // 서버에 있으면 로컬을 채운다(다른 기기/브라우저에서 동의한 경우).
+    markMealConsent()
+  } else {
+    // 서버에 없으면 로컬의 낡은 '동의함'을 지운다 → 게이트가 다시 뜬다.
+    revokeMealConsent()
+  }
+  return server
 }

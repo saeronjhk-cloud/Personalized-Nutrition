@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { track } from '../lib/events'
 import { Link } from 'react-router-dom'
-import { markMealConsent, markMealConsentServer } from '../lib/mealConsent'
+import { markMealConsent, markMealConsentServer, revokeMealConsent } from '../lib/mealConsent'
 
 interface Props {
   onAccept: () => void
@@ -17,15 +17,36 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
   const [agreeSensitive, setAgreeSensitive] = useState(false)
   const [agreeIntl, setAgreeIntl] = useState(false)
   const [confirmAge, setConfirmAge] = useState(false) // P0-④ 만 14세 이상
-  const canProceed = agreeSensitive && agreeIntl && confirmAge
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const canProceed = agreeSensitive && agreeIntl && confirmAge && !saving
 
   useEffect(() => { track('meal_consent_shown') }, [])
 
   async function handleAccept() {
     track('meal_consent_accepted')
-    markMealConsent()  // 로컬 캐시(UX)
-    // 서버 기록(권위) — Edge가 분석 전 meal_consent_active로 재검증(P0-③ G2, P0-④ 연령)
-    try { await markMealConsentServer(confirmAge) } catch { /* 실패 시 Edge가 차단 → 사용자 재시도 */ }
+    setSaving(true)
+    setSaveError(null)
+    // ★ 2026-08-28: 서버 기록이 «먼저» 다. 예전에는 로컬 캐시를 먼저 박고
+    //   서버 실패를 `catch {}` 로 삼킨 뒤 그냥 통과시켰다. 그러면
+    //     로컬 = 동의함  /  서버 = 기록 없음
+    //   이 되어 게이트는 다시 안 뜨고 Edge 는 계속 거부한다 — 사용자가 갇힌다.
+    //   Account 의 철회 버튼도 서버 기준이라 비활성이어서 탈출구가 없었다.
+    //   실제로 발생했다(2026-08-28). 이제 서버가 성공해야만 로컬을 채운다.
+    try {
+      await markMealConsentServer(confirmAge)
+    } catch (e) {
+      revokeMealConsent()   // 혹시 남아 있을 낡은 로컬 캐시까지 정리 — 다음에 게이트가 다시 뜨게
+      setSaving(false)
+      setSaveError(
+        e instanceof Error && e.message.includes('로그인')
+          ? '로그인이 풀렸어요. 다시 로그인한 뒤 동의해 주세요.'
+          : '동의를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.'
+      )
+      return                // ⛔ onAccept 를 부르지 않는다 — 통과시키면 갇힌다
+    }
+    markMealConsent()       // 서버가 성공한 뒤에만 로컬 캐시(UX)를 채운다
+    setSaving(false)
     onAccept()
   }
 
@@ -80,9 +101,16 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
           <input type="checkbox" checked={confirmAge} onChange={(e) => setConfirmAge(e.target.checked)} style={{ marginTop: 3 }} />
           <span>[필수] 저는 <strong>만 14세 이상</strong>입니다. (만 14세 미만은 식사 사진 분석을 이용할 수 없습니다.)</span>
         </label>
+        {/* ★ 2026-08-28: 저장 실패를 «보이게» 한다. 예전에는 조용히 통과시켜서
+            사용자가 왜 분석이 안 되는지 알 수 없었다. */}
+        {saveError && (
+          <p style={{ color: 'var(--danger)', fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
+            {saveError}
+          </p>
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button type="button" className="btn btn-primary" disabled={!canProceed} onClick={handleAccept}>
-            동의하고 시작
+            {saving ? '저장 중...' : '동의하고 시작'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onDecline}>
             동의하지 않음
