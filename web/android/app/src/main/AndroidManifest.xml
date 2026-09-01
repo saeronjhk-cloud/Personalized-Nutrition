@@ -38,4 +38,26 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      ★ 세션55 (2026-08-08) — 카메라 권한. 이게 없어서 앱에서 바코드 스캔이 동작하지 않았다.
+
+      증상: 「바코드 스캔하기」를 누르면 **「카메라를 열 수 없어요」**(`Scan.tsx` 208행).
+
+      원인: 화면은 웹뷰의 `navigator.mediaDevices.getUserMedia` 를 쓴다.
+        Capacitor 8 의 `BridgeWebChromeClient.onPermissionRequest`(102~123행)는
+        `VIDEO_CAPTURE` 요청을 받으면 `Manifest.permission.CAMERA` 를 **런타임 요청**한다.
+        그런데 안드로이드는 **매니페스트에 선언되지 않은 권한의 런타임 요청을 즉시 거부**한다.
+        → `request.deny()` → `getUserMedia` 실패 → 위 문구.
+
+      ⚠ 이 선언은 `954aff8`(최초 Capacitor 설정) 이래 **한 번도 없었다.**
+        즉 Capacitor 앱(`kr.co.nutriformula.app`)에서 바코드 스캔은 처음부터 불가능했다.
+        웹(`nutriformula.co.kr`)은 브라우저가 권한을 처리하므로 정상이었다 — 그래서 안 드러났다.
+
+      ⚠ `required="false"` 를 반드시 유지할 것. `true` 면 카메라 없는 기기에서
+        Play 스토어 설치 자체가 막힌다. 이 앱은 카메라 없이도 이름 검색으로 쓸 수 있다.
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 </manifest>
