@@ -21,6 +21,12 @@
 #   우리 .bat 은 `goto :end` · `goto :nodir` 같은 레이블 점프를 쓰는데,
 #   cmd.exe 의 goto 레이블 탐색은 줄바꿈에 민감해 LF-only 에서 깨질 수 있다.
 #   세션49 가 .bat 머리말마다 「100%% ASCII, CRLF」라고 못 박아 둔 이유가 이것이다.
-#   ⇒ 정본 저장 형식 자체를 CRLF 로 둔다. 어느 환경에서 clone 해도 같은 파일이 나온다.
+#
+#   ⚠ 정확히 하자면: git 은 텍스트 파일을 «항상 LF 로 저장»한다. blob 에 CR 이 없는 것은
+#     정상이고 문제가 아니다. `eol` 이 정하는 것은 «체크아웃할 때 어떻게 내려줄지»다.
+#     이전 규칙 `* text=auto eol=lf` 는 그 체크아웃 형식까지 LF 로 강제하고 있었다 —
+#     그래서 clone 하면 .bat 이 LF 로 나왔다. 아래 두 줄이 그것만 되돌린다.
+#     확인: `git check-attr eol -- run-aihub300-eval.bat` → `eol: crlf`
+#     (`git add --renormalize` 가 아무것도 안 바꾸는 것도 정상이다. 저장 형식은 원래 맞았다.)
 *.bat text eol=crlf
 *.cmd text eol=crlf
