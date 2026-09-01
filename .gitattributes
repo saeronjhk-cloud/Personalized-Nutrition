@@ -13,3 +13,14 @@
 *.ttf binary
 *.keystore binary
 *.jar binary
+
+# ★ 2026-09-01 세션50 — .bat 만은 CRLF 로 고정한다.
+#   위의 `* text=auto eol=lf` 가 .bat 까지 LF 로 정규화해, 저장소에 저장된
+#   run-*.bat 은 실측 CR 0줄이었다. 제이 PC 의 워킹 카피는 CRLF 라 지금은 돌지만,
+#   **새로 clone 하면 LF 로 나온다.**
+#   우리 .bat 은 `goto :end` · `goto :nodir` 같은 레이블 점프를 쓰는데,
+#   cmd.exe 의 goto 레이블 탐색은 줄바꿈에 민감해 LF-only 에서 깨질 수 있다.
+#   세션49 가 .bat 머리말마다 「100%% ASCII, CRLF」라고 못 박아 둔 이유가 이것이다.
+#   ⇒ 정본 저장 형식 자체를 CRLF 로 둔다. 어느 환경에서 clone 해도 같은 파일이 나온다.
+*.bat text eol=crlf
+*.cmd text eol=crlf
