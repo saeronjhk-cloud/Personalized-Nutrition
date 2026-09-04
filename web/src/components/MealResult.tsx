@@ -1,4 +1,5 @@
 import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
+import { alternatesOf } from '../lib/foodCorrection'
 
 type Slot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
@@ -30,8 +31,10 @@ export default function MealResult(props: {
   busy: boolean
   onSave: () => void
   onReset: () => void
+  /** 세션52 — 구별 불가 쌍 정정. 없으면 후보 칩을 그리지 않는다. */
+  onCorrect?: (index: number, altName: string) => void
 }) {
-  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset } = props
+  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect } = props
   return (
     <>
       {previewUrl && (
@@ -67,6 +70,28 @@ export default function MealResult(props: {
                   <span key={key}>{label} {Math.round(num(f[key]) * 10) / 10}{unit}</span>
                 ))}
               </div>
+              {/* 세션52 — 사진만으로는 구별할 수 없는 쌍(설렁탕↔곰탕 · 꽃게탕↔해물탕).
+                  엔진도 GPT 도 못 가리므로 하나를 골라 보여주되, 한 번에 고칠 수 있게 한다.
+                  누르면 이름과 영양이 «함께» 바뀐다(applyAlternate). 다시 누르면 되돌아간다. */}
+              {onCorrect && !saved && alternatesOf(f).length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>혹시 이거였나요?</span>
+                  {alternatesOf(f).map((alt) => (
+                    <button key={alt.name_ko} type="button"
+                      onClick={() => onCorrect(i, alt.name_ko)}
+                      style={{
+                        fontSize: 12, padding: '4px 10px', borderRadius: 999, cursor: 'pointer',
+                        border: '1px solid var(--border-light)', background: 'transparent',
+                        color: 'var(--text-secondary)',
+                      }}>
+                      {alt.name_ko}
+                      {typeof alt.calories_kcal === 'number' && (
+                        <span style={{ color: 'var(--text-muted)' }}> {Math.round(alt.calories_kcal)}kcal</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>

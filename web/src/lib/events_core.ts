@@ -50,6 +50,10 @@ export const ALL_APP_EVENTS = [
   'meal_session_close',      // 정찬 세션 종료
   'meal_leftover_open',      // '먹은 양' 패널 열기
   'meal_leftover_apply',     // 잔반 보정 적용
+  // 세션52 — 구별 불가 쌍(설렁탕↔곰탕 · 꽃게탕↔해물탕)에서 사용자가 이름을 고침.
+  // ★ 규칙47 의 벽을 넘는 첫 창구다. 평가셋이 아니라 «실사용 도메인»에서
+  //   자동 선택이 얼마나 틀리는지를 센다(aihub300 에서는 정확히 2:2 동전던지기였다).
+  'meal_food_corrected',
   // ── report(주간 리포트) ──
   'weekly_report_view',      // 주간 리포트 열람
 ] as const
