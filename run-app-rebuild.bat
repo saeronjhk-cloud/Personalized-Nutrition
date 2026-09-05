@@ -48,6 +48,17 @@ if errorlevel 1 (
   set MISSING=1
 ) else ( echo   [O] CAMERA 권한 선언 )
 
+REM  세션52 — JDK 21. Capacitor 8 이 sourceCompatibility 21 을 요구하는데
+REM  시스템 java 는 17 이라 gradlew 가 `invalid source release: 21` 로 죽었다.
+REM  gradle.properties 의 org.gradle.java.home 이 Android Studio 내장 JBR 21 을 가리킨다.
+REM  Android Studio 를 옮기거나 지우면 그 경로가 죽고 다시 같은 실패가 난다 — 여기서 먼저 잡는다.
+if not exist "C:\Program Files\Android\Android Studio\jbr\bin\java.exe" (
+  echo   [X] JDK 21 없음: C:\Program Files\Android\Android Studio\jbr
+  echo       gradle.properties 의 org.gradle.java.home 이 이 경로를 가리킨다.
+  echo       Android Studio 를 옮겼거나 지웠으면 그 파일의 경로를 고칠 것.
+  set MISSING=1
+) else ( echo   [O] JDK 21 ^(Android Studio JBR^) )
+
 if "!MISSING!"=="1" (
   echo.
   echo   ^>^> 빌드를 중단한다. 위 항목을 먼저 확인할 것.
