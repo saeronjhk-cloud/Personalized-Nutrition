@@ -279,7 +279,7 @@ export default function Meal() {
           </p>
 
           {previewUrl && (
-            <img src={previewUrl} alt="선택한 식사 사진" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 12, marginBottom: 14 }} />
+            <img src={previewUrl} alt="선택한 식사 사진" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 14 }} />
           )}
 
           {busy || waiting ? (

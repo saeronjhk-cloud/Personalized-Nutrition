@@ -558,7 +558,7 @@ export default function Scan() {
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 4 }}>
           {REPORT_LOGIN_SCAN_OK}
         </p>
-        <p style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 10 }}>
+        <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 10 }}>
           {REPORT_LOGIN_RETURN_NOTICE}
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -683,7 +683,7 @@ export default function Scan() {
           {analysis.ingredients.length > 0 && (
             <div style={{ marginTop: 14 }} data-testid="report-ingredients">
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>원재료</div>
-              <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              <p style={{ fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
                 {analysis.ingredients.map((it) => (
                   [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
                     .filter(Boolean).join(' ')
@@ -703,7 +703,7 @@ export default function Scan() {
                 {SHOW_RISK_GRADE ? `첨가물 ${reportAdditives.total}종` : describeAdditiveCount(reportAdditives.total)}
               </div>
               {!SHOW_RISK_GRADE && (
-                <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.6 }}>
                   {GRADE_HIDDEN_NOTICE}
                 </p>
               )}
@@ -742,7 +742,7 @@ export default function Scan() {
                     {reportNutrition.lights.map((l) => (
                       <span key={l.key} style={{
                         display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13,
-                        padding: '5px 11px', borderRadius: 999,
+                        padding: '5px 11px', borderRadius: 'var(--radius-pill)',
                         background: `${LIGHT_HEX[l.color]}1a`, color: 'var(--text)',
                       }}>
                         <span style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_HEX[l.color] }} />
@@ -761,7 +761,7 @@ export default function Scan() {
 
           {/* 신호등을 «못» 그린 이유. ⚠ 조건을 색 목록으로 걸지 않는다 — 침묵이 돌아온다. */}
           {reportNutrition.note && (
-            <p data-testid="report-nutrition-note" style={{ fontSize: 12.5, color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.6 }}>
+            <p data-testid="report-nutrition-note" style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.6 }}>
               {reportNutrition.note}
             </p>
           )}
@@ -772,7 +772,7 @@ export default function Scan() {
             onClick={() => navigate(MY_REPORTS_PATH)}
             style={{
               background: 'none', border: 'none', padding: '12px 0 0', cursor: 'pointer',
-              fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+              fontSize: 'var(--font-sm)', color: 'var(--text-muted)', textDecoration: 'underline',
             }}
           >{CONTRIBUTIONS_TITLE} 보기</button>
         </div>
@@ -830,7 +830,7 @@ export default function Scan() {
               autoComplete="off"
               onChange={(e) => { setProductName(e.target.value); setReportError(null) }}
               style={{
-                width: '100%', padding: '10px 12px', fontSize: 15, borderRadius: 8,
+                width: '100%', padding: '10px 12px', fontSize: 15, borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-light)', background: 'var(--bg)', color: 'var(--text)',
               }}
             />
@@ -859,7 +859,7 @@ export default function Scan() {
               말없이 사라진다. 사실을 먼저 말하고, 이동은 사용자가 «누를» 때만 한다. */}
         {authBlocked && (
           <div data-testid="report-auth-blocked" style={{ marginBottom: 10 }}>
-            <p style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 8 }}>
+            <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 8 }}>
               {AUTH_PHOTO_LOST_NOTICE}
             </p>
             <button
@@ -922,10 +922,10 @@ export default function Scan() {
       <div className="survey-container fade-in">
         <div className="survey-card">
           <h2 className="survey-step-title" style={{ fontSize: 16 }}>바코드를 화면 안에 맞춰주세요</h2>
-          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: '#000', aspectRatio: '3 / 4', marginBottom: 14 }}>
+          <div style={{ position: 'relative', borderRadius: 'var(--radius)', overflow: 'hidden', background: '#000', aspectRatio: '3 / 4', marginBottom: 14 }}>
             <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-              <div style={{ width: '78%', height: '32%', border: '3px solid rgba(255,255,255,0.9)', borderRadius: 12 }} />
+              <div style={{ width: '78%', height: '32%', border: '3px solid rgba(255,255,255,0.9)', borderRadius: 'var(--radius)' }} />
             </div>
           </div>
           <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={stopScan}>취소</button>
@@ -961,7 +961,7 @@ export default function Scan() {
           onClick={() => navigate(MY_REPORTS_PATH)}
           style={{
             background: 'none', border: 'none', padding: '12px 0 0', cursor: 'pointer',
-            fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+            fontSize: 'var(--font-sm)', color: 'var(--text-muted)', textDecoration: 'underline',
             display: 'block', margin: '0 auto',
           }}
         >{CONTRIBUTIONS_TITLE}</button>
@@ -984,7 +984,7 @@ export default function Scan() {
           {signedIn === false && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
-              padding: '8px 10px', marginBottom: 10, borderRadius: 8,
+              padding: '8px 10px', marginBottom: 10, borderRadius: 'var(--radius-sm)',
               background: 'var(--border-light)', fontSize: 12, lineHeight: 1.5,
               color: 'var(--text-secondary)',
             }}>
@@ -1083,7 +1083,7 @@ export default function Scan() {
           <div className="survey-card" style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               {result.product.image_url && (
-                <img src={result.product.image_url} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                <img src={result.product.image_url} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 'var(--radius-sm)', flexShrink: 0 }} />
               )}
               <div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text)' }}>{result.product.product_name}</h3>
@@ -1119,7 +1119,7 @@ export default function Scan() {
                 <>
                   {SHOW_RISK_GRADE ? (
                     <>
-                      <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '2px 0 12px', lineHeight: 1.6 }}>
+                      <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: '2px 0 12px', lineHeight: 1.6 }}>
                         첨가물 안전성을 4색으로 나타내요 (먹선 위해성 평가 기준).{' '}
                         <strong style={{ color: COLOR_HEX.green }}>초록 안전</strong> → 노랑 허용 → 주황 주의 → <strong style={{ color: COLOR_HEX.red }}>빨강 위해</strong>.
                       </p>
@@ -1129,7 +1129,7 @@ export default function Scan() {
                         {PILL_COLORS.map((c) => {
                           const n = additiveView.counts[c]
                           return (
-                            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 999, background: n ? `${COLOR_HEX[c]}1a` : 'var(--border-light)', color: n ? 'var(--text)' : 'var(--text-muted)' }}>
+                            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: n ? `${COLOR_HEX[c]}1a` : 'var(--border-light)', color: n ? 'var(--text)' : 'var(--text-muted)' }}>
                               <span style={{ width: 9, height: 9, borderRadius: '50%', background: COLOR_HEX[c] }} />
                               {COLOR_LABEL[c]} <strong>{n}</strong>
                             </span>
@@ -1137,7 +1137,7 @@ export default function Scan() {
                         })}
                         {/* 등급 미상은 0 이면 아예 띄우지 않는다(평소엔 소음). 있으면 «반드시» 띄운다. */}
                         {additiveView.counts.unknown > 0 && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 999, background: `${COLOR_HEX.unknown}1a`, color: 'var(--text)' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: `${COLOR_HEX.unknown}1a`, color: 'var(--text)' }}>
                             <span style={{ width: 9, height: 9, borderRadius: '50%', background: COLOR_HEX.unknown }} />
                             {COLOR_LABEL.unknown} <strong>{additiveView.counts.unknown}</strong>
                           </span>
@@ -1148,7 +1148,7 @@ export default function Scan() {
                     /* ★ 섹션 헤더에 «한 번만». 행마다 붙이면 그 자체가 경고가 된다.
                        ⚠ 「이 앱을 믿지 마세요」로 읽히면 실패다 — 어디까지 사실을 말할 수 있고
                           어디부터 아직 판단하지 않는지 «경계»를 보여주는 문장이다. */
-                    <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '2px 0 12px', lineHeight: 1.6 }}>
+                    <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: '2px 0 12px', lineHeight: 1.6 }}>
                       {GRADE_HIDDEN_NOTICE}
                     </p>
                   )}
@@ -1290,7 +1290,7 @@ export default function Scan() {
                 onClick={() => openReportForm('gap_none')}
                 style={{
                   background: 'none', border: 'none', padding: '10px 0 0', cursor: 'pointer',
-                  fontSize: 12.5, color: 'var(--text-muted)', textDecoration: 'underline',
+                  fontSize: 'var(--font-sm)', color: 'var(--text-muted)', textDecoration: 'underline',
                   display: 'block', margin: '0 auto',
                 }}
               >{completeness.fallbackCta}</button>

@@ -234,11 +234,11 @@ export default function HealthReport() {
               {/* 이전/이후 바 비교 */}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 28, textAlign: 'right' }}>이전</span>
-                <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 4, height: 8 }}>
+                <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 'var(--radius-xs)', height: 8 }}>
                   <div style={{
                     width: `${Math.min((c.before / c.maxScore) * 100, 100)}%`,
                     height: '100%',
-                    borderRadius: 4,
+                    borderRadius: 'var(--radius-xs)',
                     background: 'var(--text-muted)',
                     opacity: 0.5,
                     transition: 'width 0.5s ease',
@@ -248,11 +248,11 @@ export default function HealthReport() {
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 28, textAlign: 'right' }}>이후</span>
-                <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 4, height: 8 }}>
+                <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 'var(--radius-xs)', height: 8 }}>
                   <div style={{
                     width: `${Math.min((c.after / c.maxScore) * 100, 100)}%`,
                     height: '100%',
-                    borderRadius: 4,
+                    borderRadius: 'var(--radius-xs)',
                     background: c.diff <= -1 ? 'var(--success)' : c.diff >= 1 ? 'var(--warning)' : 'var(--accent)',
                     transition: 'width 0.5s ease',
                   }} />

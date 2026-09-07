@@ -49,7 +49,7 @@ const NOTE: CSSProperties = { fontSize: 12, lineHeight: 1.55, color: 'var(--text
 function Fact({ term, label, note }: { term: string; label: string; note: string }) {
   return (
     <div style={{ marginTop: 6 }}>
-      <div style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>
+      <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
         <span style={{ color: 'var(--text-muted)' }}>{term}</span>{' '}
         <strong style={{ fontWeight: 600 }}>{label}</strong>
       </div>
@@ -65,7 +65,7 @@ function Fact({ term, label, note }: { term: string; label: string; note: string
 function Evidence({ item }: { item: AdditiveView }) {
   return (
     <details style={{ marginTop: 6 }}>
-      <summary style={{ fontSize: 12.5, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+      <summary style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
         {EVIDENCE_TOGGLE_LABEL}
       </summary>
       <div style={{ paddingLeft: 2 }}>
@@ -96,15 +96,15 @@ function PlainItem({ item }: { item: AdditiveView }) {
     <li
       style={{
         border: '1px solid var(--border-light)',
-        borderRadius: 8,
+        borderRadius: 'var(--radius-sm)',
         padding: '9px 11px',
         listStyle: 'none',
       }}
     >
-      <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--text)' }}>{item.name}</div>
+      <div style={{ fontSize: 'var(--font-body)', fontWeight: 600, color: 'var(--text)' }}>{item.name}</div>
       <div
         style={{
-          fontSize: 12.5,
+          fontSize: 'var(--font-sm)',
           marginTop: 3,
           color: item.functionKnown ? 'var(--text-secondary)' : 'var(--text-muted)',
         }}
@@ -128,20 +128,20 @@ function GradedItem({ item }: { item: AdditiveView }) {
       style={{
         borderLeft: `3px solid ${hex}`,
         background: `${hex}0d`,
-        borderRadius: 8,
+        borderRadius: 'var(--radius-sm)',
         padding: '9px 11px',
         listStyle: 'none',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-        <strong style={{ fontSize: 14.5, color: 'var(--text)' }}>{item.name}</strong>
+        <strong style={{ fontSize: 'var(--font-body)', color: 'var(--text)' }}>{item.name}</strong>
         <span style={{ fontSize: 12, fontWeight: 600, color: hex }}>{item.colorLabel}</span>
         {/* 기능이 결측이어도 빈칸을 두지 않는다 — 「현재 정보 없음」이라고 말한다. */}
-        <span style={{ fontSize: 12.5, color: item.functionKnown ? 'var(--text-secondary)' : 'var(--text-muted)' }}>
+        <span style={{ fontSize: 'var(--font-sm)', color: item.functionKnown ? 'var(--text-secondary)' : 'var(--text-muted)' }}>
           {item.functionText}
         </span>
         {item.score !== null && (
-          <span style={{ fontSize: 11.5, color: 'var(--text-muted)', marginLeft: 'auto' }}>
+          <span style={{ fontSize: 'var(--font-caption)', color: 'var(--text-muted)', marginLeft: 'auto' }}>
             위해성 {item.score} / 10 <span style={{ opacity: 0.8 }}>(높을수록 주의)</span>
           </span>
         )}

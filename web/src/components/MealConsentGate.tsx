@@ -68,7 +68,7 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>
           사진에 얼굴·타인·주소 등 식별정보가 담기지 않도록 음식 위주로 촬영해 주세요.
         </p>
-        <div style={{ background: 'rgba(142, 202, 230, 0.10)', border: '1px solid rgba(142, 202, 230, 0.30)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 12.5, lineHeight: 1.7, color: 'var(--text)' }}>
+        <div style={{ background: 'rgba(142, 202, 230, 0.10)', border: '1px solid rgba(142, 202, 230, 0.30)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 'var(--font-sm)', lineHeight: 1.7, color: 'var(--text)' }}>
           <div style={{ fontWeight: 700, marginBottom: 6 }}>동의 전 안내 (법정 고지사항)</div>
           <div style={{ marginBottom: 8 }}>
             <strong>[민감정보(건강에 관한 정보)]</strong><br />

@@ -76,7 +76,7 @@ export default function InstallPrompt() {
       animation: 'slideUp 0.3s ease-out',
     }}>
       <div style={{
-        background: '#fff',
+        background: 'var(--bg-card)',
         borderRadius: 16,
         padding: '20px',
         boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
@@ -106,7 +106,7 @@ export default function InstallPrompt() {
 
         {showIOS && (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#2d5a27', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 10 }}>
               앱처럼 사용하기
             </div>
             <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>
@@ -159,7 +159,7 @@ export default function InstallPrompt() {
 
         {showAndroid && (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#2d5a27', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 10 }}>
               앱 설치하기
             </div>
             <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 14 }}>
@@ -170,7 +170,7 @@ export default function InstallPrompt() {
               style={{
                 width: '100%',
                 padding: '12px',
-                background: '#2d5a27',
+                background: 'var(--primary)',
                 color: '#fff',
                 border: 'none',
                 borderRadius: 10,

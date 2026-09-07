@@ -69,7 +69,7 @@ export default function Blog() {
           <div style={{
             background: '#fef2f2',
             border: '1px solid #fecaca',
-            borderRadius: 12,
+            borderRadius: 'var(--radius)',
             padding: '20px 24px',
             textAlign: 'center',
             color: '#991b1b',

@@ -34,7 +34,7 @@ import { describeAllergens, type AllergenView } from '../domain/meokseon/allerge
 const TAG_BASE: CSSProperties = {
   display: 'inline-block',
   padding: '3px 10px',
-  borderRadius: 999,
+  borderRadius: 'var(--radius-pill)',
   fontSize: 13,
   marginRight: 6,
   marginBottom: 6,
@@ -112,7 +112,7 @@ function IncompleteNotice() {
         color: '#8a5a00',
         background: '#fff8e1',
         border: '1px solid #ffe0a3',
-        borderRadius: 8,
+        borderRadius: 'var(--radius-sm)',
         padding: '8px 10px',
         marginTop: 12,
         marginBottom: 0,

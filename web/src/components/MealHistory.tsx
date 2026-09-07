@@ -174,8 +174,8 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
               {/* 요약 행: 썸네일 · 음식명/kcal · 삭제 */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {r.thumbUrl
-                  ? <img src={r.thumbUrl} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
-                  : <span style={{ width: 40, height: 40, borderRadius: 8, background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🍽️</span>}
+                  ? <img src={r.thumbUrl} alt="" style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover', flexShrink: 0 }} />
+                  : <span style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🍽️</span>}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleOf(r)}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -205,7 +205,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
 
               {isOpen && (
                 <div id={panelId} role="region" aria-label="먹은 양 조절"
-                  style={{ padding: '10px 12px', background: 'var(--border-light)', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  style={{ padding: '10px 12px', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>먹은 양 조절</div>
 
                   {/* 세그먼트 컨트롤 — 3모드 동등 위계, 항상 최상단 */}

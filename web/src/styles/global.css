@@ -3,6 +3,7 @@
 :root {
   /* 메인 컬러 — 브랜드 그린 기반 */
   --primary: #2D5A27;        /* 브랜드 다크그린 */
+  --primary-rgb: 45, 90, 39;  /* 세션53: rgba(var(--primary-rgb), a) 용 — --primary 와 같은 색 */
   --primary-light: #e8f5e3;
   --primary-dark: #1e3d1a;
   --accent: #4a9e3f;         /* 밝은 그린 액센트 */
@@ -358,7 +359,7 @@ input[type="range"]::-webkit-slider-thumb {
 .result-card .mfds-badge {
   display: inline-block;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--accent-light);
   color: var(--accent);
   font-size: 12px;
@@ -505,12 +506,12 @@ input[type="range"]::-webkit-slider-thumb {
   display: inline-block;
   padding: 6px 16px;
   border-radius: 20px;
-  background: rgba(45, 90, 39, 0.1);
+  background: rgba(var(--primary-rgb), 0.1);
   color: var(--primary);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
-  border: 1px solid rgba(45, 90, 39, 0.2);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 .hero-cta {
   max-width: 340px;
@@ -803,7 +804,7 @@ input[type="range"]::-webkit-slider-thumb {
 .team-role-badge {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--accent-light);
   color: var(--accent);
   font-size: 12px;
@@ -893,7 +894,7 @@ input[type="range"]::-webkit-slider-thumb {
 .blog-card-cat {
   display: inline-block;
   padding: 2px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--primary-light);
   color: var(--primary);
   font-size: 12px;
@@ -1101,7 +1102,7 @@ input[type="range"]::-webkit-slider-thumb {
   border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-2px);
 }
 .feature-hub-icon {
-  width: 46px; height: 46px; border-radius: 12px; display: flex;
+  width: 46px; height: 46px; border-radius: var(--radius); display: flex;
   align-items: center; justify-content: center; flex-shrink: 0;
 }
 .feature-hub-icon svg { width: 24px; height: 24px; }
@@ -1112,7 +1113,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .feature-hub-tag {
   font-size: 11px; font-weight: 600; color: var(--primary);
-  background: var(--primary-light); padding: 1px 7px; border-radius: 999px;
+  background: var(--primary-light); padding: 1px 7px; border-radius: var(--radius-pill);
 }
 .feature-hub-desc {
   font-size: 13px; color: var(--text-secondary); margin-top: 3px; line-height: 1.45;
@@ -1445,7 +1446,7 @@ input[type="range"]::-webkit-slider-thumb {
   gap: 8px;
   padding: 8px 10px;
   background: var(--bg);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   margin-bottom: 6px;
 }
 .hero-mockup-rank {
@@ -1691,7 +1692,7 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--text-muted);
   background: var(--bg-hover);
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 
 /* 프로그레스 바 강화 */
@@ -1753,7 +1754,7 @@ input[type="range"]::-webkit-slider-thumb {
   color: white;
   border-color: var(--primary);
   transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(45, 90, 39, 0.3);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
 }
 .survey-dot.done {
   background: var(--primary-light);
@@ -1929,7 +1930,7 @@ input[type="range"]::-webkit-slider-thumb {
   color: var(--primary);
   background: var(--primary-light);
   padding: 2px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   margin-left: auto;
 }
 
@@ -2004,12 +2005,12 @@ input[type="range"]::-webkit-slider-thumb {
 .results-score-bar {
   height: 8px;
   background: var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
 }
 .results-score-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   transition: width 0.8s ease;
 }
 
@@ -2058,7 +2059,7 @@ input[type="range"]::-webkit-slider-thumb {
 .result-card-mfds {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--accent-light);
   color: var(--accent);
   font-size: 11px;
@@ -2111,7 +2112,7 @@ input[type="range"]::-webkit-slider-thumb {
   padding: 24px;
   margin-bottom: 24px;
   margin-top: 32px;
-  border: 1px solid rgba(45, 90, 39, 0.15);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
 }
 .results-cost-header {
   display: flex;
@@ -2598,7 +2599,7 @@ input[type="range"]::-webkit-slider-thumb {
   text-decoration: none;
   padding: 8px 16px;
   border: 1.5px solid var(--primary);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   transition: background 0.15s, color 0.15s;
 }
 .blog-popup__link:hover {
@@ -2707,7 +2708,7 @@ input[type="range"]::-webkit-slider-thumb {
 .health-tracking-card__tip {
   font-size: 13px;
   color: var(--primary);
-  background: rgba(45, 90, 39, 0.06);
+  background: rgba(var(--primary-rgb), 0.06);
   padding: 12px 16px;
   border-radius: var(--radius-sm);
   line-height: 1.7;

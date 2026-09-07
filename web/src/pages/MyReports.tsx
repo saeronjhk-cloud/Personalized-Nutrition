@@ -43,7 +43,7 @@ import {
 type Phase = 'loading' | 'ready' | 'need_login' | 'error'
 
 const CARD: React.CSSProperties = { marginBottom: 16 }
-const MUTED: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 12.5, lineHeight: 1.6 }
+const MUTED: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 'var(--font-sm)', lineHeight: 1.6 }
 
 export default function MyReports() {
   const navigate = useNavigate()
@@ -142,7 +142,7 @@ export default function MyReports() {
                 const at = formatReportedAt(it.createdAt)
                 const row = (
                   <>
-                    <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--text)' }}>
+                    <div style={{ fontSize: 'var(--font-body)', fontWeight: 600, color: 'var(--text)' }}>
                       {describeContributionTitle(it)}
                     </div>
                     <div style={{ ...MUTED, marginTop: 3 }}>
@@ -152,7 +152,7 @@ export default function MyReports() {
                   </>
                 )
                 return (
-                  <li key={it.id} style={{ border: '1px solid var(--border-light)', borderRadius: 8 }}>
+                  <li key={it.id} style={{ border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)' }}>
                     {barcode ? (
                       // 바코드가 있으면 그 제품 화면으로. 앱의 제품 조회는 «바코드»가 키다.
                       <button

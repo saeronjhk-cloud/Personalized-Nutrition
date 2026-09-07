@@ -25,7 +25,7 @@ function StatusBadge({ text, tone }: { text: string; tone: "done" | "todo" | "so
         color: c.fg,
         background: c.bg,
         padding: "2px 10px",
-        borderRadius: 999,
+        borderRadius: 'var(--radius-pill)',
       }}
     >
       {text}

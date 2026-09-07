@@ -23,7 +23,7 @@ interface Insights {
   persona: PersonaRow[]
 }
 
-const BRAND = '#2D5A27'
+const BRAND = 'var(--primary)' // 세션53: 리터럴 → 토큰 (recharts fill 은 SVG 속성이라 var() 허용)
 
 function genderLabel(g: string): string {
   if (g === 'male') return '남'

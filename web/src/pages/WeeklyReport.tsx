@@ -145,10 +145,10 @@ export default function WeeklyReport() {
 
 const navBtn: React.CSSProperties = { width: 40, minWidth: 40, padding: '8px 0', fontSize: 18, lineHeight: 1 }
 const card: React.CSSProperties = {
-  border: '1px solid var(--border, rgba(0,0,0,0.1))', borderRadius: 12, padding: '14px 16px', background: 'var(--surface, #fff)',
+  border: '1px solid var(--border, rgba(0,0,0,0.1))', borderRadius: 'var(--radius)', padding: '14px 16px', background: 'var(--surface, #fff)',
 }
 const sectionTitle: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }
 const chip: React.CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 999,
+  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 'var(--radius-pill)',
   background: 'var(--surface-2, rgba(0,0,0,0.05))', color: 'var(--text)', fontSize: 14, fontWeight: 600,
 }

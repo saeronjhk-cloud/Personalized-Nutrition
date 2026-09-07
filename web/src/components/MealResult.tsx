@@ -38,7 +38,7 @@ export default function MealResult(props: {
   return (
     <>
       {previewUrl && (
-        <img src={previewUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 12, marginBottom: 16 }} />
+        <img src={previewUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 16 }} />
       )}
 
       <div className="survey-card" style={{ marginBottom: 16 }}>
@@ -49,7 +49,7 @@ export default function MealResult(props: {
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {MACROS.map(({ key, label, unit }) => (
-            <span key={key} style={{ fontSize: 13, padding: '5px 11px', borderRadius: 999, background: 'var(--border-light)', color: 'var(--text)' }}>
+            <span key={key} style={{ fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: 'var(--border-light)', color: 'var(--text)' }}>
               {label} <strong>{Math.round(num((result.summary as any)[`total_${key}`]) * 10) / 10}</strong> {unit}
             </span>
           ))}
@@ -62,7 +62,7 @@ export default function MealResult(props: {
                 <strong style={{ fontSize: 15 }}>{f.name_ko || '음식'}</strong>
                 {f.amount && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{f.amount}</span>}
                 {isLowConfidence(f) && (
-                  <span style={{ fontSize: 11, color: 'var(--warning)', background: 'var(--border-light)', padding: '2px 7px', borderRadius: 999 }}>확인 필요</span>
+                  <span style={{ fontSize: 11, color: 'var(--warning)', background: 'var(--border-light)', padding: '2px 7px', borderRadius: 'var(--radius-pill)' }}>확인 필요</span>
                 )}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 13, color: 'var(--text-secondary)' }}>
@@ -80,7 +80,7 @@ export default function MealResult(props: {
                     <button key={alt.name_ko} type="button"
                       onClick={() => onCorrect(i, alt.name_ko)}
                       style={{
-                        fontSize: 12, padding: '4px 10px', borderRadius: 999, cursor: 'pointer',
+                        fontSize: 12, padding: '4px 10px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
                         border: '1px solid var(--border-light)', background: 'transparent',
                         color: 'var(--text-secondary)',
                       }}>
@@ -95,7 +95,7 @@ export default function MealResult(props: {
             </li>
           ))}
         </ul>
-        <p style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 'var(--font-caption)', color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.6 }}>
           사진 분석은 추정치이며 실제와 다를 수 있어요. 진단이 아닌 생활관리 참고용입니다.
         </p>
       </div>
