@@ -38,16 +38,16 @@ export default function MealResult(props: {
   return (
     <>
       {previewUrl && (
-        <img src={previewUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 16 }} />
+        <img src={previewUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 'var(--space-4)' }} />
       )}
 
-      <div className="survey-card" style={{ marginBottom: 16 }}>
+      <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
           <h3 className="survey-step-title" style={{ fontSize: 16 }}>분석 결과</h3>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>사진 기준 추정</span>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 14 }}>
           {MACROS.map(({ key, label, unit }) => (
             <span key={key} style={{ fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: 'var(--border-light)', color: 'var(--text)' }}>
               {label} <strong>{Math.round(num((result.summary as any)[`total_${key}`]) * 10) / 10}</strong> {unit}
@@ -58,7 +58,7 @@ export default function MealResult(props: {
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
           {result.foods.map((f, i) => (
             <li key={i} style={{ borderTop: '1px solid var(--border-light)', paddingTop: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-1)' }}>
                 <strong style={{ fontSize: 15 }}>{f.name_ko || '음식'}</strong>
                 {f.amount && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{f.amount}</span>}
                 {isLowConfidence(f) && (
@@ -74,13 +74,13 @@ export default function MealResult(props: {
                   엔진도 GPT 도 못 가리므로 하나를 골라 보여주되, 한 번에 고칠 수 있게 한다.
                   누르면 이름과 영양이 «함께» 바뀐다(applyAlternate). 다시 누르면 되돌아간다. */}
               {onCorrect && !saved && alternatesOf(f).length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 'var(--space-2)' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>혹시 이거였나요?</span>
                   {alternatesOf(f).map((alt) => (
                     <button key={alt.name_ko} type="button"
                       onClick={() => onCorrect(i, alt.name_ko)}
                       style={{
-                        fontSize: 12, padding: '4px 10px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                        fontSize: 12, padding: 'var(--space-1) 10px', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
                         border: '1px solid var(--border-light)', background: 'transparent',
                         color: 'var(--text-secondary)',
                       }}>
@@ -95,19 +95,19 @@ export default function MealResult(props: {
             </li>
           ))}
         </ul>
-        <p style={{ fontSize: 'var(--font-caption)', color: 'var(--text-muted)', marginTop: 12, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 'var(--font-caption)', color: 'var(--text-muted)', marginTop: 'var(--space-3)', lineHeight: 1.6 }}>
           사진 분석은 추정치이며 실제와 다를 수 있어요. 진단이 아닌 생활관리 참고용입니다.
         </p>
       </div>
 
       {saved ? (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
-          <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 12 }}>✓ 기록에 저장했어요.</p>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
+          <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 'var(--space-3)' }}>✓ 기록에 저장했어요.</p>
           <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={onReset}>다른 식사 기록하기</button>
         </div>
       ) : (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 8 }}>언제 먹은 식사인가요?</p>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>언제 먹은 식사인가요?</p>
           <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
             {SLOTS.map((s) => (
               <button key={s.key} type="button"

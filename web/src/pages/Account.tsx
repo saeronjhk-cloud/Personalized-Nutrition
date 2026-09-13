@@ -83,21 +83,21 @@ export default function Account() {
         <h2 className="survey-step-title">계정</h2>
         {email ? (
           <>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 20 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 'var(--space-5)' }}>
               로그인 계정: <strong>{email}</strong>
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 'var(--space-6)' }}>
               <button type="button" className="btn btn-secondary" onClick={handleLogout}>로그아웃</button>
             </div>
 
             {MEAL_ENABLED && (
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginBottom: 24 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>식사 사진 분석 동의</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)', marginBottom: 'var(--space-6)' }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>식사 사진 분석 동의</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>
                   식사 사진 분석을 위한 건강 민감정보 처리 및 국외이전(OpenAI, 미국) 동의를 철회할 수 있습니다.
                   철회 시 이후 식사 사진 분석이 중단되며, 계정과 다른 기능은 계속 이용할 수 있습니다.
                 </p>
-                {mealMsg && <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>{mealMsg}</p>}
+                {mealMsg && <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{mealMsg}</p>}
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -109,13 +109,13 @@ export default function Account() {
               </div>
             )}
 
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--danger)', marginBottom: 8 }}>회원 탈퇴</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--danger)', marginBottom: 'var(--space-2)' }}>회원 탈퇴</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>
                 탈퇴 시 계정과 개인정보(설문 응답·검진 수치·목표 등)가 영구 삭제되며 되돌릴 수 없습니다.
                 다만 동의 사실 증명을 위한 최소 감사기록(건강정보·사진 제외)은 회사의 정당한 이익에 따라 3년간 분리 보관 후 파기됩니다.
               </p>
-              {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 12 }}>{error}</p>}
+              {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{error}</p>}
               <button
                 type="button"
                 className="btn"
@@ -128,7 +128,7 @@ export default function Account() {
           </>
         ) : (
           <>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>로그인이 필요합니다.</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 'var(--space-4)' }}>로그인이 필요합니다.</p>
             <button type="button" className="btn btn-primary" onClick={() => navigate('/login')}>로그인</button>
           </>
         )}

@@ -44,14 +44,14 @@ export default function RecommendationList({ results }: Props) {
 
   if (results.length === 0) {
     return (
-      <p style={{ fontSize: 14, color: "var(--text-muted)", textAlign: "center", padding: "16px 0" }}>
+      <p style={{ fontSize: 14, color: "var(--text-muted)", textAlign: "center", padding: "var(--space-4) 0" }}>
         분석 결과가 없습니다. 검진 수치를 입력한 뒤 분석하기를 눌러 주세요.
       </p>
     );
   }
 
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <section style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
       <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
         전체 {results.length}개 분석, 관리 권장 {managementCount}개
       </p>

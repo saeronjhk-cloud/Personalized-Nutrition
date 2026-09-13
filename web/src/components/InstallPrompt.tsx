@@ -72,13 +72,13 @@ export default function InstallPrompt() {
       left: 0,
       right: 0,
       zIndex: 9999,
-      padding: '0 16px 16px',
+      padding: '0 var(--space-4) var(--space-4)',
       animation: 'slideUp 0.3s ease-out',
     }}>
       <div style={{
         background: 'var(--bg-card)',
         borderRadius: 16,
-        padding: '20px',
+        padding: 'var(--space-5)',
         boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
         maxWidth: 420,
         margin: '0 auto',
@@ -97,7 +97,7 @@ export default function InstallPrompt() {
             fontSize: 20,
             color: '#999',
             cursor: 'pointer',
-            padding: 4,
+            padding: 'var(--space-1)',
             lineHeight: 1,
           }}
         >
@@ -115,13 +115,13 @@ export default function InstallPrompt() {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
-              marginTop: 12,
+              gap: 'var(--space-2)',
+              marginTop: 'var(--space-3)',
               fontSize: 13,
               color: '#666',
               background: '#f8f8f8',
               borderRadius: 10,
-              padding: '12px 14px',
+              padding: 'var(--space-3) 14px',
             }}>
               <span>1. 하단의</span>
               <span style={{
@@ -142,13 +142,13 @@ export default function InstallPrompt() {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 'var(--space-2)',
               marginTop: 6,
               fontSize: 13,
               color: '#666',
               background: '#f8f8f8',
               borderRadius: 10,
-              padding: '12px 14px',
+              padding: 'var(--space-3) 14px',
             }}>
               <span>2.</span>
               <span style={{ fontWeight: 600 }}>홈 화면에 추가</span>
@@ -169,7 +169,7 @@ export default function InstallPrompt() {
               onClick={handleAndroidInstall}
               style={{
                 width: '100%',
-                padding: '12px',
+                padding: 'var(--space-3)',
                 background: 'var(--primary)',
                 color: '#fff',
                 border: 'none',

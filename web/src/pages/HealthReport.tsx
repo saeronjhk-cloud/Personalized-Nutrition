@@ -41,9 +41,9 @@ export default function HealthReport() {
   if (history.length < 2) {
     return (
       <div className="page fade-in" style={{ paddingTop: '12vh', textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
-        <h2 style={{ marginBottom: 12 }}>건강 변화 리포트</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.7 }}>
+        <div style={{ fontSize: 48, marginBottom: 'var(--space-4)' }}>📊</div>
+        <h2 style={{ marginBottom: 'var(--space-3)' }}>건강 변화 리포트</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)', lineHeight: 1.7 }}>
           비교 분석을 하려면 최소 2번의 설문이 필요해요.<br />
           건강기능식품을 섭취하시고 일정 기간 후에<br />
           다시 설문을 진행해주세요.
@@ -102,18 +102,18 @@ export default function HealthReport() {
   const costAfter = after.result.monthly_summary.cost_min
 
   return (
-    <div className="page fade-in" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: '20px 16px 40px' }}>
+    <div className="page fade-in" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-5) var(--space-4) 40px' }}>
 
       {/* 헤더 */}
       <div style={{
         textAlign: 'center',
         marginBottom: 28,
-        padding: '24px 16px',
+        padding: 'var(--space-6) var(--space-4)',
         background: 'linear-gradient(135deg, var(--primary-light) 0%, #f0fdf4 100%)',
         borderRadius: 'var(--radius)',
       }}>
-        <div style={{ fontSize: 40, marginBottom: 8 }}>📊</div>
-        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>건강 변화 리포트</h1>
+        <div style={{ fontSize: 40, marginBottom: 'var(--space-2)' }}>📊</div>
+        <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 'var(--space-1)' }}>건강 변화 리포트</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
           {formatDate(before.date)} → {formatDate(after.date)} ({days}일 경과)
         </p>
@@ -122,16 +122,16 @@ export default function HealthReport() {
       {/* 기간 선택 (기록이 3개 이상일 때) */}
       {history.length >= 3 && (
         <div style={{
-          display: 'flex', gap: 12, marginBottom: 20,
+          display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-5)',
           background: 'var(--bg-card)', borderRadius: 'var(--radius-sm)',
-          padding: '12px 16px', border: '1px solid var(--border)',
+          padding: 'var(--space-3) var(--space-4)', border: '1px solid var(--border)',
         }}>
           <div style={{ flex: 1 }}>
-            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>이전</label>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 'var(--space-1)' }}>이전</label>
             <select
               value={beforeIdx}
               onChange={e => setBeforeIdx(Number(e.target.value))}
-              style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+              style={{ width: '100%', padding: '6px var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
                 <option key={r.id} value={i} disabled={i === afterIdx}>
@@ -141,11 +141,11 @@ export default function HealthReport() {
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>이후</label>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 'var(--space-1)' }}>이후</label>
             <select
               value={afterIdx}
               onChange={e => setAfterIdx(Number(e.target.value))}
-              style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+              style={{ width: '100%', padding: '6px var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
                 <option key={r.id} value={i} disabled={i === beforeIdx}>
@@ -161,19 +161,19 @@ export default function HealthReport() {
       <div style={{
         background: 'var(--bg-card)',
         borderRadius: 'var(--radius)',
-        padding: '20px',
-        marginBottom: 20,
+        padding: 'var(--space-5)',
+        marginBottom: 'var(--space-5)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow)',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 16 }}>
-          <div style={{ fontSize: 36, marginBottom: 4 }}>{overallLabel.emoji}</div>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+          <div style={{ fontSize: 36, marginBottom: 'var(--space-1)' }}>{overallLabel.emoji}</div>
           <div style={{ fontSize: 18, fontWeight: 700, color: overallLabel.color }}>
             {totalDiff < 0 ? '전반적으로 개선되었어요!' : totalDiff === 0 ? '전반적으로 유지되고 있어요' : '일부 관리가 필요해요'}
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, textAlign: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)', textAlign: 'center' }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>건강 유형</div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>
@@ -210,8 +210,8 @@ export default function HealthReport() {
       </div>
 
       {/* 카테고리별 변화 */}
-      <div style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginBottom: 'var(--space-5)' }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
           <span>🎯</span> 카테고리별 변화
         </h3>
         <div style={{
@@ -222,17 +222,17 @@ export default function HealthReport() {
         }}>
           {comparisons.filter(c => c.before > 0 || c.after > 0).map((c, i) => (
             <div key={c.category} style={{
-              padding: '14px 16px',
+              padding: '14px var(--space-4)',
               borderBottom: i < comparisons.length - 1 ? '1px solid var(--border-light)' : 'none',
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
                 <span style={{ fontWeight: 600, fontSize: 14 }}>{c.category}</span>
                 <span style={{ fontSize: 12, color: c.color, fontWeight: 600 }}>
                   {c.emoji} {c.text}
                 </span>
               </div>
               {/* 이전/이후 바 비교 */}
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 28, textAlign: 'right' }}>이전</span>
                 <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 'var(--radius-xs)', height: 8 }}>
                   <div style={{
@@ -246,7 +246,7 @@ export default function HealthReport() {
                 </div>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 24 }}>{c.before.toFixed(1)}</span>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
+              <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center', marginTop: 'var(--space-1)' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 28, textAlign: 'right' }}>이후</span>
                 <div style={{ flex: 1, background: 'var(--border-light)', borderRadius: 'var(--radius-xs)', height: 8 }}>
                   <div style={{
@@ -269,14 +269,14 @@ export default function HealthReport() {
 
       {/* 증상 변화 */}
       {(resolvedSymptoms.length > 0 || newSymptoms.length > 0) && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ marginBottom: 'var(--space-5)' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <span>🩺</span> 증상 변화
           </h3>
           <div style={{
             background: 'var(--bg-card)',
             borderRadius: 'var(--radius)',
-            padding: '16px',
+            padding: 'var(--space-4)',
             border: '1px solid var(--border)',
           }}>
             {resolvedSymptoms.length > 0 && (
@@ -290,7 +290,7 @@ export default function HealthReport() {
                       background: 'var(--success-bg)',
                       color: '#065f46',
                       fontSize: 12,
-                      padding: '4px 10px',
+                      padding: 'var(--space-1) 10px',
                       borderRadius: 20,
                     }}>{s}</span>
                   ))}
@@ -308,7 +308,7 @@ export default function HealthReport() {
                       background: 'var(--warning-bg)',
                       color: '#92400e',
                       fontSize: 12,
-                      padding: '4px 10px',
+                      padding: 'var(--space-1) 10px',
                       borderRadius: 20,
                     }}>{s}</span>
                   ))}
@@ -320,18 +320,18 @@ export default function HealthReport() {
       )}
 
       {/* 영양제 변화 */}
-      <div style={{ marginBottom: 20 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ marginBottom: 'var(--space-5)' }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
           <span>💊</span> 영양제 변화
         </h3>
         <div style={{
           background: 'var(--bg-card)',
           borderRadius: 'var(--radius)',
-          padding: '16px',
+          padding: 'var(--space-4)',
           border: '1px solid var(--border)',
         }}>
           {removedSupps.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 'var(--space-3)' }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', marginBottom: 6 }}>
                 더 이상 필요 없는 영양제
               </div>
@@ -341,7 +341,7 @@ export default function HealthReport() {
                     background: 'var(--success-bg)',
                     color: '#065f46',
                     fontSize: 12,
-                    padding: '4px 10px',
+                    padding: 'var(--space-1) 10px',
                     borderRadius: 20,
                     textDecoration: 'line-through',
                   }}>{s}</span>
@@ -350,7 +350,7 @@ export default function HealthReport() {
             </div>
           )}
           {addedSupps.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 'var(--space-3)' }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>
                 새롭게 추천된 영양제
               </div>
@@ -360,7 +360,7 @@ export default function HealthReport() {
                     background: 'var(--warning-bg)',
                     color: '#92400e',
                     fontSize: 12,
-                    padding: '4px 10px',
+                    padding: 'var(--space-1) 10px',
                     borderRadius: 20,
                   }}>{s}</span>
                 ))}
@@ -378,7 +378,7 @@ export default function HealthReport() {
                     background: 'var(--border-light)',
                     color: 'var(--text)',
                     fontSize: 12,
-                    padding: '4px 10px',
+                    padding: 'var(--space-1) 10px',
                     borderRadius: 20,
                   }}>{s}</span>
                 ))}
@@ -395,23 +395,23 @@ export default function HealthReport() {
 
       {/* 신체 변화 (체중/BMI) */}
       {(before.answers.체중 !== after.answers.체중 || before.result.nutrition_info.bmi.value !== after.result.nutrition_info.bmi.value) && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ marginBottom: 'var(--space-5)' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <span>⚖️</span> 신체 변화
           </h3>
           <div style={{
             background: 'var(--bg-card)',
             borderRadius: 'var(--radius)',
-            padding: '16px',
+            padding: 'var(--space-4)',
             border: '1px solid var(--border)',
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: 16,
+            gap: 'var(--space-4)',
             textAlign: 'center',
           }}>
             <div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>체중</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
                 {before.answers.체중}kg → {after.answers.체중}kg
               </div>
               <div style={{ fontSize: 12, color: after.answers.체중 < before.answers.체중 ? 'var(--success)' : 'var(--text-secondary)', marginTop: 2 }}>
@@ -420,7 +420,7 @@ export default function HealthReport() {
             </div>
             <div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>BMI</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 4 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
                 {before.result.nutrition_info.bmi.value} → {after.result.nutrition_info.bmi.value}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
@@ -437,7 +437,7 @@ export default function HealthReport() {
           display: 'inline-block',
           background: 'var(--primary)',
           color: '#fff',
-          padding: '14px 32px',
+          padding: '14px var(--space-8)',
           borderRadius: 'var(--radius-sm)',
           textDecoration: 'none',
           fontWeight: 600,
@@ -450,7 +450,7 @@ export default function HealthReport() {
         </p>
       </div>
 
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
+      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 'var(--space-6)' }}>
         본 리포트는 설문 응답 기반 참고 정보이며, 의학적 진단을 대체하지 않습니다.
       </p>
     </div>

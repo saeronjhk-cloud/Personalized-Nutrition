@@ -51,8 +51,8 @@ const STYLE = {
 function Row({ label, items, style }: { label: string; items: string[]; style: CSSProperties }) {
   if (!items.length) return null
   return (
-    <div style={{ marginBottom: 8 }}>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{label}</div>
+    <div style={{ marginBottom: 'var(--space-2)' }}>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>{label}</div>
       <div>{items.map((a) => <span key={a} style={style}>{a}</span>)}</div>
     </div>
   )
@@ -113,8 +113,8 @@ function IncompleteNotice() {
         background: '#fff8e1',
         border: '1px solid #ffe0a3',
         borderRadius: 'var(--radius-sm)',
-        padding: '8px 10px',
-        marginTop: 12,
+        padding: 'var(--space-2) 10px',
+        marginTop: 'var(--space-3)',
         marginBottom: 0,
       }}
     >
@@ -146,7 +146,7 @@ type AllergenCardInput = Parameters<typeof describeAllergens>[0]
 export default function AllergenCard({ result }: { result: AllergenCardInput }) {
   const view = describeAllergens(result)
   return (
-    <div className="survey-card" style={{ marginBottom: 16 }}>
+    <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
       <h3 className="survey-step-title" style={{ fontSize: 16 }}>알레르기</h3>
       <Body view={view} />
       <IncompleteNotice />

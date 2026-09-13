@@ -1,65 +1,65 @@
 export default function Terms() {
   return (
-    <div className="page fade-in" style={{ paddingTop: 32, paddingBottom: 60 }}>
-      <h1 className="section-title" style={{ marginBottom: 24 }}>이용약관</h1>
+    <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 60 }}>
+      <h1 className="section-title" style={{ marginBottom: 'var(--space-6)' }}>이용약관</h1>
 
       <div className="card" style={{ lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제1조 (목적)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제1조 (목적)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           본 약관은 (주)새론미디어(이하 "회사")가 운영하는 서박사의 영양공식 서비스(이하 "서비스")의 이용에 관한
           기본적인 사항을 규정하는 것을 목적으로 합니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제2조 (회원)</h3>
-        <p style={{ marginBottom: 8 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제2조 (회원)</h3>
+        <p style={{ marginBottom: 'var(--space-2)' }}>
           ① <strong>회원</strong>이란 이메일 Magic Link 인증을 완료한 사용자를 말합니다.
         </p>
-        <p style={{ marginBottom: 8 }}>
+        <p style={{ marginBottom: 'var(--space-2)' }}>
           ② 이용자는 회원가입 없이 <strong>익명으로</strong> 설문을 작성하고 추천 결과를 받을 수 있습니다.
           익명 이용 시에도 본 약관의 서비스 이용 조건이 적용됩니다.
         </p>
-        <p style={{ marginBottom: 8 }}>
+        <p style={{ marginBottom: 'var(--space-2)' }}>
           ③ 회원 전용 기능은 다음과 같습니다. (일부 기능은 향후 단계적으로 제공될 수 있습니다.)
         </p>
-        <ul style={{ marginBottom: 16, paddingLeft: 20 }}>
+        <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
           <li>검진 데이터 기반 정밀 추천 (향후 Phase C)</li>
           <li>추천 결과 이메일 저장</li>
           <li>페르소나 이력 추적</li>
         </ul>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제3조 (서비스의 내용)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제3조 (서비스의 내용)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           본 서비스는 이용자가 입력한 건강 설문 정보를 기반으로 맞춤 영양제를 추천하는 정보 제공 서비스입니다.
           본 서비스는 의학적 진단, 치료, 처방을 대체하지 않으며, 의료 행위에 해당하지 않습니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제4조 (면책 조항)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제4조 (면책 조항)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           본 추천은 식약처 인정 건강기능식품 기능성에 기반한 참고 정보이며, 의학적 진단을 대체하지 않습니다.
           이용자는 추천 결과를 참고 자료로만 활용하여야 하며, 건강 관련 결정은 반드시 전문 의료인과
           상담 후 내려야 합니다. 회사는 서비스 이용으로 인해 발생한 직접적·간접적 손해에 대해 책임을 지지 않습니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제5조 (지식재산권)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제5조 (지식재산권)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           서비스에 포함된 추천 알고리즘, 콘텐츠, 디자인, 로고 등 지식재산은 회사에 귀속됩니다.
           이용자는 서비스의 내용을 상업적으로 복제, 배포, 전송할 수 없습니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제6조 (제휴 링크)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제6조 (제휴 링크)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           본 서비스는 쿠팡 등 외부 쇼핑몰의 상품 검색 링크를 제공하며, 이를 통한 구매 시 회사가 일정 수수료를
           받을 수 있습니다. 이는 이용자에게 추가 비용을 발생시키지 않습니다.
           외부 사이트에서의 구매, 배송, 환불 등은 해당 사이트의 정책을 따릅니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제7조 (서비스의 변경 및 중단)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제7조 (서비스의 변경 및 중단)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           회사는 서비스의 내용을 변경하거나 중단할 수 있으며, 중요한 변경 사항은 서비스 내 공지를 통해 안내합니다.
         </p>
 
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>제8조 (준거법 및 관할)</h3>
-        <p style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제8조 (준거법 및 관할)</h3>
+        <p style={{ marginBottom: 'var(--space-4)' }}>
           본 약관의 해석 및 분쟁 해결에 관해서는 대한민국 법률을 적용하며,
           분쟁이 발생한 경우 회사의 소재지를 관할하는 법원을 관할 법원으로 합니다.
         </p>

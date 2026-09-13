@@ -96,8 +96,8 @@ export default function ViewCheckup() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>분석 결과를 불러오는 중...</p>
       </div>
     );
@@ -113,7 +113,7 @@ export default function ViewCheckup() {
           <button
             type="button"
             className="btn btn-primary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/login")}
           >
             로그인하러 가기
@@ -133,7 +133,7 @@ export default function ViewCheckup() {
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/checkup/manage")}
           >
             검진 기록 관리로 돌아가기
@@ -146,10 +146,10 @@ export default function ViewCheckup() {
   return (
     <div className="survey-container fade-in">
       <div className="survey-card">
-        <h2 className="survey-step-title" style={{ marginBottom: 4 }}>
+        <h2 className="survey-step-title" style={{ marginBottom: 'var(--space-1)' }}>
           검진 분석 결과
         </h2>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 24 }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-6)' }}>
           {recordedDate} 검진 기준
         </p>
 
@@ -161,12 +161,12 @@ export default function ViewCheckup() {
         ) : loadError ? (
           <p style={{ color: "#dc2626", fontSize: 14 }}>불러오기 오류: {loadError}</p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
             {referralCount > 0 && (
               <div
                 className="card"
                 style={{
-                  padding: 16,
+                  padding: 'var(--space-4)',
                   background: "rgba(220, 38, 38, 0.06)",
                   border: "1px solid rgba(220, 38, 38, 0.25)",
                 }}
@@ -181,7 +181,7 @@ export default function ViewCheckup() {
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 8, marginTop: 24 }}>
+        <div style={{ display: "flex", gap: 'var(--space-2)', marginTop: 'var(--space-6)' }}>
           <button
             type="button"
             className="btn btn-secondary"

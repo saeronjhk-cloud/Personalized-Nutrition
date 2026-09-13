@@ -136,9 +136,9 @@ export default function LoginEmail() {
   }
 
   return (
-    <div className="card" style={{ maxWidth: 400, margin: "0 auto", padding: 24 }}>
-      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>로그인</h2>
-      <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 20 }}>
+    <div className="card" style={{ maxWidth: 400, margin: "0 auto", padding: 'var(--space-6)' }}>
+      <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 'var(--space-2)' }}>로그인</h2>
+      <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-5)' }}>
         {status === "sent" || status === "verifying"
           ? "메일에 온 숫자 코드를 입력하거나, 메일의 링크를 눌러 주세요."
           : "이메일로 로그인 코드와 링크를 보내드립니다."}
@@ -175,7 +175,7 @@ export default function LoginEmail() {
       </form>
 
       {(status === "sent" || status === "verifying") && (
-        <form onSubmit={handleVerify} style={{ marginTop: 16 }}>
+        <form onSubmit={handleVerify} style={{ marginTop: 'var(--space-4)' }}>
           <div className="input-group">
             <label htmlFor="login-code">인증 코드</label>
             <input
@@ -225,13 +225,13 @@ export default function LoginEmail() {
       )}
 
       {notice && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 12, textAlign: "center" }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 'var(--space-3)', textAlign: "center" }}>
           {notice}
         </p>
       )}
 
       {errorMessage && (
-        <p style={{ color: "#dc2626", fontSize: 14, marginTop: 16, textAlign: "center" }}>
+        <p style={{ color: "#dc2626", fontSize: 14, marginTop: 'var(--space-4)', textAlign: "center" }}>
           {errorMessage}
         </p>
       )}

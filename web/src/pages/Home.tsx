@@ -148,7 +148,7 @@ export default function Home() {
       {/* ━━ 핵심 기능 1 — 가공식품 영양정보 ━━ */}
       {MEOKSEON_ENABLED && (
         <section className="section-alt-bg">
-          <div className="content-section section-animate" style={{ paddingBottom: 32 }}>
+          <div className="content-section section-animate" style={{ paddingBottom: 'var(--space-8)' }}>
             <div className="section-category">핵심 기능 · 가공식품 영양정보</div>
             <h2 className="section-title" style={{ textAlign: 'center' }}>
               내가 먹는 가공식품, 10초 해석
@@ -176,7 +176,7 @@ export default function Home() {
                 <p>내 건강 상태를 기준으로 다시 살펴볼 수 있습니다</p>
               </div>
             </div>
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
               <Link to="/scan" className="btn btn-primary" style={{ maxWidth: 300, margin: '0 auto' }}>
                 제품 해석해보기 →
               </Link>
@@ -187,7 +187,7 @@ export default function Home() {
 
       {/* ━━ 핵심 기능 2 — 식사 기록 ━━ */}
       {MEAL_ENABLED && (
-        <section className="content-section section-animate" style={{ paddingTop: 48 }}>
+        <section className="content-section section-animate" style={{ paddingTop: 'var(--space-12)' }}>
           <div className="section-category">핵심 기능 · 식사 기록</div>
           <h2 className="section-title" style={{ textAlign: 'center' }}>
             사진 한 장이면 식사 기록 끝
@@ -215,7 +215,7 @@ export default function Home() {
               <p>일주일 단위로 내 식습관의 흐름을 확인합니다</p>
             </div>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
             <Link to="/meal" className="btn btn-primary" style={{ maxWidth: 300, margin: '0 auto' }}>
               오늘 식사 기록하기 →
             </Link>
@@ -226,7 +226,7 @@ export default function Home() {
       {/* ━━ 핵심 기능 3 — 내 건강 기록 ━━ */}
       {CHECKUP_ENABLED && (
         <section className="section-alt-bg">
-          <div className="content-section section-animate" style={{ paddingBottom: 32 }}>
+          <div className="content-section section-animate" style={{ paddingBottom: 'var(--space-8)' }}>
             <div className="section-category">핵심 기능 · 내 건강 기록</div>
             <h2 className="section-title" style={{ textAlign: 'center' }}>
               흩어져 있던 건강 데이터를 한곳에
@@ -254,7 +254,7 @@ export default function Home() {
                 <p>내 기록을 바탕으로 맞춤 추천을 받아볼 수 있습니다</p>
               </div>
             </div>
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
               <Link to="/dashboard" className="btn btn-primary" style={{ maxWidth: 300, margin: '0 auto' }}>
                 내 건강 기록 시작하기 →
               </Link>
@@ -264,7 +264,7 @@ export default function Home() {
       )}
 
       {/* ━━ 핵심 기능 4 — 맞춤 영양제 추천 ━━ */}
-      <section className="content-section section-animate section-with-bg" style={{ paddingTop: 48 }}>
+      <section className="content-section section-animate section-with-bg" style={{ paddingTop: 'var(--space-12)' }}>
         <img src="/supp-fitness.jpg" alt="" className="section-bg-img" aria-hidden="true" />
         <div className="section-category">핵심 기능 · 맞춤 영양제 추천</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
@@ -293,7 +293,7 @@ export default function Home() {
             <p>복용법, 주의사항, 예상 비용과 함께 PDF로 저장할 수 있습니다</p>
           </div>
         </div>
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
+        <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
           <Link to="/survey" className="btn btn-primary" style={{ maxWidth: 300, margin: '0 auto' }}>
             무료 맞춤 분석 시작하기 →
           </Link>
@@ -350,7 +350,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
             <Link to="/team" className="text-link">팀 소개 자세히 보기 →</Link>
           </div>
         </div>
@@ -362,7 +362,7 @@ export default function Home() {
         <h2 className="section-title" style={{ textAlign: 'center' }}>
           꾸준히 관리하면, 변화가 보입니다
         </h2>
-        <p className="section-subtitle" style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: 32 }}>
+        <p className="section-subtitle" style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: 'var(--space-8)' }}>
           분석 결과를 자동 저장하고, 다음 분석과 비교해드려요
         </p>
 
@@ -389,7 +389,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
+        <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
           <Link to="/survey" className="btn btn-primary" style={{ textDecoration: 'none' }}>
             첫 분석 시작하기 →
           </Link>
@@ -397,7 +397,7 @@ export default function Home() {
       </section>
 
       {/* ━━ FAQ ━━ */}
-      <section className="content-section section-animate" style={{ paddingTop: 48 }}>
+      <section className="content-section section-animate" style={{ paddingTop: 'var(--space-12)' }}>
         <div className="section-category">자주 묻는 질문</div>
         <h2 className="section-title" style={{ textAlign: 'center' }}>
           궁금한 점이 있으신가요?
@@ -420,7 +420,7 @@ export default function Home() {
         <Link to="/survey" className="btn btn-primary hero-cta">
           무료 맞춤 분석 시작하기 →
         </Link>
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 'var(--space-3)' }}>
           {MEOKSEON_ENABLED && (
             <Link to="/scan" className="text-link" style={{ color: 'inherit' }}>
               가공식품 영양정보부터 써보기 →

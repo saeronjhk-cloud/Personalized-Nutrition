@@ -94,8 +94,8 @@ export default function Recommend() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>맞춤 추천을 준비하는 중...</p>
       </div>
     );
@@ -105,7 +105,7 @@ export default function Recommend() {
     return (
       <div className="survey-container fade-in">
         <div className="survey-card" style={{ textAlign: "center" }}>
-          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 16 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-4)' }}>
             맞춤 추천을 받으려면 로그인이 필요합니다.
           </p>
           <button type="button" className="btn btn-primary" style={{ maxWidth: 240, margin: "0 auto" }} onClick={() => navigate("/login")}>
@@ -121,12 +121,12 @@ export default function Recommend() {
     return (
       <div className="survey-container fade-in">
         <div className="survey-card" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🌱</div>
+          <div style={{ fontSize: 40, marginBottom: 'var(--space-3)' }}>🌱</div>
           <h2 className="survey-step-title" style={{ textAlign: "center" }}>아직 입력한 정보가 없어요</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-5)', lineHeight: 1.6 }}>
             건강진단이나 설문 중 하나만 입력해도 맞춤 영양제를 추천해 드려요.
           </p>
-          {error && <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 12 }}>{error}</p>}
+          {error && <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 'var(--space-3)' }}>{error}</p>}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 280, margin: "0 auto" }}>
             {CHECKUP_ENABLED && (
               <button type="button" className="btn btn-primary" onClick={() => navigate("/checkup")}>검진 수치 입력</button>
@@ -156,8 +156,8 @@ export default function Recommend() {
       <div
         className="card"
         style={{
-          padding: "12px 16px",
-          marginBottom: 16,
+          padding: "var(--space-3) var(--space-4)",
+          marginBottom: 'var(--space-4)',
           background: "rgba(142, 202, 230, 0.08)",
           border: "1px solid rgba(142, 202, 230, 0.25)",
           fontSize: 14,
@@ -173,7 +173,7 @@ export default function Recommend() {
           className="card"
           style={{
             padding: "10px 14px",
-            marginBottom: 16,
+            marginBottom: 'var(--space-4)',
             background: "rgba(255, 183, 3, 0.08)",
             border: "1px solid rgba(255, 183, 3, 0.25)",
             fontSize: 13,

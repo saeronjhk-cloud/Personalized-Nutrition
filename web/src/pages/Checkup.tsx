@@ -26,8 +26,8 @@ export default function Checkup() {
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
-            gap: 12,
-            marginBottom: 8,
+            gap: 'var(--space-3)',
+            marginBottom: 'var(--space-2)',
           }}
         >
           <h2 className="survey-step-title" style={{ marginBottom: 0 }}>
@@ -36,13 +36,13 @@ export default function Checkup() {
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ padding: "8px 14px", fontSize: 14, flexShrink: 0, width: "auto" }}
+            style={{ padding: "var(--space-2) 14px", fontSize: 14, flexShrink: 0, width: "auto" }}
             onClick={() => navigate("/checkup/manage")}
           >
             검진 기록 관리
           </button>
         </div>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 24, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-6)', lineHeight: 1.6 }}>
           검진 수치를 입력하면 설문 결과와 함께 더 정밀한 영양제 추천을 받을 수 있습니다.
         </p>
         <BiomarkerForm />

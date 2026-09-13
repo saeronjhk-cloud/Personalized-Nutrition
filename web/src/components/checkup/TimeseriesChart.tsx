@@ -32,7 +32,7 @@ export default function TimeseriesChart({
     return (
       <div
         style={{
-          padding: 16,
+          padding: 'var(--space-4)',
           borderRadius: "var(--radius-sm)",
           background: "var(--bg-hover)",
           color: "var(--text-muted)",

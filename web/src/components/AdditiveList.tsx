@@ -133,7 +133,7 @@ function GradedItem({ item }: { item: AdditiveView }) {
         listStyle: 'none',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
         <strong style={{ fontSize: 'var(--font-body)', color: 'var(--text)' }}>{item.name}</strong>
         <span style={{ fontSize: 12, fontWeight: 600, color: hex }}>{item.colorLabel}</span>
         {/* 기능이 결측이어도 빈칸을 두지 않는다 — 「현재 정보 없음」이라고 말한다. */}
@@ -241,7 +241,7 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
         </p>
       ) : (
         // 각주는 «섹션 끝에 한 번». 행마다 붙이면 그 자체가 경고가 된다(A7·A8).
-        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
           <p style={NOTE}>{ADDITIVE_COUNT_CAVEAT}</p>
           <p style={NOTE}>{FUNCTION_CAVEAT}</p>
           <p style={NOTE}>{FUNCTION_MISSING_CAVEAT}</p>

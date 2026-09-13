@@ -21,7 +21,7 @@ export default function CheckupConsentGate({ onAccept, onDecline }: Props) {
     <div className="survey-container fade-in">
       <div className="survey-card">
         <h2 className="survey-step-title">건강검진 민감정보 수집·이용 동의</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-4)' }}>
           건강검진 해석 기능은 이용자가 직접 입력한 검진 수치(혈압·혈당·지질·간기능·신장기능·체격 등)와
           성별·연령대·입력일시·적용 기준표 버전·해석 결과를 <strong>건강 관련 민감정보</strong>로 취급하여,
           회사가 명시한 판정기준표에 대입한 참고 범위 안내·전문가 상담 권고·본인 기록 관리 목적으로 수집·이용합니다.
@@ -30,10 +30,10 @@ export default function CheckupConsentGate({ onAccept, onDecline }: Props) {
           <Link to="/privacy" style={{ color: '#2563eb', textDecoration: 'underline' }}>개인정보처리방침</Link> 및{' '}
           <Link to="/terms" style={{ color: '#2563eb', textDecoration: 'underline' }}>이용약관</Link>을 확인하세요.
         </p>
-        <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 'var(--space-4)' }}>
           타인의 건강검진 결과지를 본인 동의 없이 입력하지 마세요. 검진 수치는 본인의 결과지를 기준으로 입력해 주세요.
         </p>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 20, cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
           <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} style={{ marginTop: 3 }} />
           <span>[검진 해석 기능 이용 시 필수] 건강검진 민감정보의 수집·이용에 동의합니다. 거부 시 검진 해석 기능 이용이 제한되며, 회원가입 및 다른 기능은 이용할 수 있습니다.</span>
         </label>

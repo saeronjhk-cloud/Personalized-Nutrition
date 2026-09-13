@@ -57,7 +57,7 @@ export default function BlogPost() {
   if (loading) {
     return (
       <div className="page fade-in" style={{ textAlign: 'center', paddingTop: '15vh' }}>
-        <div style={{ fontSize: 32, marginBottom: 12 }}>📚</div>
+        <div style={{ fontSize: 32, marginBottom: 'var(--space-3)' }}>📚</div>
         <p style={{ color: 'var(--text-muted)' }}>글을 불러오는 중...</p>
       </div>
     )
@@ -67,7 +67,7 @@ export default function BlogPost() {
     return (
       <div className="page fade-in" style={{ textAlign: 'center', paddingTop: '15vh' }}>
         <h2>글을 찾을 수 없습니다</h2>
-        <p style={{ color: 'var(--text-secondary)', margin: '12px 0 24px' }}>
+        <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-3) 0 var(--space-6)' }}>
           요청하신 블로그 글이 존재하지 않거나 아직 발행되지 않았습니다.
         </p>
         <Link to="/blog" className="btn btn-secondary" style={{ maxWidth: 240, margin: '0 auto' }}>
@@ -81,7 +81,7 @@ export default function BlogPost() {
     return (
       <div className="page fade-in" style={{ textAlign: 'center', paddingTop: '15vh' }}>
         <h2>⚠️ {error}</h2>
-        <p style={{ color: 'var(--text-secondary)', margin: '12px 0 24px' }}>
+        <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-3) 0 var(--space-6)' }}>
           잠시 후 다시 시도해 주세요.
         </p>
         <Link to="/blog" className="btn btn-secondary" style={{ maxWidth: 240, margin: '0 auto' }}>
@@ -99,10 +99,10 @@ export default function BlogPost() {
         {/* 상단 */}
         <Link to="/blog" className="blog-back">&larr; 블로그 목록</Link>
 
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 'var(--space-4)' }}>
           <span className="blog-card-cat">{post.category}</span>
-          <h1 style={{ fontSize: 26, fontWeight: 700, marginTop: 8, lineHeight: 1.4 }}>{post.title}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 700, marginTop: 'var(--space-2)', lineHeight: 1.4 }}>{post.title}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
             {post.date} &middot; {post.readMin}분 읽기
           </p>
         </div>
@@ -122,18 +122,18 @@ export default function BlogPost() {
         {/* 출처 */}
         {post.sources.length > 0 && (
           <div className="blog-sources card">
-            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>참고 자료</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 'var(--space-2)' }}>참고 자료</h3>
             <ul>
               {post.sources.map((s, i) => (
-                <li key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>{s}</li>
+                <li key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-1)' }}>{s}</li>
               ))}
             </ul>
           </div>
         )}
 
         {/* CTA */}
-        <div className="cta-section" style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 15, marginBottom: 12 }}>나에게 필요한 영양제가 궁금하다면?</p>
+        <div className="cta-section" style={{ marginTop: 'var(--space-8)' }}>
+          <p style={{ fontSize: 15, marginBottom: 'var(--space-3)' }}>나에게 필요한 영양제가 궁금하다면?</p>
           <Link to="/survey" className="btn btn-primary" style={{ maxWidth: 320, margin: '0 auto' }}>
             무료 맞춤 분석 시작하기
           </Link>

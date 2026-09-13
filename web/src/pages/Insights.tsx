@@ -48,8 +48,8 @@ function topBy<T extends { n: number }>(rows: T[], key: (r: T) => string, top = 
 function HBarCard({ title, data }: { title: string; data: { name: string; n: number }[] }) {
   const height = Math.max(120, data.length * 34 + 24)
   return (
-    <div className="survey-card" style={{ marginBottom: 20 }}>
-      <h3 className="survey-step-title" style={{ fontSize: 16, marginBottom: 12 }}>{title}</h3>
+    <div className="survey-card" style={{ marginBottom: 'var(--space-5)' }}>
+      <h3 className="survey-step-title" style={{ fontSize: 16, marginBottom: 'var(--space-3)' }}>{title}</h3>
       {data.length === 0 ? (
         <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>표시할 집계가 없습니다(5명 미만 셀은 제외).</p>
       ) : (
@@ -172,7 +172,7 @@ export default function Insights() {
 
   return (
     <div className="survey-container fade-in">
-      <div className="survey-card" style={{ marginBottom: 20 }}>
+      <div className="survey-card" style={{ marginBottom: 'var(--space-5)' }}>
         <h2 className="survey-step-title">익명 집계 대시보드</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>
           개인 식별 정보 없이 코호트(연령대·성별) 단위로 집계한 통계입니다. 인원 {data.k_min}명 미만 셀은
@@ -187,7 +187,7 @@ export default function Insights() {
       <HBarCard title="추천 페르소나 분포" data={persona} />
 
       <div className="survey-card">
-        <h3 className="survey-step-title" style={{ fontSize: 16, marginBottom: 12 }}>생활습관 분포</h3>
+        <h3 className="survey-step-title" style={{ fontSize: 16, marginBottom: 'var(--space-3)' }}>생활습관 분포</h3>
         {Array.from(lifestyleMap.entries()).length === 0 ? (
           <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>표시할 집계가 없습니다.</p>
         ) : (
@@ -210,7 +210,7 @@ export default function Insights() {
       </div>
 
       {panels.length > 0 && (
-        <div style={{ marginTop: 20 }}>
+        <div style={{ marginTop: 'var(--space-5)' }}>
           <div className="survey-card" style={{ marginBottom: 14 }}>
             <h2 className="survey-step-title">이용 퍼널 (익명 계측)</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>

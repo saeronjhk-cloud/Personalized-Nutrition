@@ -42,7 +42,7 @@ interface ModuleCardProps {
 
 function ModuleCard({ emoji, title, desc, children }: ModuleCardProps) {
   return (
-    <div className="card" style={{ padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="card" style={{ padding: 'var(--space-5)', display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ fontSize: 26 }}>{emoji}</span>
         <strong style={{ fontSize: 17, color: "var(--text)" }}>{title}</strong>
@@ -91,10 +91,10 @@ export default function Dashboard() {
     <div className="survey-container fade-in">
       <div className="survey-card">
         <h2 className="survey-step-title">내 건강</h2>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 8, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-2)', lineHeight: 1.6 }}>
           원하는 항목만 입력해도 맞춤 영양제와 생활 습관 가이드를 받을 수 있어요.
         </p>
-        <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 'var(--space-6)', lineHeight: 1.6 }}>
           건강진단·설문·식이·운동 중 편한 것부터 시작하세요. 더 많이 입력할수록 추천이 정밀해집니다.
         </p>
 
@@ -102,8 +102,8 @@ export default function Dashboard() {
           <div
             className="card"
             style={{
-              padding: "14px 16px",
-              marginBottom: 20,
+              padding: "14px var(--space-4)",
+              marginBottom: 'var(--space-5)',
               background: "rgba(142, 202, 230, 0.08)",
               border: "1px solid rgba(142, 202, 230, 0.25)",
               fontSize: 13,
@@ -126,7 +126,7 @@ export default function Dashboard() {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 16,
+            gap: 'var(--space-4)',
           }}
         >
           {/* checkup module gated by compliance flag (flags.ts) */}
@@ -197,7 +197,7 @@ export default function Dashboard() {
         <button
           type="button"
           className="btn btn-accent"
-          style={{ marginTop: 24, width: "100%", fontSize: 16 }}
+          style={{ marginTop: 'var(--space-6)', width: "100%", fontSize: 16 }}
           onClick={() => navigate("/recommend")}
         >
           맞춤 추천 받기

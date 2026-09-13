@@ -101,7 +101,7 @@ export default function Resources() {
 
       <section className="content-section">
         {sections.map((sec, i) => (
-          <div key={i} style={{ marginBottom: 32 }}>
+          <div key={i} style={{ marginBottom: 'var(--space-8)' }}>
             <h2 className="section-title">{sec.emoji} {sec.title}</h2>
             <div className="resource-list">
               {sec.links.map((link, j) => (

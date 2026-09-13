@@ -221,15 +221,15 @@ export default function Meal() {
   return (
     <div className="survey-container fade-in">
       {toast && (
-        <div className="survey-card" style={{ marginBottom: 12, background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: '10px 14px' }}>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-3)', background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: '10px 14px' }}>
           {toast}
         </div>
       )}
 
       {closed && !result && (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 종료됨 · {closed.plateCount}개 접시 · 합계 {closed.kcal} kcal</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 10px' }}>정찬 전체에서 남긴 양이 있으면 반영해 실제 섭취로 기록해요.</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 10px' }}>정찬 전체에서 남긴 양이 있으면 반영해 실제 섭취로 기록해요.</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
             <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{closedRatio}%</strong>
           </div>
@@ -239,24 +239,24 @@ export default function Meal() {
             <div style={{ fontSize: 13, color: 'var(--text)', margin: '6px 0' }}>✅ 실제 섭취 약 {closedResultKcal} kcal로 반영됐어요.</div>
           )}
           {closedErr && <div style={{ fontSize: 12, color: 'var(--danger)' }}>{closedErr}</div>}
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button type="button" className="btn btn-primary" disabled={closedBusy} style={{ flex: 1, padding: '8px 12px', fontSize: 13 }} onClick={applySessionLeftover}>{closedBusy ? '반영 중…' : '남긴 양 반영'}</button>
-            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={() => setClosed(null)}>닫기</button>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
+            <button type="button" className="btn btn-primary" disabled={closedBusy} style={{ flex: 1, padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={applySessionLeftover}>{closedBusy ? '반영 중…' : '남긴 양 반영'}</button>
+            <button type="button" className="btn btn-secondary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={() => setClosed(null)}>닫기</button>
           </div>
         </div>
       )}
 
       {!result && (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           {session ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 {sessionBadgeText(session.plate_count, session.total_calories_kcal)}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>사진을 계속 찍으면 이 정찬에 접시가 쌓여요.</div>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={startSession}>새 정찬</button>
-                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 12px', fontSize: 13 }} onClick={endSession}>정찬 종료</button>
+              <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
+                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={startSession}>새 정찬</button>
+                <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={endSession}>정찬 종료</button>
               </div>
             </div>
           ) : (
@@ -265,14 +265,14 @@ export default function Meal() {
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 모드</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>한 끼에 여러 접시를 한 세션으로 묶어 기록해요.</div>
               </div>
-              <button type="button" className="btn btn-primary" disabled={sessionBusy} style={{ width: 'auto', padding: '8px 14px', flexShrink: 0 }} onClick={startSession}>정찬 시작</button>
+              <button type="button" className="btn btn-primary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) 14px', flexShrink: 0 }} onClick={startSession}>정찬 시작</button>
             </div>
           )}
         </div>
       )}
 
       {!result && (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           <h2 className="survey-step-title">사진으로 식사 기록</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
             먹은 음식을 찍으면 칼로리·영양을 추정해 드려요. (사진 기준 추정치예요.)
@@ -306,14 +306,14 @@ export default function Meal() {
       {!result && <MealHistory reloadKey={historyKey} />}
 
       {!result && (
-        <div style={{ textAlign: 'center', marginTop: 4, marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', marginTop: 'var(--space-1)', marginBottom: 'var(--space-4)' }}>
           <Link to="/weekly-report" className="text-link">📊 주간 리포트 보기 →</Link>
         </div>
       )}
 
       {error && (
-        <div className="survey-card" style={{ marginBottom: 16 }}>
-          <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 12 }}>{error}</p>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
+          <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 'var(--space-3)' }}>{error}</p>
           <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={reset}>다시 시도</button>
         </div>
       )}

@@ -60,7 +60,7 @@ export default function Blog() {
       <section className="content-section">
         {loading && (
           <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>📚</div>
+            <div style={{ fontSize: 32, marginBottom: 'var(--space-3)' }}>📚</div>
             <p>블로그 글을 불러오는 중...</p>
           </div>
         )}
@@ -70,11 +70,11 @@ export default function Blog() {
             background: '#fef2f2',
             border: '1px solid #fecaca',
             borderRadius: 'var(--radius)',
-            padding: '20px 24px',
+            padding: 'var(--space-5) var(--space-6)',
             textAlign: 'center',
             color: '#991b1b',
           }}>
-            <p style={{ fontWeight: 600, marginBottom: 4 }}>⚠️ {error}</p>
+            <p style={{ fontWeight: 600, marginBottom: 'var(--space-1)' }}>⚠️ {error}</p>
             <p style={{ fontSize: 13, color: '#7f1d1d' }}>잠시 후 다시 시도해 주세요.</p>
           </div>
         )}

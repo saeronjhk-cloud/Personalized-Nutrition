@@ -147,8 +147,8 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
   }
 
   return (
-    <div className="survey-card" style={{ marginBottom: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+    <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
         <h3 className="survey-step-title" style={{ fontSize: 16 }}>내 최근 식사</h3>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>총 {stat?.total ?? 0}건</span>
       </div>
@@ -157,7 +157,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
           오늘 {stat.todayCount}끼 · 약 {stat.todayKcal} kcal · 최근 7일 {stat.last7Days}끼
         </p>
       )}
-      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {items.slice(0, 8).map((r) => {
           const a = adj[r.id]
           const isOpen = openId === r.id
@@ -183,7 +183,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                   </div>
                 </div>
                 <button type="button" className="btn btn-secondary" aria-label="삭제"
-                  style={{ width: 'auto', minHeight: 40, padding: '8px 12px', color: 'var(--text-muted)', flexShrink: 0 }}
+                  style={{ width: 'auto', minHeight: 40, padding: 'var(--space-2) var(--space-3)', color: 'var(--text-muted)', flexShrink: 0 }}
                   onClick={async () => { if (await deleteMeal(r)) load() }}>✕</button>
               </div>
 
@@ -192,7 +192,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                 <button type="button" aria-label="먹은 양 조절" aria-expanded={isOpen} aria-controls={panelId}
                   onClick={() => toggleCard(r)}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 48, padding: '0 12px',
+                    display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 48, padding: '0 var(--space-3)',
                     background: 'var(--border-light)', color: hasAdjustment ? 'var(--text)' : 'var(--text-secondary)',
                     border: 'none', borderRadius: 'var(--radius-sm, 8px)', fontSize: 13,
                     fontWeight: hasAdjustment ? 600 : 500, cursor: 'pointer',
@@ -205,7 +205,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
 
               {isOpen && (
                 <div id={panelId} role="region" aria-label="먹은 양 조절"
-                  style={{ padding: '10px 12px', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  style={{ padding: '10px var(--space-3)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                   <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>먹은 양 조절</div>
 
                   {/* 세그먼트 컨트롤 — 3모드 동등 위계, 항상 최상단 */}
@@ -239,12 +239,12 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', margin: '2px 0' }}>
                         <span>함께 먹은 인원</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <button type="button" className="btn btn-secondary" aria-label="인원 줄이기" disabled={a?.busy} style={{ width: 'auto', minHeight: 40, padding: '4px 14px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.max(1, (a?.people ?? 1) - 1) })}>−</button>
+                          <button type="button" className="btn btn-secondary" aria-label="인원 줄이기" disabled={a?.busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) 14px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.max(1, (a?.people ?? 1) - 1) })}>−</button>
                           <strong style={{ color: 'var(--text)', minWidth: 34, textAlign: 'center' }}>{a?.people ?? 1}명</strong>
-                          <button type="button" className="btn btn-secondary" aria-label="인원 늘리기" disabled={a?.busy} style={{ width: 'auto', minHeight: 40, padding: '4px 14px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.min(12, (a?.people ?? 1) + 1) })}>+</button>
+                          <button type="button" className="btn btn-secondary" aria-label="인원 늘리기" disabled={a?.busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) 14px', fontSize: 15 }} onClick={() => patch(r.id, { people: Math.min(12, (a?.people ?? 1) + 1) })}>+</button>
                         </span>
                       </div>
-                      <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ width: '100%', minHeight: 44, padding: '8px 12px', fontSize: 13 }} onClick={() => applyRatio(r, pct)}>{a?.busy ? '반영 중…' : '전체 반영'}</button>
+                      <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ width: '100%', minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={() => applyRatio(r, pct)}>{a?.busy ? '반영 중…' : '전체 반영'}</button>
                     </>
                   )}
 
@@ -263,7 +263,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                               style={{ width: '100%' }} aria-label={`${f.name_ko || `음식 ${i + 1}`} 먹은 양`} />
                           </div>
                         ))}
-                        <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ width: '100%', minHeight: 44, padding: '8px 12px', fontSize: 13 }} onClick={() => applyPerFood(r)}>{a?.busy ? '반영 중…' : '음식별로 반영'}</button>
+                        <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ width: '100%', minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={() => applyPerFood(r)}>{a?.busy ? '반영 중…' : '음식별로 반영'}</button>
                       </>
                     ) : (
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>음식 항목이 없어 음식별 조절을 쓸 수 없어요. '전체'에서 조절해 주세요.</div>
@@ -282,15 +282,15 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                           <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
                         </div>
                         <input type="range" min={0} max={100} step={5} value={pct} onChange={(e) => patch(r.id, { ratioPct: Number(e.target.value) })} style={{ width: '100%' }} aria-label="먹은 양 비율" />
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, minHeight: 44, padding: '8px 12px', fontSize: 13 }} onClick={() => confirmPhoto(r, pct)}>{a?.busy ? '저장 중…' : '추정값 적용'}</button>
-                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', minHeight: 44, padding: '8px 12px', fontSize: 13 }} onClick={() => patch(r.id, { photoPreview: false, suggestedNote: undefined, previewKcal: undefined })}>다시 찍기</button>
+                        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                          <button type="button" className="btn btn-primary" disabled={a?.busy} style={{ flex: 1, minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={() => confirmPhoto(r, pct)}>{a?.busy ? '저장 중…' : '추정값 적용'}</button>
+                          <button type="button" className="btn btn-secondary" disabled={a?.busy} style={{ width: 'auto', minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={() => patch(r.id, { photoPreview: false, suggestedNote: undefined, previewKcal: undefined })}>다시 찍기</button>
                         </div>
                       </>
                     ) : (
                       <>
                         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>식후 남은 음식을 촬영하면 AI가 먹은 양을 추정해요. 확인 후에만 저장됩니다.</div>
-                        <label className="btn btn-primary" style={{ width: '100%', minHeight: 44, padding: '8px 12px', fontSize: 13, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: a?.busy ? 'default' : 'pointer' }}>
+                        <label className="btn btn-primary" style={{ width: '100%', minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: a?.busy ? 'default' : 'pointer' }}>
                           {a?.busy ? '분석 중…' : '식후 사진 찍기'}
                           <input type="file" accept="image/*" capture="environment" disabled={a?.busy} style={{ display: 'none' }}
                             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onPickAfter(r, f) }} />
@@ -303,10 +303,10 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
 
                   {/* 되돌리기 — 보정 이력 있을 때만, 낮은 위계 */}
                   {hasAdjustment && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-light)', paddingTop: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-light)', paddingTop: 'var(--space-2)' }}>
                       <button type="button" disabled={a?.busy}
                         onClick={() => applyRatio(r, 100)}
-                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: '6px 4px', minHeight: 40 }}>↩ 마지막 보정 되돌리기</button>
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: '6px var(--space-1)', minHeight: 40 }}>↩ 마지막 보정 되돌리기</button>
                     </div>
                   )}
 

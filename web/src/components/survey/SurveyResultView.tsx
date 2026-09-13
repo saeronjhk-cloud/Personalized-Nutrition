@@ -71,8 +71,8 @@ export default function SurveyResultView() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>분석 결과를 불러오는 중...</p>
       </div>
     );
@@ -88,7 +88,7 @@ export default function SurveyResultView() {
           <button
             type="button"
             className="btn btn-primary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/login")}
           >
             로그인하러 가기
@@ -108,7 +108,7 @@ export default function SurveyResultView() {
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/survey/manage")}
           >
             설문 기록 관리로 돌아가기
@@ -123,8 +123,8 @@ export default function SurveyResultView() {
       <div
         className="card"
         style={{
-          padding: "12px 16px",
-          marginBottom: 16,
+          padding: "var(--space-3) var(--space-4)",
+          marginBottom: 'var(--space-4)',
           background: "rgba(142, 202, 230, 0.08)",
           border: "1px solid rgba(142, 202, 230, 0.25)",
           fontSize: 14,

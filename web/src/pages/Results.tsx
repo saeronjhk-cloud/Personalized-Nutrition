@@ -25,9 +25,9 @@ export default function Results({
   if (error) {
     return (
       <div className="fade-in" style={{ paddingTop: '15vh', textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>😥</div>
-        <h2 style={{ marginBottom: 8 }}>분석에 실패했어요</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>{error}</p>
+        <div style={{ fontSize: 48, marginBottom: 'var(--space-4)' }}>😥</div>
+        <h2 style={{ marginBottom: 'var(--space-2)' }}>분석에 실패했어요</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-6)' }}>{error}</p>
         <button className="btn btn-primary" onClick={onRestart} style={{ maxWidth: 300 }}>
           다시 시작하기
         </button>
@@ -69,11 +69,11 @@ export default function Results({
       </div>
 
       {/* PDF 저장 버튼 */}
-      <div className="no-print" style={{ marginBottom: 20 }}>
+      <div className="no-print" style={{ marginBottom: 'var(--space-5)' }}>
         <button className="btn-pdf" onClick={handleSavePDF}>
           📄 결과를 PDF로 저장하기
         </button>
-        <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
+        <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
           저장 화면에서 "PDF로 저장"을 선택하세요
         </p>
       </div>
@@ -125,7 +125,7 @@ export default function Results({
 
       {/* 경고 메시지 */}
       {warnings.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
+        <div style={{ marginBottom: 'var(--space-5)' }}>
           {warnings.map((w, i) => (
             <div key={i} className="alert alert-warning">⚠️ {w}</div>
           ))}
@@ -168,12 +168,12 @@ export default function Results({
           background: 'linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%)',
           border: '1px solid #c6f6d5',
           borderRadius: 16,
-          padding: '28px 24px',
+          padding: '28px var(--space-6)',
           textAlign: 'center',
-          margin: '12px 0',
+          margin: 'var(--space-3) 0',
         }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🌿</div>
-          <div style={{ fontSize: 17, fontWeight: 600, color: '#276749', marginBottom: 8 }}>
+          <div style={{ fontSize: 40, marginBottom: 'var(--space-3)' }}>🌿</div>
+          <div style={{ fontSize: 17, fontWeight: 600, color: '#276749', marginBottom: 'var(--space-2)' }}>
             현재 특별히 보충이 필요한 영양소가 없습니다
           </div>
           <div style={{ fontSize: 14, color: '#4a5568', lineHeight: 1.6 }}>
@@ -272,7 +272,7 @@ export default function Results({
       </div>
 
       {/* 내 설문 기록 관리 진입 */}
-      <div className="no-print" style={{ marginTop: 12 }}>
+      <div className="no-print" style={{ marginTop: 'var(--space-3)' }}>
         <Link
           to="/survey/manage"
           className="btn btn-secondary"
@@ -283,16 +283,16 @@ export default function Results({
       </div>
 
       {/* 다시 시작 */}
-      <div className="no-print" style={{ marginTop: 16 }}>
+      <div className="no-print" style={{ marginTop: 'var(--space-4)' }}>
         <button className="btn btn-secondary" onClick={onRestart}>
           {restartLabel}
         </button>
       </div>
 
-      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 24 }}>
+      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 'var(--space-6)' }}>
         본 추천은 식약처 인정 건강기능식품 기능성에 기반한 참고 정보이며, 의학적 진단을 대체하지 않습니다.
       </p>
-      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 8 }}>
+      <p className="disclaimer-text" style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 'var(--space-2)' }}>
         이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
       </p>
     </div>
@@ -348,7 +348,7 @@ function SupplementCard({ supp }: { supp: Supplement }) {
             🛒 쿠팡에서 최저가 보기
           </a>
           {/* 추천 근거와 제휴 링크 분리 표시 (신뢰 정렬) */}
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 1.5 }}>
             제휴 링크 · 추천 순위는 건강 분석 결과로만 정해지며, 구매 시 회사가 일정 수수료를 받을 수 있습니다.
           </p>
         </>

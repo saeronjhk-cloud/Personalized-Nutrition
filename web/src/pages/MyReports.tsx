@@ -42,7 +42,7 @@ import {
 
 type Phase = 'loading' | 'ready' | 'need_login' | 'error'
 
-const CARD: React.CSSProperties = { marginBottom: 16 }
+const CARD: React.CSSProperties = { marginBottom: 'var(--space-4)' }
 const MUTED: React.CSSProperties = { color: 'var(--text-muted)', fontSize: 'var(--font-sm)', lineHeight: 1.6 }
 
 export default function MyReports() {
@@ -92,7 +92,7 @@ export default function MyReports() {
         {/* ★ 로그인 필요 — 「없다」와 «절대» 섞지 않는다. */}
         {phase === 'need_login' && (
           <div data-testid="reports-need-login">
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-3)' }}>
               {CONTRIBUTIONS_LOGIN_REQUIRED}
             </p>
             <button
@@ -105,7 +105,7 @@ export default function MyReports() {
         {/* ★ 조회 실패 — 다시 시도할 길을 준다. 「없다」고 말하지 않는다. */}
         {phase === 'error' && (
           <div data-testid="reports-load-error">
-            <p style={{ color: 'var(--danger)', fontSize: 14, lineHeight: 1.7, marginBottom: 12 }}>
+            <p style={{ color: 'var(--danger)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-3)' }}>
               {CONTRIBUTIONS_LOAD_ERROR}
             </p>
             <button
@@ -130,11 +130,11 @@ export default function MyReports() {
 
         {phase === 'ready' && items.length > 0 && (
           <div data-testid="reports-list">
-            <p style={{ ...MUTED, marginBottom: 4 }}>총 {total}건</p>
+            <p style={{ ...MUTED, marginBottom: 'var(--space-1)' }}>총 {total}건</p>
             {/* 상태가 왜 잘 안 바뀌는지 «먼저» 말한다. 오지 않을 변화를 기다리게 하지 않는다. */}
-            <p style={{ ...MUTED, marginBottom: 12 }}>{CONTRIBUTIONS_STATUS_HINT}</p>
+            <p style={{ ...MUTED, marginBottom: 'var(--space-3)' }}>{CONTRIBUTIONS_STATUS_HINT}</p>
 
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, margin: 0, padding: 0 }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', margin: 0, padding: 0 }}>
               {items.map((it) => {
                 const status = describeContributionStatus(it.status)
                 const nutrition = describeContributionNutrition(it.nutritionStatus)
@@ -160,14 +160,14 @@ export default function MyReports() {
                         onClick={() => navigate(`/scan?barcode=${encodeURIComponent(barcode)}`)}
                         style={{
                           width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-                          textAlign: 'left', padding: '10px 12px',
+                          textAlign: 'left', padding: '10px var(--space-3)',
                         }}
                       >{row}</button>
                     ) : (
                       // ⚠ 갈 곳이 없으면 «왜» 없는지 말한다. 눌러도 아무 일 없는 버튼을 두지 않는다.
-                      <div style={{ padding: '10px 12px' }}>
+                      <div style={{ padding: '10px var(--space-3)' }}>
                         {row}
-                        <div style={{ ...MUTED, marginTop: 4 }}>{CONTRIBUTION_NO_BARCODE_NOTE}</div>
+                        <div style={{ ...MUTED, marginTop: 'var(--space-1)' }}>{CONTRIBUTION_NO_BARCODE_NOTE}</div>
                       </div>
                     )}
                   </li>

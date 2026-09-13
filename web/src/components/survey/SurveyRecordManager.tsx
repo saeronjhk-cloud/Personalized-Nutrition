@@ -101,8 +101,8 @@ export default function SurveyRecordManager() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>설문 기록을 불러오는 중...</p>
       </div>
     );
@@ -114,15 +114,15 @@ export default function SurveyRecordManager() {
         className="card"
         style={{
           textAlign: "center",
-          padding: "28px 24px",
+          padding: "28px var(--space-6)",
           background: "rgba(142, 202, 230, 0.08)",
           border: "1px solid rgba(142, 202, 230, 0.25)",
         }}
       >
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 'var(--space-3)' }}>
           로그인이 필요합니다
         </h3>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-5)', lineHeight: 1.6 }}>
           설문 기록을 관리하려면 로그인이 필요합니다
         </p>
         <button
@@ -146,14 +146,14 @@ export default function SurveyRecordManager() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
       {actionError && (
         <p style={{ color: "#dc2626", fontSize: 14 }}>작업 실패: {actionError}</p>
       )}
 
       {responses.length === 0 ? (
-        <div className="card" style={{ padding: 24, textAlign: "center" }}>
-          <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+        <div className="card" style={{ padding: 'var(--space-6)', textAlign: "center" }}>
+          <p style={{ margin: "0 0 var(--space-4)", fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
             저장된 설문 기록이 없습니다.
           </p>
           <button
@@ -171,25 +171,25 @@ export default function SurveyRecordManager() {
             key={res.id}
             className="card"
             style={{
-              padding: 16,
+              padding: 'var(--space-4)',
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 12,
+              gap: 'var(--space-3)',
               flexWrap: "wrap",
             }}
           >
             <div>
               <strong style={{ fontSize: 15, color: "var(--text)" }}>{formatDate(res.created_at)}</strong>
-              <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--text-muted)" }}>
+              <p style={{ margin: "var(--space-1) 0 0", fontSize: 13, color: "var(--text-muted)" }}>
                 증상 {res.symptom_count} · 목표 {res.goal_count}
               </p>
             </div>
-            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            <div style={{ display: "flex", gap: 'var(--space-2)', flexShrink: 0 }}>
               <button
                 type="button"
                 className="btn btn-primary"
-                style={{ padding: "8px 14px", fontSize: 14 }}
+                style={{ padding: "var(--space-2) 14px", fontSize: 14 }}
                 onClick={() => navigate(`/survey/view/${res.id}`)}
               >
                 결과 보기
@@ -197,7 +197,7 @@ export default function SurveyRecordManager() {
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ padding: "8px 14px", fontSize: 14, color: "#dc2626" }}
+                style={{ padding: "var(--space-2) 14px", fontSize: 14, color: "#dc2626" }}
                 onClick={() => {
                   setActionError(null);
                   setPendingDelete(res);
@@ -234,11 +234,11 @@ export default function SurveyRecordManager() {
             transform: "translateX(-50%)",
             background: "rgba(33, 37, 41, 0.96)",
             color: "#fff",
-            padding: "12px 16px",
+            padding: "var(--space-3) var(--space-4)",
             borderRadius: 10,
             display: "flex",
             alignItems: "center",
-            gap: 16,
+            gap: 'var(--space-4)',
             fontSize: 14,
             zIndex: 1000,
             maxWidth: "calc(100% - 32px)",

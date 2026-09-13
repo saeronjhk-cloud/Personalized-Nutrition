@@ -302,8 +302,8 @@ export default function BiomarkerForm() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>검진 항목을 불러오는 중...</p>
       </div>
     );
@@ -323,15 +323,15 @@ export default function BiomarkerForm() {
         className="card"
         style={{
           textAlign: "center",
-          padding: "28px 24px",
+          padding: "28px var(--space-6)",
           background: "rgba(142, 202, 230, 0.08)",
           border: "1px solid rgba(142, 202, 230, 0.25)",
         }}
       >
-        <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 12 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 'var(--space-3)' }}>
           로그인이 필요합니다
         </h3>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-5)', lineHeight: 1.6 }}>
           검진 결과를 기록하고 이전 검진과 비교해 추천을 받으려면 로그인이 필요합니다
         </p>
         <button
@@ -349,18 +349,18 @@ export default function BiomarkerForm() {
   return (
     <form
       onSubmit={handleAnalyze}
-      style={{ display: "flex", flexDirection: "column", gap: 24 }}
+      style={{ display: "flex", flexDirection: "column", gap: 'var(--space-6)' }}
     >
       {needsProfile && (
         <section>
-          <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
+          <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-2)' }}>
             기본 프로필
           </h3>
-          <p className="section-subtitle" style={{ marginBottom: 16 }}>
+          <p className="section-subtitle" style={{ marginBottom: 'var(--space-4)' }}>
             첫 이용 시 성별과 출생 연도를 입력해 주세요.
           </p>
 
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
             {(["M", "F"] as const).map((value) => (
               <div
                 key={value}
@@ -396,10 +396,10 @@ export default function BiomarkerForm() {
       )}
 
       <section>
-        <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
+        <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-2)' }}>
           검진결과지 불러오기
         </h3>
-        <p className="section-subtitle" style={{ marginBottom: 12 }}>
+        <p className="section-subtitle" style={{ marginBottom: 'var(--space-3)' }}>
           The건강보험 앱이나 정부24에서 받은 건강검진 결과 PDF를 올리면 수치를 자동으로 채워드려요.
         </p>
         <label
@@ -416,19 +416,19 @@ export default function BiomarkerForm() {
           />
         </label>
         {importMessage && (
-          <p style={{ color: "#16a34a", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+          <p style={{ color: "#16a34a", fontSize: 13, marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
             {importMessage}
           </p>
         )}
         {importError && (
-          <p style={{ color: "#dc2626", fontSize: 13, marginTop: 8, lineHeight: 1.5 }}>
+          <p style={{ color: "#dc2626", fontSize: 13, marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
             {importError}
           </p>
         )}
       </section>
 
       <section>
-        <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
+        <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-2)' }}>
           검진일
         </h3>
         <div className="input-group">
@@ -447,11 +447,11 @@ export default function BiomarkerForm() {
         <section key={category}>
           <h3
             className="section-title"
-            style={{ fontSize: 16, marginBottom: 12, borderBottom: "1px solid var(--border)", paddingBottom: 8 }}
+            style={{ fontSize: 16, marginBottom: 'var(--space-3)', borderBottom: "1px solid var(--border)", paddingBottom: 'var(--space-2)' }}
           >
             {category}
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
             {items.map((rule) => (
               <div key={rule.biomarker_key} className="input-group" style={{ marginBottom: 0 }}>
                 <label htmlFor={`biomarker-${rule.biomarker_key}`}>
@@ -459,7 +459,7 @@ export default function BiomarkerForm() {
                   {rule.inverted && (
                     <span
                       style={{
-                        marginLeft: 8,
+                        marginLeft: 'var(--space-2)',
                         fontSize: 12,
                         color: "var(--text-muted)",
                         fontWeight: 400,
@@ -472,7 +472,7 @@ export default function BiomarkerForm() {
                 {rule.note && (
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>{rule.note}</p>
                 )}
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
                   <input
                     id={`biomarker-${rule.biomarker_key}`}
                     type="number"
@@ -498,7 +498,7 @@ export default function BiomarkerForm() {
       <button
         type="submit"
         className="btn btn-accent"
-        style={{ marginTop: 8, fontSize: 16 }}
+        style={{ marginTop: 'var(--space-2)', fontSize: 16 }}
         disabled={analyzing}
       >
         {analyzing ? "분석 중..." : "검진 결과 분석하기"}
@@ -509,23 +509,23 @@ export default function BiomarkerForm() {
           <button
             type="button"
             className="btn btn-primary"
-            style={{ marginBottom: 12, fontSize: 16 }}
+            style={{ marginBottom: 'var(--space-3)', fontSize: 16 }}
             disabled={saving || saved}
             onClick={handleSave}
           >
             {saving ? "저장 중..." : saved ? "저장 완료" : "저장하기"}
           </button>
           {saveMessage && (
-            <p style={{ color: "#16a34a", fontSize: 14, marginBottom: 12, lineHeight: 1.5 }}>
+            <p style={{ color: "#16a34a", fontSize: 14, marginBottom: 'var(--space-3)', lineHeight: 1.5 }}>
               {saveMessage}
             </p>
           )}
           {saveError && (
-            <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 12, lineHeight: 1.5 }}>
+            <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 'var(--space-3)', lineHeight: 1.5 }}>
               저장 실패: {saveError}
             </p>
           )}
-          <h3 className="section-title" style={{ fontSize: 16, marginBottom: 12 }}>
+          <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-3)' }}>
             분석 결과
           </h3>
           <RecommendationList results={results} />
@@ -534,7 +534,7 @@ export default function BiomarkerForm() {
             <button
               type="button"
               className="btn btn-secondary"
-              style={{ marginTop: 16, fontSize: 16, width: "100%" }}
+              style={{ marginTop: 'var(--space-4)', fontSize: 16, width: "100%" }}
               disabled={historyLoading}
               onClick={handleShowTimeseries}
             >
@@ -543,27 +543,27 @@ export default function BiomarkerForm() {
           )}
 
           {historyError && (
-            <p style={{ color: "#dc2626", fontSize: 14, marginTop: 12 }}>
+            <p style={{ color: "#dc2626", fontSize: 14, marginTop: 'var(--space-3)' }}>
               과거 검진 결과 조회 실패: {historyError}
             </p>
           )}
 
           {showTimeseries && (
-            <section style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+            <section style={{ marginTop: 'var(--space-5)', display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
               <h3 className="section-title" style={{ fontSize: 16, marginBottom: 0 }}>
                 변화 추이
               </h3>
 
               {historyPoints.length < 2 ? (
-                <div className="card" style={{ padding: 20 }}>
-                  <h4 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 600 }}>
+                <div className="card" style={{ padding: 'var(--space-5)' }}>
+                  <h4 style={{ margin: "0 0 var(--space-2)", fontSize: 16, fontWeight: 600 }}>
                     첫 검진 기준선이 저장되었습니다
                   </h4>
-                  <p style={{ margin: "0 0 12px", fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                  <p style={{ margin: "0 0 var(--space-3)", fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
                     다음 검진 때 변화가 표시됩니다.
                   </p>
                   {topNeeds.length > 0 && (
-                    <div style={{ marginBottom: 16 }}>
+                    <div style={{ marginBottom: 'var(--space-4)' }}>
                       <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600 }}>이번 관심 카테고리 TOP 3</p>
                       <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, color: "var(--text-secondary)" }}>
                         {topNeeds.map((need) => (
@@ -574,7 +574,7 @@ export default function BiomarkerForm() {
                   )}
                   {exampleBiomarkerKey && historyPoints[0]?.biomarkers[exampleBiomarkerKey] != null && (
                     <div>
-                      <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-secondary)" }}>
+                      <p style={{ margin: "0 0 var(--space-2)", fontSize: 13, color: "var(--text-secondary)" }}>
                         꾸준한 관리로 목표 범위 도달 가능 (예시: {exampleBiomarkerKey})
                       </p>
                       <TimeseriesChart
@@ -595,10 +595,10 @@ export default function BiomarkerForm() {
                   )}
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-3)' }}>
                   {topChanges.map((change) => (
-                    <div key={change.biomarker_key} className="card" style={{ padding: 16 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <div key={change.biomarker_key} className="card" style={{ padding: 'var(--space-4)' }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 'var(--space-2)' }}>
                         <strong style={{ fontSize: 15 }}>{change.biomarker_key}</strong>
                         <span
                           style={{
@@ -611,7 +611,7 @@ export default function BiomarkerForm() {
                           {change.changeRate.toFixed(1)}%)
                         </span>
                       </div>
-                      <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-muted)" }}>
+                      <p style={{ margin: "0 0 var(--space-2)", fontSize: 13, color: "var(--text-muted)" }}>
                         {change.prev} → {change.curr}
                       </p>
                       <TimeseriesChart

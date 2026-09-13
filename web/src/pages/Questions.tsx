@@ -173,7 +173,7 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
       <p className="section-subtitle">기초대사량과 일일 에너지 소비량을 계산해요</p>
       <WhyTooltip text="키, 체중, 나이를 기반으로 기초대사량(BMR)과 일일 에너지 소비량(TDEE)을 계산해요. 이 수치가 단백질 목표량과 영양소 필요량의 기준이 됩니다." />
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
         {['male', 'female'].map(g => (
           <div key={g} className={`radio-card ${answers.성별 === g ? 'selected' : ''}`}
             onClick={() => onUpdate({ 성별: g })} style={{ flex: 1 }}>
@@ -185,14 +185,14 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
 
       <div className="input-group">
         <label>나이</label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <input type="range" min={10} max={90} value={answers.나이}
             onChange={e => onUpdate({ 나이: +e.target.value })} style={{ flex: 1 }} />
           <span style={{ fontWeight: 600, minWidth: 50, textAlign: 'right' }}>{answers.나이}세</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
         <div className="input-group" style={{ flex: 1 }}>
           <label>키 (cm)</label>
           <input type="number" className="input-field" value={heightText}
@@ -209,7 +209,7 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
 
       <div className="input-group">
         <label>최근 체중 변화</label>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
           {[['변화없음', '변화 없음'], ['증가', '📈 증가'], ['감소', '📉 감소']].map(([val, label]) => (
             <div key={val} className={`radio-card ${answers.체중변화 === val ? 'selected' : ''}`}
               onClick={() => onUpdate({ 체중변화: val })} style={{ flex: 1, minWidth: 100 }}>
@@ -223,7 +223,7 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
       {answers.성별 === 'female' && (
         <div className="input-group">
           <label>월경 상태</label>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             {[['정상', '정상'], ['불규칙', '불규칙'], ['폐경', '폐경']].map(([val, label]) => (
               <div key={val} className={`radio-card ${answers.월경상태 === val ? 'selected' : ''}`}
                 onClick={() => onUpdate({ 월경상태: val })} style={{ flex: 1 }}>
@@ -235,7 +235,7 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
         </div>
       )}
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 16 }}>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-4)' }}>
         다음 →
       </button>
     </div>
@@ -257,11 +257,11 @@ function StepSymptoms({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
       <WhyTooltip text="선택하신 증상에 따라 14개 건강 카테고리의 필요도 점수가 계산됩니다. 점수가 높은 카테고리와 관련된 영양제가 우선 추천돼요." />
 
       {SYMPTOM_GROUPS.map(group => (
-        <div key={group.group} style={{ marginBottom: 20 }}>
-          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-secondary)', marginBottom: 8 }}>
+        <div key={group.group} style={{ marginBottom: 'var(--space-5)' }}>
+          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
             {group.group}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
             {group.symptoms.map(s => (
               <div key={s.id} className={`check-card ${answers.증상.includes(s.id) ? 'selected' : ''}`}
                 onClick={() => toggle(s.id)}>
@@ -273,7 +273,7 @@ function StepSymptoms({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
         </div>
       ))}
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 16 }}>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-4)' }}>
         다음 → {answers.증상.length > 0 && `(${answers.증상.length}개 선택)`}
       </button>
     </div>
@@ -305,7 +305,7 @@ function StepGoals({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUp
       </div>
 
       <button className="btn btn-primary" onClick={onNext}
-        disabled={answers.목표.length === 0} style={{ marginTop: 20 }}>
+        disabled={answers.목표.length === 0} style={{ marginTop: 'var(--space-5)' }}>
         다음 → {answers.목표.length > 0 && `(${answers.목표.length}개 선택)`}
       </button>
     </div>
@@ -338,7 +338,7 @@ function StepSleep({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUp
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -369,7 +369,7 @@ function StepStress({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onU
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -395,8 +395,8 @@ function StepExercise({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
       <p className="section-subtitle">운동 강도와 일조량은 비타민D·코엔자임Q10 필요도에 영향을 줍니다.</p>
       <WhyTooltip text="운동 강도는 코엔자임Q10, BCAA 등의 필요도를 높이고, 일조량 부족은 비타민D 보충 필요성을 결정합니다." />
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>운동 빈도</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>운동 빈도</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-5)' }}>
         {freqOptions.map(o => (
           <div key={o.value} className={`radio-card ${answers.운동 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 운동: o.value })}>
@@ -406,8 +406,8 @@ function StepExercise({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
         ))}
       </div>
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>일조량 / 실외 활동</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>일조량 / 실외 활동</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {sunOptions.map(o => (
           <div key={o.value} className={`radio-card ${answers.일조량 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 일조량: o.value })}>
@@ -417,7 +417,7 @@ function StepExercise({ answers, onUpdate, onNext }: { answers: SurveyAnswers; o
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -448,7 +448,7 @@ function StepDiet({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -474,8 +474,8 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
       <p className="section-subtitle">알코올과 흡연은 비타민B·C 소모량을 크게 높여요.</p>
       <WhyTooltip text="음주는 비타민B1, 엽산, 마그네슘 흡수를 방해하고, 흡연은 비타민C 소모를 2배 이상 높입니다." />
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>음주 빈도</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>음주 빈도</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-5)' }}>
         {drinkOptions.map(o => (
           <div key={o.value} className={`radio-card ${answers.음주 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 음주: o.value })}>
@@ -485,8 +485,8 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
         ))}
       </div>
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>흡연 여부</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>흡연 여부</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {smokeOptions.map(o => (
           <div key={o.value} className={`radio-card ${answers.흡연 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 흡연: o.value })}>
@@ -496,7 +496,7 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
         ))}
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -548,12 +548,12 @@ function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers
 
       <div className={`check-card ${noneSelected ? 'selected' : ''}`}
         onClick={() => { setNoneSelected(!noneSelected); onUpdate({ 현재복용영양제: [] }) }}
-        style={{ marginTop: 12 }}>
+        style={{ marginTop: 'var(--space-3)' }}>
         <div className="check-icon">✓</div>
         <span className="check-text">❌ 현재 복용 중인 영양제 없음</span>
       </div>
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 20 }}>다음 →</button>
+      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
@@ -576,8 +576,8 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
       <p className="section-subtitle">안전한 추천을 위해 현재 질환과 가족력을 확인합니다.</p>
       <WhyTooltip text="기저질환에 따라 특정 영양소가 금기이거나 주의가 필요할 수 있어요. 안전한 추천을 위해 꼭 필요합니다." />
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>현재 기저질환 (해당 사항 선택)</div>
-      <div className="grid-2" style={{ marginBottom: 24 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>현재 기저질환 (해당 사항 선택)</div>
+      <div className="grid-2" style={{ marginBottom: 'var(--space-6)' }}>
         {CONDITIONS_LIST.map(c => (
           <div key={c} className={`check-card ${answers.기저질환.includes(c) ? 'selected' : ''}`}
             onClick={() => toggleCondition(c)}>
@@ -587,8 +587,8 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
         ))}
       </div>
 
-      <div style={{ fontWeight: 500, marginBottom: 8, fontSize: 14 }}>가족력 (해당 사항 선택)</div>
-      <div className="grid-2" style={{ marginBottom: 24 }}>
+      <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>가족력 (해당 사항 선택)</div>
+      <div className="grid-2" style={{ marginBottom: 'var(--space-6)' }}>
         {FAMILY_HISTORY_LIST.map(f => (
           <div key={f} className={`check-card ${answers.가족력.includes(f) ? 'selected' : ''}`}
             onClick={() => toggleFamily(f)}>
@@ -605,7 +605,7 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
           onChange={e => onUpdate({ 복용약물: e.target.value || undefined })} />
       </div>
 
-      <button className="btn btn-accent" onClick={onSubmit} style={{ marginTop: 16, fontSize: 18 }}>
+      <button className="btn btn-accent" onClick={onSubmit} style={{ marginTop: 'var(--space-4)', fontSize: 18 }}>
         🔬 맞춤 분석 시작
       </button>
     </div>

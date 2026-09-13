@@ -124,8 +124,8 @@ export default function EditCheckup() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "32px 0" }}>
-        <div className="spinner" style={{ margin: "0 auto 16px" }} />
+      <div style={{ textAlign: "center", padding: "var(--space-8) 0" }}>
+        <div className="spinner" style={{ margin: "0 auto var(--space-4)" }} />
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>검진 기록을 불러오는 중...</p>
       </div>
     );
@@ -141,7 +141,7 @@ export default function EditCheckup() {
           <button
             type="button"
             className="btn btn-primary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/login")}
           >
             로그인하러 가기
@@ -161,7 +161,7 @@ export default function EditCheckup() {
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ maxWidth: 240, margin: "16px auto 0" }}
+            style={{ maxWidth: 240, margin: "var(--space-4) auto 0" }}
             onClick={() => navigate("/checkup/manage")}
           >
             검진 기록 관리로 돌아가기
@@ -176,14 +176,14 @@ export default function EditCheckup() {
       <div className="survey-card">
         <h2 className="survey-step-title">검진 기록 수정</h2>
         {loadError && (
-          <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 16 }}>
+          <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 'var(--space-4)' }}>
             불러오기 오류: {loadError}
           </p>
         )}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-6)' }}>
           <section>
-            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 8 }}>
+            <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-2)' }}>
               검진일
             </h3>
             <div className="input-group">
@@ -204,14 +204,14 @@ export default function EditCheckup() {
                 className="section-title"
                 style={{
                   fontSize: 16,
-                  marginBottom: 12,
+                  marginBottom: 'var(--space-3)',
                   borderBottom: "1px solid var(--border)",
-                  paddingBottom: 8,
+                  paddingBottom: 'var(--space-2)',
                 }}
               >
                 {category}
               </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
                 {items.map((rule) => (
                   <div key={rule.biomarker_key} className="input-group" style={{ marginBottom: 0 }}>
                     <label htmlFor={`edit-biomarker-${rule.biomarker_key}`}>
@@ -219,7 +219,7 @@ export default function EditCheckup() {
                       {rule.inverted && (
                         <span
                           style={{
-                            marginLeft: 8,
+                            marginLeft: 'var(--space-2)',
                             fontSize: 12,
                             color: "var(--text-muted)",
                             fontWeight: 400,
@@ -234,7 +234,7 @@ export default function EditCheckup() {
                         {rule.note}
                       </p>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
                       <input
                         id={`edit-biomarker-${rule.biomarker_key}`}
                         type="number"
@@ -261,7 +261,7 @@ export default function EditCheckup() {
             <p style={{ color: "#dc2626", fontSize: 14 }}>수정 실패: {saveError}</p>
           )}
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 'var(--space-2)' }}>
             <button
               type="button"
               className="btn btn-secondary"

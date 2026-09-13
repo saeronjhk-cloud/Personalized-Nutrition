@@ -3,7 +3,7 @@ export default function Loading() {
     <div className="loading-container fade-in">
       <div className="spinner" />
       <div style={{ textAlign: 'center' }}>
-        <p style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>
+        <p style={{ fontWeight: 600, fontSize: 18, marginBottom: 'var(--space-2)' }}>
           맞춤 분석 중...
         </p>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>

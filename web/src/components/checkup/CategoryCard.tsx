@@ -75,7 +75,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
     >
       <header
         style={{
-          padding: "16px 20px",
+          padding: "var(--space-4) var(--space-5)",
           borderBottom: "1px solid var(--border)",
           borderLeft: `4px solid ${accentColor}`,
         }}
@@ -85,7 +85,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
         </h4>
       </header>
 
-      <section style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+      <section style={{ padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border)" }}>
         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
           {results.map((result) => (
             <li
@@ -107,14 +107,14 @@ export default function CategoryCard({ categoryName, results }: Props) {
       </section>
 
       {toneBody && (
-        <section style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)" }}>
+        <section style={{ padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border)" }}>
           <p style={{ margin: 0, fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7 }}>
             {toneBody}
           </p>
         </section>
       )}
 
-      <footer style={{ padding: "16px 20px" }}>
+      <footer style={{ padding: "var(--space-4) var(--space-5)" }}>
         <p style={{ margin: 0, fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6 }}>
           본 정보는 의학적 진단·치료를 대체하지 않습니다. 질환·약물 복용 중이면 전문가 상담을 권장합니다.
         </p>

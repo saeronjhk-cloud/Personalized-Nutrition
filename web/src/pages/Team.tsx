@@ -60,12 +60,12 @@ export default function Team() {
 
       <section className="content-section">
         {members.map((m, i) => (
-          <div key={i} className="card team-card" style={{ marginBottom: 24 }}>
+          <div key={i} className="card team-card" style={{ marginBottom: 'var(--space-6)' }}>
             <div className="team-header">
               <img src={m.photo} alt={m.name} className="team-avatar-photo" style={m.photoPos ? { objectPosition: m.photoPos } : undefined} />
               <div>
                 <span className="team-role-badge">{m.role}</span>
-                <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>{m.name}</h2>
+                <h2 style={{ fontSize: 22, fontWeight: 700, marginTop: 'var(--space-1)' }}>{m.name}</h2>
                 <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{m.title}</p>
               </div>
             </div>

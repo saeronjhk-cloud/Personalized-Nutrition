@@ -36,7 +36,7 @@ export default function ConfirmDialog({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 20,
+        padding: 'var(--space-5)',
         zIndex: 1000,
       }}
     >
@@ -46,17 +46,17 @@ export default function ConfirmDialog({
         style={{
           maxWidth: 360,
           width: "100%",
-          padding: 24,
+          padding: 'var(--space-6)',
           background: "var(--surface, #fff)",
         }}
       >
-        <h3 style={{ margin: "0 0 8px", fontSize: 17, fontWeight: 600, color: "var(--text)" }}>
+        <h3 style={{ margin: "0 0 var(--space-2)", fontSize: 17, fontWeight: 600, color: "var(--text)" }}>
           {title}
         </h3>
         {description && (
           <p
             style={{
-              margin: "0 0 20px",
+              margin: "0 0 var(--space-5)",
               fontSize: 14,
               color: "var(--text-secondary)",
               lineHeight: 1.6,
@@ -65,7 +65,7 @@ export default function ConfirmDialog({
             {description}
           </p>
         )}
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+        <div style={{ display: "flex", gap: 'var(--space-2)', justifyContent: "flex-end" }}>
           <button
             type="button"
             className="btn btn-secondary"
