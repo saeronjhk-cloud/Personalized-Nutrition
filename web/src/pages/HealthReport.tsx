@@ -102,7 +102,7 @@ export default function HealthReport() {
   const costAfter = after.result.monthly_summary.cost_min
 
   return (
-    <div className="page fade-in" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-5) var(--space-4) var(--space-8)' }}>
+    <div className="survey-container fade-in">
 
       {/* 헤더 */}
       <div style={{

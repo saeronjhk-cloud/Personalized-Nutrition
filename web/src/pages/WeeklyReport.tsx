@@ -38,7 +38,7 @@ export default function WeeklyReport() {
   const vm = weeklyRenderModel({ loading, error, data })
 
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto', padding: 'var(--space-5) var(--space-4) var(--space-12)' }}>
+    <div className="survey-container fade-in">
       <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', margin: 'var(--space-1) 0 var(--space-1)' }}>주간 식사 리포트</h1>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 var(--space-4)' }}>
         한 주 식사 기록을 영양 기준으로 정리했어요.
