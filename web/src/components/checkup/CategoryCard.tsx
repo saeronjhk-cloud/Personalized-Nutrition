@@ -92,7 +92,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
               key={result.biomarker_key}
               style={{
                 fontSize: 14,
-                color: result.force_medical_referral ? "#ef4444" : getResultLineColor(result.level),
+                color: result.force_medical_referral ? "#dc2626" : getResultLineColor(result.level),
                 lineHeight: 1.5,
               }}
             >
@@ -124,7 +124,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
               margin: "var(--space-2) 0 0",
               fontSize: 13,
               fontWeight: 600,
-              color: "#dc2626",
+              color: "var(--danger)",
               lineHeight: 1.5,
             }}
           >

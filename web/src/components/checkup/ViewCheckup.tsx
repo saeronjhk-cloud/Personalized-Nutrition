@@ -159,7 +159,7 @@ export default function ViewCheckup() {
             기본 정보를 먼저 저장해 주세요.
           </p>
         ) : loadError ? (
-          <p style={{ color: "#dc2626", fontSize: 14 }}>불러오기 오류: {loadError}</p>
+          <p style={{ color: "var(--danger)", fontSize: 14 }}>불러오기 오류: {loadError}</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
             {referralCount > 0 && (

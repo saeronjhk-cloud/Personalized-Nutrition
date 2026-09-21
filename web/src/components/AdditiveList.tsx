@@ -39,7 +39,7 @@ const COLOR_HEX: Record<AdditiveColor, string> = {
   green: '#4a9e3f',
   yellow: '#f59e0b',
   orange: '#ea580c',
-  red: '#ef4444',
+  red: '#dc2626',
   unknown: '#6b7280',   // 회색 — 「판정 없음」이지 「안전」이 아니다
 }
 

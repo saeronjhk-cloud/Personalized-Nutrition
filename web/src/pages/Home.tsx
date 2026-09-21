@@ -133,7 +133,7 @@ export default function Home() {
           )}
 
           <Link to="/survey" className="feature-hub-card">
-            <span className="feature-hub-icon" style={{ background: '#e8f5e3' }}>
+            <span className="feature-hub-icon" style={{ background: 'var(--primary-light)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><path d="M8.5 8.5l7 7"/></svg>
             </span>
             <div className="feature-hub-body">

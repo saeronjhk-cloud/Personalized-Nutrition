@@ -67,7 +67,7 @@ export default function Blog() {
 
         {error && !loading && (
           <div style={{
-            background: '#fef2f2',
+            background: 'var(--danger-bg)',
             border: '1px solid #fecaca',
             borderRadius: 'var(--radius)',
             padding: 'var(--space-5) var(--space-6)',

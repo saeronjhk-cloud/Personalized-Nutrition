@@ -311,7 +311,7 @@ export default function BiomarkerForm() {
 
   if (loadError) {
     return (
-      <p style={{ color: "#dc2626", fontSize: 14, textAlign: "center" }}>
+      <p style={{ color: "var(--danger)", fontSize: 14, textAlign: "center" }}>
         데이터를 불러오지 못했습니다: {loadError}
       </p>
     );
@@ -421,7 +421,7 @@ export default function BiomarkerForm() {
           </p>
         )}
         {importError && (
-          <p style={{ color: "#dc2626", fontSize: 13, marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
+          <p style={{ color: "var(--danger)", fontSize: 13, marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
             {importError}
           </p>
         )}
@@ -521,7 +521,7 @@ export default function BiomarkerForm() {
             </p>
           )}
           {saveError && (
-            <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 'var(--space-3)', lineHeight: 1.5 }}>
+            <p style={{ color: "var(--danger)", fontSize: 14, marginBottom: 'var(--space-3)', lineHeight: 1.5 }}>
               저장 실패: {saveError}
             </p>
           )}
@@ -543,7 +543,7 @@ export default function BiomarkerForm() {
           )}
 
           {historyError && (
-            <p style={{ color: "#dc2626", fontSize: 14, marginTop: 'var(--space-3)' }}>
+            <p style={{ color: "var(--danger)", fontSize: 14, marginTop: 'var(--space-3)' }}>
               과거 검진 결과 조회 실패: {historyError}
             </p>
           )}

@@ -59,7 +59,7 @@ const NUTRIENTS: { key: keyof NonNullable<MsProductResult['nutrition']>; label: 
 //   (`productService.js:120` 의 'gray' 폴백, `mfras_grade` ENUM 의 'blue' 잔재).
 //   4색만 그리면 그런 첨가물은 「N종」에 세어 놓고 화면에서 조용히 사라진다.
 const COLOR_HEX: Record<AdditiveColor, string> = {
-  green: '#4a9e3f', yellow: '#f59e0b', orange: '#ea580c', red: '#ef4444', unknown: '#6b7280',
+  green: '#4a9e3f', yellow: '#f59e0b', orange: '#ea580c', red: '#dc2626', unknown: '#6b7280',
 }
 // 먹선 위해성 평가(MFRAS) 색 의미 — 정본은 domain/meokseon/additives.ts 의 COLOR_LABEL.
 // ⚠ 여기서 다시 정의하지 않는다(두 곳에 두면 갈라진다).
@@ -72,7 +72,7 @@ const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']
  *   목록에서 «빼고», 그 사실을 «말»로 한다(회색 점을 그리면 「판정했다」로 읽힌다).
  */
 const LIGHT_HEX: Record<'green' | 'yellow' | 'red', string> = {
-  green: '#4a9e3f', yellow: '#f59e0b', red: '#ef4444',
+  green: '#4a9e3f', yellow: '#f59e0b', red: '#dc2626',
 }
 
 /** 「내가 보낸 제보」 화면. ⚠ `App.tsx` 의 라우트와 «같은 값»이어야 한다. */
@@ -820,7 +820,7 @@ export default function Scan() {
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 'var(--space-2)' }}>사진에서 읽어낸 내용</div>
 
             <label htmlFor="report-product-name" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
-              제품명 <span style={{ color: '#ef4444' }}>(필수)</span>
+              제품명 <span style={{ color: "var(--danger)" }}>(필수)</span>
             </label>
             <input
               id="report-product-name"
@@ -851,7 +851,7 @@ export default function Scan() {
         )}
 
         {reportError && (
-          <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 'var(--space-2)' }}>{reportError}</p>
+          <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 'var(--space-2)' }}>{reportError}</p>
         )}
 
         {/* ★★★ 흐름 «도중»의 401. 폼이 열린 뒤 세션이 끊긴 경우다.

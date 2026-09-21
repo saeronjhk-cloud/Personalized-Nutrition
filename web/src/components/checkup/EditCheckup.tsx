@@ -176,7 +176,7 @@ export default function EditCheckup() {
       <div className="survey-card">
         <h2 className="survey-step-title">검진 기록 수정</h2>
         {loadError && (
-          <p style={{ color: "#dc2626", fontSize: 14, marginBottom: 'var(--space-4)' }}>
+          <p style={{ color: "var(--danger)", fontSize: 14, marginBottom: 'var(--space-4)' }}>
             불러오기 오류: {loadError}
           </p>
         )}
@@ -258,7 +258,7 @@ export default function EditCheckup() {
           ))}
 
           {saveError && (
-            <p style={{ color: "#dc2626", fontSize: 14 }}>수정 실패: {saveError}</p>
+            <p style={{ color: "var(--danger)", fontSize: 14 }}>수정 실패: {saveError}</p>
           )}
 
           <div style={{ display: "flex", gap: 'var(--space-2)' }}>

@@ -126,7 +126,7 @@ export default function Recommend() {
           <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-5)', lineHeight: 1.6 }}>
             건강진단이나 설문 중 하나만 입력해도 맞춤 영양제를 추천해 드려요.
           </p>
-          {error && <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 'var(--space-3)' }}>{error}</p>}
+          {error && <p style={{ color: "var(--danger)", fontSize: 13, marginBottom: 'var(--space-3)' }}>{error}</p>}
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)", maxWidth: 280, margin: "0 auto" }}>
             {CHECKUP_ENABLED && (
               <button type="button" className="btn btn-primary" onClick={() => navigate("/checkup")}>검진 수치 입력</button>

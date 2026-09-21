@@ -80,7 +80,7 @@ export default function ConfirmDialog({
             className="btn btn-primary"
             style={{
               maxWidth: 120,
-              ...(danger ? { background: "#dc2626", borderColor: "#dc2626" } : {}),
+              ...(danger ? { background: "var(--danger)", borderColor: "var(--danger)" } : {}),
             }}
             disabled={busy}
             onClick={onConfirm}

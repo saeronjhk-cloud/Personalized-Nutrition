@@ -231,7 +231,7 @@ export default function LoginEmail() {
       )}
 
       {errorMessage && (
-        <p style={{ color: "#dc2626", fontSize: 14, marginTop: 'var(--space-4)', textAlign: "center" }}>
+        <p style={{ color: "var(--danger)", fontSize: 14, marginTop: 'var(--space-4)', textAlign: "center" }}>
           {errorMessage}
         </p>
       )}

@@ -137,7 +137,7 @@ export default function CheckupRecordManager() {
 
   if (loadError) {
     return (
-      <p style={{ color: "#dc2626", fontSize: 14, textAlign: "center" }}>
+      <p style={{ color: "var(--danger)", fontSize: 14, textAlign: "center" }}>
         검진 기록을 불러오지 못했습니다: {loadError}
       </p>
     );
@@ -146,7 +146,7 @@ export default function CheckupRecordManager() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
       {actionError && (
-        <p style={{ color: "#dc2626", fontSize: 14 }}>작업 실패: {actionError}</p>
+        <p style={{ color: "var(--danger)", fontSize: 14 }}>작업 실패: {actionError}</p>
       )}
 
       {records.length === 0 ? (
@@ -203,7 +203,7 @@ export default function CheckupRecordManager() {
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ padding: "var(--space-2) 14px", fontSize: 14, color: "#dc2626" }}
+                style={{ padding: "var(--space-2) 14px", fontSize: 14, color: "var(--danger)" }}
                 onClick={() => {
                   setActionError(null);
                   setPendingDelete(rec);
