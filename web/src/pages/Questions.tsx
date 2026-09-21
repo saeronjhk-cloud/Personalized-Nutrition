@@ -328,7 +328,7 @@ function StepSleep({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUp
       <p className="section-subtitle">수면 패턴은 마그네슘·GABA 등 추천 여부에 직결됩니다.</p>
       <WhyTooltip text="수면 패턴은 마그네슘, GABA, 테아닌 등 수면 관련 영양소의 추천 여부를 결정하는 핵심 지표입니다." />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {options.map(o => (
           <div key={o.value} className={`radio-card ${answers.수면 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 수면: o.value })}>
@@ -359,7 +359,7 @@ function StepStress({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onU
       <p className="section-subtitle">스트레스 수준은 비타민B·마그네슘 필요도를 결정합니다.</p>
       <WhyTooltip text="만성 스트레스는 비타민B군과 마그네슘의 소모를 크게 높여요. 스트레스 수준에 따라 추천 용량도 달라집니다." />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {options.map(o => (
           <div key={o.value} className={`radio-card ${answers.스트레스 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 스트레스: o.value })}>
@@ -438,7 +438,7 @@ function StepDiet({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
       <p className="section-subtitle">식습관에 따라 특정 영양소 결핍 가능성이 달라져요.</p>
       <WhyTooltip text="불규칙한 식사나 편식은 특정 영양소 결핍 위험을 높여요. 식사 패턴에 맞는 보충 전략을 세울 수 있습니다." />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {options.map(o => (
           <div key={o.value} className={`radio-card ${answers.식사패턴 === o.value ? 'selected' : ''}`}
             onClick={() => onUpdate({ 식사패턴: o.value })}>

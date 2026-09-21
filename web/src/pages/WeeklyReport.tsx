@@ -39,7 +39,7 @@ export default function WeeklyReport() {
 
   return (
     <div style={{ maxWidth: 520, margin: '0 auto', padding: 'var(--space-5) var(--space-4) var(--space-12)' }}>
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', margin: 'var(--space-1) 0 2px' }}>주간 식사 리포트</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', margin: 'var(--space-1) 0 var(--space-1)' }}>주간 식사 리포트</h1>
       <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '0 0 var(--space-4)' }}>
         한 주 식사 기록을 영양 기준으로 정리했어요.
       </p>
@@ -60,10 +60,10 @@ export default function WeeklyReport() {
 
       {vm.mode === 'error' && error && (
         <div style={{ ...card, borderColor: 'var(--danger)' }}>
-          <div style={{ color: 'var(--danger)', fontWeight: 700, marginBottom: 6 }}>리포트를 불러오지 못했어요</div>
+          <div style={{ color: 'var(--danger)', fontWeight: 700, marginBottom: 'var(--space-2)' }}>리포트를 불러오지 못했어요</div>
           <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: vm.errorRetryable ? 12 : 0 }}>{error.message}</div>
           {vm.errorRetryable && (
-            <button type="button" className="btn btn-secondary" style={{ padding: 'var(--space-2) 14px' }}
+            <button type="button" className="btn btn-secondary" style={{ padding: 'var(--space-2) var(--space-3)' }}
               onClick={() => load(weekStart, true)}>다시 시도</button>
           )}
         </div>
@@ -72,7 +72,7 @@ export default function WeeklyReport() {
       {(vm.mode === 'insufficient' || vm.mode === 'report') && report && (
         <>
           {/* coverage */}
-          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 14 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
             {coverageCaption(report.coverage)}
           </div>
 
@@ -84,7 +84,7 @@ export default function WeeklyReport() {
             <>
               {/* 1) 음식군 칩 */}
               {vm.showFoodGroups && (
-                <section style={{ marginBottom: 18 }}>
+                <section style={{ marginBottom: 'var(--space-4)' }}>
                   <div style={sectionTitle}>이번 주 자주 먹은 음식</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                     {report.top_food_groups.map((g) => (
@@ -95,7 +95,7 @@ export default function WeeklyReport() {
               )}
 
               {/* 2) 영양 균형 flags */}
-              <section style={{ marginBottom: 18 }}>
+              <section style={{ marginBottom: 'var(--space-4)' }}>
                 <div style={sectionTitle}>영양 균형</div>
                 {vm.showFlagsSuccess ? (
                   <div style={{ ...card, borderColor: 'var(--success)' }}>
@@ -106,7 +106,7 @@ export default function WeeklyReport() {
                     {report.macro_balance.flags.map((f, i) => {
                       const v = flagView(f)
                       return (
-                        <div key={i} style={{ ...card, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
+                        <div key={i} style={{ ...card, display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-3)' }}>
                           <span style={{ color: v.colorVar, fontWeight: 800, fontSize: 16 }}>{v.arrow}</span>
                           <span style={{ fontWeight: 700, color: 'var(--text)' }}>{v.label}</span>
                           {typeof f.avg === 'number' && (
@@ -122,7 +122,7 @@ export default function WeeklyReport() {
               </section>
 
               {/* 3) 다음 행동 */}
-              <section style={{ marginBottom: 18 }}>
+              <section style={{ marginBottom: 'var(--space-4)' }}>
                 <div style={sectionTitle}>다음 주 제안</div>
                 <div style={{ ...card, background: 'var(--surface-2, rgba(0,0,0,0.03))' }}>
                   <div style={{ fontSize: 15, color: 'var(--text)', lineHeight: 1.5 }}>{report.next_action.message}</div>
@@ -145,10 +145,10 @@ export default function WeeklyReport() {
 
 const navBtn: React.CSSProperties = { width: 40, minWidth: 40, padding: 'var(--space-2) 0', fontSize: 18, lineHeight: 1 }
 const card: React.CSSProperties = {
-  border: '1px solid var(--border, rgba(0,0,0,0.1))', borderRadius: 'var(--radius)', padding: '14px var(--space-4)', background: 'var(--surface, #fff)',
+  border: '1px solid var(--border, rgba(0,0,0,0.1))', borderRadius: 'var(--radius)', padding: 'var(--space-3) var(--space-4)', background: 'var(--surface, #fff)',
 }
 const sectionTitle: React.CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }
 const chip: React.CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 'var(--space-1)', padding: '6px var(--space-3)', borderRadius: 'var(--radius-pill)',
+  display: 'inline-flex', alignItems: 'center', gap: 'var(--space-1)', padding: 'var(--space-2) var(--space-3)', borderRadius: 'var(--radius-pill)',
   background: 'var(--surface-2, rgba(0,0,0,0.05))', color: 'var(--text)', fontSize: 14, fontWeight: 600,
 }

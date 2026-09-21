@@ -86,7 +86,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
       </header>
 
       <section style={{ padding: "var(--space-4) var(--space-5)", borderBottom: "1px solid var(--border)" }}>
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
           {results.map((result) => (
             <li
               key={result.biomarker_key}
@@ -121,7 +121,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
         {hasMedicalReferral && (
           <p
             style={{
-              margin: "10px 0 0",
+              margin: "var(--space-2) 0 0",
               fontSize: 13,
               fontWeight: 600,
               color: "#dc2626",

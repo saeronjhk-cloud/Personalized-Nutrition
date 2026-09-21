@@ -48,7 +48,7 @@ const NOTE: CSSProperties = { fontSize: 12, lineHeight: 1.55, color: 'var(--text
 /** 근거 한 줄 — 「제목: 값」 + 그 아래 «의미» 설명. 설명은 접지 않는다. */
 function Fact({ term, label, note }: { term: string; label: string; note: string }) {
   return (
-    <div style={{ marginTop: 6 }}>
+    <div style={{ marginTop: 'var(--space-2)' }}>
       <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)' }}>
         <span style={{ color: 'var(--text-muted)' }}>{term}</span>{' '}
         <strong style={{ fontWeight: 600 }}>{label}</strong>
@@ -64,14 +64,14 @@ function Fact({ term, label, note }: { term: string; label: string; note: string
  */
 function Evidence({ item }: { item: AdditiveView }) {
   return (
-    <details style={{ marginTop: 6 }}>
+    <details style={{ marginTop: 'var(--space-2)' }}>
       <summary style={{ fontSize: 'var(--font-sm)', color: 'var(--text-secondary)', cursor: 'pointer' }}>
         {EVIDENCE_TOGGLE_LABEL}
       </summary>
-      <div style={{ paddingLeft: 2 }}>
+      <div style={{ paddingLeft: 'var(--space-1)' }}>
         {/* identity 보조 — 국제번호. ⚠ E-number 가 아니라 INS 다(A3). */}
         {item.ins && (
-          <div style={{ ...NOTE, marginTop: 6 }}>식품첨가물 국제번호 <strong>{item.ins}</strong></div>
+          <div style={{ ...NOTE, marginTop: 'var(--space-2)' }}>식품첨가물 국제번호 <strong>{item.ins}</strong></div>
         )}
         {item.iarc && <Fact term="국제암연구소(IARC)" label={item.iarc.label} note={item.iarc.note} />}
         <Fact term="하루 섭취 허용량" label={item.adi.label} note={item.adi.note} />
@@ -97,7 +97,7 @@ function PlainItem({ item }: { item: AdditiveView }) {
       style={{
         border: '1px solid var(--border-light)',
         borderRadius: 'var(--radius-sm)',
-        padding: '9px 11px',
+        padding: 'var(--space-2) var(--space-3)',
         listStyle: 'none',
       }}
     >
@@ -105,7 +105,7 @@ function PlainItem({ item }: { item: AdditiveView }) {
       <div
         style={{
           fontSize: 'var(--font-sm)',
-          marginTop: 3,
+          marginTop: 'var(--space-1)',
           color: item.functionKnown ? 'var(--text-secondary)' : 'var(--text-muted)',
         }}
       >
@@ -129,7 +129,7 @@ function GradedItem({ item }: { item: AdditiveView }) {
         borderLeft: `3px solid ${hex}`,
         background: `${hex}0d`,
         borderRadius: 'var(--radius-sm)',
-        padding: '9px 11px',
+        padding: 'var(--space-2) var(--space-3)',
         listStyle: 'none',
       }}
     >
@@ -148,7 +148,7 @@ function GradedItem({ item }: { item: AdditiveView }) {
       </div>
 
       {/* 등급이 없는 첨가물은 침묵하면 「안전」으로 읽힌다. 반드시 말한다. */}
-      {item.color === 'unknown' && <div style={{ ...NOTE, marginTop: 5 }}>{UNKNOWN_COLOR_NOTE}</div>}
+      {item.color === 'unknown' && <div style={{ ...NOTE, marginTop: 'var(--space-1)' }}>{UNKNOWN_COLOR_NOTE}</div>}
 
       {/* ★ 근거는 주황·빨강·등급미상에서만 편다. 초록·노랑까지 다 펴면 소음이 되고,
           소음이 흔해지면 진짜 경고를 넘긴다(알레르기 축에서 배운 alarm fatigue). */}
@@ -164,7 +164,7 @@ function GradedItem({ item }: { item: AdditiveView }) {
 
 function List({ items }: { items: AdditiveView[] }) {
   return (
-    <ul style={{ display: 'flex', flexDirection: 'column', gap: 7, listStyle: 'none', margin: 0, padding: 0 }}>
+    <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', listStyle: 'none', margin: 0, padding: 0 }}>
       {items.map((it) => <GradedItem key={it.key} item={it} />)}
     </ul>
   )
@@ -177,7 +177,7 @@ function GradeSections({ view }: { view: AdditiveListView }) {
     <>
       {view.alerts.length > 0 && (
         <>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
             주의해서 볼 첨가물 {view.alerts.length}종
           </div>
           <List items={view.alerts} />
@@ -198,7 +198,7 @@ function GradeSections({ view }: { view: AdditiveListView }) {
           >
             {open ? '▾' : '▸'} 안전·허용으로 평가된 첨가물 {view.calm.length}종 {open ? '접기' : '보기'}
           </button>
-          {open && <div style={{ marginTop: 7 }}><List items={view.calm} /></div>}
+          {open && <div style={{ marginTop: 'var(--space-2)' }}><List items={view.calm} /></div>}
         </div>
       )}
     </>
@@ -217,11 +217,11 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
   if (view.total === 0 && view.unlisted === 0) return null
 
   return (
-    <div style={{ marginTop: 14 }}>
+    <div style={{ marginTop: 'var(--space-3)' }}>
       {SHOW_RISK_GRADE ? (
         <GradeSections view={view} />
       ) : (
-        <ul style={{ display: 'flex', flexDirection: 'column', gap: 7, listStyle: 'none', margin: 0, padding: 0 }}>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', listStyle: 'none', margin: 0, padding: 0 }}>
           {view.items.map((it) => <PlainItem key={it.key} item={it} />)}
         </ul>
       )}
@@ -231,17 +231,17 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
             화면에 다시 적으면 문구가 갈라지고, 갈라진 쪽은 아무도 검토하지 않는다.
           ⚠ `view.unlisted` 는 **서버가 계산해 준 값**이다. 여기서 다시 빼지 말 것. */}
       {view.unlisted > 0 && (
-        <p style={{ ...NOTE, marginTop: 10 }}>{describeUnlistedAdditives(view.unlisted)}</p>
+        <p style={{ ...NOTE, marginTop: 'var(--space-2)' }}>{describeUnlistedAdditives(view.unlisted)}</p>
       )}
 
       {SHOW_RISK_GRADE ? (
-        <p style={{ ...NOTE, marginTop: 10 }}>
+        <p style={{ ...NOTE, marginTop: 'var(--space-2)' }}>
           위해성 등급·근거는 먹선 위해성 평가(MFRAS) 기준이며, 국제기구(JECFA·EFSA·IARC) 공개 자료를 바탕으로 해요.
           진단이나 의학적 조언이 아니라 생활관리 참고 정보예요.
         </p>
       ) : (
         // 각주는 «섹션 끝에 한 번». 행마다 붙이면 그 자체가 경고가 된다(A7·A8).
-        <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+        <div style={{ marginTop: 'var(--space-2)', display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
           <p style={NOTE}>{ADDITIVE_COUNT_CAVEAT}</p>
           <p style={NOTE}>{FUNCTION_CAVEAT}</p>
           <p style={NOTE}>{FUNCTION_MISSING_CAVEAT}</p>

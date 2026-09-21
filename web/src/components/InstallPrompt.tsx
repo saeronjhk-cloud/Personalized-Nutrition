@@ -106,7 +106,7 @@ export default function InstallPrompt() {
 
         {showIOS && (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 'var(--space-2)' }}>
               앱처럼 사용하기
             </div>
             <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6 }}>
@@ -121,7 +121,7 @@ export default function InstallPrompt() {
               color: '#666',
               background: '#f8f8f8',
               borderRadius: 10,
-              padding: 'var(--space-3) 14px',
+              padding: 'var(--space-3) var(--space-3)',
             }}>
               <span>1. 하단의</span>
               <span style={{
@@ -143,12 +143,12 @@ export default function InstallPrompt() {
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--space-2)',
-              marginTop: 6,
+              marginTop: 'var(--space-2)',
               fontSize: 13,
               color: '#666',
               background: '#f8f8f8',
               borderRadius: 10,
-              padding: 'var(--space-3) 14px',
+              padding: 'var(--space-3) var(--space-3)',
             }}>
               <span>2.</span>
               <span style={{ fontWeight: 600 }}>홈 화면에 추가</span>
@@ -159,10 +159,10 @@ export default function InstallPrompt() {
 
         {showAndroid && (
           <>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', marginBottom: 'var(--space-2)' }}>
               앱 설치하기
             </div>
-            <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 14 }}>
+            <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>
               홈 화면에 설치하면 더 빠르게 이용할 수 있어요!
             </div>
             <button

@@ -33,11 +33,11 @@ import { describeAllergens, type AllergenView } from '../domain/meokseon/allerge
 
 const TAG_BASE: CSSProperties = {
   display: 'inline-block',
-  padding: '3px 10px',
+  padding: 'var(--space-1) var(--space-2)',
   borderRadius: 'var(--radius-pill)',
   fontSize: 13,
-  marginRight: 6,
-  marginBottom: 6,
+  marginRight: 'var(--space-2)',
+  marginBottom: 'var(--space-2)',
 }
 
 const STYLE = {
@@ -73,7 +73,7 @@ function Body({ view }: { view: AllergenView }) {
     return (
       <div>
         <div>{view.items.map((a) => <span key={a} style={STYLE.plain}>{a}</span>)}</div>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
           직접 함유와 혼입 가능이 구분되지 않은 목록이에요.
         </p>
       </div>
@@ -86,7 +86,7 @@ function Body({ view }: { view: AllergenView }) {
       <Row label="원재료 추정" items={view.inferred} style={STYLE.inferred} />
       <Row label="혼입 가능" items={view.mayContain} style={STYLE.mayContain} />
       {view.mayContain.length > 0 && (
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 1.5 }}>
           「혼입 가능」은 같은 제조시설·라인에서 만든 제품에 들어 있는 물질이에요.
           제품에 직접 들어 있다는 뜻은 아니지만, 알레르기가 있다면 주의하세요.
         </p>
@@ -113,7 +113,7 @@ function IncompleteNotice() {
         background: '#fff8e1',
         border: '1px solid #ffe0a3',
         borderRadius: 'var(--radius-sm)',
-        padding: 'var(--space-2) 10px',
+        padding: 'var(--space-2) var(--space-2)',
         marginTop: 'var(--space-3)',
         marginBottom: 0,
       }}

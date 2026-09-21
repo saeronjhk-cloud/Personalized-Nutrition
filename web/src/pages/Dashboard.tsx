@@ -24,7 +24,7 @@ function StatusBadge({ text, tone }: { text: string; tone: "done" | "todo" | "so
         fontWeight: 600,
         color: c.fg,
         background: c.bg,
-        padding: "2px 10px",
+        padding: "var(--space-1) var(--space-2)",
         borderRadius: 'var(--radius-pill)',
       }}
     >
@@ -42,13 +42,13 @@ interface ModuleCardProps {
 
 function ModuleCard({ emoji, title, desc, children }: ModuleCardProps) {
   return (
-    <div className="card" style={{ padding: 'var(--space-5)', display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div className="card" style={{ padding: 'var(--space-5)', display: "flex", flexDirection: "column", gap: 'var(--space-2)' }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
         <span style={{ fontSize: 26 }}>{emoji}</span>
         <strong style={{ fontSize: 17, color: "var(--text)" }}>{title}</strong>
       </div>
       <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{desc}</p>
-      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>{children}</div>
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 'var(--space-2)' }}>{children}</div>
     </div>
   );
 }
@@ -102,7 +102,7 @@ export default function Dashboard() {
           <div
             className="card"
             style={{
-              padding: "14px var(--space-4)",
+              padding: "var(--space-3) var(--space-4)",
               marginBottom: 'var(--space-5)',
               background: "rgba(142, 202, 230, 0.08)",
               border: "1px solid rgba(142, 202, 230, 0.25)",
@@ -202,7 +202,7 @@ export default function Dashboard() {
         >
           맞춤 추천 받기
         </button>
-        <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", marginTop: 10, lineHeight: 1.6 }}>
+        <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
           입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)
         </p>
       </div>

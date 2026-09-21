@@ -70,8 +70,8 @@ function HBarCard({ title, data }: { title: string; data: { name: string; n: num
 // 익명 이용 퍼널 카드 (get_scan_metrics · surface별). 개인 식별자 없음.
 function FunnelCard({ panel }: { panel: SurfacePanel }) {
   return (
-    <div className="survey-card" style={{ marginBottom: 14 }}>
-      <h3 className="survey-step-title" style={{ fontSize: 15, marginBottom: 10 }}>
+    <div className="survey-card" style={{ marginBottom: 'var(--space-3)' }}>
+      <h3 className="survey-step-title" style={{ fontSize: 15, marginBottom: 'var(--space-2)' }}>
         {panel.title} <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 400 }}>· 총 {panel.total}건</span>
       </h3>
       {panel.empty ? (
@@ -81,9 +81,9 @@ function FunnelCard({ panel }: { panel: SurfacePanel }) {
           <tbody>
             {panel.steps.map((s) => (
               <tr key={s.label} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                <td style={{ padding: '6px 0', color: 'var(--text-secondary)' }}>{s.label}</td>
-                <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }}>{s.n}</td>
-                <td style={{ padding: '6px 0', textAlign: 'right', width: 56, color: 'var(--text-muted)' }}>
+                <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{s.label}</td>
+                <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>{s.n}</td>
+                <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', width: 56, color: 'var(--text-muted)' }}>
                   {s.pct == null ? '—' : `${s.pct}%`}
                 </td>
               </tr>
@@ -192,14 +192,14 @@ export default function Insights() {
           <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>표시할 집계가 없습니다.</p>
         ) : (
           Array.from(lifestyleMap.entries()).map(([dim, vm]) => (
-            <div key={dim} style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>{dimLabel[dim] || dim}</div>
+            <div key={dim} style={{ marginBottom: 'var(--space-3)' }}>
+              <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 'var(--space-2)' }}>{dimLabel[dim] || dim}</div>
               <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
                 <tbody>
                   {Array.from(vm.entries()).sort((a, b) => b[1] - a[1]).map(([val, n]) => (
                     <tr key={val} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                      <td style={{ padding: '6px 0', color: 'var(--text-secondary)' }}>{val}</td>
-                      <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }}>{n}명</td>
+                      <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{val}</td>
+                      <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>{n}명</td>
                     </tr>
                   ))}
                 </tbody>
@@ -211,7 +211,7 @@ export default function Insights() {
 
       {panels.length > 0 && (
         <div style={{ marginTop: 'var(--space-5)' }}>
-          <div className="survey-card" style={{ marginBottom: 14 }}>
+          <div className="survey-card" style={{ marginBottom: 'var(--space-3)' }}>
             <h2 className="survey-step-title">이용 퍼널 (익명 계측)</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.6 }}>
               최근 {metrics?.window_days ?? 30}일 익명 이벤트 집계입니다(개인 식별자 없음). 스캔·식사기록·리포트 표면별 전환.

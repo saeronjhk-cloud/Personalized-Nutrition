@@ -544,11 +544,11 @@ export default function Scan() {
       <div
         data-testid="report-login-gate"
         style={{
-          marginTop: 'var(--space-3)', padding: 'var(--space-3) 14px', borderRadius: 10,
+          marginTop: 'var(--space-3)', padding: 'var(--space-3) var(--space-3)', borderRadius: 10,
           border: '1px solid var(--border-light)', background: 'var(--border-light)',
         }}
       >
-        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>
+        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>
           {REPORT_LOGIN_HEADLINE}
         </p>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 'var(--space-1)' }}>
@@ -558,16 +558,16 @@ export default function Scan() {
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 'var(--space-1)' }}>
           {REPORT_LOGIN_SCAN_OK}
         </p>
-        <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 10 }}>
+        <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 'var(--space-2)' }}>
           {REPORT_LOGIN_RETURN_NOTICE}
         </p>
         <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
           <button
-            type="button" className="btn btn-primary" style={{ width: 'auto', padding: '10px var(--space-4)' }}
+            type="button" className="btn btn-primary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
             onClick={() => goLoginForReport('report_gate')}
           >{REPORT_LOGIN_CTA}</button>
           <button
-            type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '10px var(--space-4)' }}
+            type="button" className="btn btn-secondary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
             onClick={() => setLoginGateOpen(false)}
           >{REPORT_LOGIN_DISMISS}</button>
         </div>
@@ -630,7 +630,7 @@ export default function Scan() {
       const reportAdditives = buildAdditiveList({ additives: analysis.additives })
       return (
         <div>
-          <p style={{ color: outcome.kind === 'saved' ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 14, marginBottom: 6 }}>
+          <p style={{ color: outcome.kind === 'saved' ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 14, marginBottom: 'var(--space-2)' }}>
             {outcome.headline}
           </p>
           {/* ★★★ 부분 저장 — 「저장됐다」 바로 «아래»에서 「영양은 못 읽었다」를 말한다.
@@ -638,7 +638,7 @@ export default function Scan() {
               ⚠ 조건을 `outcome.nutritionNote` 로 둔다 — 사유 코드를 몰라도(=UNKNOWN) 뜬다.
                 코드 목록으로 조건을 걸면 서버가 코드를 늘리는 순간 화면이 «조용해진다». */}
           {outcome.nutritionNote && (
-            <p style={{ color: 'var(--text)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-2)', padding: '10px var(--space-3)', background: 'var(--warning-bg)', borderLeft: '3px solid var(--warning)', borderRadius: 'var(--radius-sm)' }}>
+            <p style={{ color: 'var(--text)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-2)', padding: 'var(--space-2) var(--space-3)', background: 'var(--warning-bg)', borderLeft: '3px solid var(--warning)', borderRadius: 'var(--radius-sm)' }}>
               {outcome.nutritionNote}
             </p>
           )}
@@ -647,7 +647,7 @@ export default function Scan() {
           {outcome.retakeable && (
             <button
               type="button" className="btn btn-secondary"
-              style={{ width: 'auto', padding: 'var(--space-2) 14px', marginBottom: 10 }}
+              style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', marginBottom: 'var(--space-2)' }}
               onClick={() => { track('scan_report_click', { source: 'nutrition_retake' }); retakeNutritionPhoto() }}
             >{NUTRITION_RETAKE_CTA}</button>
           )}
@@ -681,15 +681,15 @@ export default function Scan() {
           {/* 원재료 — 라벨 표기 순서 그대로. 못 읽었으면 목록 자체를 그리지 않는다
               (그 사실은 위 `describeReadback` 의 「원재료 0개」가 이미 말한다). */}
           {analysis.ingredients.length > 0 && (
-            <div style={{ marginTop: 14 }} data-testid="report-ingredients">
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>원재료</div>
+            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-ingredients">
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>원재료</div>
               <p style={{ fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
                 {analysis.ingredients.map((it) => (
                   [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
                     .filter(Boolean).join(' ')
                 )).join(', ')}
               </p>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.55 }}>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
                 사진에서 읽어낸 그대로예요. 라벨과 다르면 라벨이 맞아요.
               </p>
             </div>
@@ -698,7 +698,7 @@ export default function Scan() {
           {/* 첨가물 — ⚠ 4색 등급은 계속 «꺼진» 상태다(`SHOW_RISK_GRADE`). 여기서 켜지 않는다.
               외부 검토 6명이 일치해서 끈 것이다. 화면은 이름과 「일반적 용도」만 그린다. */}
           {reportAdditives.total > 0 && (
-            <div style={{ marginTop: 14 }} data-testid="report-additives">
+            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-additives">
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
                 {SHOW_RISK_GRADE ? `첨가물 ${reportAdditives.total}종` : describeAdditiveCount(reportAdditives.total)}
               </div>
@@ -716,7 +716,7 @@ export default function Scan() {
               여기에 `analysis.nutrition &&` 같은 조건을 «더하지» 말 것 — 관문이 두 곳으로
               갈라져 한쪽만 고쳐지는 순간 기준 없는 숫자가 새어 나간다. */}
           {reportNutrition.show && (
-            <div style={{ marginTop: 14 }} data-testid="report-nutrition">
+            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-nutrition">
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--space-1)' }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>영양성분</span>
                 {/* ★ 기준 문구는 숫자와 «항상» 함께 나간다. 없으면 숫자의 뜻이 3~5배 달라진다. */}
@@ -726,8 +726,8 @@ export default function Scan() {
                 <tbody>
                   {reportNutrition.rows.map((r) => (
                     <tr key={r.key} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                      <td style={{ padding: '6px 0', color: 'var(--text-secondary)' }}>{r.label}</td>
-                      <td style={{ padding: '6px 0', textAlign: 'right', fontWeight: 600 }}>
+                      <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{r.label}</td>
+                      <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>
                         {Math.round(r.value * 10) / 10} {r.unit}
                       </td>
                     </tr>
@@ -737,12 +737,12 @@ export default function Scan() {
 
               {/* 신호등 — 판정된 항목만 온다(회색은 `lights` 에 들어오지 않는다). */}
               {reportNutrition.showLights && (
-                <div style={{ marginTop: 10 }} data-testid="report-traffic-light">
+                <div style={{ marginTop: 'var(--space-2)' }} data-testid="report-traffic-light">
                   <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
                     {reportNutrition.lights.map((l) => (
                       <span key={l.key} style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13,
-                        padding: '5px 11px', borderRadius: 'var(--radius-pill)',
+                        display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 13,
+                        padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)',
                         background: `${LIGHT_HEX[l.color]}1a`, color: 'var(--text)',
                       }}>
                         <span style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_HEX[l.color] }} />
@@ -761,7 +761,7 @@ export default function Scan() {
 
           {/* 신호등을 «못» 그린 이유. ⚠ 조건을 색 목록으로 걸지 않는다 — 침묵이 돌아온다. */}
           {reportNutrition.note && (
-            <p data-testid="report-nutrition-note" style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 10, lineHeight: 1.6 }}>
+            <p data-testid="report-nutrition-note" style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
               {reportNutrition.note}
             </p>
           )}
@@ -785,8 +785,8 @@ export default function Scan() {
             법정 알레르기 표기가 영양성분표 «옆»에 인쇄된 제품이 흔해서
             라벨 한 장만 보내면 경고를 놓친다(서버 세션44 치명B 실측). */}
         {/* 입력은 숨기고 label 을 버튼처럼 쓴다 — Meal.tsx 와 같은 패턴. */}
-        <div style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+        <div style={{ marginBottom: 'var(--space-2)' }}>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
             ① 원재료 · 알레르기 표기 {labelImage && <span style={{ color: 'var(--accent)' }}>✓ 선택됨</span>}
           </div>
           <label className={labelImage ? 'btn btn-secondary' : 'btn btn-primary'}
@@ -800,7 +800,7 @@ export default function Scan() {
         </div>
 
         <div style={{ marginBottom: 'var(--space-3)' }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
             ② 영양성분표 {nutritionImage && <span style={{ color: 'var(--accent)' }}>✓ 선택됨</span>}
           </div>
           <label className={nutritionImage ? 'btn btn-secondary' : 'btn btn-primary'}
@@ -819,7 +819,7 @@ export default function Scan() {
           <div style={{ border: '1px solid var(--border-light)', borderRadius: 10, padding: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 'var(--space-2)' }}>사진에서 읽어낸 내용</div>
 
-            <label htmlFor="report-product-name" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 6 }}>
+            <label htmlFor="report-product-name" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
               제품명 <span style={{ color: '#ef4444' }}>(필수)</span>
             </label>
             <input
@@ -830,7 +830,7 @@ export default function Scan() {
               autoComplete="off"
               onChange={(e) => { setProductName(e.target.value); setReportError(null) }}
               style={{
-                width: '100%', padding: '10px var(--space-3)', fontSize: 15, borderRadius: 'var(--radius-sm)',
+                width: '100%', padding: 'var(--space-2) var(--space-3)', fontSize: 15, borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-light)', background: 'var(--bg)', color: 'var(--text)',
               }}
             />
@@ -838,11 +838,11 @@ export default function Scan() {
                 실측상 라벨의 40.3% 는 제품명이 인쇄돼 있지도 않다 — 상시 경로다.
                 ★ 등록된 제품이면 여기 문구가 「이미 등록된 제품명이에요」로 갈린다
                   (판정은 photoReport.ts:seedProductNameForExisting). */}
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, lineHeight: 1.5 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
               {nameSeed.notice}
             </p>
 
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 10, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
               {describeReadback(analysis)}
               {analysis.nutritionCount === 0 && ' — 영양성분표가 흐릿하면 다시 찍어 주시면 더 정확해져요.'}
             </p>
@@ -851,20 +851,20 @@ export default function Scan() {
         )}
 
         {reportError && (
-          <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 10 }}>{reportError}</p>
+          <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 'var(--space-2)' }}>{reportError}</p>
         )}
 
         {/* ★★★ 흐름 «도중»의 401. 폼이 열린 뒤 세션이 끊긴 경우다.
             ⚠ 여기서 자동으로 로그인 화면으로 «옮기지 않는다» — 옮기는 순간 방금 고른 사진이
               말없이 사라진다. 사실을 먼저 말하고, 이동은 사용자가 «누를» 때만 한다. */}
         {authBlocked && (
-          <div data-testid="report-auth-blocked" style={{ marginBottom: 10 }}>
+          <div data-testid="report-auth-blocked" style={{ marginBottom: 'var(--space-2)' }}>
             <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 'var(--space-2)' }}>
               {AUTH_PHOTO_LOST_NOTICE}
             </p>
             <button
               type="button" className="btn btn-primary"
-              style={{ width: 'auto', padding: '9px 15px' }}
+              style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
               onClick={() => goLoginForReport('report_auth_expired')}
             >{AUTH_RELOGIN_CTA}</button>
           </div>
@@ -872,7 +872,7 @@ export default function Scan() {
 
         {/* 왜 못 보내는지를 «누르기 전에» 말한다. 버튼만 막고 침묵하면 고장 난 줄 안다. */}
         {analysis && !submitGate.ok && submitGate.reason && !reportError && (
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 10 }}>{submitGate.reason}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 'var(--space-2)' }}>{submitGate.reason}</p>
         )}
 
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -922,7 +922,7 @@ export default function Scan() {
       <div className="survey-container fade-in">
         <div className="survey-card">
           <h2 className="survey-step-title" style={{ fontSize: 16 }}>바코드를 화면 안에 맞춰주세요</h2>
-          <div style={{ position: 'relative', borderRadius: 'var(--radius)', overflow: 'hidden', background: '#000', aspectRatio: '3 / 4', marginBottom: 14 }}>
+          <div style={{ position: 'relative', borderRadius: 'var(--radius)', overflow: 'hidden', background: '#000', aspectRatio: '3 / 4', marginBottom: 'var(--space-3)' }}>
             <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
               <div style={{ width: '78%', height: '32%', border: '3px solid rgba(255,255,255,0.9)', borderRadius: 'var(--radius)' }} />
@@ -938,13 +938,13 @@ export default function Scan() {
     <div className="survey-container fade-in">
       <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
         <h2 className="survey-step-title">내가 먹는 가공식품, 10초 해석</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)', lineHeight: 1.6 }}>
           제품 바코드를 카메라로 스캔하면 성분·첨가물·영양을 바로 보여드려요.
         </p>
         <button type="button" className="btn btn-primary" style={{ width: '100%', marginBottom: 'var(--space-3)' }} onClick={startScan} disabled={loading}>
           📷 바코드 스캔하기
         </button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: 'var(--space-1) 0 var(--space-3)', color: 'var(--text-muted)', fontSize: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', margin: 'var(--space-1) 0 var(--space-3)', color: 'var(--text-muted)', fontSize: 12 }}>
           <span style={{ flex: 1, height: 1, background: 'var(--border)' }} /> 또는 이름으로 검색 <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
         <form onSubmit={onSubmit} style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -984,7 +984,7 @@ export default function Scan() {
           {signedIn === false && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap',
-              padding: 'var(--space-2) 10px', marginBottom: 10, borderRadius: 'var(--radius-sm)',
+              padding: 'var(--space-2) var(--space-2)', marginBottom: 'var(--space-2)', borderRadius: 'var(--radius-sm)',
               background: 'var(--border-light)', fontSize: 12, lineHeight: 1.5,
               color: 'var(--text-secondary)',
             }}>
@@ -992,18 +992,18 @@ export default function Scan() {
                 이 이력은 지금 <strong>이 기기에만</strong> 저장돼 있어요.
                 로그인하면 그대로 옮겨져 기기를 바꿔도 유지됩니다.
               </span>
-              <button type="button" className="btn btn-secondary" style={{ fontSize: 12, padding: 'var(--space-1) 10px' }}
+              <button type="button" className="btn btn-secondary" style={{ fontSize: 12, padding: 'var(--space-1) var(--space-2)' }}
                 onClick={() => { track('scan_login_cta_click', { local_n: history.length }); navigate('/login') }}>
                 로그인
               </button>
             </div>
           )}
           <WeekBars weeks={summary.weeks} />
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 'var(--space-3)' }}>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginTop: 'var(--space-3)' }}>
             {history.slice(0, 5).map((r) => (
-              <li key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <li key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                 <button type="button" className="btn btn-secondary"
-                  style={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10 }}
+                  style={{ flex: 1, minWidth: 0, justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
                   onClick={() => lookupBarcode(r.barcode)}>
                   {r.image_url
                     ? <img src={r.image_url} alt="" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
@@ -1055,11 +1055,11 @@ export default function Scan() {
           {searchResults.length === 0 ? (
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>일치하는 제품이 없어요. 바코드 스캔으로 시도해 보세요.</p>
           ) : (
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
               {searchResults.map((it) => (
                 <li key={it.product_id}>
                   <button type="button" className="btn btn-secondary"
-                    style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10 }}
+                    style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
                     disabled={!it.barcode} onClick={() => it.barcode && lookupBarcode(it.barcode, 'search')}>
                     {it.image_url
                       ? <img src={it.image_url} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
@@ -1119,7 +1119,7 @@ export default function Scan() {
                 <>
                   {SHOW_RISK_GRADE ? (
                     <>
-                      <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: '2px 0 var(--space-3)', lineHeight: 1.6 }}>
+                      <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-3)', lineHeight: 1.6 }}>
                         첨가물 안전성을 4색으로 나타내요 (먹선 위해성 평가 기준).{' '}
                         <strong style={{ color: COLOR_HEX.green }}>초록 안전</strong> → 노랑 허용 → 주황 주의 → <strong style={{ color: COLOR_HEX.red }}>빨강 위해</strong>.
                       </p>
@@ -1129,7 +1129,7 @@ export default function Scan() {
                         {PILL_COLORS.map((c) => {
                           const n = additiveView.counts[c]
                           return (
-                            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: n ? `${COLOR_HEX[c]}1a` : 'var(--border-light)', color: n ? 'var(--text)' : 'var(--text-muted)' }}>
+                            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 13, padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)', background: n ? `${COLOR_HEX[c]}1a` : 'var(--border-light)', color: n ? 'var(--text)' : 'var(--text-muted)' }}>
                               <span style={{ width: 9, height: 9, borderRadius: '50%', background: COLOR_HEX[c] }} />
                               {COLOR_LABEL[c]} <strong>{n}</strong>
                             </span>
@@ -1137,7 +1137,7 @@ export default function Scan() {
                         })}
                         {/* 등급 미상은 0 이면 아예 띄우지 않는다(평소엔 소음). 있으면 «반드시» 띄운다. */}
                         {additiveView.counts.unknown > 0 && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '5px 11px', borderRadius: 'var(--radius-pill)', background: `${COLOR_HEX.unknown}1a`, color: 'var(--text)' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 13, padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)', background: `${COLOR_HEX.unknown}1a`, color: 'var(--text)' }}>
                             <span style={{ width: 9, height: 9, borderRadius: '50%', background: COLOR_HEX.unknown }} />
                             {COLOR_LABEL.unknown} <strong>{additiveView.counts.unknown}</strong>
                           </span>
@@ -1148,7 +1148,7 @@ export default function Scan() {
                     /* ★ 섹션 헤더에 «한 번만». 행마다 붙이면 그 자체가 경고가 된다.
                        ⚠ 「이 앱을 믿지 마세요」로 읽히면 실패다 — 어디까지 사실을 말할 수 있고
                           어디부터 아직 판단하지 않는지 «경계»를 보여주는 문장이다. */
-                    <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: '2px 0 var(--space-3)', lineHeight: 1.6 }}>
+                    <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-3)', lineHeight: 1.6 }}>
                       {GRADE_HIDDEN_NOTICE}
                     </p>
                   )}
@@ -1173,15 +1173,15 @@ export default function Scan() {
                     if (v === null || v === undefined || typeof v !== 'number') return null
                     return (
                       <tr key={key} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                        <td style={{ padding: '7px 0', color: 'var(--text-secondary)' }}>{label}</td>
-                        <td style={{ padding: '7px 0', textAlign: 'right', fontWeight: 600 }}>{Math.round(v * 10) / 10} {unit}</td>
+                        <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{label}</td>
+                        <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>{Math.round(v * 10) / 10} {unit}</td>
                       </tr>
                     )
                   })}
                 </tbody>
               </table>
               {result.nutrition.source_license && /odbl/i.test(result.nutrition.source_license) && (
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 10 }}>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
                   일부 정보는 Open Food Facts(ODbL) 오픈DB 참고 자료입니다.
                 </p>
               )}
@@ -1216,7 +1216,7 @@ export default function Scan() {
                     {completeness.gaps.map((g) => (
                       <button
                         key={g.kind} type="button" className="btn btn-primary"
-                        style={{ width: 'auto', padding: '10px var(--space-4)' }}
+                        style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
                         onClick={() => {
                           // ⚠ 새 이벤트 이름을 만들지 않는다 — `ALL_APP_EVENTS` 는 DB CHECK 와 1:1 이다.
                           //   `source` 는 화이트리스트에 있는 기존 키다(events_core.ts).
@@ -1238,12 +1238,12 @@ export default function Scan() {
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>내 기준으로 보기</h3>
               {personal.warnings.length > 0 ? (
                 <>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
                     내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)
                   </p>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                     {personal.warnings.map((f) => (
-                      <li key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14 }}>
+                      <li key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 14 }}>
                         <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: f.color === 'red' ? 'var(--danger)' : 'var(--warning)' }} />
                         <span><strong>{f.label}</strong> — {f.reason}이라 주의해서 보세요. <span style={{ color: 'var(--text-muted)' }}>(먹선 신호등: {f.color === 'red' ? '빨강' : '노랑'})</span></span>
                       </li>
@@ -1263,18 +1263,18 @@ export default function Scan() {
                 <p>· 나에게 중요한 항목 A</p>
                 <p>· 나에게 중요한 항목 B</p>
               </div>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, background: 'rgba(255,255,255,0.55)', padding: 'var(--space-4)', textAlign: 'center' }}>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)', background: 'rgba(255,255,255,0.55)', padding: 'var(--space-4)', textAlign: 'center' }}>
                 <p style={{ fontSize: 13, color: 'var(--text-secondary)', maxWidth: 280 }}>
                   설문을 연결하면 이 제품에서 <strong>나에게 중요한 항목</strong>만 골라 표시해드려요.
                 </p>
-                <button type="button" className="btn btn-primary" style={{ width: 'auto', padding: '10px 18px' }} onClick={() => { track('scan_survey_cta_click'); navigate('/survey') }}>
+                <button type="button" className="btn btn-primary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }} onClick={() => { track('scan_survey_cta_click'); navigate('/survey') }}>
                   30초 설문하고 내 기준으로 보기
                 </button>
               </div>
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onShare}>공유</button>
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setQuery(''); reset(); refreshHistory() }}>다른 제품 조회</button>
           </div>
@@ -1289,7 +1289,7 @@ export default function Scan() {
                 type="button"
                 onClick={() => openReportForm('gap_none')}
                 style={{
-                  background: 'none', border: 'none', padding: '10px 0 0', cursor: 'pointer',
+                  background: 'none', border: 'none', padding: 'var(--space-2) 0 0', cursor: 'pointer',
                   fontSize: 'var(--font-sm)', color: 'var(--text-muted)', textDecoration: 'underline',
                   display: 'block', margin: '0 auto',
                 }}

@@ -59,7 +59,7 @@ export default function Blog() {
 
       <section className="content-section">
         {loading && (
-          <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: 'var(--space-12)', color: 'var(--text-muted)' }}>
             <div style={{ fontSize: 32, marginBottom: 'var(--space-3)' }}>📚</div>
             <p>블로그 글을 불러오는 중...</p>
           </div>
@@ -115,7 +115,7 @@ export default function Blog() {
             </div>
 
             {filtered.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 40 }}>
+              <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 'var(--space-8)' }}>
                 {posts.length === 0 ? '아직 발행된 글이 없습니다.' : '해당 카테고리의 글이 없습니다.'}
               </p>
             )}

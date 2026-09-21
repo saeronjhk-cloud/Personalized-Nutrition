@@ -39,15 +39,15 @@ export default function ConsentGate({ onAccept, onDecline }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 'var(--space-4)' }}>
           가족력은 본인의 건강관리 참고 범위에서만 입력해 주세요. 가족 구성원의 이름·연락처·생년월일 등 식별정보는 입력하지 마세요.
         </p>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreePI} onChange={(e) => setAgreePI(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={agreePI} onChange={(e) => setAgreePI(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[필수] <strong>개인정보</strong> 수집·이용에 동의합니다. (성별·연령·신장·체중·생활습관 등 설문 입력 정보 및 추천 결과)</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[필수] <strong>민감정보(건강에 관한 정보)</strong> 수집·이용에 동의합니다. (증상·기저질환·가족력·건강 목표) 거부 시 설문 기능 이용이 제한되며, 회원가입 및 다른 기능은 이용할 수 있습니다.</span>
         </label>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <button type="button" className="btn btn-primary" disabled={!canProceed} onClick={handleAccept}>
             동의하고 설문 시작
           </button>

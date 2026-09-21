@@ -102,12 +102,12 @@ export default function HealthReport() {
   const costAfter = after.result.monthly_summary.cost_min
 
   return (
-    <div className="page fade-in" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-5) var(--space-4) 40px' }}>
+    <div className="page fade-in" style={{ maxWidth: 'var(--max-width)', margin: '0 auto', padding: 'var(--space-5) var(--space-4) var(--space-8)' }}>
 
       {/* 헤더 */}
       <div style={{
         textAlign: 'center',
-        marginBottom: 28,
+        marginBottom: 'var(--space-6)',
         padding: 'var(--space-6) var(--space-4)',
         background: 'linear-gradient(135deg, var(--primary-light) 0%, #f0fdf4 100%)',
         borderRadius: 'var(--radius)',
@@ -131,7 +131,7 @@ export default function HealthReport() {
             <select
               value={beforeIdx}
               onChange={e => setBeforeIdx(Number(e.target.value))}
-              style={{ width: '100%', padding: '6px var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+              style={{ width: '100%', padding: 'var(--space-2) var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
                 <option key={r.id} value={i} disabled={i === afterIdx}>
@@ -145,7 +145,7 @@ export default function HealthReport() {
             <select
               value={afterIdx}
               onChange={e => setAfterIdx(Number(e.target.value))}
-              style={{ width: '100%', padding: '6px var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
+              style={{ width: '100%', padding: 'var(--space-2) var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
                 <option key={r.id} value={i} disabled={i === beforeIdx}>
@@ -175,7 +175,7 @@ export default function HealthReport() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)', textAlign: 'center' }}>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>건강 유형</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>건강 유형</div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>
               {before.result.persona.emoji} → {after.result.persona.emoji}
             </div>
@@ -185,7 +185,7 @@ export default function HealthReport() {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>필요 영양제</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>필요 영양제</div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>
               {before.result.recommendations.length}종 → {after.result.recommendations.length}종
             </div>
@@ -198,7 +198,7 @@ export default function HealthReport() {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>월 비용</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>월 비용</div>
             <div style={{ fontSize: 13, fontWeight: 600 }}>
               {costAfter < costBefore ? '↓' : costAfter > costBefore ? '↑' : '='}
             </div>
@@ -222,7 +222,7 @@ export default function HealthReport() {
         }}>
           {comparisons.filter(c => c.before > 0 || c.after > 0).map((c, i) => (
             <div key={c.category} style={{
-              padding: '14px var(--space-4)',
+              padding: 'var(--space-3) var(--space-4)',
               borderBottom: i < comparisons.length - 1 ? '1px solid var(--border-light)' : 'none',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-2)' }}>
@@ -262,7 +262,7 @@ export default function HealthReport() {
             </div>
           ))}
         </div>
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6, textAlign: 'center' }}>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 'var(--space-2)', textAlign: 'center' }}>
           * 필요도 점수가 낮을수록 해당 영역의 건강 상태가 양호합니다
         </p>
       </div>
@@ -281,16 +281,16 @@ export default function HealthReport() {
           }}>
             {resolvedSymptoms.length > 0 && (
               <div style={{ marginBottom: newSymptoms.length > 0 ? 12 : 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', marginBottom: 'var(--space-2)' }}>
                   ✅ 개선된 증상
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                   {resolvedSymptoms.map(s => (
                     <span key={s} style={{
                       background: 'var(--success-bg)',
                       color: '#065f46',
                       fontSize: 12,
-                      padding: 'var(--space-1) 10px',
+                      padding: 'var(--space-1) var(--space-2)',
                       borderRadius: 20,
                     }}>{s}</span>
                   ))}
@@ -299,16 +299,16 @@ export default function HealthReport() {
             )}
             {newSymptoms.length > 0 && (
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning)', marginBottom: 'var(--space-2)' }}>
                   ⚠️ 새로 나타난 증상
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                   {newSymptoms.map(s => (
                     <span key={s} style={{
                       background: 'var(--warning-bg)',
                       color: '#92400e',
                       fontSize: 12,
-                      padding: 'var(--space-1) 10px',
+                      padding: 'var(--space-1) var(--space-2)',
                       borderRadius: 20,
                     }}>{s}</span>
                   ))}
@@ -332,16 +332,16 @@ export default function HealthReport() {
         }}>
           {removedSupps.length > 0 && (
             <div style={{ marginBottom: 'var(--space-3)' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', marginBottom: 'var(--space-2)' }}>
                 더 이상 필요 없는 영양제
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                 {removedSupps.map(s => (
                   <span key={s} style={{
                     background: 'var(--success-bg)',
                     color: '#065f46',
                     fontSize: 12,
-                    padding: 'var(--space-1) 10px',
+                    padding: 'var(--space-1) var(--space-2)',
                     borderRadius: 20,
                     textDecoration: 'line-through',
                   }}>{s}</span>
@@ -351,16 +351,16 @@ export default function HealthReport() {
           )}
           {addedSupps.length > 0 && (
             <div style={{ marginBottom: 'var(--space-3)' }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning)', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--warning)', marginBottom: 'var(--space-2)' }}>
                 새롭게 추천된 영양제
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                 {addedSupps.map(s => (
                   <span key={s} style={{
                     background: 'var(--warning-bg)',
                     color: '#92400e',
                     fontSize: 12,
-                    padding: 'var(--space-1) 10px',
+                    padding: 'var(--space-1) var(--space-2)',
                     borderRadius: 20,
                   }}>{s}</span>
                 ))}
@@ -369,16 +369,16 @@ export default function HealthReport() {
           )}
           {keptSupps.length > 0 && (
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--space-2)' }}>
                 계속 복용 권장
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                 {keptSupps.map(s => (
                   <span key={s} style={{
                     background: 'var(--border-light)',
                     color: 'var(--text)',
                     fontSize: 12,
-                    padding: 'var(--space-1) 10px',
+                    padding: 'var(--space-1) var(--space-2)',
                     borderRadius: 20,
                   }}>{s}</span>
                 ))}
@@ -414,7 +414,7 @@ export default function HealthReport() {
               <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
                 {before.answers.체중}kg → {after.answers.체중}kg
               </div>
-              <div style={{ fontSize: 12, color: after.answers.체중 < before.answers.체중 ? 'var(--success)' : 'var(--text-secondary)', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: after.answers.체중 < before.answers.체중 ? 'var(--success)' : 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
                 {after.answers.체중 - before.answers.체중 > 0 ? '+' : ''}{(after.answers.체중 - before.answers.체중).toFixed(1)}kg
               </div>
             </div>
@@ -423,7 +423,7 @@ export default function HealthReport() {
               <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
                 {before.result.nutrition_info.bmi.value} → {after.result.nutrition_info.bmi.value}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
                 {after.result.nutrition_info.bmi.label}
               </div>
             </div>
@@ -432,12 +432,12 @@ export default function HealthReport() {
       )}
 
       {/* CTA */}
-      <div style={{ textAlign: 'center', marginTop: 28 }}>
+      <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
         <Link to="/survey" style={{
           display: 'inline-block',
           background: 'var(--primary)',
           color: '#fff',
-          padding: '14px var(--space-8)',
+          padding: 'var(--space-3) var(--space-8)',
           borderRadius: 'var(--radius-sm)',
           textDecoration: 'none',
           fontWeight: 600,
@@ -445,7 +445,7 @@ export default function HealthReport() {
         }}>
           🔄 다시 분석하기
         </Link>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 10 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
           정기적으로 분석하면 건강 변화를 더 정확히 추적할 수 있어요
         </p>
       </div>

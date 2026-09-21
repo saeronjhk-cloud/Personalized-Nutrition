@@ -33,11 +33,11 @@ export default function CheckupConsentGate({ onAccept, onDecline }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 'var(--space-4)' }}>
           타인의 건강검진 결과지를 본인 동의 없이 입력하지 마세요. 검진 수치는 본인의 결과지를 기준으로 입력해 주세요.
         </p>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[검진 해석 기능 이용 시 필수] 건강검진 민감정보의 수집·이용에 동의합니다. 거부 시 검진 해석 기능 이용이 제한되며, 회원가입 및 다른 기능은 이용할 수 있습니다.</span>
         </label>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <button type="button" className="btn btn-primary" disabled={!checked} onClick={onAccept}>
             동의하고 검진 입력 시작
           </button>

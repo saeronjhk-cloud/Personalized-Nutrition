@@ -323,7 +323,7 @@ export default function BiomarkerForm() {
         className="card"
         style={{
           textAlign: "center",
-          padding: "28px var(--space-6)",
+          padding: "var(--space-6)",
           background: "rgba(142, 202, 230, 0.08)",
           border: "1px solid rgba(142, 202, 230, 0.25)",
         }}
@@ -470,7 +470,7 @@ export default function BiomarkerForm() {
                   )}
                 </label>
                 {rule.note && (
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>{rule.note}</p>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>{rule.note}</p>
                 )}
                 <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
                   <input
@@ -564,8 +564,8 @@ export default function BiomarkerForm() {
                   </p>
                   {topNeeds.length > 0 && (
                     <div style={{ marginBottom: 'var(--space-4)' }}>
-                      <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 600 }}>이번 관심 카테고리 TOP 3</p>
-                      <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, color: "var(--text-secondary)" }}>
+                      <p style={{ margin: "0 0 var(--space-2)", fontSize: 13, fontWeight: 600 }}>이번 관심 카테고리 TOP 3</p>
+                      <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', fontSize: 14, color: "var(--text-secondary)" }}>
                         {topNeeds.map((need) => (
                           <li key={need}>{need}</li>
                         ))}

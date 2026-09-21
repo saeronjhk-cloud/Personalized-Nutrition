@@ -54,7 +54,7 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
     <div className="survey-container fade-in">
       <div className="survey-card">
         <h2 className="survey-step-title">식사 사진 분석 동의</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 14 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-3)' }}>
           식사 사진 기록은 사진 속 음식을 인식해 칼로리·영양을 추정하고 내 건강 기록에 쌓아드리는 기능입니다.
           이를 위해 촬영·선택한 <strong>식사 사진</strong>과 그로부터 추정된 <strong>음식·칼로리·영양 정보(건강에 관한 정보)</strong>를
           수집·이용하며, 분석을 위해 <strong>음식 영역으로 최소화한 이미지</strong>가 <strong>국외(미국)의 엔진·AI 처리자(OpenAI 등)</strong>에게 전송·처리됩니다.
@@ -68,8 +68,8 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 'var(--space-4)' }}>
           사진에 얼굴·타인·주소 등 식별정보가 담기지 않도록 음식 위주로 촬영해 주세요.
         </p>
-        <div style={{ background: 'rgba(142, 202, 230, 0.10)', border: '1px solid rgba(142, 202, 230, 0.30)', borderRadius: 10, padding: 'var(--space-3) 14px', marginBottom: 'var(--space-4)', fontSize: 'var(--font-sm)', lineHeight: 1.7, color: 'var(--text)' }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>동의 전 안내 (법정 고지사항)</div>
+        <div style={{ background: 'rgba(142, 202, 230, 0.10)', border: '1px solid rgba(142, 202, 230, 0.30)', borderRadius: 10, padding: 'var(--space-3) var(--space-3)', marginBottom: 'var(--space-4)', fontSize: 'var(--font-sm)', lineHeight: 1.7, color: 'var(--text)' }}>
+          <div style={{ fontWeight: 700, marginBottom: 'var(--space-2)' }}>동의 전 안내 (법정 고지사항)</div>
           <div style={{ marginBottom: 'var(--space-2)' }}>
             <strong>[민감정보(건강에 관한 정보)]</strong><br />
             · 수집·이용 목적: 식사 사진 분석, 음식·섭취량·열량·영양소 추정, 식사기록 및 개인화된 식생활 안내 제공<br />
@@ -89,16 +89,16 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
             자세한 내용은{' '}<Link to="/privacy" style={{ color: '#2563eb', textDecoration: 'underline' }}>개인정보처리방침 제4조</Link>를 확인하세요.
           </div>
         </div>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[필수] 위에 안내된 목적·항목·보유기간·거부효과를 확인하였으며, <strong>민감정보(건강에 관한 정보)</strong> 수집·이용에 동의합니다. (식사 사진 및 그로부터 추정된 음식·칼로리·영양 정보)</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreeIntl} onChange={(e) => setAgreeIntl(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={agreeIntl} onChange={(e) => setAgreeIntl(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[필수] 위에 안내된 <strong>Railway 및 OpenAI(미국)로의 개인정보 국외이전</strong>에 동의합니다. 거부 시 식사 사진 분석 이용이 제한되며, 계정 및 다른 기능은 계속 이용할 수 있습니다.</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={confirmAge} onChange={(e) => setConfirmAge(e.target.checked)} style={{ marginTop: 3 }} />
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
+          <input type="checkbox" checked={confirmAge} onChange={(e) => setConfirmAge(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
           <span>[필수] 저는 <strong>만 14세 이상</strong>입니다. (만 14세 미만은 식사 사진 분석을 이용할 수 없습니다.)</span>
         </label>
         {/* ★ 2026-08-28: 저장 실패를 «보이게» 한다. 예전에는 조용히 통과시켜서
@@ -108,7 +108,7 @@ export default function MealConsentGate({ onAccept, onDecline }: Props) {
             {saveError}
           </p>
         )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <button type="button" className="btn btn-primary" disabled={!canProceed} onClick={handleAccept}>
             {saving ? '저장 중...' : '동의하고 시작'}
           </button>

@@ -230,7 +230,7 @@ export default function EditCheckup() {
                       )}
                     </label>
                     {rule.note && (
-                      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>
                         {rule.note}
                       </p>
                     )}

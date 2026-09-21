@@ -168,7 +168,7 @@ export default function Results({
           background: 'linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%)',
           border: '1px solid #c6f6d5',
           borderRadius: 16,
-          padding: '28px var(--space-6)',
+          padding: 'var(--space-6)',
           textAlign: 'center',
           margin: 'var(--space-3) 0',
         }}>

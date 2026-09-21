@@ -2,7 +2,7 @@ import { MEAL_ENABLED } from '../lib/flags'
 
 export default function Privacy() {
   return (
-    <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 60 }}>
+    <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-12)' }}>
       <h1 className="section-title" style={{ marginBottom: 'var(--space-6)' }}>개인정보처리방침</h1>
 
       <div className="card" style={{ lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>
@@ -78,7 +78,7 @@ export default function Privacy() {
             background: 'rgba(142, 202, 230, 0.10)',
             border: '1px solid rgba(142, 202, 230, 0.30)',
             borderRadius: 10,
-            padding: '14px var(--space-4)',
+            padding: 'var(--space-3) var(--space-4)',
             marginBottom: 'var(--space-6)',
             color: 'var(--text)',
             fontSize: 13,

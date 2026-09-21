@@ -195,7 +195,7 @@ export default function Meal() {
     return (
       <div className="survey-container fade-in"><div className="survey-card">
         <h2 className="survey-step-title">사진으로 식사 기록</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 14 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-3)' }}>
           식사 사진을 찍으면 칼로리·영양을 분석해 내 건강 그래프에 쌓아드려요. 기록을 저장하려면 로그인이 필요해요.
         </p>
         <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate('/login')}>
@@ -221,7 +221,7 @@ export default function Meal() {
   return (
     <div className="survey-container fade-in">
       {toast && (
-        <div className="survey-card" style={{ marginBottom: 'var(--space-3)', background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: '10px 14px' }}>
+        <div className="survey-card" style={{ marginBottom: 'var(--space-3)', background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: 'var(--space-2) var(--space-3)' }}>
           {toast}
         </div>
       )}
@@ -229,14 +229,14 @@ export default function Meal() {
       {closed && !result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 종료됨 · {closed.plateCount}개 접시 · 합계 {closed.kcal} kcal</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 10px' }}>정찬 전체에서 남긴 양이 있으면 반영해 실제 섭취로 기록해요.</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-2)' }}>정찬 전체에서 남긴 양이 있으면 반영해 실제 섭취로 기록해요.</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
             <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{closedRatio}%</strong>
           </div>
           <input type="range" min={0} max={100} step={5} value={closedRatio}
             onChange={(e) => setClosedRatio(Number(e.target.value))} style={{ width: '100%' }} aria-label="정찬 전체 먹은 양" />
           {closedResultKcal != null && (
-            <div style={{ fontSize: 13, color: 'var(--text)', margin: '6px 0' }}>✅ 실제 섭취 약 {closedResultKcal} kcal로 반영됐어요.</div>
+            <div style={{ fontSize: 13, color: 'var(--text)', margin: 'var(--space-2) 0' }}>✅ 실제 섭취 약 {closedResultKcal} kcal로 반영됐어요.</div>
           )}
           {closedErr && <div style={{ fontSize: 12, color: 'var(--danger)' }}>{closedErr}</div>}
           <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
@@ -249,10 +249,10 @@ export default function Meal() {
       {!result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           {session ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 {sessionBadgeText(session.plate_count, session.total_calories_kcal)}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>사진을 계속 찍으면 이 정찬에 접시가 쌓여요.</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>사진을 계속 찍으면 이 정찬에 접시가 쌓여요.</div>
               </div>
               <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
                 <button type="button" className="btn btn-secondary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', fontSize: 13 }} onClick={startSession}>새 정찬</button>
@@ -260,12 +260,12 @@ export default function Meal() {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍱 정찬 모드</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>한 끼에 여러 접시를 한 세션으로 묶어 기록해요.</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>한 끼에 여러 접시를 한 세션으로 묶어 기록해요.</div>
               </div>
-              <button type="button" className="btn btn-primary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) 14px', flexShrink: 0 }} onClick={startSession}>정찬 시작</button>
+              <button type="button" className="btn btn-primary" disabled={sessionBusy} style={{ width: 'auto', padding: 'var(--space-2) var(--space-3)', flexShrink: 0 }} onClick={startSession}>정찬 시작</button>
             </div>
           )}
         </div>
@@ -274,22 +274,22 @@ export default function Meal() {
       {!result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           <h2 className="survey-step-title">사진으로 식사 기록</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)', lineHeight: 1.6 }}>
             먹은 음식을 찍으면 칼로리·영양을 추정해 드려요. (사진 기준 추정치예요.)
           </p>
 
           {previewUrl && (
-            <img src={previewUrl} alt="선택한 식사 사진" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 14 }} />
+            <img src={previewUrl} alt="선택한 식사 사진" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 'var(--space-3)' }} />
           )}
 
           {busy || waiting ? (
-            <div style={{ textAlign: 'center', padding: '18px 0' }}>
+            <div style={{ textAlign: 'center', padding: 'var(--space-4) 0' }}>
               <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                 {waiting ? '분석 중이에요… (조금 걸릴 수 있어요)' : '사진은 준비하고 있어요…'}
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
               <label className="btn btn-primary" style={{ flex: 1, textAlign: 'center', cursor: 'pointer' }}>
                 📷 촬영
                 <input type="file" accept="image/*" capture="environment" onChange={onPick} style={{ display: 'none' }} />

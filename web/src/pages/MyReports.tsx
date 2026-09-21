@@ -96,7 +96,7 @@ export default function MyReports() {
               {CONTRIBUTIONS_LOGIN_REQUIRED}
             </p>
             <button
-              type="button" className="btn btn-primary" style={{ width: 'auto', padding: '10px 18px' }}
+              type="button" className="btn btn-primary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
               onClick={() => navigate(loginPathWithReturn('/scan/reports'))}
             >{CONTRIBUTIONS_LOGIN_CTA}</button>
           </div>
@@ -109,7 +109,7 @@ export default function MyReports() {
               {CONTRIBUTIONS_LOAD_ERROR}
             </p>
             <button
-              type="button" className="btn btn-secondary" style={{ width: 'auto', padding: '10px 18px' }}
+              type="button" className="btn btn-secondary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
               onClick={load}
             >다시 시도</button>
           </div>
@@ -117,12 +117,12 @@ export default function MyReports() {
 
         {phase === 'ready' && items.length === 0 && (
           <div data-testid="reports-empty">
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 6 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-2)' }}>
               {CONTRIBUTIONS_EMPTY}
             </p>
-            <p style={{ ...MUTED, marginBottom: 14 }}>{CONTRIBUTIONS_EMPTY_HINT}</p>
+            <p style={{ ...MUTED, marginBottom: 'var(--space-3)' }}>{CONTRIBUTIONS_EMPTY_HINT}</p>
             <button
-              type="button" className="btn btn-primary" style={{ width: 'auto', padding: '10px 18px' }}
+              type="button" className="btn btn-primary" style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)' }}
               onClick={() => navigate('/scan')}
             >제품 스캔하러 가기</button>
           </div>
@@ -145,7 +145,7 @@ export default function MyReports() {
                     <div style={{ fontSize: 'var(--font-body)', fontWeight: 600, color: 'var(--text)' }}>
                       {describeContributionTitle(it)}
                     </div>
-                    <div style={{ ...MUTED, marginTop: 3 }}>
+                    <div style={{ ...MUTED, marginTop: 'var(--space-1)' }}>
                       {at ? `${at} · ` : ''}{status.label}
                       {nutrition ? ` · ${nutrition}` : ''}
                     </div>
@@ -160,12 +160,12 @@ export default function MyReports() {
                         onClick={() => navigate(`/scan?barcode=${encodeURIComponent(barcode)}`)}
                         style={{
                           width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-                          textAlign: 'left', padding: '10px var(--space-3)',
+                          textAlign: 'left', padding: 'var(--space-2) var(--space-3)',
                         }}
                       >{row}</button>
                     ) : (
                       // ⚠ 갈 곳이 없으면 «왜» 없는지 말한다. 눌러도 아무 일 없는 버튼을 두지 않는다.
-                      <div style={{ padding: '10px var(--space-3)' }}>
+                      <div style={{ padding: 'var(--space-2) var(--space-3)' }}>
                         {row}
                         <div style={{ ...MUTED, marginTop: 'var(--space-1)' }}>{CONTRIBUTION_NO_BARCODE_NOTE}</div>
                       </div>
@@ -175,7 +175,7 @@ export default function MyReports() {
               })}
             </ul>
 
-            <p style={{ ...MUTED, marginTop: 14 }}>{CONTRIBUTIONS_ACCOUNT_NOTICE}</p>
+            <p style={{ ...MUTED, marginTop: 'var(--space-3)' }}>{CONTRIBUTIONS_ACCOUNT_NOTICE}</p>
           </div>
         )}
       </div>

@@ -7,6 +7,11 @@
 사용:
   python scripts/space_tokenize.py            드라이런(파일별 건수만)
   python scripts/space_tokenize.py --apply    실제 치환
+
+4-b (픽셀이 «움직이는» 값 — 매핑규칙 §2 표) — 반드시 파일을 지정하고, 적용 후 눈으로 확인:
+  python scripts/space_tokenize.py --shift src/pages/Dashboard.tsx ...          드라이런
+  python scripts/space_tokenize.py --shift --apply src/pages/Dashboard.tsx ...  적용
+  2·3→4 / 6·7·10→8 / 14→12 / 18→16 / 28→24 / 36·40→32 / 60→48  (최대 2px, 40·60 은 8~12px)
 """
 import re, sys, pathlib
 
@@ -49,10 +54,20 @@ def process(text):
     text = RE_STR.sub(r_str, text)
     return text, n
 
+SHIFT = {2: 4, 3: 4, 6: 8, 7: 8, 10: 8, 14: 12, 18: 16, 28: 24, 36: 32, 40: 32, 60: 48}
+
 def main():
     apply = "--apply" in sys.argv
+    shift = "--shift" in sys.argv
+    files = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if shift:
+        if not files:
+            sys.exit("--shift 는 파일을 지정해야 합니다 (전체 일괄 금지 — 눈 확인 단위로)")
+        for k, v in SHIFT.items():
+            TOK[k] = TOK[v]          # 이동 값도 같은 토큰으로 흡수
     total = 0
-    for f in sorted(ROOT.rglob("*.tsx")):
+    targets = [pathlib.Path(f).resolve() for f in files] if files else sorted(ROOT.rglob("*.tsx"))
+    for f in targets:
         src = f.read_text(encoding="utf-8")
         out, n = process(src)
         if n:

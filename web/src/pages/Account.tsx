@@ -86,7 +86,7 @@ export default function Account() {
             <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 'var(--space-5)' }}>
               로그인 계정: <strong>{email}</strong>
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 'var(--space-6)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
               <button type="button" className="btn btn-secondary" onClick={handleLogout}>로그아웃</button>
             </div>
 

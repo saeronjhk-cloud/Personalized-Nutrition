@@ -1,6 +1,6 @@
 export default function Terms() {
   return (
-    <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 60 }}>
+    <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-12)' }}>
       <h1 className="section-title" style={{ marginBottom: 'var(--space-6)' }}>이용약관</h1>
 
       <div className="card" style={{ lineHeight: 1.8, fontSize: 14, color: 'var(--text-secondary)' }}>

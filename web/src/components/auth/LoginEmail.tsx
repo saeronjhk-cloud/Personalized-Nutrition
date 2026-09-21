@@ -214,7 +214,7 @@ export default function LoginEmail() {
             onClick={handleResend}
             disabled={status === "verifying"}
             style={{
-              width: "100%", marginTop: 10, background: "none", border: "none",
+              width: "100%", marginTop: 'var(--space-2)', background: "none", border: "none",
               color: "var(--text-secondary)", fontSize: 13, textDecoration: "underline",
               cursor: "pointer",
             }}
