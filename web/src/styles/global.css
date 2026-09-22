@@ -1510,7 +1510,9 @@ input[type="range"]::-webkit-slider-thumb {
   .nav-links.open { display: flex; }
 
   /* 홈페이지 반응형 */
-  .steps-grid { flex-direction: column; }
+  /* 세션54: 세로 배치에서는 align-items 가 «가로축»이 된다. 위의 flex-start 를 그대로 두면
+     카드가 내용 폭만큼만 차지해 01·02·03 폭이 들쭉날쭉해진다(제이 실기기 스크린샷). */
+  .steps-grid { flex-direction: column; align-items: stretch; }
   .step-arrow { display: none; }
   .diff-grid { grid-template-columns: 1fr; }
   .stats-inner { flex-wrap: wrap; gap: 16px; }
