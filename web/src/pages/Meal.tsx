@@ -10,6 +10,8 @@ import { applyAlternate } from '../lib/foodCorrection'
 import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
+import BetaFeedback from '../components/BetaFeedback'
+import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
   openMealSession, closeMealSession, getCurrentOpenSession,
@@ -46,6 +48,7 @@ export default function Meal() {
 
   const blobRef = useRef<Blob | null>(null)
   const shaRef = useRef<string | null>(null)
+  const jobIdRef = useRef<string | null>(null)   // 세션54 — 베타 피드백을 사진(analysis_job)과 잇는 키
   const mealIdRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -81,7 +84,7 @@ export default function Meal() {
     setError(null); setResult(null); setSaved(false); setWaiting(false)
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
-    blobRef.current = null; shaRef.current = null; mealIdRef.current = null
+    blobRef.current = null; shaRef.current = null; mealIdRef.current = null; jobIdRef.current = null
   }
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -101,6 +104,7 @@ export default function Meal() {
       setWaiting(false)
       if (state.status === 'done' && state.result) {
         shaRef.current = state.photo_sha256 ?? null
+        jobIdRef.current = state.jobId ?? null
         setResult(state.result)
         track('meal_analyze_success', { food_count: state.result.foods.length })
       } else {
@@ -220,6 +224,13 @@ export default function Meal() {
 
   return (
     <div className="survey-container fade-in">
+      {isBetaPanel() && !result && (
+        /* 세션54 — 패널 배너. /beta 에서 플래그를 켠 브라우저에서만 보인다. */
+        <div className="survey-card" style={{ marginBottom: 'var(--space-3)', borderColor: 'var(--primary)', padding: 'var(--space-2) var(--space-3)', fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)' }}>
+          🍚 <strong style={{ color: 'var(--text)' }}>사진 수집 패널</strong> · 밥·국이 보이는 한식 사진을 부탁드려요.
+          결과가 틀리면 「의견 보내기」로 알려 주세요. <Link to="/beta" className="text-link">안내 다시 보기</Link>
+        </div>
+      )}
       {toast && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-3)', background: 'rgba(142,202,230,0.10)', border: '1px solid rgba(142,202,230,0.30)', fontSize: 13, color: 'var(--text)', padding: 'var(--space-2) var(--space-3)' }}>
           {toast}
@@ -319,11 +330,15 @@ export default function Meal() {
       )}
 
       {result && (
-        <MealResult
-          result={result} previewUrl={previewUrl} slot={slot} onSlot={setSlot}
-          saved={saved} busy={busy} onSave={onSave} onReset={reset}
-          onCorrect={onCorrect}
-        />
+        <>
+          <MealResult
+            result={result} previewUrl={previewUrl} slot={slot} onSlot={setSlot}
+            saved={saved} busy={busy} onSave={onSave} onReset={reset}
+            onCorrect={onCorrect}
+          />
+          {/* 세션54 — 베타 패널 피드백. 저장 전후 무관하게 보인다(정정 칩은 저장 전에만). job_id 로 사진과 잇는다. */}
+          <BetaFeedback jobId={jobIdRef.current} foods={result.foods.map((f) => f.name_ko)} page="/meal" />
+        </>
       )}
     </div>
   )

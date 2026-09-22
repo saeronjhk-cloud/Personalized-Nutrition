@@ -34,6 +34,7 @@ import Scan from './pages/Scan'
 import MyReports from './pages/MyReports'
 import Meal from './pages/Meal'
 import WeeklyReport from './pages/WeeklyReport'
+import BetaLanding from './pages/BetaLanding'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
@@ -193,6 +194,10 @@ export default function App() {
           )}
           {MEAL_ENABLED && (
             <Route path="/weekly-report" element={<WeeklyReport />} />
+          )}
+          {MEAL_ENABLED && (
+            /* 사진 수집 베타 패널 입구 (세션54). 식사 기능이 꺼져 있으면 의미가 없으므로 같이 묶는다. */
+            <Route path="/beta" element={<BetaLanding />} />
           )}
           <Route path="/about" element={<About />} />
           <Route path="/team" element={<Team />} />
