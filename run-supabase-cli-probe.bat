@@ -2,15 +2,15 @@
 chcp 65001 > nul
 setlocal EnableExtensions
 REM ============================================================================
-REM  run-supabase-cli-probe.bat — Supabase CLI «TransportError» 원인 분리 (세션55)   $0
+REM  run-supabase-cli-probe.bat — Supabase CLI "TransportError" 원인 분리 (세션55)   $0
 REM ============================================================================
 REM  IP/179 §2-0: `supabase functions deploy` 가 TransportError 로 2회 실패, 대시보드로 우회.
-REM  운영 함수는 «건드리지 않는다». 1줄짜리 프로브 함수 zz-cli-probe 를 4가지 조합으로
+REM  운영 함수는 "건드리지 않는다". 1줄짜리 프로브 함수 zz-cli-probe 를 4가지 조합으로
 REM  배포해 보고, 끝나면 삭제한다.
-REM     T1  CLI 2.115.0(당시 버전) · 한글 경로   ← 재현
-REM     T2  CLI 2.115.0            · ASCII 경로  ← 경로 가설
-REM     T3  CLI latest             · 한글 경로   ← 버전 가설
-REM     T4  CLI latest             · ASCII 경로
+REM     T1  CLI 2.115.0(당시 버전) - 한글 경로   <- 재현
+REM     T2  CLI 2.115.0            - ASCII 경로  <- 경로 가설
+REM     T3  CLI latest             - 한글 경로   <- 버전 가설
+REM     T4  CLI latest             - ASCII 경로
 REM  로그: .tmp\sb_cli_probe.log  (토큰이 찍힐 수 있는 줄은 걸러서 저장)
 REM ============================================================================
 set REF=lrnuqhpgyuizfggxgxpl
