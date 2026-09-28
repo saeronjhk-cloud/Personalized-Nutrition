@@ -132,7 +132,8 @@ export default function Home() {
             </Link>
           )}
 
-          <Link to="/survey" className="feature-hub-card">
+          {/* D4: 로그인 + 저장 설문 있음 → /recommend 에서 바로 통합 추천, 그 외엔 /recommend 가 /survey 로 보낸다 */}
+          <Link to="/recommend?entry=home" className="feature-hub-card">
             <span className="feature-hub-icon" style={{ background: 'var(--primary-light)' }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><path d="M8.5 8.5l7 7"/></svg>
             </span>

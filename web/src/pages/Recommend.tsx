@@ -1,96 +1,49 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  fetchMyProfile,
-  fetchCheckupRecords,
-  fetchCheckupRecordDetail,
-  fetchRanges,
-} from "../lib/checkup_api";
-import { fetchSurveyResponses, fetchSurveyResponseDetail } from "../lib/survey_api";
-import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
-import { loadRecentDietSummary } from "../lib/dietSummary";
-import type { DietDailyAvg } from "../domain/unified/diet_adapter";
-import { runEngine, type Range, type CategoryResult, type BiomarkerInput } from "../domain/checkup/engine";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { CHECKUP_ENABLED } from "../lib/flags";
+import { loadUnifiedInputs } from "../lib/loadUnifiedInputs";
+import { composeUnifiedInput } from "../domain/unified/compose";
 import { runUnifiedRecommendation, type UnifiedResult } from "../domain/unified/recommend";
-import type { SurveyAnswers } from "../types";
+import RecommendSources from "../components/RecommendSources";
 import Results from "./Results";
 
 export default function Recommend() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  // D4: 홈 «맞춤 영양제 추천» 카드는 ?entry=home 으로 들어온다.
+  //     로그인 + 저장된 설문 있음 → 여기서 바로 통합 추천 / 그 외 → /survey 로 보낸다.
+  const fromHome = params.get("entry") === "home";
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [result, setResult] = useState<UnifiedResult | null>(null);
+  const [goalCount, setGoalCount] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
-      setError(null);
-
-      const profile = await fetchMyProfile();
+      // 입력 로드는 /survey(로그인) 와 공유하는 로더 — 결과 동일성(G14)
+      const r = await loadUnifiedInputs();
       if (cancelled) return;
-      setIsLoggedIn(profile.isLoggedIn);
-      if (!profile.isLoggedIn || !profile.userId) {
+      if (fromHome && (!r.isLoggedIn || !r.hasSurvey)) {
+        navigate("/survey", { replace: true });
+        return;
+      }
+      setIsLoggedIn(r.isLoggedIn);
+      if (!r.isLoggedIn) {
         setLoading(false);
         return;
       }
-
-      const sex = profile.profile?.sex === "F" ? "F" : "M";
-      const age = profile.profile?.birth_year
-        ? new Date().getFullYear() - profile.profile.birth_year
-        : null;
-
-      // 최신 검진 → CategoryResult[]
-      let checkupResults: CategoryResult[] | null = null;
-      const recs = await fetchCheckupRecords(profile.userId);
-      if (cancelled) return;
-      if (recs.records.length > 0) {
-        const [detail, rangeRes] = await Promise.all([
-          fetchCheckupRecordDetail(recs.records[0].id, profile.userId),
-          fetchRanges(sex),
-        ]);
-        if (cancelled) return;
-        if (detail.detail && !rangeRes.error) {
-          const input: BiomarkerInput = {};
-          for (const [key, v] of Object.entries(detail.detail.values)) {
-            input[key] = v.value;
-          }
-          checkupResults = runEngine(input, rangeRes.ranges as Range[]);
-        }
-      }
-
-      // 최신 설문 → answers
-      let surveyAnswers: SurveyAnswers | null = null;
-      const surveys = await fetchSurveyResponses(profile.userId);
-      if (cancelled) return;
-      if (surveys.responses.length > 0) {
-        const sDetail = await fetchSurveyResponseDetail(surveys.responses[0].id, profile.userId);
-        if (cancelled) return;
-        if (sDetail.detail) surveyAnswers = sDetail.detail.answers;
-      }
-
-      // 식이→추천 배선: MEAL_ENABLED일 때만 최근 7일 meal_log를 DietDailyAvg로 로드해 병합.
-      let dietSummary: DietDailyAvg | null = null;
-      if (MEAL_ENABLED) {
-        dietSummary = await loadRecentDietSummary(7);
-        if (cancelled) return;
-      }
-
-      const unified = runUnifiedRecommendation({
-        surveyAnswers,
-        checkupResults,
-        dietSummary,
-        profile: { sex, age },
-      });
-      setResult(unified);
+      setGoalCount(r.inputs.goals === null ? null : r.inputs.goals.length);
+      setResult(runUnifiedRecommendation(composeUnifiedInput({ loaded: r.inputs })));
       setLoading(false);
     }
     load();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [fromHome, navigate]);
 
   if (loading) {
     return (
@@ -139,51 +92,9 @@ export default function Recommend() {
     );
   }
 
-  // 반영된 입력 소스(식이 포함). 식이는 실제 기여했을 때만(저확신 제외) 근거로 표기.
-  const contributors: string[] = [];
-  if (result.sources.checkup) contributors.push("검진");
-  if (result.sources.survey) contributors.push("설문");
-  if (result.sources.diet && !result.dietLowConfidence) contributors.push("식이");
-  const srcText =
-    contributors.length >= 2
-      ? `${contributors.join(" + ")} 결과를 합쳐 추천했어요.`
-      : contributors.length === 1
-        ? `${contributors[0]} 결과를 바탕으로 추천했어요.`
-        : "입력하신 정보를 바탕으로 추천했어요.";
-
   return (
     <div className="survey-container fade-in">
-      <div
-        className="card"
-        style={{
-          padding: "var(--space-3) var(--space-4)",
-          marginBottom: 'var(--space-4)',
-          background: "rgba(142, 202, 230, 0.08)",
-          border: "1px solid rgba(142, 202, 230, 0.25)",
-          fontSize: 14,
-          color: "var(--text-secondary)",
-          lineHeight: 1.6,
-        }}
-      >
-        ✅ {srcText}
-      </div>
-
-      {MEAL_ENABLED && result.sources.diet && result.dietLowConfidence && (
-        <div
-          className="card"
-          style={{
-            padding: "var(--space-2) var(--space-4)",
-            marginBottom: 'var(--space-4)',
-            background: "rgba(255, 183, 3, 0.08)",
-            border: "1px solid rgba(255, 183, 3, 0.25)",
-            fontSize: 13,
-            color: "var(--text-secondary)",
-            lineHeight: 1.6,
-          }}
-        >
-          🍽️ 식사 기록이 아직 부족해(2일 미만) 이번 추천엔 반영하지 못했어요. 며칠만 더 기록하면 식이까지 반영해 더 정밀해집니다.
-        </div>
-      )}
+      <RecommendSources result={result} goalCount={goalCount} />
 
       <Results
         result={result}

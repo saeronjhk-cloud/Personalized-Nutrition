@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getLatestRecord } from '../lib/surveyHistory'
 import { personalizeProduct } from '../domain/meokseon/personalize'
+import { withGoals } from '../domain/goals/goals'
+import { loadEffectiveGoals } from '../lib/userGoals'
+import { MEAL_ENABLED } from '../lib/flags'
 import { track } from '../lib/events'
 import { reportScanMiss } from '../lib/scanMiss'
 import {
@@ -158,9 +161,25 @@ export default function Scan() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null)
 
   const latestRecord = getLatestRecord()
+  // Phase G — 로그인 + 식사 기록 ON: 목표는 user_goals(식사 기록에서 관리)에서 읽는다.
+  //   기저질환 등 나머지는 기존처럼 최근 설문(localStorage). null = 아직 모름/해당 없음 → 설문 목표 그대로.
+  const [managedGoals, setManagedGoals] = useState<string[] | null>(null)
+  useEffect(() => {
+    if (!MEAL_ENABLED) return
+    let alive = true
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const g = await loadEffectiveGoals(user.id)
+      if (alive) setManagedGoals(g.goals)
+    })
+    return () => { alive = false }
+  }, [])
+  const personalAnswers = latestRecord
+    ? (managedGoals !== null ? withGoals(latestRecord.answers, managedGoals) : latestRecord.answers)
+    : null
   // 개인화는 먹선 traffic_light 색을 소비(자체 임계 없음). 근거: 64 재평가 v1.
-  const personal = (result && latestRecord)
-    ? personalizeProduct(result.nutrition, result.traffic_light ?? null, latestRecord.answers)
+  const personal = (result && personalAnswers)
+    ? personalizeProduct(result.nutrition, result.traffic_light ?? null, personalAnswers)
     : null
 
   // 첨가물 «개별» 뷰 모델. 판정·문구는 전부 domain/meokseon/additives.ts 의 순수 함수다.

@@ -9,6 +9,12 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import InstallPrompt from './components/InstallPrompt'
 import ConsentGate from './components/ConsentGate'
+import RecommendSources from './components/RecommendSources'
+import { supabase } from './lib/supabase'
+import { loadUnifiedInputs } from './lib/loadUnifiedInputs'
+import { composeUnifiedInput } from './domain/unified/compose'
+import { runUnifiedRecommendation, type UnifiedResult } from './domain/unified/recommend'
+import { shouldSkipGoalStep, withGoals } from './domain/goals/goals'
 import Home from './pages/Home'
 import About from './pages/About'
 import Team from './pages/Team'
@@ -60,6 +66,18 @@ function SurveyFlow() {
   const navigate = useNavigate()
   const isPopState = useRef(false)
   const [consented, setConsented] = useState(hasConsentedCollection())
+  // Phase G — 로그인 여부(null=확인 중). 로그인 + 식사 기록 ON 이면 목표 단계를 건너뛴다(D2).
+  const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
+  const [unified, setUnified] = useState<UnifiedResult | null>(null)
+  const [goalCount, setGoalCount] = useState<number | null>(null)
+  const [savedAnswers, setSavedAnswers] = useState<SurveyAnswers | null>(null)
+  const skipGoals = shouldSkipGoalStep({ loggedIn: loggedIn === true, mealEnabled: MEAL_ENABLED })
+
+  useEffect(() => {
+    let alive = true
+    supabase.auth.getSession().then(({ data }) => { if (alive) setLoggedIn(!!data.session) })
+    return () => { alive = false }
+  }, [])
 
   // 브라우저 뒤로가기/앞으로가기 처리
   useEffect(() => {
@@ -103,20 +121,41 @@ function SurveyFlow() {
     setStep('loading')
     setError(null)
     try {
-      const data = await getRecommendation(answers)
-      setResult(data)
-      setStep('results')
-      // 익명 분석 수집 (fire-and-forget, 실패해도 UI 영향 없음)
-      submitSurveyAnalytics(answers, data)
+      // Phase G — 로그인: 방금 답한 설문 + 저장된 검진·식이 7일·목표를 통합 엔진으로 (= /recommend 와 같은 엔진)
+      //           비로그인: 현행 설문 단독 엔진 그대로 (G08 회귀 0)
+      const loaded = loggedIn ? await loadUnifiedInputs({ skipLatestSurvey: true }) : { isLoggedIn: false as const }
+      if (loaded.isLoggedIn) {
+        const res = runUnifiedRecommendation(composeUnifiedInput({ freshSurvey: answers, loaded: loaded.inputs }))
+        // 저장 스냅샷: 이 추천에 실제로 쓰인 목표를 설문 행에 남긴다(과거 결과 재현·집계 호환).
+        const effective = loaded.inputs.goals !== null ? withGoals(answers, loaded.inputs.goals) : answers
+        setUnified(res)
+        setGoalCount(loaded.inputs.goals === null ? null : loaded.inputs.goals.length)
+        setSavedAnswers(effective)
+        setResult(res)
+        setStep('results')
+        submitSurveyAnalytics(effective, res)
+      } else {
+        const data = await getRecommendation(answers)
+        setUnified(null)
+        setGoalCount(null)
+        setSavedAnswers(answers)
+        setResult(data)
+        setStep('results')
+        // 익명 분석 수집 (fire-and-forget, 실패해도 UI 영향 없음)
+        submitSurveyAnalytics(answers, data)
+      }
     } catch (e: any) {
       setError(e.message || '추천 결과를 가져오는 데 실패했습니다.')
       setStep('results')
     }
-  }, [answers])
+  }, [answers, loggedIn])
 
   const restart = useCallback(() => {
     setAnswers({ ...INITIAL_ANSWERS })
     setResult(null)
+    setUnified(null)
+    setGoalCount(null)
+    setSavedAnswers(null)
     setError(null)
     setStep('body')
   }, [])
@@ -131,7 +170,20 @@ function SurveyFlow() {
   }
 
   if (step === 'loading') return <Loading />
-  if (step === 'results') return <Results result={result} answers={answers} error={error} onRestart={restart} />
+  if (step === 'results') {
+    return (
+      <>
+        {unified && !error && (
+          <div className="survey-container" style={{ paddingBottom: 0 }}>
+            <RecommendSources result={unified} goalCount={goalCount} />
+          </div>
+        )}
+        <Results result={result} answers={savedAnswers ?? answers} error={error} onRestart={restart} />
+      </>
+    )
+  }
+  // 로그인 여부 확인 전엔 단계 목록이 흔들리지 않도록 잠깐 비운다(수 ms).
+  if (loggedIn === null) return <div className="survey-container fade-in" />
 
   return (
     <Questions
@@ -141,6 +193,7 @@ function SurveyFlow() {
       onNext={(nextStep) => setStep(nextStep)}
       onBack={(prevStep) => setStep(prevStep)}
       onSubmit={submitSurvey}
+      skipGoals={skipGoals}
     />
   )
 }

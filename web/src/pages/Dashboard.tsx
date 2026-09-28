@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchMyProfile, fetchCheckupRecords } from "../lib/checkup_api";
 import { fetchSurveyResponses } from "../lib/survey_api";
-import { CHECKUP_ENABLED } from "../lib/flags";
+import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
 
 interface ModuleStatus {
   checkupCount: number;
@@ -152,8 +152,12 @@ export default function Dashboard() {
           </ModuleCard>
           )}
 
-          {/* 증상·목표 (설문) */}
-          <ModuleCard emoji="📝" title="증상·목표" desc="증상과 건강 목표, 생활 습관을 설문으로 알려주세요.">
+          {/* 증상·생활습관 (설문) — Phase G(D3): 목표는 식사 기록으로 이전 */}
+          <ModuleCard
+            emoji="📝"
+            title={MEAL_ENABLED ? "증상·생활습관" : "증상·목표"}
+            desc={MEAL_ENABLED ? "증상과 생활 습관을 설문으로 알려주세요." : "증상과 건강 목표, 생활 습관을 설문으로 알려주세요."}
+          >
             <div>
               {loading ? (
                 <StatusBadge text="확인 중..." tone="soon" />
@@ -169,6 +173,11 @@ export default function Dashboard() {
             {isLoggedIn && status.surveyCount > 0 && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: 14 }} onClick={() => navigate("/survey/manage")}>
                 설문 기록 관리
+              </button>
+            )}
+            {MEAL_ENABLED && (
+              <button type="button" className="text-link" style={{ fontSize: 13, background: "none", border: "none", padding: 0, textAlign: "left", cursor: "pointer" }} onClick={() => navigate("/meal#goals")}>
+                🎯 건강 목표는 식사 기록에서 정해요 →
               </button>
             )}
           </ModuleCard>
@@ -203,7 +212,7 @@ export default function Dashboard() {
           맞춤 추천 받기
         </button>
         <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
-          입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)
+          {MEAL_ENABLED ? "설문·식사 기록(최근 7일)·건강 목표를 함께 참조해 맞춤 영양제를 추천합니다." : "입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)"}
         </p>
       </div>
     </div>

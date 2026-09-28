@@ -5,6 +5,8 @@ import { markSensitiveConsent } from '../lib/analytics'
 interface Props {
   onAccept: () => void
   onDecline: () => void
+  /** 동의 버튼 라벨 (기본: 동의하고 설문 시작). 식사 기록 «내 건강 목표» 카드에서 재사용 — 동의 범위(건강 목표 포함)는 동일. */
+  acceptLabel?: string
 }
 
 /**
@@ -14,7 +16,7 @@ interface Props {
  * - 문구는 개인정보처리방침 v4.7 §3-2 / 이용약관 v4.5 제6조의2와 1:1 정합.
  *   ("각 동의는 하나로 묶지 않으며, 사전 선택 없이 이용자가 직접 선택" — 기능 이용 시 개별 동의)
  */
-export default function ConsentGate({ onAccept, onDecline }: Props) {
+export default function ConsentGate({ onAccept, onDecline, acceptLabel = '동의하고 설문 시작' }: Props) {
   // 두 동의 분리: 일반 개인정보 + 건강 민감정보. 둘 다 필수(사전체크 금지).
   const [agreePI, setAgreePI] = useState(false)
   const [agreeSensitive, setAgreeSensitive] = useState(false)
@@ -49,7 +51,7 @@ export default function ConsentGate({ onAccept, onDecline }: Props) {
         </label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <button type="button" className="btn btn-primary" disabled={!canProceed} onClick={handleAccept}>
-            동의하고 설문 시작
+            {acceptLabel}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onDecline}>
             동의하지 않음

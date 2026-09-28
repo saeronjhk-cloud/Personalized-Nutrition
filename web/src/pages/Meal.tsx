@@ -11,6 +11,7 @@ import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
 import BetaFeedback from '../components/BetaFeedback'
+import GoalsCard from '../components/GoalsCard'
 import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
@@ -236,6 +237,9 @@ export default function Meal() {
           {toast}
         </div>
       )}
+
+      {/* Phase G — 건강 목표는 식사 기록에서 관리 (맞춤 영양제 추천이 참조) */}
+      {!result && <GoalsCard />}
 
       {closed && !result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>

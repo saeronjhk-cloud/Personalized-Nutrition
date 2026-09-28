@@ -1,17 +1,19 @@
 interface Props {
   current: number
   total: number
+  /** 단계 라벨 (목표 단계 건너뛰기 시 9개). 미지정이면 기본 10단계 라벨. */
+  labels?: string[]
 }
 
-const STEP_LABELS = ['기본 정보', '증상 체크', '건강 목표', '수면', '스트레스', '운동', '식습관', '음주/흡연', '영양제', '건강 상태']
+const DEFAULT_LABELS = ['기본 정보', '증상 체크', '건강 목표', '수면', '스트레스', '운동', '식습관', '음주/흡연', '영양제', '건강 상태']
 
-export default function ProgressBar({ current, total }: Props) {
+export default function ProgressBar({ current, total, labels = DEFAULT_LABELS }: Props) {
   const pct = Math.round((current / total) * 100)
 
   return (
     <div className="survey-progress">
       <div className="survey-progress-header">
-        <span className="survey-progress-step">Q{current}. {STEP_LABELS[current - 1]}</span>
+        <span className="survey-progress-step">Q{current}. {labels[current - 1]}</span>
         <span className="survey-progress-pct">{pct}%</span>
       </div>
       <div className="survey-progress-bar">

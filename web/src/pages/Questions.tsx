@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { Step, SurveyAnswers } from '../types'
 import ProgressBar from '../components/ProgressBar'
+import { GOAL_OPTIONS, surveySteps } from '../domain/goals/goals'
 
 interface Props {
   step: Step
@@ -10,6 +11,8 @@ interface Props {
   onNext: (step: Step) => void
   onBack: (step: Step) => void
   onSubmit: () => void
+  /** Phase G(D2): 로그인 + 식사 기록 ON 이면 목표 단계를 건너뛴다 — 목표는 식사 기록에서 관리. */
+  skipGoals?: boolean
 }
 
 function WhyTooltip({ text }: { text: string }) {
@@ -24,12 +27,11 @@ function WhyTooltip({ text }: { text: string }) {
   )
 }
 
-const STEPS: Step[] = ['body', 'symptoms', 'goals', 'sleep', 'stress', 'exercise', 'diet', 'alcohol', 'supplements', 'conditions']
-const TOTAL = STEPS.length
-
-function getStepIndex(step: Step): number {
-  return STEPS.indexOf(step) + 1
+const STEP_LABELS: Record<string, string> = {
+  body: '기본 정보', symptoms: '증상 체크', goals: '건강 목표', sleep: '수면', stress: '스트레스',
+  exercise: '운동', diet: '식습관', alcohol: '음주/흡연', supplements: '영양제', conditions: '건강 상태',
 }
+
 
 /* ── 증상 데이터 (백엔드 meta API에서도 가져올 수 있음) ── */
 const SYMPTOM_GROUPS = [
@@ -89,21 +91,7 @@ const SYMPTOM_GROUPS = [
   ]},
 ]
 
-const GOAL_OPTIONS = [
-  { id: '피로회복', emoji: '💪', label: '피로회복' },
-  { id: '수면개선', emoji: '😴', label: '수면개선' },
-  { id: '면역력강화', emoji: '🛡️', label: '면역력강화' },
-  { id: '체중관리', emoji: '⚖️', label: '체중 / 체지방 관리' },
-  { id: '간건강', emoji: '🍺', label: '간건강' },
-  { id: '소화장건강', emoji: '🦠', label: '소화장건강' },
-  { id: '근육증가', emoji: '🏋️', label: '근육증가' },
-  { id: '피부개선', emoji: '✨', label: '피부개선' },
-  { id: '혈당관리', emoji: '🩸', label: '혈당관리' },
-  { id: '눈건강', emoji: '👁️', label: '눈건강' },
-  { id: '심혈관건강', emoji: '❤️', label: '심혈관건강' },
-  { id: '갱년기관리', emoji: '🌸', label: '갱년기관리' },
-  { id: '인지력향상', emoji: '🧠', label: '인지력향상' },
-]
+// GOAL_OPTIONS 는 domain/goals/goals.ts 로 이동 (식사 기록 목표 카드와 공용)
 
 const CONDITIONS_LIST = [
   '고혈압', '당뇨', '고지혈증', '간질환', '신장질환', '갑상선질환',
@@ -116,8 +104,10 @@ const FAMILY_HISTORY_LIST = [
 ]
 
 
-export default function Questions({ step, answers, onUpdate, onNext, onBack, onSubmit }: Props) {
-  const idx = getStepIndex(step)
+export default function Questions({ step, answers, onUpdate, onNext, onBack, onSubmit, skipGoals = false }: Props) {
+  const STEPS = surveySteps(skipGoals)
+  const idx = STEPS.indexOf(step) + 1
+  const next = (from: Step): Step => STEPS[STEPS.indexOf(from) + 1]
   const navigate = useNavigate()
 
   return (
@@ -133,10 +123,10 @@ export default function Questions({ step, answers, onUpdate, onNext, onBack, onS
         <span className="survey-time-hint">약 3분 소요</span>
       </div>
 
-      <ProgressBar current={idx} total={TOTAL} />
+      <ProgressBar current={idx} total={STEPS.length} labels={STEPS.map((s) => STEP_LABELS[s])} />
 
       {step === 'body' && <StepBody answers={answers} onUpdate={onUpdate} onNext={() => onNext('symptoms')} />}
-      {step === 'symptoms' && <StepSymptoms answers={answers} onUpdate={onUpdate} onNext={() => onNext('goals')} />}
+      {step === 'symptoms' && <StepSymptoms answers={answers} onUpdate={onUpdate} onNext={() => onNext(next('symptoms'))} />}
       {step === 'goals' && <StepGoals answers={answers} onUpdate={onUpdate} onNext={() => onNext('sleep')} />}
       {step === 'sleep' && <StepSleep answers={answers} onUpdate={onUpdate} onNext={() => onNext('stress')} />}
       {step === 'stress' && <StepStress answers={answers} onUpdate={onUpdate} onNext={() => onNext('exercise')} />}
