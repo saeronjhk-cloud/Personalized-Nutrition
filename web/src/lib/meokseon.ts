@@ -99,6 +99,13 @@ export interface MsProductResult {
   allergens_available?: boolean
   /** false = flat 목록이 전부가 아니다(혼입이 따로 있다). */
   allergens_flat_complete?: boolean
+  /**
+   * ★ 먹선 서버 세션72 — 제보 «자동 반영»(관리자 미검증) 알레르겐 이름. 배지 「제보 기반 · 포장 확인」.
+   *   `null`/없음 = 미수집이거나 구버전 서버. `[]` = 자동 반영 행 없음.
+   */
+  allergens_crowd_auto?: string[] | null
+  /** ★ 세션72 — true = 혼입 정보 미확인(혼입 문장을 못 읽었을 수 있다). 「혼입 없음」이라고 말하면 안 된다. */
+  allergens_may_unconfirmed?: boolean | null
   mfras?: unknown
   context?: unknown
   sources?: unknown

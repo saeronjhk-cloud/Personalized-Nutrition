@@ -35,6 +35,16 @@
  *       이라고 «단정»한다. `DS-6′` 이후 그 경로는 0이므로 그 문구는 사실과 다르다.
  *       ⇒ 문구 교체는 **화면 카피 변경**이라 별개 축이다(제이 확인 필요). 여기 적어 둔다.
  *
+ * ★ `DS-6″` (제이 확정 2026-09-28 · 서버 `IP/결정_DS-6pp_괄호알레르겐_2026-09-28.md`)
+ *   원재료 «괄호 안» 19종 이름(`카제인나트륨(우유)`·`베이컨(돼지고기)`)은 **제조사 표기**다 → 서버가 contains 로 낸다.
+ *   원산지 괄호(`밀:미국산`)·원재료명 추론(`밀가루`→밀)은 여전히 금지(DS-6′ 유지). 앱은 여전히 원재료를 스캔하지 않는다.
+ *
+ * ★ 세션72 — 제보 «자동 반영»(서버 `IP/결정_알레르기자동반영_2026-09-29.md`)
+ *   서버가 게이트를 통과한 제보 알레르기를 관리자 승인 없이 반영한다(`allergens_crowd_auto`).
+ *   화면은 그것을 «확정»처럼 보이면 안 된다 → 배지 「제보 기반 · 포장 확인」.
+ *   혼입 문장을 못 읽었으면(`allergens_may_unconfirmed`) 「혼입 정보 미확인」을 말한다 — 「혼입 없음」이 아니다.
+ *   ⇒ `describeAllergenProvenance` (아래). `describeAllergens` 는 한 글자도 바꾸지 않았다.
+ *
  * ★ 이 파일의 존재 이유는 «무엇을 보여줄까»가 아니라 **«무엇을 단정하면 안 되는가»** 다.
  *
  *   먹선 서버는 세션44~51 여덟 세션에 걸쳐 알레르기 판정을 정교하게 다듬었다
@@ -106,6 +116,23 @@ export function describeAllergens(result: Pick<
   //   (meokseon-server 세션48 §6 PENDING). 그러므로 「없음」이라고 말할 근거가 없다.
   //   근거 없이 안심시키는 것보다 「모른다」가 안전하다.
   return { kind: 'uncollected' }
+}
+
+/**
+ * ★ 세션72 — 알레르기 목록의 «출처» 신호. `describeAllergens` 와 독립(3분리 판정은 건드리지 않는다).
+ *   crowdAuto      — 관리자 미검증 자동 반영 이름(배지). 구버전 서버·미수집이면 [].
+ *   mayUnconfirmed — 「혼입 정보 미확인」 고지 여부. `=== true` 일 때만(모르면 말하지 않는 게 아니라 서버가 null 로 준다).
+ */
+export interface AllergenProvenance { crowdAuto: string[]; mayUnconfirmed: boolean }
+
+export function describeAllergenProvenance(result: Partial<Pick<
+  MsProductResult, 'allergens_crowd_auto' | 'allergens_may_unconfirmed' | 'allergens_available'
+>> | null | undefined): AllergenProvenance {
+  if (!result || result.allergens_available === false) return { crowdAuto: [], mayUnconfirmed: false }
+  return {
+    crowdAuto: clean(result.allergens_crowd_auto),
+    mayUnconfirmed: result.allergens_may_unconfirmed === true,
+  }
 }
 
 /* ★ 카드는 «항상» 띄운다. 세 상태 전부 사용자가 알아야 할 정보이고,

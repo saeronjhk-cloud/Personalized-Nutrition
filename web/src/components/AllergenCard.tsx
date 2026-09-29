@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { describeAllergens, type AllergenView } from '../domain/meokseon/allergens'
+import { describeAllergens, describeAllergenProvenance, type AllergenView } from '../domain/meokseon/allergens'
 // ★ 세션61 U60-7 — `MsProductResult` 를 더는 import 하지 않는다.
 //   prop 타입을 `describeAllergens` 의 시그니처에서 유도하므로 필요 없어졌고,
 //   남겨 두면 「이 카드는 바코드 결과 전용」이라는 잘못된 인상을 준다.
@@ -141,14 +141,46 @@ function IncompleteNotice() {
  *
  * ⚠ 렌더·판정 로직은 **한 글자도 바꾸지 않았다.** 바코드 경로의 동작은 그대로다.
  */
+// ★ 세션72 — 출처 신호 2필드를 «선택»으로 더한다. 없는 입력(사진 제보·구버전 서버)은 종전과 똑같이 그린다.
 type AllergenCardInput = Parameters<typeof describeAllergens>[0]
+  & Parameters<typeof describeAllergenProvenance>[0]
+
+/** ★ 세션72 — 관리자 미검증 자동 반영 배지. 확정처럼 보이지 않게 «회색 테두리»로만. */
+function CrowdAutoBadge() {
+  return (
+    <span
+      data-testid="allergen-crowd-auto-badge"
+      style={{
+        fontSize: 11, fontWeight: 500, color: '#5f6368', border: '1px solid #c4c7c5',
+        borderRadius: 'var(--radius-pill)', padding: '1px 8px', marginLeft: 'var(--space-2)',
+        verticalAlign: 'middle',
+      }}
+    >
+      제보 기반 · 포장 확인
+    </span>
+  )
+}
+
+/** ★ 세션72 대책3 — 혼입 문장을 못 읽었을 수 있다. 「혼입 없음」이라고 말하지 않는다. */
+function MayUnconfirmedNotice() {
+  return (
+    <p data-testid="allergen-may-unconfirmed" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 1.5 }}>
+      <strong style={{ color: 'var(--text-secondary)' }}>혼입 정보 미확인</strong> — 제보 사진에서 「같은 제조시설」 문구를 읽지 못했어요.
+      혼입 가능 알레르겐이 없다는 뜻은 아니니 포장을 확인해 주세요.
+    </p>
+  )
+}
 
 export default function AllergenCard({ result }: { result: AllergenCardInput }) {
   const view = describeAllergens(result)
+  const prov = describeAllergenProvenance(result)
   return (
     <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-      <h3 className="survey-step-title" style={{ fontSize: 16 }}>알레르기</h3>
+      <h3 className="survey-step-title" style={{ fontSize: 16 }}>
+        알레르기{view.kind !== 'uncollected' && prov.crowdAuto.length > 0 && <CrowdAutoBadge />}
+      </h3>
       <Body view={view} />
+      {view.kind !== 'uncollected' && prov.mayUnconfirmed && <MayUnconfirmedNotice />}
       <IncompleteNotice />
     </div>
   )
