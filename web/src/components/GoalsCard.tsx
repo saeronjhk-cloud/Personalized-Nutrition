@@ -100,7 +100,7 @@ export default function GoalsCard() {
       {editing && (
         <>
           <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "var(--space-2) 0", lineHeight: 1.6 }}>
-            여러 개 고를 수 있어요. 맞춤 영양제 추천의 우선순위에 반영됩니다.
+            여러 개 고를 수 있어요. 고른 목표는 맞춤 영양제 추천에 쓰여요. 목표에 맞춘 식사 조언은 준비 중이에요.
           </p>
           <div className="grid-2">
             {GOAL_OPTIONS.map((g) => {
