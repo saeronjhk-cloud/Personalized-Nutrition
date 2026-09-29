@@ -14,6 +14,8 @@ const CATEGORY_CAP = 10;
 
 /** 신호화에 필요한 최소 기록 일수 (미만이면 과추천 방지로 신호 0) */
 const MIN_DAYS = 2;
+/** 외부(UI 상태 판정 등)에서 같은 기준을 쓰기 위한 공개 이름 — 값 복제 금지 (Phase H) */
+export const DIET_MIN_DAYS = MIN_DAYS;
 
 /** KDRIs 2020 확정 임계 (검증: 2026-06-22, 한국영양학회/보건복지부) */
 export const DIET_THRESHOLDS = {

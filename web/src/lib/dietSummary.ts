@@ -7,9 +7,11 @@ import { supabase } from './supabase'
 import { mealLogRowsToDietSummary, type MealLogRow } from '../domain/unified/meal_diet_bridge'
 import type { DietDailyAvg } from '../domain/unified/diet_adapter'
 
-export async function loadRecentDietSummary(windowDays = 7): Promise<DietDailyAvg | null> {
+type RecentRows = { ok: true; rows: MealLogRow[] } | { ok: false; reason: 'guest' | 'error' }
+
+async function fetchRecentMealRows(windowDays: number): Promise<RecentRows> {
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) return { ok: false, reason: 'guest' }
   const since = new Date()
   since.setDate(since.getDate() - windowDays)
   const { data, error } = await supabase
@@ -19,6 +21,23 @@ export async function loadRecentDietSummary(windowDays = 7): Promise<DietDailyAv
     .gte('eaten_at', since.toISOString())
     .order('eaten_at', { ascending: false })
     .limit(200)
-  if (error || !data || data.length === 0) return null
-  return mealLogRowsToDietSummary(data as MealLogRow[], windowDays)
+  if (error || !data) return { ok: false, reason: 'error' }
+  return { ok: true, rows: data as MealLogRow[] }
+}
+
+export async function loadRecentDietSummary(windowDays = 7): Promise<DietDailyAvg | null> {
+  const r = await fetchRecentMealRows(windowDays)
+  if (!r.ok || r.rows.length === 0) return null
+  return mealLogRowsToDietSummary(r.rows, windowDays)
+}
+
+/**
+ * «내 건강» 식이 카드용 (Phase H): 최근 windowDays일 기록 일수.
+ * 추천과 같은 쿼리·같은 집계(aggregateMeals.days). 조회 실패는 null(«기록 없음»과 구분).
+ */
+export async function loadRecentMealDays(windowDays = 7): Promise<number | null> {
+  const r = await fetchRecentMealRows(windowDays)
+  if (!r.ok) return r.reason === 'guest' ? 0 : null
+  if (r.rows.length === 0) return 0
+  return mealLogRowsToDietSummary(r.rows, windowDays).days
 }

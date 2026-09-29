@@ -3,10 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { fetchMyProfile, fetchCheckupRecords } from "../lib/checkup_api";
 import { fetchSurveyResponses } from "../lib/survey_api";
 import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
+import { loadRecentMealDays } from "../lib/dietSummary";
+import { dietCardStatus, DIET_CARD_WINDOW_DAYS } from "../domain/unified/diet_card";
 
 interface ModuleStatus {
   checkupCount: number;
   surveyCount: number;
+  /** 최근 7일 식사 기록 일수 — 조회 실패 null (Phase H) */
+  dietDays: number | null;
 }
 
 function StatusBadge({ text, tone }: { text: string; tone: "done" | "todo" | "soon" }) {
@@ -57,7 +61,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [status, setStatus] = useState<ModuleStatus>({ checkupCount: 0, surveyCount: 0 });
+  const [status, setStatus] = useState<ModuleStatus>({ checkupCount: 0, surveyCount: 0, dietDays: 0 });
 
   useEffect(() => {
     let cancelled = false;
@@ -70,14 +74,16 @@ export default function Dashboard() {
         setLoading(false);
         return;
       }
-      const [checkup, survey] = await Promise.all([
+      const [checkup, survey, dietDays] = await Promise.all([
         fetchCheckupRecords(profile.userId),
         fetchSurveyResponses(profile.userId),
+        MEAL_ENABLED ? loadRecentMealDays(DIET_CARD_WINDOW_DAYS) : Promise.resolve(0),
       ]);
       if (cancelled) return;
       setStatus({
         checkupCount: checkup.records.length,
         surveyCount: survey.responses.length,
+        dietDays,
       });
       setLoading(false);
     }
@@ -182,15 +188,42 @@ export default function Dashboard() {
             )}
           </ModuleCard>
 
-          {/* 식이 */}
-          <ModuleCard emoji="🥗" title="식이" desc="식사 패턴을 분석해 부족하기 쉬운 영양과 식이 가이드를 제안해요.">
-            <div>
-              <StatusBadge text="준비 중" tone="soon" />
-            </div>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: 14 }} disabled>
-              곧 제공됩니다
-            </button>
-          </ModuleCard>
+          {/* 식이 — Phase H: 식사 기록·주간 리포트 입구 + 추천 반영 상태 (판정 = dietCardStatus, 추천 엔진과 같은 기준) */}
+          {MEAL_ENABLED ? (
+            <ModuleCard
+              emoji="🥗"
+              title="식이"
+              desc={`식사 사진을 기록하면 최근 ${DIET_CARD_WINDOW_DAYS}일 식사를 맞춤 영양제 추천에 함께 반영해요. 주간 리포트로 식사 흐름도 확인할 수 있어요.`}
+            >
+              <div>
+                {loading ? (
+                  <StatusBadge text="확인 중..." tone="soon" />
+                ) : (
+                  (() => {
+                    const st = dietCardStatus({ mealEnabled: MEAL_ENABLED, isLoggedIn, days: status.dietDays });
+                    return <StatusBadge text={st.badge} tone={st.tone} />;
+                  })()
+                )}
+              </div>
+              <button type="button" className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => navigate("/meal")}>
+                식사 기록하기
+              </button>
+              {isLoggedIn && (
+                <button type="button" className="btn btn-secondary" style={{ fontSize: 14 }} onClick={() => navigate("/weekly-report")}>
+                  주간 리포트 보기
+                </button>
+              )}
+            </ModuleCard>
+          ) : (
+            <ModuleCard emoji="🥗" title="식이" desc="식사 패턴을 분석해 부족하기 쉬운 영양을 알려드려요.">
+              <div>
+                <StatusBadge text="준비 중" tone="soon" />
+              </div>
+              <button type="button" className="btn btn-secondary" style={{ fontSize: 14 }} disabled>
+                곧 제공됩니다
+              </button>
+            </ModuleCard>
+          )}
 
           {/* 운동 */}
           <ModuleCard emoji="🏃" title="운동" desc="운동 습관에 맞춘 가이드와 관련 기능성을 제안해요.">
