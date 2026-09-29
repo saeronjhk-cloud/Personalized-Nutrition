@@ -268,3 +268,29 @@ export function buildReportNutrition(input: ReportNutritionInput): ReportNutriti
     code: 'ok',
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * 5. ★ 세션72 — «보내기 전» 미리보기 (제이 결정 2026-09-29)
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * 제이 결정(2026-09-29): 「읽기가 끝난 뒤 전체 정보를 보여주되, 현재 정보는 완전할 수 없다는
+ * 고지를 붙이고, 관리자 확인 후 확정된 정보를 알려준다고 말한다.」
+ * ⇒ 위 ①(「저장된 경우에만」)은 «보낸 뒤» 화면의 규칙으로 그대로 남는다. 이 함수는 그 «앞» 단계다.
+ *   ⚠ ②(기준을 모르면 숫자도 색도 없음)는 여기서도 그대로 지킨다 — 기준 없는 숫자는 뜻이 3~5배 갈린다.
+ *   ★ 엔진이 이상치 경고(`traffic_light.sanity_warnings`)를 냈으면 «색»은 접는다(숫자는 고지와 함께 보임).
+ */
+export const PREVIEW_DISCLAIMER =
+  '사진에서 읽은 내용이라 완전하지 않을 수 있어요. 보내 주시면 관리자가 확인한 뒤 확정된 정보를 알려드릴게요.'
+
+export const PREVIEW_SANITY_NOTE =
+  '일부 수치가 라벨 기준과 맞지 않아 보여 신호등은 표시하지 않았어요. 관리자가 확인할게요.'
+
+export function buildPreviewNutrition(input: Omit<ReportNutritionInput, 'nutritionStatus'>): ReportNutritionView {
+  const view = buildReportNutrition({ ...input, nutritionStatus: 'ok' })
+  const sw = (input.trafficLight as any)?.sanity_warnings
+  if (view.show && Array.isArray(sw) && sw.length > 0) {
+    return { ...view, showLights: false, lights: [], note: PREVIEW_SANITY_NOTE }
+  }
+  return view
+}

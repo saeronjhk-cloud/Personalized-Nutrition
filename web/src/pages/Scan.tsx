@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getLatestRecord } from '../lib/surveyHistory'
 import { personalizeProduct } from '../domain/meokseon/personalize'
@@ -38,6 +39,7 @@ import {
 } from '../domain/meokseon/reportAuth'
 import {
   buildReportNutrition, TRAFFIC_LIGHT_CAPTION,
+  buildPreviewNutrition, PREVIEW_DISCLAIMER,   // 세션72
 } from '../domain/meokseon/reportNutrition'
 import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 
@@ -82,6 +84,19 @@ const LIGHT_HEX: Record<'green' | 'yellow' | 'red', string> = {
 const MY_REPORTS_PATH = '/scan/reports'
 
 // 동명 제품 구분용 보조표기: 제조사·브랜드·분류 등에서 빈값/`general`/중복 제거 후 ' · ' 결합.
+/**
+ * ★ 세션72 — 제보 폼 하단 버튼 줄. 제이 실물(2026-09-29): 「읽는 중…」·「보내는 중…」이 두 줄로 갈려
+ *   「읽는」과 「중」의 열이 어긋났다. 원인: `.btn` 이 `width:100%` + 좌우 패딩 `--space-7` 이라
+ *   flex 한 줄에 두 버튼이 들어가면 주 버튼 폭이 좁아져 글자가 줄바꿈됐다.
+ *   ⇒ 주 버튼은 남는 폭을 다 쓰고(minWidth 0) 줄바꿈 금지 · 취소 버튼은 글자 폭만.
+ */
+const REPORT_BTN_MAIN: CSSProperties = {
+  flex: 1, minWidth: 0, whiteSpace: 'nowrap', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)',
+}
+const REPORT_BTN_CANCEL: CSSProperties = {
+  flex: '0 0 auto', width: 'auto', whiteSpace: 'nowrap', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)',
+}
+
 function subtitleOf(...parts: (string | null | undefined)[]): string {
   const seen = new Set<string>()
   const out: string[] = []
@@ -608,6 +623,108 @@ export default function Scan() {
    *   `pages/__tests__/Scan_allergen_wiring.test.ts` 가 이 파일의 소스 문자열로 배선을 지킨다.
    *   다른 파일로 옮기면 그 가드가 조용히 눈이 먼다. 훅을 쓰지 않는 순수 렌더 함수다.
    */
+  /**
+   * ★ 세션72 — 원재료 → 첨가물 → 영양·신호등 블록. «보내기 전» 미리보기와 «보낸 뒤» 화면이 같이 쓴다.
+   *   영양 판정은 호출부가 만든 view 를 받는다(보낸 뒤 = buildReportNutrition · 보내기 전 = buildPreviewNutrition).
+   */
+  function renderReadbackDetails(
+    analysis: MsPhotoAnalysis,
+    reportNutrition: ReturnType<typeof buildReportNutrition>,
+    reportAdditives: ReturnType<typeof buildAdditiveList>,
+  ) {
+    return (
+      <>
+        {/* 원재료 — 라벨 표기 순서 그대로. 못 읽었으면 목록 자체를 그리지 않는다
+            (그 사실은 위 `describeReadback` 의 「원재료 0개」가 이미 말한다). */}
+        {analysis.ingredients.length > 0 && (
+          <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-ingredients">
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>원재료</div>
+            <p style={{ fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              {analysis.ingredients.map((it) => (
+                [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
+                  .filter(Boolean).join(' ')
+              )).join(', ')}
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
+              사진에서 읽어낸 그대로예요. 라벨과 다르면 라벨이 맞아요.
+            </p>
+          </div>
+        )}
+
+        {/* 첨가물 — ⚠ 4색 등급은 계속 «꺼진» 상태다(`SHOW_RISK_GRADE`). 여기서 켜지 않는다.
+            외부 검토 6명이 일치해서 끈 것이다. 화면은 이름과 「일반적 용도」만 그린다. */}
+        {reportAdditives.total > 0 && (
+          <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-additives">
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+              {SHOW_RISK_GRADE ? `첨가물 ${reportAdditives.total}종` : describeAdditiveCount(reportAdditives.total)}
+            </div>
+            {!SHOW_RISK_GRADE && (
+              <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 0', lineHeight: 1.6 }}>
+                {GRADE_HIDDEN_NOTICE}
+              </p>
+            )}
+            <AdditiveList view={reportAdditives} />
+          </div>
+        )}
+
+        {/* ★★★ 영양·신호등 — **`reportNutrition.show` 가 참일 때만** 그린다.
+            그 판정에는 「서버가 저장했는가」와 「표기 기준을 아는가」가 둘 다 들어 있다.
+            여기에 `analysis.nutrition &&` 같은 조건을 «더하지» 말 것 — 관문이 두 곳으로
+            갈라져 한쪽만 고쳐지는 순간 기준 없는 숫자가 새어 나간다. */}
+        {reportNutrition.show && (
+          <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-nutrition">
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--space-1)' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>영양성분</span>
+              {/* ★ 기준 문구는 숫자와 «항상» 함께 나간다. 없으면 숫자의 뜻이 3~5배 달라진다. */}
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{reportNutrition.basisLabel}</span>
+            </div>
+            <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
+              <tbody>
+                {reportNutrition.rows.map((r) => (
+                  <tr key={r.key} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                    <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{r.label}</td>
+                    <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>
+                      {Math.round(r.value * 10) / 10} {r.unit}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* 신호등 — 판정된 항목만 온다(회색은 `lights` 에 들어오지 않는다). */}
+            {reportNutrition.showLights && (
+              <div style={{ marginTop: 'var(--space-2)' }} data-testid="report-traffic-light">
+                <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                  {reportNutrition.lights.map((l) => (
+                    <span key={l.key} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 13,
+                      padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)',
+                      background: `${LIGHT_HEX[l.color]}1a`, color: 'var(--text)',
+                    }}>
+                      <span style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_HEX[l.color] }} />
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+                {/* ★ 초록을 「안전 인증」으로 읽지 않게 하는 한 줄. 색이 뜨면 «항상» 함께 나간다. */}
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
+                  {TRAFFIC_LIGHT_CAPTION}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 신호등을 «못» 그린 이유. ⚠ 조건을 색 목록으로 걸지 않는다 — 침묵이 돌아온다. */}
+        {reportNutrition.note && (
+          <p data-testid="report-nutrition-note" style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
+            {reportNutrition.note}
+          </p>
+        )}
+      </>
+    )
+  }
+
   function renderReportForm(kind: 'new' | 'existing') {
     if (confirmed && analysis) {
       // ★★ 세션64b — 「저장됐다」와 「영양은 못 읽었다」를 **한 화면에서 동시에** 말한다.
@@ -697,93 +814,8 @@ export default function Scan() {
           {/* ───── 세션64c — 「보여줄 수 있는 부분만 보여주고, 나머지는 나중에」(제이 2026-08-24) ─────
               원재료 → 첨가물 → 영양·신호등 순. 알레르기가 «먼저»인 것은 안전 항목이기 때문이다. */}
 
-          {/* 원재료 — 라벨 표기 순서 그대로. 못 읽었으면 목록 자체를 그리지 않는다
-              (그 사실은 위 `describeReadback` 의 「원재료 0개」가 이미 말한다). */}
-          {analysis.ingredients.length > 0 && (
-            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-ingredients">
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>원재료</div>
-              <p style={{ fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                {analysis.ingredients.map((it) => (
-                  [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
-                    .filter(Boolean).join(' ')
-                )).join(', ')}
-              </p>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
-                사진에서 읽어낸 그대로예요. 라벨과 다르면 라벨이 맞아요.
-              </p>
-            </div>
-          )}
-
-          {/* 첨가물 — ⚠ 4색 등급은 계속 «꺼진» 상태다(`SHOW_RISK_GRADE`). 여기서 켜지 않는다.
-              외부 검토 6명이 일치해서 끈 것이다. 화면은 이름과 「일반적 용도」만 그린다. */}
-          {reportAdditives.total > 0 && (
-            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-additives">
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-                {SHOW_RISK_GRADE ? `첨가물 ${reportAdditives.total}종` : describeAdditiveCount(reportAdditives.total)}
-              </div>
-              {!SHOW_RISK_GRADE && (
-                <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 0', lineHeight: 1.6 }}>
-                  {GRADE_HIDDEN_NOTICE}
-                </p>
-              )}
-              <AdditiveList view={reportAdditives} />
-            </div>
-          )}
-
-          {/* ★★★ 영양·신호등 — **`reportNutrition.show` 가 참일 때만** 그린다.
-              그 판정에는 「서버가 저장했는가」와 「표기 기준을 아는가」가 둘 다 들어 있다.
-              여기에 `analysis.nutrition &&` 같은 조건을 «더하지» 말 것 — 관문이 두 곳으로
-              갈라져 한쪽만 고쳐지는 순간 기준 없는 숫자가 새어 나간다. */}
-          {reportNutrition.show && (
-            <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-nutrition">
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--space-1)' }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>영양성분</span>
-                {/* ★ 기준 문구는 숫자와 «항상» 함께 나간다. 없으면 숫자의 뜻이 3~5배 달라진다. */}
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{reportNutrition.basisLabel}</span>
-              </div>
-              <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
-                <tbody>
-                  {reportNutrition.rows.map((r) => (
-                    <tr key={r.key} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                      <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{r.label}</td>
-                      <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontWeight: 600 }}>
-                        {Math.round(r.value * 10) / 10} {r.unit}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* 신호등 — 판정된 항목만 온다(회색은 `lights` 에 들어오지 않는다). */}
-              {reportNutrition.showLights && (
-                <div style={{ marginTop: 'var(--space-2)' }} data-testid="report-traffic-light">
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-                    {reportNutrition.lights.map((l) => (
-                      <span key={l.key} style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 13,
-                        padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)',
-                        background: `${LIGHT_HEX[l.color]}1a`, color: 'var(--text)',
-                      }}>
-                        <span style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_HEX[l.color] }} />
-                        {l.label}
-                      </span>
-                    ))}
-                  </div>
-                  {/* ★ 초록을 「안전 인증」으로 읽지 않게 하는 한 줄. 색이 뜨면 «항상» 함께 나간다. */}
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
-                    {TRAFFIC_LIGHT_CAPTION}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 신호등을 «못» 그린 이유. ⚠ 조건을 색 목록으로 걸지 않는다 — 침묵이 돌아온다. */}
-          {reportNutrition.note && (
-            <p data-testid="report-nutrition-note" style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
-              {reportNutrition.note}
-            </p>
-          )}
+          {/* ★ 세션72 — 원재료·첨가물·영양 블록은 «보내기 전» 미리보기와 «같은» 렌더러를 쓴다(두 벌 금지). */}
+          {renderReadbackDetails(analysis, reportNutrition, reportAdditives)}
 
           {/* 「나머지는 나중에 알려드릴게요」로 끝내지 않고 «확인할 자리»를 준다. */}
           <button
@@ -865,7 +897,21 @@ export default function Scan() {
               {describeReadback(analysis)}
               {analysis.nutritionCount === 0 && ' — 영양성분표가 흐릿하면 다시 찍어 주시면 더 정확해져요.'}
             </p>
+            {/* ★ 세션72 — 제이 결정(2026-09-29): 읽기가 끝나면 «전체» 정보를 보여준다 + 「완전하지 않을 수 있음 ·
+                관리자 확인 후 확정 정보를 알려드림」 고지. 영양은 buildPreviewNutrition(기준 모르면 숫자·색 없음). */}
+            <p data-testid="report-preview-disclaimer" style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: 'var(--space-2) 0' }}>
+              {PREVIEW_DISCLAIMER}
+            </p>
             <AllergenCard result={analysis} />
+            {renderReadbackDetails(
+              analysis,
+              buildPreviewNutrition({
+                nutrition: analysis.nutrition,
+                basis: analysis.nutritionBasis,
+                trafficLight: analysis.trafficLight,
+              }),
+              buildAdditiveList({ additives: analysis.additives }),
+            )}
           </div>
         )}
 
@@ -897,19 +943,19 @@ export default function Scan() {
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           {!analysis ? (
             <button
-              type="button" className="btn btn-primary" style={{ flex: 1 }}
+              type="button" className="btn btn-primary" style={REPORT_BTN_MAIN}
               disabled={reportBusy !== null || (!labelImage && !nutritionImage)}
               onClick={analyzePhotos}
             >{reportBusy === 'analyze' ? '읽는 중…' : '읽어보기'}</button>
           ) : (
             <button
-              type="button" className="btn btn-primary" style={{ flex: 1 }}
+              type="button" className="btn btn-primary" style={REPORT_BTN_MAIN}
               disabled={!submitGate.ok}
               onClick={confirmReport}
             >{reportBusy === 'confirm' ? '보내는 중…' : '보내기'}</button>
           )}
           <button
-            type="button" className="btn btn-secondary"
+            type="button" className="btn btn-secondary" style={REPORT_BTN_CANCEL}
             disabled={reportBusy !== null}
             onClick={() => {
               setReportOpen(false); setLabelImage(null); setNutritionImage(null)
