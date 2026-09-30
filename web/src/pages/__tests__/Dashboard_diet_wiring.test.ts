@@ -29,4 +29,8 @@ describe("Phase H — Dashboard 식이 카드 배선", () => {
   it("H12 미구현 식이 코칭 표현 없음", () => {
     expect(card).not.toMatch(/식이 가이드|식단 코칭|식사 조언을 (드려|제공)/);
   });
+
+  it("H13 하단 추천 설명: 검진 켜짐이면 «검진·» 포함 (통합 엔진이 검진을 참조하므로)", () => {
+    expect(src).toContain('${CHECKUP_ENABLED ? "검진·" : ""}설문·식사 기록(최근 7일)');
+  });
 });

@@ -245,7 +245,7 @@ export default function Dashboard() {
           맞춤 추천 받기
         </button>
         <p style={{ color: "var(--text-muted)", fontSize: 12, textAlign: "center", marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
-          {MEAL_ENABLED ? "설문·식사 기록(최근 7일)·건강 목표를 함께 참조해 맞춤 영양제를 추천합니다." : "입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)"}
+          {MEAL_ENABLED ? `${CHECKUP_ENABLED ? "검진·" : ""}설문·식사 기록(최근 7일)·건강 목표를 함께 참조해 맞춤 영양제를 추천합니다.` : "입력한 항목을 바탕으로 맞춤 영양제를 추천합니다. (검진·설문 중 하나만 있어도 가능)"}
         </p>
       </div>
     </div>
