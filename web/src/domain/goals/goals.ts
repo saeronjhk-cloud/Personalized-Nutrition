@@ -43,6 +43,22 @@ export function sanitizeGoals(goals: readonly string[] | null | undefined): stri
   return GOAL_OPTIONS.map((g) => g.id).filter((id) => set.has(id));
 }
 
+/**
+ * 결과 화면 «반영한 목표» 표기용 (Phase G 후속 2026-09-30).
+ *  - null  → hidden (목표 출처 없음: MEAL_ENABLED=false 등 — 설문 안 목표를 그대로 씀)
+ *  - 유효 0개 → empty («건강 목표가 아직 없어요» 안내)
+ *  - 1개 이상 → 정의 순서 화면 라벨
+ */
+export type GoalSummary = { kind: "hidden" } | { kind: "empty" } | { kind: "goals"; labels: string[] };
+
+export function goalSummary(goals: readonly string[] | null): GoalSummary {
+  if (goals === null) return { kind: "hidden" };
+  const ids = sanitizeGoals(goals);
+  if (ids.length === 0) return { kind: "empty" };
+  const byId = new Map(GOAL_OPTIONS.map((g) => [g.id, g.label]));
+  return { kind: "goals", labels: ids.map((id) => byId.get(id) ?? id) };
+}
+
 export type GoalSource = "user_goals" | "survey_fallback" | "none";
 
 /**

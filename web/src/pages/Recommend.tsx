@@ -17,7 +17,7 @@ export default function Recommend() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error] = useState<string | null>(null);
   const [result, setResult] = useState<UnifiedResult | null>(null);
-  const [goalCount, setGoalCount] = useState<number | null>(null);
+  const [goals, setGoals] = useState<string[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,7 +35,7 @@ export default function Recommend() {
         setLoading(false);
         return;
       }
-      setGoalCount(r.inputs.goals === null ? null : r.inputs.goals.length);
+      setGoals(r.inputs.goals);
       setResult(runUnifiedRecommendation(composeUnifiedInput({ loaded: r.inputs })));
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function Recommend() {
 
   return (
     <div className="survey-container fade-in">
-      <RecommendSources result={result} goalCount={goalCount} />
+      <RecommendSources result={result} goals={goals} />
 
       <Results
         result={result}

@@ -69,7 +69,7 @@ function SurveyFlow() {
   // Phase G — 로그인 여부(null=확인 중). 로그인 + 식사 기록 ON 이면 목표 단계를 건너뛴다(D2).
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
   const [unified, setUnified] = useState<UnifiedResult | null>(null)
-  const [goalCount, setGoalCount] = useState<number | null>(null)
+  const [goals, setGoals] = useState<string[] | null>(null)
   const [savedAnswers, setSavedAnswers] = useState<SurveyAnswers | null>(null)
   const skipGoals = shouldSkipGoalStep({ loggedIn: loggedIn === true, mealEnabled: MEAL_ENABLED })
 
@@ -129,7 +129,7 @@ function SurveyFlow() {
         // 저장 스냅샷: 이 추천에 실제로 쓰인 목표를 설문 행에 남긴다(과거 결과 재현·집계 호환).
         const effective = loaded.inputs.goals !== null ? withGoals(answers, loaded.inputs.goals) : answers
         setUnified(res)
-        setGoalCount(loaded.inputs.goals === null ? null : loaded.inputs.goals.length)
+        setGoals(loaded.inputs.goals)
         setSavedAnswers(effective)
         setResult(res)
         setStep('results')
@@ -137,7 +137,7 @@ function SurveyFlow() {
       } else {
         const data = await getRecommendation(answers)
         setUnified(null)
-        setGoalCount(null)
+        setGoals(null)
         setSavedAnswers(answers)
         setResult(data)
         setStep('results')
@@ -154,7 +154,7 @@ function SurveyFlow() {
     setAnswers({ ...INITIAL_ANSWERS })
     setResult(null)
     setUnified(null)
-    setGoalCount(null)
+    setGoals(null)
     setSavedAnswers(null)
     setError(null)
     setStep('body')
@@ -175,7 +175,7 @@ function SurveyFlow() {
       <>
         {unified && !error && (
           <div className="survey-container" style={{ paddingBottom: 0 }}>
-            <RecommendSources result={unified} goalCount={goalCount} />
+            <RecommendSources result={unified} goals={goals} />
           </div>
         )}
         <Results result={result} answers={savedAnswers ?? answers} error={error} onRestart={restart} />

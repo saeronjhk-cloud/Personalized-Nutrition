@@ -182,3 +182,23 @@ describe("Phase G · 목표 이전 평가셋", () => {
     }
   });
 });
+
+// ── Phase G 후속 (2026-09-30): 결과 화면 «반영한 목표» 표기 ─────────────────────
+import { goalSummary } from "../../goals/goals";
+
+describe("Phase G 후속 — 반영한 목표 표기 (G16~G18)", () => {
+  it("G16 목표 있음 → 정의 순서 라벨, 알 수 없는 값·중복 제거", () => {
+    expect(goalSummary(["근육증가", "피로회복", "없는목표", "근육증가"])).toEqual({
+      kind: "goals",
+      labels: ["피로회복", "근육증가"],
+    });
+  });
+  it("G17 체중관리는 화면 라벨(«체중 / 체지방 관리»)로", () => {
+    expect(goalSummary(["체중관리"])).toEqual({ kind: "goals", labels: ["체중 / 체지방 관리"] });
+  });
+  it("G18 빈 배열 → empty(목표 없음 안내), null → hidden(MEAL OFF 등 목표 출처 없음)", () => {
+    expect(goalSummary([])).toEqual({ kind: "empty" });
+    expect(goalSummary(["없는목표"])).toEqual({ kind: "empty" });
+    expect(goalSummary(null)).toEqual({ kind: "hidden" });
+  });
+});

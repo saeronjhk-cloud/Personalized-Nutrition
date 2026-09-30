@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
 import type { UnifiedResult } from "../domain/unified/recommend";
+import { goalSummary } from "../domain/goals/goals";
 
 /**
  * 통합 추천 «참조한 기록» 안내 (Phase G) — /recommend 와 /survey(로그인) 결과 공용.
  * 식이는 실제 기여했을 때만(저확신 제외) ✓.
  */
-export default function RecommendSources({ result, goalCount }: { result: UnifiedResult; goalCount: number | null }) {
+export default function RecommendSources({ result, goals }: { result: UnifiedResult; goals: string[] | null }) {
+  const goal = goalSummary(goals);
   const dietUsed = result.sources.diet && !result.dietLowConfidence;
   const parts: string[] = [`설문 ${result.sources.survey ? "✓" : "–"}`];
   if (CHECKUP_ENABLED) parts.push(`검진 ${result.sources.checkup ? "✓" : "–"}`);
@@ -32,7 +34,13 @@ export default function RecommendSources({ result, goalCount }: { result: Unifie
           🍽️ 식사 기록이 아직 부족해(2일 미만) 이번 추천엔 반영하지 못했어요. 며칠만 더 기록하면 식이까지 반영해 더 정밀해집니다.
         </div>
       )}
-      {MEAL_ENABLED && goalCount === 0 && (
+      {MEAL_ENABLED && goal.kind === "goals" && (
+        <div className="card" style={box("rgba(142, 202, 230, 0.05)", "rgba(142, 202, 230, 0.20)")}>
+          🎯 반영한 목표: {goal.labels.join(" · ")}{" "}
+          <Link to="/meal#goals" className="text-link">(식사 기록에서 수정)</Link>
+        </div>
+      )}
+      {MEAL_ENABLED && goal.kind === "empty" && (
         <div className="card" style={box("rgba(142, 202, 230, 0.05)", "rgba(142, 202, 230, 0.20)")}>
           🎯 건강 목표가 아직 없어요. <Link to="/meal#goals" className="text-link">식사 기록에서 목표를 정하면</Link> 추천이 목표에 맞춰집니다.
         </div>
