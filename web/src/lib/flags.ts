@@ -38,3 +38,11 @@ export const MEAL_ENABLED = import.meta.env.VITE_MEAL_ENABLED === 'true'
  *   - off면 식후 1장(Path B)만. 활성화: 배포 환경변수 VITE_MEAL_CMIN=true.
  */
 export const MEAL_CMIN_ENABLED = import.meta.env.VITE_MEAL_CMIN === 'true'
+
+/**
+ * GOAL_COACHING_ENABLED: 목표 기반 식사 코칭 카드(/meal «오늘의 식사 코칭») 노출. 기본 false.
+ *   - 판정: domain/coaching/goal_meal_coaching.ts (엔진 결정론). 값: goal_coaching_params.ts.
+ *   - ⛔ 서박사 확정(IP/웹앱트랙_서박사_질의패킷_목표식사코칭_v1.md E1·E3·E4·G5) 전 운영 ON 금지.
+ *   - 활성화: 배포 환경변수 VITE_GOAL_COACHING_ENABLED=true (MEAL_ENABLED 도 켜져 있어야 의미 있음).
+ */
+export const GOAL_COACHING_ENABLED = import.meta.env.VITE_GOAL_COACHING_ENABLED === 'true'

@@ -12,6 +12,8 @@ import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
 import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
+import GoalCoachingCard from '../components/GoalCoachingCard'
+import { GOAL_COACHING_ENABLED } from '../lib/flags'
 import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
@@ -240,6 +242,9 @@ export default function Meal() {
 
       {/* Phase G — 건강 목표는 식사 기록에서 관리 (맞춤 영양제 추천이 참조) */}
       {!result && <GoalsCard />}
+
+      {/* 목표 기반 식사 코칭 v1 — 기본 OFF, 서박사 확정 전 운영 ON 금지 */}
+      {!result && GOAL_COACHING_ENABLED && <GoalCoachingCard />}
 
       {closed && !result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
