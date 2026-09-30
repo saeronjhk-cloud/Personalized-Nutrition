@@ -7,13 +7,14 @@ import {
   type AnalyzeResult,
 } from '../lib/nutrilens'
 import { applyAlternate } from '../lib/foodCorrection'
+import { renameFood, removeFood, addFood, canSaveFoods, type ResolvedFood } from '../lib/foodEdit'
 import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
 import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
 import GoalCoachingCard from '../components/GoalCoachingCard'
-import { GOAL_COACHING_ENABLED } from '../lib/flags'
+import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED } from '../lib/flags'
 import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
@@ -123,6 +124,13 @@ export default function Meal() {
 
   // 세션52 — 구별 불가 쌍 정정. result 자체를 갈아끼워야 onSave 가 정정본을 저장한다.
   // (컴포넌트 안에서만 이름을 바꾸면 저장은 옛 값을 그대로 올린다 — 규칙70 과 같은 형태의 사고)
+  // 음식 편집 v1 — 불변 갱신(상태 통째 교체 → 저장·합계 자동 반영)
+  const editHandlers = MEAL_EDIT_ENABLED ? {
+    onRename: (i: number, food: ResolvedFood) => setResult((prev) => (prev ? renameFood(prev, i, food) : prev)),
+    onRemove: (i: number) => setResult((prev) => (prev ? removeFood(prev, i) : prev)),
+    onAdd: (food: ResolvedFood) => setResult((prev) => (prev ? addFood(prev, food) : prev)),
+  } : undefined
+
   function onCorrect(index: number, altName: string) {
     setResult((prev) => (prev ? applyAlternate(prev, index, altName) : prev))
     // ⚠ 음식 이름은 넘기지 않는다 — ALLOWED_PROP_KEYS 가 자유 텍스트를 막는 정책 그대로다.
@@ -131,7 +139,7 @@ export default function Meal() {
   }
 
   async function onSave() {
-    if (!result || !blobRef.current || !shaRef.current || !mealIdRef.current) return
+    if (!result || !canSaveFoods(result) || !blobRef.current || !shaRef.current || !mealIdRef.current) return
     setBusy(true)
     try {
       const r = await saveMeal({
@@ -344,6 +352,7 @@ export default function Meal() {
             result={result} previewUrl={previewUrl} slot={slot} onSlot={setSlot}
             saved={saved} busy={busy} onSave={onSave} onReset={reset}
             onCorrect={onCorrect}
+            edit={editHandlers}
           />
           {/* 세션54 — 베타 패널 피드백. 저장 전후 무관하게 보인다(정정 칩은 저장 전에만). job_id 로 사진과 잇는다. */}
           <BetaFeedback jobId={jobIdRef.current} foods={result.foods.map((f) => f.name_ko)} page="/meal" />

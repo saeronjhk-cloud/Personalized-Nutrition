@@ -124,6 +124,8 @@ export function applyAlternate(
   // 사용자가 직접 고른 이름이다. DB 매칭 신뢰도 표시가 남아 있으면 거짓말이 된다.
   swapped.match_confidence = 'user_selected'
   ;(swapped as any).name_source = 'user_correction'
+  // 음식 편집 v1 — 최초 AI 이름 보존(칩을 되돌려도 유지, 이름 바꾸기와 같은 정정 기록 필드)
+  ;(swapped as any).ai_name = (current as any).ai_name ?? current.name_ko
   swapped.alternates = [back, ...alts.filter((a) => a.name_ko !== altName)]
 
   const nextFoods = foods.slice()

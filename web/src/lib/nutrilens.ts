@@ -23,6 +23,13 @@ export interface MealFood {
   db_name?: string | null
   match_confidence?: string
   quality_flags?: string[]
+  /** 사진 추정량(g) — 엔진이 채움. 이름 바꾸기 때 유지(음식 편집 v1) */
+  estimated_serving_g?: number | null
+  /** 음식 편집 v1 정정 표식 — 'renamed'(AI 이름을 바꿈) · 'added'(사용자가 추가) */
+  user_edit?: 'renamed' | 'added'
+  /** 최초 AI 이름(바꾼 음식만) — 모델 개선용 정정 기록 */
+  ai_name?: string
+  name_source?: string
 }
 export interface MealSummary {
   total_calories_kcal: number

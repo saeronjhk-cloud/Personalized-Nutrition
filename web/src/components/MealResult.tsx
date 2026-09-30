@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
 import { alternatesOf } from '../lib/foodCorrection'
+import { canSaveFoods, renameRequestServing, type ResolvedFood } from '../lib/foodEdit'
+import FoodEditPanel from './FoodEditPanel'
 
 type Slot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
@@ -33,8 +36,18 @@ export default function MealResult(props: {
   onReset: () => void
   /** 세션52 — 구별 불가 쌍 정정. 없으면 후보 칩을 그리지 않는다. */
   onCorrect?: (index: number, altName: string) => void
+  /** 음식 편집 v1 (MEAL_EDIT_ENABLED) — 이름 바꾸기·삭제·추가. 저장 전에만 보인다. */
+  edit?: {
+    onRename: (index: number, food: ResolvedFood) => void
+    onRemove: (index: number) => void
+    onAdd: (food: ResolvedFood) => void
+  }
 }) {
-  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect } = props
+  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect, edit } = props
+  // 편집 중인 행: 음식 index · 'add' · null
+  const [editing, setEditing] = useState<number | 'add' | null>(null)
+  const editable = !!edit && !saved
+  const canSave = canSaveFoods(result)
   return (
     <>
       {previewUrl && (
@@ -64,6 +77,17 @@ export default function MealResult(props: {
                 {isLowConfidence(f) && (
                   <span style={{ fontSize: 11, color: 'var(--warning)', background: 'var(--border-light)', padding: 'var(--space-1) var(--space-2)', borderRadius: 'var(--radius-pill)' }}>확인 필요</span>
                 )}
+                {f.user_edit && (
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{f.user_edit === 'added' ? '직접 추가' : '직접 수정'}</span>
+                )}
+                {editable && editing !== i && (
+                  <span style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--space-1)' }}>
+                    <button type="button" aria-label={`${f.name_ko} 이름 바꾸기`} onClick={() => setEditing(i)}
+                      style={{ fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-2)', cursor: 'pointer', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-secondary)' }}>수정</button>
+                    <button type="button" aria-label={`${f.name_ko} 삭제`} onClick={() => { setEditing(null); edit!.onRemove(i) }}
+                      style={{ fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-2)', cursor: 'pointer', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-secondary)' }}>삭제</button>
+                  </span>
+                )}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', fontSize: 13, color: 'var(--text-secondary)' }}>
                 {MACROS.map(({ key, label, unit }) => (
@@ -92,9 +116,25 @@ export default function MealResult(props: {
                   ))}
                 </div>
               )}
+              {editable && editing === i && (
+                <FoodEditPanel mode="rename" initialQuery="" servingG={renameRequestServing(f)}
+                  onPicked={(food) => { edit!.onRename(i, food); setEditing(null) }}
+                  onCancel={() => setEditing(null)} />
+              )}
             </li>
           ))}
         </ul>
+        {editable && result.foods.length === 0 && (
+          <p style={{ fontSize: 13, color: 'var(--warning)', marginTop: 'var(--space-2)' }}>음식을 하나 이상 남겨 주세요.</p>
+        )}
+        {editable && (editing === 'add' ? (
+          <FoodEditPanel mode="add" servingG={null}
+            onPicked={(food) => { edit!.onAdd(food); setEditing(null) }}
+            onCancel={() => setEditing(null)} />
+        ) : (
+          <button type="button" className="btn btn-secondary" style={{ width: '100%', marginTop: 'var(--space-3)', minHeight: 44 }}
+            onClick={() => setEditing('add')}>+ 빠진 음식 추가</button>
+        ))}
         <p style={{ fontSize: 'var(--font-caption)', color: 'var(--text-muted)', marginTop: 'var(--space-3)', lineHeight: 1.6 }}>
           사진 분석은 추정치이며 실제와 다를 수 있어요. 진단이 아닌 생활관리 참고용입니다.
         </p>
@@ -118,7 +158,7 @@ export default function MealResult(props: {
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
             <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={onReset} disabled={busy}>다시</button>
-            <button type="button" className="btn btn-primary" style={{ flex: 2 }} onClick={onSave} disabled={busy}>
+            <button type="button" className="btn btn-primary" style={{ flex: 2 }} onClick={onSave} disabled={busy || !canSave}>
               {busy ? '저장 중…' : '기록에 저장'}
             </button>
           </div>

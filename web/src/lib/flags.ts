@@ -46,3 +46,11 @@ export const MEAL_CMIN_ENABLED = import.meta.env.VITE_MEAL_CMIN === 'true'
  *   - 활성화: 배포 환경변수 VITE_GOAL_COACHING_ENABLED=true (MEAL_ENABLED 도 켜져 있어야 의미 있음).
  */
 export const GOAL_COACHING_ENABLED = import.meta.env.VITE_GOAL_COACHING_ENABLED === 'true'
+
+/**
+ * MEAL_EDIT_ENABLED: 식사 결과 «음식 편집»(이름 바꾸기·삭제·추가) 노출. 기본 false.
+ *   - 선행 배포: 엔진 /v1/food/{search,resolve}(NutriLens Railway) + Edge food-lookup.
+ *     배포 확인 전 켜면 «지금은 음식을 찾을 수 없어요»만 보인다.
+ *   - 설계 IP/integration/meal_food_edit_design_v1.md · 활성화: VITE_MEAL_EDIT_ENABLED=true
+ */
+export const MEAL_EDIT_ENABLED = import.meta.env.VITE_MEAL_EDIT_ENABLED === 'true'
