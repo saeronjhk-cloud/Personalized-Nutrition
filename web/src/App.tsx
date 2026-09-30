@@ -37,6 +37,7 @@ import Dashboard from './pages/Dashboard'
 import Recommend from './pages/Recommend'
 import Insights from './pages/Insights'
 import Scan from './pages/Scan'
+import Admin from './pages/Admin'   // 세션72d — 메뉴에 없음 · 서버가 ADMIN_EMAILS 로 판정
 import MyReports from './pages/MyReports'
 import Meal from './pages/Meal'
 import WeeklyReport from './pages/WeeklyReport'
@@ -274,6 +275,7 @@ export default function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<LoginEmail />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

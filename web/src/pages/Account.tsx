@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { MEAL_ENABLED } from '../lib/flags'
+import { adminWhoami } from '../lib/meokseonAdmin'   // 세션72d
 import { hasServerMealConsent, revokeMealConsentServer, revokeMealConsent } from '../lib/mealConsent'
 
 // 계정 페이지: 로그인 상태 표시 + 로그아웃 + 회원 탈퇴(삭제권).
@@ -16,6 +17,7 @@ export default function Account() {
   const [error, setError] = useState<string | null>(null)
   const [mealConsented, setMealConsented] = useState(false)
   const [mealMsg, setMealMsg] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)   // 세션72d — 관리자에게만 /admin 링크(판정은 서버)
 
   useEffect(() => {
     let alive = true
@@ -23,6 +25,7 @@ export default function Account() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!alive) return
       setEmail(user?.email ?? null)
+      if (user) adminWhoami().then((w) => { if (alive) setIsAdmin(w.admin) }).catch(() => { /* 일반 사용자: 403 → 링크 없음 */ })
       if (user && MEAL_ENABLED) {
         try { setMealConsented(await hasServerMealConsent()) } catch { /* noop */ }
       }
@@ -88,6 +91,7 @@ export default function Account() {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-6)' }}>
               <button type="button" className="btn btn-secondary" onClick={handleLogout}>로그아웃</button>
+              {isAdmin && <button type="button" className="btn btn-secondary" style={{ marginTop: 'var(--space-2)' }} onClick={() => navigate('/admin')}>관리자 화면</button>}
             </div>
 
             {MEAL_ENABLED && (
