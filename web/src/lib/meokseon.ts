@@ -1,5 +1,6 @@
 import { getDeviceId } from './deviceId'
 import { getMeokseonAccessToken } from './meokseonAuth'
+import { makeArchiveCopy } from './reportArchive'   // 세션72f — 관리자 검토용 축소본
 import { normalizeContributionPage, type MyContributionPage } from '../domain/meokseon/contributions'
 import { classifyAuthFailure, type MeokseonAuthCode } from '../domain/meokseon/reportAuth'
 
@@ -488,6 +489,8 @@ export async function analyzePhotoReport(params: {
   barcode?: string | null
   labelImage?: File | null
   nutritionImage?: File | null
+  /** 세션72f — 테스트 주입용. 기본은 makeArchiveCopy(실패·미지원이면 null → 축소본 없이 전송). */
+  makeArchive?: (f: File) => Promise<Blob | null>
 }): Promise<MsPhotoAnalysis> {
   if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
 
@@ -508,6 +511,14 @@ export async function analyzePhotoReport(params: {
   if (labelImage) fd.append('label_image', labelImage)
   if (nutritionImage) fd.append('nutrition_image', nutritionImage)
   if (barcode) fd.append('barcode', barcode)
+  // ★ 세션72f — 관리자 검토용 축소본(서버가 제보 확정 시에만 90일 보관). OCR 은 위 원본으로 한다.
+  const mk = params.makeArchive ?? makeArchiveCopy
+  const [la, na] = await Promise.all([
+    labelImage ? mk(labelImage).catch(() => null) : Promise.resolve(null),
+    nutritionImage ? mk(nutritionImage).catch(() => null) : Promise.resolve(null),
+  ])
+  if (la) fd.append('label_archive', la, 'label.jpg')
+  if (na) fd.append('nutrition_archive', na, 'nutrition.jpg')
   fd.append('save', 'false')   // ★ 세션64 — 저장은 2단계(confirm)에서만 일어난다
   // ★ 세션64b — 제보자 식별자. 이게 없으면 서버 `contributions.device_id` 가 null 로 남고
   //   「내 제보」가 영원히 빈 목록이 된다(웹 제보는 `user_id` 도 null 이다 — 계정 체계가 다르다).

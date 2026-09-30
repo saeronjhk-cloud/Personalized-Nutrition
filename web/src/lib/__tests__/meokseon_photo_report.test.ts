@@ -156,6 +156,32 @@ describe('analyzePhotoReport — 요청 형태 (서버 계약과 일치하는가
     expect(fd.get('label_image')).toBeNull()
     expect(fd.get('nutrition_image')).toBeInstanceOf(File)
   })
+
+  it('세션72f — 축소본이 만들어지면 *_archive 로 함께 보낸다(원본 필드는 그대로)', async () => {
+    const { analyzePhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ analysis: {}, analysis_token: 't1' }))
+    const small = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 1])], { type: 'image/jpeg' })
+    await analyzePhotoReport({ barcode: '1', labelImage: file('l.jpg', 10), nutritionImage: file('n.jpg', 10), makeArchive: async () => small })
+    const fd = fetchMock.mock.calls[0][1].body as FormData
+    expect(fd.get('label_image')).toBeInstanceOf(File)
+    expect(fd.get('label_archive')).toBeInstanceOf(Blob)
+    expect(fd.get('nutrition_archive')).toBeInstanceOf(Blob)
+  })
+
+  it('세션72f — 축소본을 못 만들면(null·예외) 축소본 없이 그대로 제보한다', async () => {
+    const { analyzePhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ analysis: {}, analysis_token: 't1' }))
+    await analyzePhotoReport({ barcode: '1', labelImage: file('l.jpg', 10), nutritionImage: file('n.jpg', 10), makeArchive: async () => { throw new Error('x') } })
+    const fd = fetchMock.mock.calls[0][1].body as FormData
+    expect(fd.get('label_archive')).toBeNull()
+    expect(fd.get('nutrition_archive')).toBeNull()
+    expect(fd.get('label_image')).toBeInstanceOf(File)
+  })
+
+  it('세션72f — 기본 축소기는 createImageBitmap 없는 환경에서 즉시 null(테스트가 멈추지 않는다)', async () => {
+    const { makeArchiveCopy } = await import('../reportArchive')
+    expect(await makeArchiveCopy(file('l.jpg', 10))).toBeNull()
+  })
 })
 
 describe('★ §3-a. 1단계도 실패를 성공이라고 말하지 않는다', () => {

@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { AdminApiError, gateFromError, describeProposed } from '../meokseonAdmin'
+import { AdminApiError, gateFromError, describeProposed, initialEdit, buildOverrideValues, ALLERGENS_19 } from '../meokseonAdmin'
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -56,5 +56,47 @@ describe('배선', () => {
     const acc = readFileSync(join(SRC, 'pages/Account.tsx'), 'utf8')
     expect(acc).toContain('adminWhoami()')
     expect(acc).toMatch(/\{isAdmin && <button[^\n]*navigate\('\/admin'\)/)
+  })
+})
+
+describe('세션72f — 사진 보며 정정(편집기 순수 함수)', () => {
+  it('19종 목록은 서버 ocrParser.ALLERGEN_NAMES 키와 같다(이름 한 글자라도 다르면 서버가 400)', () => {
+    let src = ''
+    try { src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../../../backends/먹선/meokseon-server/src/services/ocrParser.js'), 'utf8') } catch { return }
+    const m = src.match(/const ALLERGEN_NAMES = \{([\s\S]*?)\n\};/)
+    if (!m) return   // 서버 저장소가 옆에 없는 환경(CI 단독 체크아웃)에서는 건너뜀
+    const keys = [...m[1].matchAll(/^\s*'([^']+)'\s*:/gm)].map((x) => x[1])
+    expect(keys).toEqual([...ALLERGENS_19])
+  })
+  it('알레르기: 제보값으로 초기화 · 그대로면 null(정정 없이 승인) · 바꾸면 19종 이름으로 contains/may_contain', () => {
+    const a = { proposed: { inspected: true, allergens: [{ name: '밀', evidence_level: 'contains' }, { name: '대두', evidence_level: 'may_contain' }] } }
+    const init = initialEdit('allergens', a)
+    expect(init['밀']).toBe('contains'); expect(init['대두']).toBe('may_contain'); expect(init['우유']).toBe('none')
+    expect(buildOverrideValues('allergens', { ...init }, init)).toBeNull()
+    expect(buildOverrideValues('allergens', { ...init, 우유: 'contains', 대두: 'none' }, init))
+      .toEqual({ allergens: { contains: ['우유', '밀'], may_contain: [] } })
+  })
+  it('알레르기: 이미 정정된 행은 정정값(effective)으로 초기화', () => {
+    const a = { proposed: { allergens: [] }, effective: { proposed: { allergens: [{ name: '우유', evidence_level: 'contains' }] } } }
+    expect(initialEdit('allergens', a)['우유']).toBe('contains')
+  })
+  it('원재료: 제보 이름을 쉼표로 · 바뀌면 ingredients_text', () => {
+    const a = { proposed: { ingredients: ['밀가루', '설탕'] } }
+    const init = initialEdit('ingredients', a)
+    expect(init).toBe('밀가루, 설탕')
+    expect(buildOverrideValues('ingredients', init, init)).toBeNull()
+    expect(buildOverrideValues('ingredients', '밀가루(미국산), 설탕', init)).toEqual({ ingredients_text: '밀가루(미국산), 설탕' })
+  })
+  it('영양: 바뀐 칸만 · 빈칸은 null(비움) · 숫자 아님은 throw', () => {
+    const a = { proposed: { nutrition: { total_fat: 32, sodium: 100 } } }
+    const init = initialEdit('nutrition', a)
+    expect(buildOverrideValues('nutrition', { ...init }, init)).toBeNull()
+    expect(buildOverrideValues('nutrition', { ...init, total_fat: '3.2', sodium: '' }, init)).toEqual({ total_fat: 3.2, sodium: null })
+    expect(() => buildOverrideValues('nutrition', { ...init, total_fat: 'abc' }, init)).toThrow()
+  })
+  it('배선: Admin 화면이 사진 패널·정정 편집기를 쓰고, 정정이 있으면 override 후 승인', () => {
+    const src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../pages/Admin.tsx'), 'utf8')
+    expect(src).toMatch(/<PhotoPanel productId=/)
+    expect(src).toMatch(/if \(action === 'approve' && ov\) await overrideReview\(/)
   })
 })
