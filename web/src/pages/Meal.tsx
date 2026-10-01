@@ -14,7 +14,8 @@ import MealConsentGate from '../components/MealConsentGate'
 import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
 import GoalCoachingCard from '../components/GoalCoachingCard'
-import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED } from '../lib/flags'
+import MealGrammarCard from '../components/MealGrammarCard'
+import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED } from '../lib/flags'
 import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
@@ -253,6 +254,7 @@ export default function Meal() {
 
       {/* 목표 기반 식사 코칭 v1 — 기본 OFF, 서박사 확정 전 운영 ON 금지 */}
       {!result && GOAL_COACHING_ENABLED && <GoalCoachingCard />}
+      {!result && MEAL_GRAMMAR_ENABLED && <MealGrammarCard />}
 
       {closed && !result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>

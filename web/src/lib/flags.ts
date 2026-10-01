@@ -54,3 +54,10 @@ export const GOAL_COACHING_ENABLED = import.meta.env.VITE_GOAL_COACHING_ENABLED 
  *   - 설계 IP/integration/meal_food_edit_design_v1.md · 활성화: VITE_MEAL_EDIT_ENABLED=true
  */
 export const MEAL_EDIT_ENABLED = import.meta.env.VITE_MEAL_EDIT_ENABLED === 'true'
+
+/**
+ * MEAL_GRAMMAR_ENABLED: 한식 끼니 문법 P1 카드(/meal «오늘의 밥상 코칭» — 단백질·채소 반찬 + 사진 검증) 노출. 기본 false.
+ *   - 설계 IP/integration/meal_grammar_p1_design_v1.md · 평가 IP/integration/meal_grammar_p1_eval_v1.md
+ *   - 활성화: VITE_MEAL_GRAMMAR_ENABLED=true (MEAL_ENABLED 도 켜져 있어야 의미 있음). 서박사 문구 회신 전 운영 ON 금지.
+ */
+export const MEAL_GRAMMAR_ENABLED = import.meta.env.VITE_MEAL_GRAMMAR_ENABLED === 'true'
