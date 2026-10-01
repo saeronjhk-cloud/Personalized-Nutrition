@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import {
-  listMeals, deleteMeal, summarizeMeals, slotLabel, titleOf, kcalOf,
+  listMeals, deleteMeal, summarizeMeals, slotLabel, titleOf, kcalOf, isAdjusted,
   type MealRecord, type MealStat,
 } from '../lib/mealHistory'
 import { adjustSliderSingle, adjustPerFood, suggestPhotoAi, suggestPhotoAiHybrid, confirmPhotoAi, foodItemId, splitRatio } from '../lib/mealLeftover'
-import { MEAL_CMIN_ENABLED } from '../lib/flags'
+import { MEAL_CMIN_ENABLED, MEAL_SAVED_EDIT_ENABLED } from '../lib/flags'
+import MealSavedEditPanel from './MealSavedEditPanel'
 import { track } from '../lib/events'
 import type { MealSummary, MealFood } from '../lib/nutrilens'
 
@@ -34,8 +35,8 @@ const MODES: { key: Mode; label: string }[] = [
 ]
 
 // 진입칩 라벨 — 목적("먹은 양")은 항상 유지, 보정 시 상태 표기.
-function entryLabel(a?: AdjustState): string {
-  if (!a?.adjusted) return '먹은 양'
+function entryLabel(a?: AdjustState, dbAdjusted = false): string {
+  if (!a?.adjusted) return dbAdjusted ? '먹은 양 · 보정됨' : '먹은 양'
   if (a.adjKind === 'perfood') return '먹은 양 · 수정됨'
   if (a.adjKind === 'ratio' && typeof a.adjPct === 'number' && a.adjPct < 100) return `먹은 양 · ${a.adjPct}%`
   return '먹은 양'
@@ -64,6 +65,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
   const [loading, setLoading] = useState(true)
   const [openId, setOpenId] = useState<string | null>(null)
   const [adj, setAdj] = useState<Record<string, AdjustState>>({})
+  const [editId, setEditId] = useState<string | null>(null)
 
   async function load() {
     setLoading(true)
@@ -86,7 +88,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
   // 카드 열기/닫기 — 열 때 항상 초기 뷰(세그먼트 '전체', 미리보기 리셋). Stateless.
   function toggleCard(r: MealRecord) {
     if (openId === r.id) { setOpenId(null); return }
-    setOpenId(r.id)
+    setOpenId(r.id); setEditId(null)
     track('meal_leftover_open', { mode: 'all' })
     patch(r.id, { mode: 'all', photoPreview: false, suggestedNote: undefined, previewKcal: undefined, err: undefined })
   }
@@ -162,12 +164,12 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
           const a = adj[r.id]
           const isOpen = openId === r.id
           const pct = a?.ratioPct ?? 100
-          const adjusted = !!a?.adjusted
+          const adjusted = !!a?.adjusted || isAdjusted(r)
           const mode: Mode = a?.mode ?? 'all'
           const foods = (r.foods ?? []) as MealFood[]
           const pcts = a?.perFoodPct ?? foods.map(() => 100)
           const perFoodAvail = foods.length >= 1
-          const hasAdjustment = adjusted && !(a?.adjKind === 'ratio' && a?.adjPct === 100)
+          const hasAdjustment = a?.adjusted ? !(a?.adjKind === 'ratio' && a?.adjPct === 100) : isAdjusted(r)
           const panelId = `meal-panel-${r.id}`
           return (
             <li key={r.id} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
@@ -188,7 +190,16 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
               </div>
 
               {/* 액션 행: '먹은 양' 진입점(상시·상태 겸용, 우측 정렬) */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-2)' }}>
+                {MEAL_SAVED_EDIT_ENABLED && (
+                  <button type="button" aria-label="음식 수정" aria-expanded={editId === r.id}
+                    onClick={() => { setOpenId(null); setEditId(editId === r.id ? null : r.id) }}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', minHeight: 48, padding: '0 var(--space-3)',
+                      background: 'var(--border-light)', color: 'var(--text-secondary)', border: 'none',
+                      borderRadius: 'var(--radius-sm, 8px)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                    }}>음식 수정</button>
+                )}
                 <button type="button" aria-label="먹은 양 조절" aria-expanded={isOpen} aria-controls={panelId}
                   onClick={() => toggleCard(r)}
                   style={{
@@ -198,10 +209,15 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
                     fontWeight: hasAdjustment ? 600 : 500, cursor: 'pointer',
                   }}>
                   <AdjustIcon />
-                  {entryLabel(a)}
+                  {entryLabel(a, isAdjusted(r))}
                   <Chevron open={isOpen} />
                 </button>
               </div>
+
+              {MEAL_SAVED_EDIT_ENABLED && editId === r.id && (
+                <MealSavedEditPanel record={r} onClose={() => setEditId(null)}
+                  onSaved={() => { setEditId(null); setAdj((s) => { const n = { ...s }; delete n[r.id]; return n }); load() }} />
+              )}
 
               {isOpen && (
                 <div id={panelId} role="region" aria-label="먹은 양 조절"

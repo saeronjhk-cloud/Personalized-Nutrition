@@ -1,5 +1,6 @@
 // NutriLens 사진 식사분석 클라이언트 — 라이브 Edge 소비. 로그인 필요. 저장=meal-photos+meal_log.
 import { supabase } from './supabase'
+import { assignFoodItemIds } from './foodEdit'
 
 const BASE = import.meta.env.VITE_SUPABASE_URL || ''
 const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -30,6 +31,10 @@ export interface MealFood {
   /** 최초 AI 이름(바꾼 음식만) — 모델 개선용 정정 기록 */
   ai_name?: string
   name_source?: string
+  /** 음식 고정 id(food_01…) — 잔반 per_food 매핑 키. 저장 시 부여(저장 후 편집 v1) */
+  food_item_id?: string
+  /** 'after_save' = 기록 목록에서 저장 뒤에 고친 음식 (정정 데이터 점검용) */
+  edit_stage?: 'after_save'
 }
 export interface MealSummary {
   total_calories_kcal: number
@@ -200,7 +205,7 @@ export async function saveMeal(params: {
     eaten_at: params.eatenAt ?? new Date().toISOString(),
     meal_slot: params.mealSlot ?? null,
     meal_session_id: params.mealSessionId ?? null,
-    foods: params.result.foods,
+    foods: assignFoodItemIds(params.result.foods ?? []),
     summary: params.result.summary,
     photo_path: path,
     photo_sha256: params.photo_sha256,

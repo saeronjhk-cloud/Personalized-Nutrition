@@ -56,6 +56,14 @@ export const GOAL_COACHING_ENABLED = import.meta.env.VITE_GOAL_COACHING_ENABLED 
 export const MEAL_EDIT_ENABLED = import.meta.env.VITE_MEAL_EDIT_ENABLED === 'true'
 
 /**
+ * MEAL_SAVED_EDIT_ENABLED: 기록 목록(내 최근 식사)에서 저장된 식사의 음식 편집(이름 바꾸기·삭제·추가). 기본 false.
+ *   - 재사용: Edge food-lookup(운영 가동). DB 변경 없음(RLS meal_own UPDATE).
+ *   - 설계 IP/integration/meal_saved_edit_design_v1.md · 활성화: VITE_MEAL_SAVED_EDIT_ENABLED=true
+ *   - 켜는 곳 3곳: Vercel 환경변수 · web/.env.local(앱 빌드) · 앱 재빌드
+ */
+export const MEAL_SAVED_EDIT_ENABLED = import.meta.env.VITE_MEAL_SAVED_EDIT_ENABLED === 'true'
+
+/**
  * MEAL_GRAMMAR_ENABLED: 한식 끼니 문법 P1 카드(/meal «오늘의 밥상 코칭» — 단백질·채소 반찬 + 사진 검증) 노출. 기본 false.
  *   - 설계 IP/integration/meal_grammar_p1_design_v1.md · 평가 IP/integration/meal_grammar_p1_eval_v1.md
  *   - 활성화: VITE_MEAL_GRAMMAR_ENABLED=true (MEAL_ENABLED 도 켜져 있어야 의미 있음). 서박사 문구 회신 전 운영 ON 금지.

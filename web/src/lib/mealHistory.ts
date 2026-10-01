@@ -11,18 +11,28 @@ export interface MealRecord {
   summary: MealSummary
   photo_path: string | null
   thumbUrl?: string | null
+  /** 잔반(먹은 양) 보정 결과 — 있으면 실섭취로 우선 표시(다른 화면과 같은 coalesce 규칙) */
+  adjusted_summary?: MealSummary | null
+  /** 낙관적 잠금 기준(저장 후 편집) */
+  updated_at?: string | null
+  meal_session_id?: string | null
 }
 
 const SLOT_LABEL: Record<string, string> = { breakfast: '아침', lunch: '점심', dinner: '저녁', snack: '간식' }
 export function slotLabel(s: string | null): string { return (s && SLOT_LABEL[s]) || '식사' }
 
 function num(v: unknown): number { return typeof v === 'number' && isFinite(v) ? v : 0 }
-export function kcalOf(r: MealRecord): number { return Math.round(num((r.summary as any)?.total_calories_kcal)) }
+/** 실섭취 우선(adjusted_summary ?? summary) — meal_diet_bridge·147 뷰·코칭과 같은 규칙 */
+export function actualSummary(r: MealRecord): MealSummary { return (r.adjusted_summary ?? r.summary ?? {}) as MealSummary }
+export function isAdjusted(r: MealRecord): boolean { return r.adjusted_summary != null && typeof r.adjusted_summary === 'object' }
+export function kcalOf(r: MealRecord): number { return Math.round(num((actualSummary(r) as any)?.total_calories_kcal)) }
 export function titleOf(r: MealRecord): string {
   const names = (r.foods ?? []).map((f) => f.name_ko).filter(Boolean)
   if (!names.length) return '식사'
   return names.length <= 2 ? names.join(', ') : `${names[0]} 외 ${names.length - 1}`
 }
+
+export const MEAL_LIST_COLUMNS = 'id, eaten_at, meal_slot, foods, summary, photo_path, adjusted_summary, updated_at, meal_session_id'
 
 /** 최근 meal_log(최신순) + 사진 signed URL. 로그인 필요(RLS 본인). */
 export async function listMeals(limit = 30): Promise<MealRecord[]> {
@@ -30,7 +40,7 @@ export async function listMeals(limit = 30): Promise<MealRecord[]> {
   if (!user) return []
   const { data, error } = await supabase
     .from('meal_log')
-    .select('id, eaten_at, meal_slot, foods, summary, photo_path')
+    .select(MEAL_LIST_COLUMNS)
     .eq('user_id', user.id)
     .order('eaten_at', { ascending: false })
     .limit(limit)
@@ -49,6 +59,9 @@ export async function listMeals(limit = 30): Promise<MealRecord[]> {
     foods: (r.foods ?? []) as MealFood[],
     summary: (r.summary ?? {}) as MealSummary,
     photo_path: r.photo_path ?? null,
+    adjusted_summary: (r.adjusted_summary ?? null) as MealSummary | null,
+    updated_at: r.updated_at ?? null,
+    meal_session_id: r.meal_session_id ?? null,
     thumbUrl: r.photo_path ? signed[r.photo_path] ?? null : null,
   }))
 }

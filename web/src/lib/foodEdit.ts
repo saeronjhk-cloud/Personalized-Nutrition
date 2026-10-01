@@ -101,3 +101,43 @@ export function renameRequestServing(food: MealFood | null | undefined): number 
   const v = (food as { estimated_serving_g?: unknown } | null | undefined)?.estimated_serving_g
   return typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= SERVING_MAX_G ? v : null
 }
+
+// ───────── food_item_id 고정 (저장 후 편집 v1 — IP/integration/meal_saved_edit_design_v1.md §3-1) ─────────
+
+const ID_RE = /^food_(\d+)$/
+
+function idOf(f: unknown): string | null {
+  const v = (f as { food_item_id?: unknown } | null | undefined)?.food_item_id
+  return typeof v === 'string' && v.trim() ? v.trim() : null
+}
+
+/** 다음 빈 번호 — 기존 food_NN 최대값+1 (지운 번호를 다시 쓰지 않는다). */
+export function nextFoodItemId(foods: readonly unknown[]): string {
+  let max = 0
+  for (const f of foods ?? []) {
+    const m = ID_RE.exec(idOf(f) ?? '')
+    if (m) max = Math.max(max, Number(m[1]))
+  }
+  return 'food_' + String(max + 1).padStart(2, '0')
+}
+
+/**
+ * 모든 음식에 food_item_id 를 굳힌다. 규칙은 Edge meal-leftover ensureFoodItemId ·
+ * leftover_math.foodItemId 와 같다(저장값 우선, 없으면 food_ + 2자리(인덱스+1)).
+ * 부분적으로만 id 가 있어 인덱스 규칙값이 이미 쓰인 경우엔 다음 빈 번호(중복 0). 원본 불변.
+ */
+export function assignFoodItemIds<T>(foods: readonly T[]): T[] {
+  const list = Array.isArray(foods) ? foods : []
+  const used = new Set(list.map(idOf).filter((x): x is string => !!x))
+  const out: T[] = []
+  for (let i = 0; i < list.length; i++) {
+    const f = list[i]
+    if (idOf(f)) { out.push(f); continue }
+    let id = 'food_' + String(i + 1).padStart(2, '0')
+    if (used.has(id)) id = nextFoodItemId([...used].map((u) => ({ food_item_id: u })))
+    used.add(id)
+    out.push({ ...(f as object), food_item_id: id } as T)
+  }
+  return out
+}
+
