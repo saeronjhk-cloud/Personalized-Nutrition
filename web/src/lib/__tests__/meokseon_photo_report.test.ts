@@ -644,3 +644,23 @@ describe('★ confirmPhotoReport — 알레르기 자동반영·혼입 판독 �
     expect([b.allergenAutoApplied, b.allergenMayInspected]).toEqual([null, null])
   })
 })
+
+/* ★ 세션73 U71-5 — 제품명 한 글자 오독 제안(GET /api/products/name-suggest) */
+describe('★ suggestProductName (세션73 U71-5)', () => {
+  it('서버 제안이 있으면 그 이름 · 요청 경로에 이름을 인코딩해 싣는다', async () => {
+    const { suggestProductName } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ name: '초코맛 호두정고', suggested: '초코맛 호두정과', tokens: [] }))
+    expect(await suggestProductName('초코맛 호두정고')).toBe('초코맛 호두정과')
+    expect(String(fetchMock.mock.calls[0][0])).toContain('/api/products/name-suggest?name=' + encodeURIComponent('초코맛 호두정고'))
+  })
+  it('제안 없음·같은 이름·오류·빈 이름 → null (화면 흐름을 막지 않는다)', async () => {
+    const { suggestProductName } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ suggested: null }))
+    expect(await suggestProductName('하루단백쫀쿠맛')).toBeNull()
+    fetchMock.mockResolvedValue(okResponse({ suggested: '하루단백쫀쿠맛' }))
+    expect(await suggestProductName('하루단백쫀쿠맛')).toBeNull()
+    fetchMock.mockRejectedValue(new Error('network'))
+    expect(await suggestProductName('아무거나')).toBeNull()
+    expect(await suggestProductName('   ')).toBeNull()
+  })
+})

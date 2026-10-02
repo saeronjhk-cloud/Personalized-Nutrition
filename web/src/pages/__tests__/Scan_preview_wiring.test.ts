@@ -62,3 +62,16 @@ describe('buildPreviewNutrition', () => {
     expect(PREVIEW_DISCLAIMER).toContain('관리자가 확인한 뒤 확정된 정보')
   })
 })
+
+describe('Scan — 세션73 U71-5 제품명 오독 제안 배선', () => {
+  it('OCR 이름일 때만 suggestProductName 을 부르고, 이름이 그대로일 때만 제안을 보인다', () => {
+    expect(src).toMatch(/if \(seeded\.found && seeded\.value && seeded\.value !== normalizeRegistered\(registeredName\)\)/)
+    expect(src).toMatch(/suggestProductName\(from\)\.then/)
+    expect(src).toMatch(/nameSuggestion && productName === nameSuggestion\.from &&/)
+  })
+  it('자동으로 바꾸지 않는다 — 바꾸기는 버튼 onClick 안에서만', () => {
+    const sets = src.match(/setProductName\(nameSuggestion\.to\)/g) || []
+    expect(sets.length).toBe(1)
+    expect(src).toMatch(/onClick=\{\(\) => \{ setProductName\(nameSuggestion\.to\)/)
+  })
+})

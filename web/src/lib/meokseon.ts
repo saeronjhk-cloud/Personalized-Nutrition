@@ -247,6 +247,20 @@ export async function getProduct(barcode: string): Promise<MsProductResult> {
   return data
 }
 
+/**
+ * ★ 세션73 U71-5 — 제품명 «한 글자 오독» 제안(서버 GET /api/products/name-suggest · AI 아님).
+ *   실패·사전 없음·제안 없음은 전부 null — 제안은 «덤»이라 화면 흐름을 막지 않는다.
+ */
+export async function suggestProductName(name: string): Promise<string | null> {
+  const n = (name || '').trim()
+  if (!n || !BASE) return null
+  try {
+    const data = await getJson(`/api/products/name-suggest?name=${encodeURIComponent(n)}`) as { suggested?: unknown } | null
+    const s = data && typeof data.suggested === 'string' ? data.suggested.trim() : ''
+    return s && s !== n ? s : null
+  } catch { return null }
+}
+
 export async function getAdditiveSummary(barcode: string): Promise<MsAdditiveSummary> {
   return await getJson(`/api/products/${encodeURIComponent(barcode)}/additives`)
 }

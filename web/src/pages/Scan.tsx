@@ -22,7 +22,7 @@ import {
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
   getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
-  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError,
+  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis,
 } from '../lib/meokseon'
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
@@ -48,6 +48,9 @@ import { describeLabelDv, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelD
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
 // 카메라 스캔은 무의존성 BarcodeDetector(브라우저 네이티브). 미지원/거부 시 이름 검색으로 폴백.
 // 개인정보 무관·무인증 공개 API 소비. 개인 맞춤은 동의/설문 후(맛보기는 중립+블러). 근거: 문서 61/62.
+
+/** 세션73 U71-5 — 등록된 이름 비교용(공백 정리). */
+function normalizeRegistered(v: unknown): string { return typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '' }
 
 const NUTRIENTS: { key: keyof NonNullable<MsProductResult['nutrition']>; label: string; unit: string }[] = [
   { key: 'calories', label: '열량', unit: 'kcal' },
@@ -225,6 +228,8 @@ export default function Scan() {
 
   // 사진 제보 2단계 — 자동채움 결과와 전송 게이트. 판정은 domain/meokseon/photoReport.ts.
   const nameSeed = analysis ? seedProductNameForExisting(registeredName, analysis.productName) : null
+  // ★ 세션73 U71-5 — OCR 이름의 한 글자 오독 제안 {from: 제안 당시 이름, to: 제안 이름}. 사용자가 이름을 고치면 숨긴다.
+  const [nameSuggestion, setNameSuggestion] = useState<{ from: string; to: string } | null>(null)
   const submitGate = canSubmitReport({
     analysisToken: analysis?.analysisToken ?? null,
     productName,
@@ -381,7 +386,14 @@ export default function Scan() {
       setAnalysis(a)
       // OCR 값은 «자동채움»일 뿐이다. 못 읽었으면 빈칸으로 두고 안내문이 이유를 말한다.
       // ★ 이미 등록된 제품이면 «등록된 이름»이 OCR 값보다 우선한다(서버 UPDATE 가 덮어쓰지 않으므로).
-      setProductName(seedProductNameForExisting(registeredName, a.productName).value)
+      const seeded = seedProductNameForExisting(registeredName, a.productName)
+      setProductName(seeded.value)
+      // ★ 세션73 U71-5 — 등록된 이름이 아니라 «OCR 이 읽은 이름»일 때만 제안을 묻는다(등록 이름은 이미 사람이 확정).
+      setNameSuggestion(null)
+      if (seeded.found && seeded.value && seeded.value !== normalizeRegistered(registeredName)) {
+        const from = seeded.value
+        suggestProductName(from).then((to) => { if (to) setNameSuggestion({ from, to }) })
+      }
     } catch (e) {
       // ★ 401 을 일반 실패로 뭉개지 않는다 — 사용자가 할 일이 「로그인」으로 다르다.
       if (e instanceof MeokseonAuthError) { handleAuthError(e, 'analyze'); return }
@@ -899,6 +911,15 @@ export default function Scan() {
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
               {nameSeed.notice}
             </p>
+            {/* ★ 세션73 U71-5 — 한 글자 오독 제안. 자동으로 바꾸지 않는다(누를 때만). 사용자가 이름을 고치면 사라진다. */}
+            {nameSuggestion && productName === nameSuggestion.from && (
+              <div data-testid="name-suggestion" style={{ fontSize: 13, marginTop: 'var(--space-2)', padding: 'var(--space-2) var(--space-3)', background: 'var(--warning-bg, #fffbeb)', borderRadius: 'var(--radius-sm)' }}>
+                혹시 <strong>{nameSuggestion.to}</strong> 인가요? 사진 글자를 한 글자 잘못 읽었을 수 있어요.{' '}
+                <button type="button" className="btn btn-secondary"
+                  style={{ width: 'auto', padding: '2px 10px', fontSize: 12, marginLeft: 4, whiteSpace: 'nowrap' }}
+                  onClick={() => { setProductName(nameSuggestion.to); setNameSuggestion(null); setReportError(null) }}>이 이름으로 바꾸기</button>
+              </div>
+            )}
 
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 'var(--space-2)', lineHeight: 1.6 }}>
               {describeReadback(analysis)}
