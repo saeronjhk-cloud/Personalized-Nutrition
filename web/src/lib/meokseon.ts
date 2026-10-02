@@ -52,6 +52,8 @@ export interface MsNutrition {
   off_grade?: string | null
   confidence?: string | null
   source_license?: string | null
+  /** ★ 세션73 U71-3 — 라벨 인쇄 % ↔ 우리 계산 % (domain/meokseon/labelDv.ts). 제보 영양일 때만 · 없으면 null. */
+  label_dv?: unknown
 }
 
 // 먹선 신호등(정본 판정). 개인화는 이 색을 "소비"만 하고 자체 임계를 만들지 않는다.

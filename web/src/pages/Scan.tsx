@@ -43,6 +43,7 @@ import {
 } from '../domain/meokseon/reportNutrition'
 import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 import { reportMayUnconfirmed } from '../domain/meokseon/allergens'
+import { describeLabelDv, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelDv'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
 // 카메라 스캔은 무의존성 BarcodeDetector(브라우저 네이티브). 미지원/거부 시 이름 검색으로 폴백.
@@ -1251,6 +1252,26 @@ export default function Scan() {
                   })}
                 </tbody>
               </table>
+              {/* ★ 세션73 U71-3 — 라벨 인쇄 %를 «따로» 보여 준다(기준이 표와 다를 수 있다). 다르면 계산값을 함께. */}
+              {(() => {
+                const ldv = describeLabelDv(result.nutrition?.label_dv, result.product)
+                if (!ldv) return null
+                return (
+                  <div data-testid="label-dv" style={{ marginTop: 'var(--space-3)', paddingTop: 'var(--space-2)', borderTop: '1px dashed var(--border-light)' }}>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>{ldv.caption}</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', fontSize: 13 }}>
+                      {ldv.rows.map((r) => (
+                        <span key={r.key} style={{ whiteSpace: 'nowrap', color: r.differs ? 'var(--warning, #b45309)' : 'var(--text-secondary)' }}>
+                          {r.label} {r.labelPct}%{r.differs && r.ourPct !== null ? ` (계산 ${r.ourPct}%)` : ''}
+                        </span>
+                      ))}
+                    </div>
+                    {ldv.differCount > 0 && (
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>{LABEL_DV_DIFFER_NOTE}</p>
+                    )}
+                  </div>
+                )
+              })()}
               {result.nutrition.source_license && /odbl/i.test(result.nutrition.source_license) && (
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
                   일부 정보는 Open Food Facts(ODbL) 오픈DB 참고 자료입니다.
