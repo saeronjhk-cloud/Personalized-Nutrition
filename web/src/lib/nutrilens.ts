@@ -191,7 +191,7 @@ export async function saveMeal(params: {
   mealSlot?: string
   eatenAt?: string
   mealSessionId?: string
-}): Promise<{ ok: boolean; error?: string }> {
+}): Promise<{ ok: boolean; error?: string; id?: string }> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: '로그인이 필요합니다' }
   const path = `${user.id}/${params.photo_sha256}.jpg`
@@ -199,7 +199,7 @@ export async function saveMeal(params: {
     contentType: 'image/jpeg', upsert: true,
   })
   if (up.error) return { ok: false, error: `사진 저장 실패: ${up.error.message}` }
-  const { error } = await supabase.from('meal_log').insert({
+  const { data: ins, error } = await supabase.from('meal_log').insert({
     user_id: user.id,
     client_meal_id: params.clientMealId,
     eaten_at: params.eatenAt ?? new Date().toISOString(),
@@ -211,12 +211,17 @@ export async function saveMeal(params: {
     photo_sha256: params.photo_sha256,
     engine_version: params.result.engine_version ?? null,
     source: 'photo',
-  })
+  }).select('id')
   if (error) {
-    if ((error as { code?: string }).code === '23505') return { ok: true }
+    if ((error as { code?: string }).code === '23505') {
+      // 이미 저장된 같은 식사(멱등) — 저장 직후 «먹은 양»을 위해 id 를 찾아 돌려준다.
+      const { data: ex } = await supabase.from('meal_log').select('id')
+        .eq('user_id', user.id).eq('client_meal_id', params.clientMealId).limit(1)
+      return { ok: true, id: ex?.[0]?.id ? String(ex[0].id) : undefined }
+    }
     return { ok: false, error: `기록 저장 실패: ${error.message}` }
   }
-  return { ok: true }
+  return { ok: true, id: ins?.[0]?.id ? String(ins[0].id) : undefined }
 }
 
 export function genMealId(): string {

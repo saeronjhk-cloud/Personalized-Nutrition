@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
 import { alternatesOf } from '../lib/foodCorrection'
 import { canSaveFoods, renameRequestServing, type ResolvedFood } from '../lib/foodEdit'
@@ -42,8 +42,11 @@ export default function MealResult(props: {
     onRemove: (index: number) => void
     onAdd: (food: ResolvedFood) => void
   }
+  /** 식사 흐름 v2 — ① 제목·설명. afterSave 가 있으면 저장 뒤 카드를 그것으로 바꾼다(② 얼마나 드셨나요?) */
+  flowV2?: boolean
+  afterSave?: ReactNode
 }) {
-  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect, edit } = props
+  const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect, edit, flowV2, afterSave } = props
   // 편집 중인 행: 음식 index · 'add' · null
   const [editing, setEditing] = useState<number | 'add' | null>(null)
   const editable = !!edit && !saved
@@ -56,9 +59,14 @@ export default function MealResult(props: {
 
       <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
-          <h3 className="survey-step-title" style={{ fontSize: 16 }}>분석 결과</h3>
+          <h3 className="survey-step-title" style={{ fontSize: 16 }}>{flowV2 ? '① 사진 속 음식이 맞나요?' : '분석 결과'}</h3>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>사진 기준 추정</span>
         </div>
+        {flowV2 && !saved && (
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-3)', lineHeight: 1.6 }}>
+            이름이 틀렸거나 빠진 음식이 있으면 고쳐 주세요. 얼마나 드셨는지는 저장한 뒤에 정해요.
+          </p>
+        )}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginBottom: 'var(--space-3)' }}>
           {MACROS.map(({ key, label, unit }) => (
@@ -140,7 +148,7 @@ export default function MealResult(props: {
         </p>
       </div>
 
-      {saved ? (
+      {saved && afterSave ? afterSave : saved ? (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
           <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 'var(--space-3)' }}>✓ 기록에 저장했어요.</p>
           <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={onReset}>다른 식사 기록하기</button>

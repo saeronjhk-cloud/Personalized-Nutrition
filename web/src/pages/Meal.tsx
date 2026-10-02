@@ -15,7 +15,9 @@ import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
 import GoalCoachingCard from '../components/GoalCoachingCard'
 import MealGrammarCard from '../components/MealGrammarCard'
-import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED } from '../lib/flags'
+import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED, MEAL_FLOW_V2_ENABLED } from '../lib/flags'
+import { ANALYZE_BUSY_MSG, ANALYZE_WAIT_MSG } from '../lib/mealDetail'
+import AfterSaveLeftover from '../components/AfterSaveLeftover'
 import { isBetaPanel } from '../lib/betaPanel'
 import { hasConsentedMeal, syncMealConsentFromServer } from '../lib/mealConsent'
 import {
@@ -41,6 +43,7 @@ export default function Meal() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [slot, setSlot] = useState<Slot>(defaultMealSlot())
   const [saved, setSaved] = useState(false)
+  const [savedId, setSavedId] = useState<string | null>(null)   // 식사 흐름 v2 — 저장 직후 «먹은 양»용
   const [historyKey, setHistoryKey] = useState(0)
   const [session, setSession] = useState<SessionSummary | null>(null)
   const [sessionBusy, setSessionBusy] = useState(false)
@@ -86,7 +89,7 @@ export default function Meal() {
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
 
   function reset() {
-    setError(null); setResult(null); setSaved(false); setWaiting(false)
+    setError(null); setResult(null); setSaved(false); setSavedId(null); setWaiting(false)
     if (previewUrl) URL.revokeObjectURL(previewUrl)
     setPreviewUrl(null)
     blobRef.current = null; shaRef.current = null; mealIdRef.current = null; jobIdRef.current = null
@@ -148,7 +151,7 @@ export default function Meal() {
         clientMealId: mealIdRef.current, mealSlot: slot,
         mealSessionId: session?.session_id,
       })
-      if (r.ok) { setSaved(true); track('meal_saved', { saved_to: 'cloud' }); setHistoryKey((k) => k + 1); if (session) await refreshSession() }
+      if (r.ok) { setSaved(true); setSavedId(r.id ?? null); track('meal_saved', { saved_to: 'cloud' }); setHistoryKey((k) => k + 1); if (session) await refreshSession() }
       else setError(r.error || '저장에 실패했어요.')
     } finally {
       setBusy(false)
@@ -315,7 +318,7 @@ export default function Meal() {
           {busy || waiting ? (
             <div style={{ textAlign: 'center', padding: 'var(--space-4) 0' }}>
               <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-                {waiting ? '분석 중이에요… (조금 걸릴 수 있어요)' : '사진은 준비하고 있어요…'}
+                {waiting ? ANALYZE_WAIT_MSG : ANALYZE_BUSY_MSG}
               </p>
             </div>
           ) : (
@@ -355,6 +358,10 @@ export default function Meal() {
             saved={saved} busy={busy} onSave={onSave} onReset={reset}
             onCorrect={onCorrect}
             edit={editHandlers}
+            flowV2={MEAL_FLOW_V2_ENABLED}
+            afterSave={MEAL_FLOW_V2_ENABLED && savedId
+              ? <AfterSaveLeftover mealId={savedId} foods={result.foods} onNext={() => { reset(); setHistoryKey((k) => k + 1) }} />
+              : undefined}
           />
           {/* 세션54 — 베타 패널 피드백. 저장 전후 무관하게 보인다(정정 칩은 저장 전에만). job_id 로 사진과 잇는다. */}
           <BetaFeedback jobId={jobIdRef.current} foods={result.foods.map((f) => f.name_ko)} page="/meal" />

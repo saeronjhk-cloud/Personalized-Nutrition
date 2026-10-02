@@ -13,10 +13,11 @@ const panel = read('../MealSavedEditPanel.tsx')
 const logic = read('../../lib/mealSavedEdit.ts')
 
 describe('저장 후 편집 v1 — 배선', () => {
-  it('W1 플래그 기본 OFF · 진입점과 패널 모두 플래그 아래', () => {
+  it('W1 플래그 기본 OFF · 진입점(v1·v2)과 패널 모두 플래그 아래', () => {
     expect(flags).toContain("export const MEAL_SAVED_EDIT_ENABLED = import.meta.env.VITE_MEAL_SAVED_EDIT_ENABLED === 'true'")
-    expect(history).toContain('{MEAL_SAVED_EDIT_ENABLED && (\n                  <button type="button" aria-label="음식 수정"')
-    expect(history).toContain('{MEAL_SAVED_EDIT_ENABLED && editId === r.id && (')
+    expect(history).toContain('{MEAL_SAVED_EDIT_ENABLED && (\n                        <button type="button" aria-label="음식 고치기"')
+    expect(history).toContain('{MEAL_SAVED_EDIT_ENABLED && (\n                      <button type="button" aria-label="음식 수정"')
+    expect(history).toContain('const editPanel = MEAL_SAVED_EDIT_ENABLED && editId === r.id && (')
     expect(history.match(/<MealSavedEditPanel/g)?.length).toBe(1)
   })
   it('W2 영양 출처는 FoodEditPanel(→ foodLookup.resolveFood) 하나 · 산식 없음', () => {

@@ -16,7 +16,7 @@ vi.mock('../supabase', () => {
       return chain
     }
   }
-  chain.insert = (row: unknown) => { lastInsert = row; return Promise.resolve({ error: null }) }
+  chain.insert = (row: unknown) => { lastInsert = row; return { select: () => Promise.resolve({ data: [{ id: 'new1' }], error: null }) } }
   return {
     supabase: {
       auth: { getUser: async () => ({ data: { user: { id: 'u1' } } }) },

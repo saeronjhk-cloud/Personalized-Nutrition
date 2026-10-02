@@ -69,3 +69,9 @@ export const MEAL_SAVED_EDIT_ENABLED = import.meta.env.VITE_MEAL_SAVED_EDIT_ENAB
  *   - 활성화: VITE_MEAL_GRAMMAR_ENABLED=true (MEAL_ENABLED 도 켜져 있어야 의미 있음). 서박사 문구 회신 전 운영 ON 금지.
  */
 export const MEAL_GRAMMAR_ENABLED = import.meta.env.VITE_MEAL_GRAMMAR_ENABLED === 'true'
+
+/**
+ * MEAL_FLOW_V2_ENABLED: 식사 기록 흐름 v2 — ①«사진 속 음식이 맞나요?» → 저장 직후 ②«얼마나 드셨나요?»(식후 사진·직접 조절)
+ *   + 기록 카드 눌러 상세 보기. 기본 false. 설계 IP/integration/meal_flow_v2_design_v1.md · 활성화: VITE_MEAL_FLOW_V2=true
+ */
+export const MEAL_FLOW_V2_ENABLED = import.meta.env.VITE_MEAL_FLOW_V2 === 'true'
