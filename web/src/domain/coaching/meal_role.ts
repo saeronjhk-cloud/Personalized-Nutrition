@@ -2,12 +2,12 @@
  * 한식 끼니 문법 P1 — 음식 이름 → 역할(role) 해석 (순수 · 엔진 내부 결정론, 원칙5)
  *
  * 설계: IP/integration/meal_grammar_p1_design_v1.md §1·§2 · 평가: IP/integration/meal_grammar_p1_eval_v1.md R·D
- * 사전 정본: IP/meal_role_dictionary_v1.json (원칙3) — 이 폴더의 JSON 은 바이트 동일 복사본(D01).
- *   재생성: python tools/gen_meal_role_dictionary.py → cp IP/meal_role_dictionary_v1.json web/src/domain/coaching/
+ * 사전 정본: IP/meal_role_dictionary_v2.json (원칙3, v2 = 운영 집계 2026-10-02 반영 · v1 은 IP 이력) — 이 폴더의 JSON 은 바이트 동일 복사본(D01).
+ *   재생성: python tools/gen_meal_role_dictionary.py → cp IP/meal_role_dictionary_v2.json web/src/domain/coaching/
  * 의미론은 생성기(apply_rules)와 동일: 정확 일치 entries 우선 → 아니면 rules 전부 합집합 → OTHER 는 단독일 때만 → 없으면 UNKNOWN.
  * ⚠ IO import 금지(W3).
  */
-import dict from "./meal_role_dictionary_v1.json";
+import dict from "./meal_role_dictionary_v2.json";
 
 export const ROLES = [
   "RICE", "NOODLE", "GRAIN_OTHER", "PROTEIN", "VEG", "KIMCHI", "PICKLE", "BROTH",

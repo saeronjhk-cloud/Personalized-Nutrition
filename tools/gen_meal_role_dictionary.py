@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """한식 끼니 문법 P1 — role 사전 생성기 (웹앱트랙 · 설계 IP/integration/meal_grammar_p1_design_v1.md)
 입력: backends/NutriLens/training/aihub_400_코드매핑.tsv (AI Hub 음식분류 400종)
-출력: IP/meal_role_dictionary_v1.json (정본) — 코드 복사본은 web/src/domain/coaching/ 로 cp.
+출력: IP/meal_role_dictionary_v2.json (정본, v2 2026-10-02 운영 집계 반영) — 코드 복사본은 web/src/domain/coaching/ 로 cp.
 의미론은 web/src/domain/coaching/meal_role.ts 와 동일해야 한다(평가 R·D).
   resolve(name): 정규화 → entries 정확 일치 → 아니면 rules 전부 평가해 합집합 → OTHER 는 단독일 때만 남김 → 없으면 UNKNOWN
 """
@@ -9,7 +9,7 @@ import json, re, sys, unicodedata, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TSV = ROOT / "backends/NutriLens/training/aihub_400_코드매핑.tsv"
-OUT = ROOT / "IP/meal_role_dictionary_v1.json"
+OUT = ROOT / "IP/meal_role_dictionary_v2.json"  # v1 은 IP 에 이력으로 보존
 
 ROLE_ORDER = ["RICE", "NOODLE", "GRAIN_OTHER", "PROTEIN", "VEG", "KIMCHI", "PICKLE", "BROTH",
               "ALCOHOL", "SNACK_SWEET", "FRUIT", "BEVERAGE", "OTHER"]
@@ -22,12 +22,12 @@ def E(p, roles, unless=()):  # endswith
 RULES = []
 # 주식
 RULES += [E("밥", "RICE"), C("덮밥", "RICE"), C("국밥", ["RICE", "BROTH"]), C("김밥", "RICE"), C("초밥", "RICE"),
-          C("라이스", "RICE"), C("리조또", "RICE"), C("백반", "RICE"), E("죽", "RICE"), E("롤", "RICE", ["케이크", "스프링"])]
+          C("라이스", "RICE"), C("리조또", "RICE"), C("백반", "RICE"), C("나시", "RICE"), E("죽", "RICE"), E("롤", "RICE", ["케이크", "스프링"])]
 RULES += [C(p, "NOODLE") for p in ["라면", "국수", "냉면", "우동", "짬뽕", "짜장면", "자장면", "칼국수", "쫄면", "파스타",
                                    "스파게티", "쌀국수", "소바", "막국수", "수제비", "만두", "떡국", "라볶이", "만둣국"]]
 RULES += [E("면", "NOODLE")]
 RULES += [C(p, "GRAIN_OTHER") for p in ["빵", "토스트", "샌드위치", "베이글", "시리얼", "그래놀라", "오트밀", "피자",
-                                        "핫도그", "크루아상", "크로와상", "와플", "팬케이크", "또띠아", "부리또", "타코"]]
+                                        "핫도그", "크루아상", "크로와상", "와플", "팬케이크", "또띠아", "부리또", "타코", "바게트", "브레드", "치아바타", "포카치아"]]
 RULES += [C("떡", "GRAIN_OTHER", ["떡갈비", "떡국", "떡만둣국", "떡라면"]), C("고구마", "GRAIN_OTHER", ["맛탕", "줄기"])]
 # 단백질 — 이름-재료 원칙
 PROT = ["달걀", "계란", "메추리알", "에그", "오믈렛", "스크램블", "두부", "비지", "청국장", "낫토",
@@ -37,36 +37,40 @@ PROT = ["달걀", "계란", "메추리알", "에그", "오믈렛", "스크램블
         "어묵", "육회", "물회", "회덮밥", "회무침", "회냉면", "고기", "소고기", "쇠고기", "돼지", "제육", "불고기", "갈비",
         "삼겹", "목살", "항정", "수육", "족발", "보쌈", "편육", "순대", "곱창", "막창", "대창", "닭", "치킨", "오리",
         "베이컨", "소시지", "소세지", "햄", "스테이크", "미트", "너겟", "가스", "까스", "커틀릿", "육전", "육포", "차돌",
-        "등심", "안심", "소머리", "탕수육", "깐풍기", "유린기", "동그랑땡", "선지", "뼈다귀", "뼈해장", "홍어", "쥐포", "우렁",
+        "등심", "안심", "소머리", "탕수육", "깐풍기", "유린기", "동그랑땡", "선지", "뼈다귀", "뼈해장", "홍어", "쥐포", "우렁", "비프", "포크", "슈니첼", "폭립", "바비큐", "바베큐", "굴라쉬", "굴라시",
         "우유", "요거트", "요구르트", "치즈", "두유", "프로틴", "단백질"]
 RULES += [C(p, "PROTEIN") for p in PROT]
-RULES += [C("콩", "PROTEIN", ["콩나물"]), C("굴", "PROTEIN", ["굴소스"]), E("회", "PROTEIN")]
+RULES += [C("콩", "PROTEIN", ["콩나물"]), C("굴", "PROTEIN", ["굴소스", "굴라"]), E("회", "PROTEIN")]
 # 채소 (김치·장아찌·피클 제외)
-VEG = ["나물", "샐러드", "상추", "시금치", "숙주", "고사리", "도라지", "취나물", "미나리", "가지", "버섯", "브로콜리",
+NOT_VEG = ["절임", "절인"]
+VEG = ["오크라", "비트", "콜리플라워", "주키니", "루꼴라", "로메인", "치커리", "새싹", "나물", "상추", "시금치", "숙주", "고사리", "도라지", "취나물", "미나리", "가지", "버섯", "브로콜리",
        "당근", "파프리카", "피망", "양상추", "케일", "채소", "야채", "생채", "우엉", "연근", "시래기", "우거지",
        "근대", "아욱", "쑥갓", "냉이", "달래", "더덕", "봄동", "청경채", "아스파라거스", "셀러리", "노각", "콩나물", "열무", "얼갈이", "쑥갓", "머위", "고들빼기잎"]
-RULES += [C(p, "VEG") for p in VEG]
-RULES += [C("쌈", "VEG", ["쌈장"]), C("배추", "VEG", ["김치", "겉절이"]), C("호박", "VEG", ["호박씨"]),
-          C("오이", "VEG", ["소박이", "오이지", "피클"]), C("깻잎", "VEG", ["김치", "장아찌"]),
-          C("고추", "VEG", ["고추장", "고춧", "장아찌"]), C("양파", "VEG", ["장아찌"]), C("양배추", "VEG"), C("부추", "VEG", ["김치"]), C("토마토", "VEG", ["소스", "스프", "케첩"])]
+RULES += [C(p, "VEG", NOT_VEG) for p in VEG]
+RULES += [C("샐러드", "VEG", ["감자샐러드", "마카로니", "고구마샐러드", "과일샐러드"] + NOT_VEG), C("쌈", "VEG", ["쌈장"] + NOT_VEG), C("배추", "VEG", ["김치", "겉절이"] + NOT_VEG), C("호박", "VEG", ["호박씨"] + NOT_VEG),
+          C("오이", "VEG", ["소박이", "오이지", "피클"] + NOT_VEG), C("깻잎", "VEG", ["김치", "장아찌"]),
+          C("고추", "VEG", ["고추장", "고춧", "장아찌"] + NOT_VEG), C("양파", "VEG", ["장아찌"] + NOT_VEG), C("양배추", "VEG"), C("부추", "VEG", ["김치"] + NOT_VEG), C("토마토", "VEG", ["소스", "스프", "수프", "케첩"] + NOT_VEG)]
 # 김치·장아찌
 RULES += [E("김치", "KIMCHI")] + [C(p, "KIMCHI") for p in ["깍두기", "겉절이", "동치미", "소박이", "섞박지"]]
-RULES += [C(p, "PICKLE") for p in ["장아찌", "피클", "단무지", "오이지", "젓갈"]] + [E("젓", "PICKLE")]
+RULES += [C(p, "PICKLE") for p in ["장아찌", "피클", "단무지", "오이지", "젓갈", "절임", "절인"]] + [E("젓", "PICKLE")]
 # 국물
 RULES += [E("국", "BROTH"), E("탕", "BROTH", ["맛탕", "사탕", "설탕"]), C("찌개", "BROTH"), C("전골", "BROTH"),
-          C("스프", "BROTH"), C("수프", "BROTH"), C("해장국", "BROTH"), C("냉국", "BROTH")]
+          C("스프", "BROTH"), C("수프", "BROTH"), C("스튜", "BROTH"), C("굴라쉬", "BROTH"), C("굴라시", "BROTH"), C("해장국", "BROTH"), C("냉국", "BROTH")]
 # 기타
 RULES += [C(p, "ALCOHOL") for p in ["맥주", "소주", "막걸리", "와인", "위스키", "사케", "하이볼", "칵테일", "보드카",
                                     "고량주", "청주", "동동주", "소맥"]]
 RULES += [C(p, "SNACK_SWEET") for p in ["콜라", "사이다", "탄산", "주스", "에이드", "스무디", "밀크티", "버블티", "과자",
                                         "쿠키", "케이크", "초콜릿", "초코", "아이스크림", "빙수", "도넛", "마카롱", "젤리",
-                                        "맛탕", "약과", "유과", "한과", "시럽", "프라푸치노", "식혜", "수정과"]]
+                                        "맛탕", "약과", "유과", "한과", "시럽", "프라푸치노", "식혜", "수정과", "나초", "팝콘", "프레첼", "크래커", "칩"]]
 RULES += [C("사탕", "SNACK_SWEET")]
 RULES += [C(p, "FRUIT") for p in ["사과", "바나나", "딸기", "귤", "오렌지", "포도", "수박", "참외", "키위", "블루베리",
-                                  "망고", "복숭아", "자두", "체리", "파인애플", "과일", "멜론"]]
+                                  "망고", "복숭아", "자두", "체리", "파인애플", "과일", "멜론", "레몬", "라임", "용과", "자몽", "석류", "무화과", "감귤", "한라봉", "리치", "아사이"]]
 RULES += [C(p, "BEVERAGE") for p in ["커피", "아메리카노", "라떼", "에스프레소", "녹차", "홍차", "보리차", "생수"]]
 RULES += [E("전", "OTHER"), C("부침", "OTHER"), C("튀김", "OTHER"), C("볶음", "OTHER"), C("조림", "OTHER"),
-          C("구이", "OTHER"), E("찜", "OTHER"), C("잡채", "OTHER"), C("감자", "OTHER"), C("묵", "OTHER")]
+          C("구이", "OTHER"), E("찜", "OTHER"), C("잡채", "OTHER"), C("감자", "OTHER"), C("묵", "OTHER"), C("마카로니", "OTHER"),
+          C("소스", "OTHER", ["요리"]), C("넛", "OTHER"), C("견과", "OTHER"), C("아몬드", "OTHER"), C("호두", "OTHER"),
+          C("피스타치오", "OTHER"), C("생크림", "OTHER"), C("올리브", "OTHER"), C("마늘", "OTHER"), C("케첩", "OTHER"),
+          C("마요", "OTHER"), C("드레싱", "OTHER"), C("버터", "OTHER"), C("잼", "OTHER"), C("옥수수", "OTHER")]
 
 def norm(s: str) -> str:
     s = unicodedata.normalize("NFC", s or "")
@@ -125,7 +129,7 @@ OVERRIDE = {
     "김치만두": ["NOODLE"], "군만두": ["NOODLE"], "고기만두": ["NOODLE", "PROTEIN"], "떡라면": ["NOODLE"],
     "김치라면": ["NOODLE"], "짬뽕라면": ["NOODLE"], "짜장라면": ["NOODLE"], "간자장": ["NOODLE"], "기스면": ["NOODLE"],
     "삼선자장면": ["NOODLE", "PROTEIN"], "삼선짬뽕": ["NOODLE", "PROTEIN"], "삼선우동": ["NOODLE", "PROTEIN"],
-    "삼선볶음밥": ["RICE", "PROTEIN"], "콘스프": ["BROTH"], "토마토스프": ["BROTH"], "미소된장국": ["BROTH"],
+    "삼선볶음밥": ["RICE", "PROTEIN"], "콘": ["OTHER"], "나시레막": ["RICE"], "콘스프": ["BROTH"], "토마토스프": ["BROTH"], "미소된장국": ["BROTH"],
 }
 DROP = {"categories", "생략", "음식명"}
 
@@ -151,8 +155,8 @@ def main():
     for k, v in OVERRIDE.items():
         entries.setdefault(k, v)
     doc = {
-        "version": "meal_role_dictionary_v1",
-        "note": "정본 IP/meal_role_dictionary_v1.json · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
+        "version": "meal_role_dictionary_v2",
+        "note": "정본 IP/meal_role_dictionary_v2.json (v2 = 운영 집계 2026-10-02 반영) · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
         "roles": ROLE_ORDER + ["UNKNOWN"],
         "entries": dict(sorted(entries.items())),
         "rules": RULES,

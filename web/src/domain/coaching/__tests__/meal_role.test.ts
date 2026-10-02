@@ -1,6 +1,6 @@
 /**
  * 한식 끼니 문법 P1 — role 해석·사전 평가셋 (R01~R50 · D01~D03) — Eval-First
- * 정본: IP/integration/meal_grammar_p1_eval_v1.md · 사전 정본: IP/meal_role_dictionary_v1.json
+ * 정본: IP/integration/meal_grammar_p1_eval_v1.md · 사전 정본: IP/meal_role_dictionary_v2.json
  * 사전 v2 는 이 표에 케이스를 먼저 추가한 뒤 고친다(케이스 삭제 금지).
  */
 import { describe, it, expect } from "vitest";
@@ -58,6 +58,35 @@ const R: [string, string, string][] = [
   ["R48", "두부김치", "PROTEIN,KIMCHI"],
   ["R49", "샌드위치", "GRAIN_OTHER"],
   ["R50", "미역국", "BROTH"],
+  // v2 — 운영 집계 기반(IP/운영_음식이름_집계_2026-10-02.csv)
+  ["R51", "고추절임", "PICKLE"],
+  ["R52", "절인 채소", "PICKLE"],
+  ["R53", "감자 샐러드", "OTHER"],
+  ["R54", "마카로니 샐러드", "OTHER"],
+  ["R55", "토마토 수프", "BROTH"],
+  ["R56", "비프 스튜와 빵", "GRAIN_OTHER,PROTEIN,BROTH"],
+  ["R57", "굴라쉬", "PROTEIN,BROTH"],
+  ["R58", "바게트", "GRAIN_OTHER"],
+  ["R59", "오크라", "VEG"],
+  ["R60", "나시 레막", "RICE"],
+  ["R61", "레몬", "FRUIT"],
+  ["R61b", "용과", "FRUIT"],
+  ["R61c", "라임", "FRUIT"],
+  ["R62", "슈니첼", "PROTEIN"],
+  ["R62b", "비엔나 슈니첼", "PROTEIN"],
+  ["R63", "폭립", "PROTEIN"],
+  ["R64", "칠리 소스", "OTHER"],
+  ["R64b", "크랜베리 소스", "OTHER"],
+  ["R64c", "소스", "OTHER"],
+  ["R65", "캐슈넛", "OTHER"],
+  ["R66", "나초", "SNACK_SWEET"],
+  ["R67", "반찬", "UNKNOWN"],
+  ["R68", "크림 소스 요리", "UNKNOWN"],
+  ["R69", "콘", "OTHER"],
+  ["R70", "생크림", "OTHER"],
+  ["R70b", "올리브", "OTHER"],
+  ["R70c", "튀긴 마늘", "OTHER"],
+  ["R72", "크림 소스 피자", "GRAIN_OTHER"],
 ];
 
 const sorted = (a: readonly string[]) => [...a].sort();
@@ -71,6 +100,10 @@ describe("R role 해석", () => {
   it("R46 바나나우유 ⊇ PROTEIN", () => {
     expect(resolveRoles("바나나우유")).toContain("PROTEIN");
   });
+  it("R71 굴전·굴국 ⊇ PROTEIN («굴» 예외 회귀 방지)", () => {
+    expect(resolveRoles("굴전")).toContain("PROTEIN");
+    expect(resolveRoles("굴국")).toContain("PROTEIN");
+  });
   it("비문자열 입력 → UNKNOWN", () => {
     expect(resolveRoles(null)).toEqual(["UNKNOWN"]);
     expect(resolveRoles(42)).toEqual(["UNKNOWN"]);
@@ -78,9 +111,17 @@ describe("R role 해석", () => {
 });
 
 describe("D 사전 무결성", () => {
+  it("D04 운영 집계 이름 UNKNOWN ≤ 10% (IP CSV 없으면 skip)", () => {
+    const csv = resolve(__dirname, "../../../../../IP/운영_음식이름_집계_2026-10-02.csv");
+    if (!existsSync(csv)) return;
+    const names = readFileSync(csv, "utf-8").trim().split(/\r?\n/).slice(1).map((l) => l.slice(0, l.lastIndexOf(",")));
+    const unknown = names.filter((n) => resolveRoles(n).includes("UNKNOWN"));
+    expect(names.length).toBeGreaterThan(100);
+    expect(unknown.length / names.length).toBeLessThanOrEqual(0.1);
+  });
   it("D01 코드 복사본 = IP 정본 (바이트 동일, IP 없으면 skip)", () => {
-    const ip = resolve(__dirname, "../../../../../IP/meal_role_dictionary_v1.json");
-    const code = resolve(__dirname, "../meal_role_dictionary_v1.json");
+    const ip = resolve(__dirname, "../../../../../IP/meal_role_dictionary_v2.json");
+    const code = resolve(__dirname, "../meal_role_dictionary_v2.json");
     if (!existsSync(ip)) return;
     expect(readFileSync(code, "utf-8")).toBe(readFileSync(ip, "utf-8"));
   });
