@@ -2,7 +2,8 @@
  * ★ 세션72d — 앱 안 관리자 화면 (/admin · 제이 결정 2026-09-30)
  *   · 메뉴에 없다. 관리자 계정(ADMIN_EMAILS)만 서버가 통과시킨다 — 일반 사용자가 주소를 쳐도 403 화면.
  *   · 할 수 있는 일: 검토 대기 목록 → 제품 펼치기(제보 값) → 축별 승인/반려 · 자동반영 목록 → 되돌리기.
- *   · 값 정정·기준 채우기 같은 고급 작업은 기존 화면(contribution-review.html) 링크로 보낸다(두 벌 금지).
+ *   · (세션73 U72-12) 영양 «표기 기준 채우기»와 보류 행 «다시 반영(retry)»도 여기서 한다. 옛 화면(contribution-review.html ·
+ *     ADMIN_TOKEN)은 비상용 링크로만 남긴다.
  * ★ 세션72f — 제보 사진(축소본)을 왼쪽에, 축별 «정정 후 승인» 편집기를 오른쪽에(제이 결정 2026-09-30).
  *   정정은 서버 override(판정 테이블)에 남고 사용자 원본은 그대로다. 승인은 정정을 얹어 반영한다.
  */
@@ -13,6 +14,7 @@ import {
   describeProposed, axisKo, statusKo, MEOKSEON_BASE, type AdminGate,
   listPhotos, fetchPhotoUrl, overrideReview, initialEdit, buildOverrideValues,
   ALLERGENS_19, NUTRIENT_KEYS, type AdminPhoto, type AllergenMark,
+  BASIS_OPTIONS, BASIS_UNITS, EMPTY_BASIS_FORM, buildBasisBody, submitBasis, isHeld, type BasisForm,
 } from '../lib/meokseonAdmin'
 
 const NUT_LABEL: Record<string, string> = {
@@ -140,6 +142,63 @@ function AxisEditor({ a, busy, onApprove, onReject }: {
   )
 }
 
+/**
+ * ★ 세션73 U72-12 — 영양 축 «표기 기준(basis)» 채우기. 서버 …/basis(근거 필수 · 승인까지 밀지 않음).
+ *   기준이 «모름»이면 펼친 채로 시작한다(지금 승인하면 보류되기 때문). 저장 뒤 승인 또는 다시 반영은 사람이 누른다.
+ */
+function BasisEditor({ a, busy, onSave }: {
+  a: any; busy: boolean; onSave: (body: Record<string, string | number>) => Promise<void>
+}) {
+  const unknown = a.basis?.value == null
+  const [openForm, setOpenForm] = useState(unknown)
+  const [f, setF] = useState<BasisForm>(() => ({ ...EMPTY_BASIS_FORM, basis: a.basis?.admin_basis?.value ?? '', note: '라벨 사진 확인' }))
+  const [err, setErr] = useState<string | null>(null)
+  const set = (k: keyof BasisForm) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }))
+  async function save() {
+    setErr(null)
+    const r = buildBasisBody(f)
+    if (!r.ok) { setErr(r.message); return }
+    await onSave(r.body)
+  }
+  const ab = a.basis?.admin_basis
+  return (
+    <div style={{ fontSize: 12, margin: '4px 0' }} data-testid="basis-editor">
+      <span style={{ color: unknown ? 'var(--warning, #b45309)' : 'var(--text-muted)' }}>
+        표기 기준: {unknown ? '모름 — 지금 승인하면 보류돼요' : (BASIS_OPTIONS.find((o) => o.value === a.basis.value)?.label ?? a.basis.value)}
+        {a.basis?.raw ? ` · 라벨 원문 「${a.basis.raw}」` : ''}
+        {ab ? ` · 관리자 입력(${ab.by ?? ''}: ${ab.note ?? ''})` : ''}
+      </span>
+      {!openForm && (
+        <button type="button" disabled={busy} onClick={() => setOpenForm(true)}
+          style={{ background: 'none', border: 'none', textDecoration: 'underline', cursor: 'pointer', fontSize: 12, marginLeft: 6 }}>기준 고치기</button>
+      )}
+      {openForm && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginTop: 4 }}>
+          <select className="input-field" value={f.basis} onChange={set('basis')} disabled={busy} style={{ width: 'auto', padding: '4px 8px' }}>
+            <option value="">기준 선택</option>
+            {BASIS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <input className="input-field" inputMode="decimal" placeholder="1회 제공량" value={f.serving_size} onChange={set('serving_size')}
+            disabled={busy} style={{ width: 100, padding: '4px 8px' }} />
+          <select className="input-field" value={f.serving_unit} onChange={set('serving_unit')} disabled={busy} style={{ width: 'auto', padding: '4px 8px' }}>
+            <option value="">단위</option>{BASIS_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+          <input className="input-field" inputMode="decimal" placeholder="총 내용량" value={f.total_content} onChange={set('total_content')}
+            disabled={busy} style={{ width: 100, padding: '4px 8px' }} />
+          <select className="input-field" value={f.content_unit} onChange={set('content_unit')} disabled={busy} style={{ width: 'auto', padding: '4px 8px' }}>
+            <option value="">단위</option>{BASIS_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+          <input className="input-field" placeholder="근거(필수)" value={f.note} onChange={set('note')} disabled={busy}
+            style={{ flex: '1 1 200px', padding: '4px 8px' }} />
+          <button type="button" className="btn btn-secondary" disabled={busy} style={smallBtn} onClick={save}>기준 저장</button>
+          <span style={{ width: '100%', color: 'var(--text-muted)' }}>모르면 채우지 마세요 — 추측한 기준은 신호등 색을 뒤집습니다. 제공량·내용량은 제품 정보에 기록돼요(선택).</span>
+        </div>
+      )}
+      {err && <p style={{ color: 'var(--danger, #b91c1c)', margin: '4px 0 0' }}>{err}</p>}
+    </div>
+  )
+}
+
 type Tab = 'pending' | 'auto'
 const TAB_STATUS: Record<Tab, string[]> = { pending: ['candidate', 'approved'], auto: ['auto_applied'] }
 
@@ -175,7 +234,18 @@ export default function Admin() {
     try { setDetail(await getReviewDetail(pid)) } catch (e: any) { setMsg(e?.message || '상세를 불러오지 못했어요.') }
   }
 
-  async function act(pid: number, action: 'approve' | 'reject' | 'undo', reviewIds: number[],
+  async function saveBasis(pid: number, reviewId: number, held: boolean, body: Record<string, string | number>) {
+    setBusy(true); setMsg(null)
+    try {
+      await submitBasis(reviewId, body)
+      setMsg(held ? '기준 저장 완료 · 이제 「다시 반영」을 눌러 주세요' : '기준 저장 완료 · 이제 승인하면 반영돼요')
+      setDetail(await getReviewDetail(pid).catch(() => null))
+    } catch (e: any) {
+      setMsg(e?.message || '기준을 저장하지 못했어요.')
+    } finally { setBusy(false) }
+  }
+
+  async function act(pid: number, action: 'approve' | 'reject' | 'undo' | 'retry', reviewIds: number[],
     ov?: { values: Record<string, any>; note: string } | null) {
     if (action === 'reject' && !reason.trim()) { setMsg('반려 사유를 먼저 적어 주세요.'); return }
     setBusy(true); setMsg(null)
@@ -184,7 +254,8 @@ export default function Admin() {
       if (action === 'approve' && ov) await overrideReview(reviewIds[0], ov.values, ov.note)
       const r = await verifyReviews(pid, { action, review_ids: reviewIds, ...(action === 'reject' ? { reject_reason: reason.trim() } : {}) })
       const fails = r?.failures?.length ? ` · 실패 ${r.failures.map((f: any) => f.code).join(', ')}` : ''
-      setMsg(`${action === 'approve' ? (ov ? '정정 후 승인' : '승인') : action === 'reject' ? '반려' : '되돌리기'} 완료${fails}`)
+      const label = action === 'approve' ? (ov ? '정정 후 승인' : '승인') : action === 'reject' ? '반려' : action === 'retry' ? '다시 반영' : '되돌리기'
+      setMsg(`${label} 완료${fails}`)
       setReason('')
       setDetail(await getReviewDetail(pid).catch(() => null))
       load()
@@ -224,7 +295,7 @@ export default function Admin() {
         {msg && <p style={{ fontSize: 13, marginTop: 'var(--space-2)' }} data-testid="admin-msg">{msg}</p>}
         <a href={`${MEOKSEON_BASE}/contribution-review.html`} target="_blank" rel="noreferrer"
           style={{ display: 'inline-block', fontSize: 12, marginTop: 'var(--space-2)', color: 'var(--text-muted)' }}>
-          값 정정·기준 채우기 등 고급 검토(기존 화면) ↗
+          옛 고급 검토 화면(비상용 · ADMIN_TOKEN) ↗
         </a>
       </div>
 
@@ -254,7 +325,19 @@ export default function Admin() {
                     <p key={i} style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>제보: {l}</p>
                   ))}
                   {a.override && <p style={{ fontSize: 12, color: '#1d4ed8' }}>관리자 정정 있음 · {a.override.by ?? ''} · {a.override.note ?? ''}</p>}
-                  {a.axis === 'nutrition' && a.basis && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>표기 기준: {a.basis.value ?? '모름(고급 화면에서 채우기)'}</p>}
+                  {a.axis === 'nutrition' && a.basis && (a.status === 'candidate' || isHeld(a)) && (
+                    <BasisEditor key={`b${a.review_id}`} a={a} busy={busy}
+                      onSave={(body) => saveBasis(it.product_id, a.review_id, isHeld(a), body)} />
+                  )}
+                  {a.axis === 'nutrition' && a.basis && !(a.status === 'candidate' || isHeld(a)) && (
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>표기 기준: {a.basis.value ?? '모름'}</p>
+                  )}
+                  {isHeld(a) && (
+                    <div style={{ marginTop: 'var(--space-1)' }}>
+                      <button type="button" className="btn btn-primary" disabled={busy} style={smallBtn} data-testid="admin-retry"
+                        onClick={() => act(it.product_id, 'retry', [a.review_id])}>다시 반영</button>
+                    </div>
+                  )}
                   {a.status === 'candidate' && (
                     <AxisEditor a={a} busy={busy}
                       onApprove={(values, note) => act(it.product_id, 'approve', [a.review_id], values ? { values, note } : null)}

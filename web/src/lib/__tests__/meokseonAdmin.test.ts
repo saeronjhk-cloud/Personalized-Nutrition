@@ -8,7 +8,10 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { AdminApiError, gateFromError, describeProposed, initialEdit, buildOverrideValues, ALLERGENS_19 } from '../meokseonAdmin'
+import {
+  AdminApiError, gateFromError, describeProposed, initialEdit, buildOverrideValues, ALLERGENS_19,
+  BASIS_OPTIONS, EMPTY_BASIS_FORM, buildBasisBody, isHeld,
+} from '../meokseonAdmin'
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -98,5 +101,47 @@ describe('세션72f — 사진 보며 정정(편집기 순수 함수)', () => {
     const src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../pages/Admin.tsx'), 'utf8')
     expect(src).toMatch(/<PhotoPanel productId=/)
     expect(src).toMatch(/if \(action === 'approve' && ov\) await overrideReview\(/)
+  })
+})
+
+describe('세션73 U72-12 — 표기 기준(basis) 채우기 · 다시 반영(retry)을 /admin 으로', () => {
+  const F = (o: Partial<typeof EMPTY_BASIS_FORM>) => ({ ...EMPTY_BASIS_FORM, note: '라벨 사진 확인', ...o })
+  it('기준 4종은 서버 contributionApply.CONTRIBUTION_BASIS_OK 와 같다(다르면 서버 400 INVALID_BASIS)', () => {
+    let src = ''
+    try { src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../../../backends/먹선/meokseon-server/src/services/contributionApply.js'), 'utf8') } catch { return }
+    const m = src.match(/const CONTRIBUTION_BASIS_OK = \[([^\]]*)\]/)
+    if (!m) return
+    const server = [...m[1].matchAll(/'([^']+)'/g)].map((x) => x[1])
+    expect(BASIS_OPTIONS.map((o) => o.value)).toEqual(server)
+  })
+  it('기준만 + 근거 → 본문 {basis, note} (제공량은 보내지 않음)', () => {
+    expect(buildBasisBody(F({ basis: 'per_100g' }))).toEqual({ ok: true, body: { basis: 'per_100g', note: '라벨 사진 확인' } })
+  })
+  it('기준 없음·모르는 값 · 근거 없음 → 거부', () => {
+    expect(buildBasisBody(F({})).ok).toBe(false)
+    expect(buildBasisBody(F({ basis: 'per_serving_x' })).ok).toBe(false)
+    expect(buildBasisBody(F({ basis: 'per_serving', note: '  ' })).ok).toBe(false)
+  })
+  it('제공량: 값+단위 → 숫자·소문자 · 값만/단위만/0·음수·문자/kg → 거부', () => {
+    expect(buildBasisBody(F({ basis: 'per_serving', serving_size: '30', serving_unit: 'G', total_content: '300', content_unit: 'g' })))
+      .toEqual({ ok: true, body: { basis: 'per_serving', note: '라벨 사진 확인', serving_size: 30, serving_unit: 'g', total_content: 300, content_unit: 'g' } })
+    for (const bad of [{ serving_size: '30' }, { serving_unit: 'g' }, { serving_size: '0', serving_unit: 'g' },
+      { serving_size: '-1', serving_unit: 'g' }, { serving_size: 'abc', serving_unit: 'g' }, { total_content: '1', content_unit: 'kg' }]) {
+      expect(buildBasisBody(F({ basis: 'per_serving', ...bad })).ok).toBe(false)
+    }
+  })
+  it('isHeld — approved 이고 미반영(또는 서버 held=true)만', () => {
+    expect(isHeld({ status: 'approved', applied_at: null })).toBe(true)
+    expect(isHeld({ status: 'approved', applied_at: '2026-10-01' })).toBe(false)
+    expect(isHeld({ status: 'candidate', held: false })).toBe(false)
+    expect(isHeld({ status: 'approved', held: true, applied_at: null })).toBe(true)
+    expect(isHeld(null)).toBe(false)
+  })
+  it('배선: Admin 이 BasisEditor·submitBasis 를 쓰고, 보류 행에 retry 버튼을 준다', () => {
+    const src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../pages/Admin.tsx'), 'utf8')
+    expect(src).toMatch(/<BasisEditor /)
+    expect(src).toMatch(/await submitBasis\(reviewId, body\)/)
+    expect(src).toMatch(/act\(it\.product_id, 'retry', \[a\.review_id\]\)/)
+    expect(src).not.toMatch(/고급 화면에서 채우기/)
   })
 })

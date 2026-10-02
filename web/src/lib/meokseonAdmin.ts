@@ -153,6 +153,63 @@ export async function overrideReview(reviewId: number, values: Record<string, an
   return b?.data ?? b
 }
 
+// ── ★ 세션73 U72-12 — 영양 «표기 기준(basis)» 채우기를 /admin 으로 (옛 화면 · ADMIN_TOKEN 의존 제거) ──
+/** 서버 `contributionApply.CONTRIBUTION_BASIS_OK` 와 같은 4종 · 같은 순서. */
+export const BASIS_OPTIONS = [
+  { value: 'per_serving', label: '1회 제공량 기준' },
+  { value: 'per_100g', label: '100g 기준' },
+  { value: 'per_100ml', label: '100ml 기준' },
+  { value: 'per_total', label: '총 내용량 기준' },
+] as const
+export const BASIS_UNITS = ['g', 'ml'] as const
+
+export interface BasisForm {
+  basis: string; note: string
+  serving_size: string; serving_unit: string
+  total_content: string; content_unit: string
+}
+export const EMPTY_BASIS_FORM: BasisForm = { basis: '', note: '', serving_size: '', serving_unit: '', total_content: '', content_unit: '' }
+
+/**
+ * 순수 — 폼 → 서버 본문. 서버(adminRoutes …/basis)와 «같은 규칙»으로 보내기 전에 막는다. 테스트 대상.
+ *   기준 4종 필수 · 근거 필수 · 값을 넣으면 단위(g/ml)도 · 0보다 큰 숫자 · 단위만 있고 값이 없어도 거부.
+ *   ⚠ 모르면 채우지 않는다 — 추측한 기준의 오차는 신호등 색으로 곧장 넘어간다(서버 문구와 같은 원칙).
+ */
+export function buildBasisBody(f: BasisForm):
+  { ok: true; body: Record<string, string | number> } | { ok: false; message: string } {
+  const basis = (f.basis || '').trim()
+  if (!BASIS_OPTIONS.some((o) => o.value === basis)) return { ok: false, message: '표기 기준을 골라 주세요(모르면 채우지 마세요).' }
+  const note = (f.note || '').trim()
+  if (!note) return { ok: false, message: '무엇을 보고 정했는지 근거를 적어 주세요(예: 라벨 사진 «1회 제공량 30g» 확인).' }
+  const body: Record<string, string | number> = { basis, note }
+  const pairs: [keyof BasisForm, keyof BasisForm, string][] = [
+    ['serving_size', 'serving_unit', '1회 제공량'], ['total_content', 'content_unit', '총 내용량'],
+  ]
+  for (const [vk, uk, ko] of pairs) {
+    const raw = String(f[vk] ?? '').trim(); const unit = String(f[uk] ?? '').trim().toLowerCase()
+    if (!raw && !unit) continue
+    if (!raw) return { ok: false, message: `${ko} 값을 적거나 단위를 비워 주세요.` }
+    if (!unit) return { ok: false, message: `${ko} 단위(g/ml)를 골라 주세요.` }
+    if (!(BASIS_UNITS as readonly string[]).includes(unit)) return { ok: false, message: '단위는 g 또는 ml 만 받습니다.' }
+    const n = Number(raw)
+    if (!Number.isFinite(n) || n <= 0) return { ok: false, message: `${ko}은(는) 0보다 큰 숫자여야 합니다.` }
+    body[vk] = n; body[uk] = unit
+  }
+  return { ok: true, body }
+}
+
+export async function submitBasis(reviewId: number, body: Record<string, string | number>): Promise<any> {
+  const b = await adminFetch(`/review/contributions/${Number(reviewId)}/basis`, {
+    method: 'POST', body: JSON.stringify(body),
+  })
+  return b?.data ?? b
+}
+
+/** 순수 — 보류(승인했지만 반영 안 됨) 행인가. 이 행에는 «다시 반영(retry)» 버튼을 준다. */
+export function isHeld(a: any): boolean {
+  return !!a && (a.held === true || (a.status === 'approved' && !a.applied_at))
+}
+
 const AXIS_KO: Record<string, string> = { nutrition: '영양', ingredients: '원재료', allergens: '알레르기', additives: '첨가물' }
 const STATUS_KO: Record<string, string> = {
   candidate: '검토 대기', approved: '승인', rejected: '반려', undone: '되돌림', superseded: '대체됨', auto_applied: '자동반영',
