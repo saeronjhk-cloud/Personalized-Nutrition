@@ -8,6 +8,7 @@ import { CHECKUP_ENABLED, MEAL_ENABLED } from './flags'
 import { loadEffectiveGoals } from './userGoals'
 import { fetchSurveyResponses, fetchSurveyResponseDetail } from './survey_api'
 import { fetchCheckupRecords, fetchCheckupRecordDetail } from './checkup_api'
+import { resolveEgfr } from '../domain/checkup/egfr'
 import { mealRowsToCoachMeals, type CoachingInput, type CoachMealRow } from '../domain/coaching/goal_meal_coaching'
 
 /** 오늘 0시(로컬) — 운영 브라우저는 KST */
@@ -29,29 +30,30 @@ async function fetchTodayMealRows(userId: string): Promise<CoachMealRow[] | null
   return data as CoachMealRow[]
 }
 
-/** 검진 eGFR — biomarker_key 'egfr' (checkupImport 개념 id). CHECKUP 꺼짐·없음 → null */
-async function fetchLatestEgfr(userId: string): Promise<number | null> {
+/** 최신 검진 수치(CHECKUP 켜짐만) — eGFR 은 아래 resolveEgfr 로 측정값 우선, 없으면 크레아티닌 CKD-EPI 2021 산출
+ *  (운영 DB 에 'egfr' 키 없음 10-02 확인 · 평가 IP/integration/egfr_ckd_epi_eval_v1.md) */
+async function fetchLatestCheckupValues(userId: string): Promise<Record<string, { value: number; unit?: string | null }> | null> {
   if (!CHECKUP_ENABLED) return null
   const recs = await fetchCheckupRecords(userId)
   if (recs.records.length === 0) return null
   const d = await fetchCheckupRecordDetail(recs.records[0].id, userId)
-  const v = d.detail?.values?.egfr?.value
-  return typeof v === 'number' && Number.isFinite(v) ? v : null
+  return d.detail?.values ?? null
 }
 
 export async function loadGoalCoachingInput(): Promise<CoachingInput | null> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const [goals, surveys, egfr, rows] = await Promise.all([
+  const [goals, surveys, checkupValues, rows] = await Promise.all([
     loadEffectiveGoals(user.id),
     fetchSurveyResponses(user.id),
-    fetchLatestEgfr(user.id),
+    fetchLatestCheckupValues(user.id),
     fetchTodayMealRows(user.id),
   ])
   if (rows === null) return null
   const latest = surveys.responses[0]
   const a = latest ? (await fetchSurveyResponseDetail(latest.id, user.id)).detail?.answers ?? null : null
   const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null)
+  const egfr = resolveEgfr(checkupValues, num(a?.나이), a?.성별).value
   return {
     mealEnabled: MEAL_ENABLED,
     loggedIn: true,
