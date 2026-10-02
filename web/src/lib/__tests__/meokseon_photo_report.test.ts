@@ -619,3 +619,28 @@ describe('★★ confirmPhotoReport — 부분 저장 필드를 잃지 않는다
     expect(r.nutrientCount).toBe(0)
   })
 })
+
+/* ★ 세션73 U72-4 — 서버 `allergen_auto_applied` · `allergen_may_inspected`(세션72 신설)를 잃지 않는다. */
+describe('★ confirmPhotoReport — 알레르기 자동반영·혼입 판독 신호를 잃지 않는다 (세션73 U72-4)', () => {
+  it('boolean 이면 그대로 싣는다', async () => {
+    const { confirmPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({
+      save_result: { saved: true, allergen_auto_applied: true, allergen_may_inspected: false },
+    }))
+    const r = await confirmPhotoReport({ analysisToken: 't', productName: '신라면' })
+    expect(r.allergenAutoApplied).toBe(true)
+    expect(r.allergenMayInspected).toBe(false)
+  })
+
+  it('★ 없거나 null·문자열이면 «명시적 null» — false 로 승격하지 않는다', async () => {
+    const { confirmPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ save_result: { saved: true } }))
+    const a = await confirmPhotoReport({ analysisToken: 't', productName: '신라면' })
+    expect([a.allergenAutoApplied, a.allergenMayInspected]).toEqual([null, null])
+    fetchMock.mockResolvedValue(okResponse({
+      save_result: { saved: true, allergen_auto_applied: null, allergen_may_inspected: 'false' },
+    }))
+    const b = await confirmPhotoReport({ analysisToken: 't', productName: '신라면' })
+    expect([b.allergenAutoApplied, b.allergenMayInspected]).toEqual([null, null])
+  })
+})

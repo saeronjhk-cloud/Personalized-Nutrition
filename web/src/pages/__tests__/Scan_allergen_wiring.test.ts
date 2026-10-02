@@ -65,8 +65,16 @@ describe('Scan — 사진 제보 결과 알레르기 배선 (세션61 U60-7)', (
    *     이름이 바뀌었다고 이 단정을 지우면 배선을 지켜보는 것이 없어진다.
    */
   it('★ 사진 제보 결과(analysis)에 AllergenCard 를 붙인다 — 미리보기·완료 «두 곳» 모두', () => {
-    const hits = code.match(/<AllergenCard\s+result=\{analysis\}/g) || []
-    expect(hits.length).toBeGreaterThanOrEqual(2)
+    // ★ 세션73 U72-4 — 완료 화면은 `{ ...analysis, allergens_may_unconfirmed: … }` 로 바뀌었다(서버 판정을 얹는다).
+    const plain = code.match(/<AllergenCard\s+result=\{analysis\}/g) || []
+    const overlaid = code.match(/<AllergenCard\s+result=\{\{\s*\.\.\.analysis,/g) || []
+    expect(plain.length).toBeGreaterThanOrEqual(1)
+    expect(overlaid.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('★ 세션73 U72-4 — 완료 카드는 서버 판정을 reportMayUnconfirmed(confirmed) 로 얹는다', () => {
+    expect(code).toMatch(/allergens_may_unconfirmed:\s*reportMayUnconfirmed\(confirmed\)/)
+    expect(code).toMatch(/allergenMayInspected:\s*r\.allergenMayInspected/)
   })
 
   it('★★ 바코드 결과(result)의 카드도 그대로 남아 있다 — 한쪽을 고치며 다른 쪽을 지우지 않는다', () => {

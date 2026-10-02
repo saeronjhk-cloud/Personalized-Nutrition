@@ -135,6 +135,21 @@ export function describeAllergenProvenance(result: Partial<Pick<
   }
 }
 
+/**
+ * ★ 세션73 U72-4 — 사진 제보 «완료» 화면의 「혼입 정보 미확인」 판정.
+ *   종전에는 바코드 조회(`allergens_may_unconfirmed`)에서만 이 고지가 떴다 — 제보자 본인은
+ *   방금 보낸 사진에서 혼입 문장을 못 읽었다는 걸 모른 채 떠났다.
+ *   true 조건: 서버가 저장했고(saved) ∧ 서버가 «읽지 못했다»고 명시(allergenMayInspected === false).
+ *   null(구버전 서버·알레르기 축 없음)은 말하지 않는다 — 없는 사실을 지어내지 않는다.
+ *   ⚠ 카드가 `uncollected` 면 고지 자체를 안 그린다(AllergenCard 쪽 조건) — 여기서 중복 판정하지 않는다.
+ */
+export function reportMayUnconfirmed(c: {
+  saved: boolean
+  allergenMayInspected?: boolean | null
+} | null | undefined): boolean {
+  return !!c && c.saved === true && c.allergenMayInspected === false
+}
+
 /* ★ 카드는 «항상» 띄운다. 세 상태 전부 사용자가 알아야 할 정보이고,
  *   특히 `uncollected` 에서 카드를 숨기면 «침묵»이 「알레르겐 없음」으로 읽힌다.
  *   그래서 shouldShow 류의 분기를 일부러 두지 않았다. */

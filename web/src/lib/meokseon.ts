@@ -613,6 +613,14 @@ export interface MsPhotoConfirmResult {
    */
   nutrientCount: number | null
 
+  /**
+   * ★ 세션73 U72-4 — 서버 `save_result.allergen_auto_applied` · `allergen_may_inspected` 원문(세션72 신설).
+   *   allergenMayInspected: false = 혼입(「같은 제조시설」) 문장을 읽지 못했다 → 「혼입 정보 미확인」.
+   *   **boolean 이 아니면 null** — 구버전 서버·알레르기 축 없음. null 을 false 로 읽지 않는다.
+   */
+  allergenAutoApplied: boolean | null
+  allergenMayInspected: boolean | null
+
   raw: unknown
 }
 
@@ -711,6 +719,9 @@ export async function confirmPhotoReport(params: {
     nutritionRejectCode: str(srObj?.nutrition_reject_code),
     nutritionRejectReason: str(srObj?.nutrition_reject_reason),
     nutrientCount,
+    // ★ 세션73 U72-4 — boolean 일 때만 싣는다(문자열 'false' 등은 null).
+    allergenAutoApplied: typeof srObj?.allergen_auto_applied === 'boolean' ? srObj.allergen_auto_applied : null,
+    allergenMayInspected: typeof srObj?.allergen_may_inspected === 'boolean' ? srObj.allergen_may_inspected : null,
     raw: data,
   }
 }

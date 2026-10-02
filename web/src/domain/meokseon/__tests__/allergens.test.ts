@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { describeAllergens } from '../allergens'
+import { describeAllergens, reportMayUnconfirmed } from '../allergens'
 
 /**
  * 먹선 알레르기 표시 판정.
@@ -128,5 +128,20 @@ describe('입력 방어 — 서버/사용자 입력이 지저분해도 죽지 �
       allergens_v2: { mayContain: ['  게  '] },
     })
     expect(v.kind === 'grouped' && v.mayContain).toEqual(['게'])
+  })
+})
+
+describe('reportMayUnconfirmed — 사진 제보 완료 화면 「혼입 정보 미확인」 (세션73 U72-4)', () => {
+  it('저장됨 ∧ 서버가 «못 읽음(false)» 이라고 했을 때만 true', () => {
+    expect(reportMayUnconfirmed({ saved: true, allergenMayInspected: false })).toBe(true)
+  })
+  it('읽었으면(true) · 서버가 말이 없으면(null/undefined) false — 지어내지 않는다', () => {
+    expect(reportMayUnconfirmed({ saved: true, allergenMayInspected: true })).toBe(false)
+    expect(reportMayUnconfirmed({ saved: true, allergenMayInspected: null })).toBe(false)
+    expect(reportMayUnconfirmed({ saved: true })).toBe(false)
+  })
+  it('저장 안 된 제보·null 입력은 false', () => {
+    expect(reportMayUnconfirmed({ saved: false, allergenMayInspected: false })).toBe(false)
+    expect(reportMayUnconfirmed(null)).toBe(false)
   })
 })

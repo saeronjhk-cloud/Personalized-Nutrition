@@ -42,6 +42,7 @@ import {
   buildPreviewNutrition, PREVIEW_DISCLAIMER,   // 세션72
 } from '../domain/meokseon/reportNutrition'
 import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
+import { reportMayUnconfirmed } from '../domain/meokseon/allergens'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
 // 카메라 스캔은 무의존성 BarcodeDetector(브라우저 네이티브). 미지원/거부 시 이름 검색으로 폴백.
@@ -151,6 +152,8 @@ export default function Scan() {
     rejectReason: string | null
     nutritionStatus: string | null
     nutritionRejectCode: string | null
+    /** ★ 세션73 U72-4 — 서버 `allergen_may_inspected`(null = 말이 없었다). */
+    allergenMayInspected: boolean | null
   } | null>(null)
   /**
    * ★★ 2026-08-24 세션64c — 「제보하려면 로그인이 필요해요」 패널.
@@ -406,6 +409,7 @@ export default function Scan() {
         rejectReason: r.rejectReason,
         nutritionStatus: r.nutritionStatus,
         nutritionRejectCode: r.nutritionRejectCode,
+        allergenMayInspected: r.allergenMayInspected,
       })
       // ★★ 세션64b 계측 — 「부분 저장」은 새 «결과 상태»지만 새 «이벤트 이름»을 만들지 않는다.
       //   `ALL_APP_EVENTS` 는 DB CHECK 제약과 1:1 이라 이름을 늘리면 INSERT 가 «조용히» 거부된다
@@ -809,7 +813,9 @@ export default function Scan() {
 
               ⇒ 바코드 경로와 «같은 카드»를 쓴다. 그래야 두 경로가 갈라지지 않는다.
               ⚠ 이 카드를 다시 한 줄짜리 텍스트로 되돌리지 말 것. 되돌리면 침묵이 돌아온다. */}
-          <AllergenCard result={analysis} />
+          {/* ★ 세션73 U72-4 — 완료 화면은 서버 판정(allergen_may_inspected)을 얹어 「혼입 정보 미확인」을 말한다.
+              판정은 `reportMayUnconfirmed` 한 곳. 미리보기(저장 전) 카드는 그대로 analysis 만 쓴다. */}
+          <AllergenCard result={{ ...analysis, allergens_may_unconfirmed: reportMayUnconfirmed(confirmed) }} />
 
           {/* ───── 세션64c — 「보여줄 수 있는 부분만 보여주고, 나머지는 나중에」(제이 2026-08-24) ─────
               원재료 → 첨가물 → 영양·신호등 순. 알레르기가 «먼저»인 것은 안전 항목이기 때문이다. */}
