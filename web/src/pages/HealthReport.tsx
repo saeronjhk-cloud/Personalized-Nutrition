@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import type { SurveyRecord, ScoreBreakdown } from '../types'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
+import { symptomLabel } from '../domain/survey/symptoms'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -300,7 +301,7 @@ export default function HealthReport() {
                       fontSize: 12,
                       padding: 'var(--space-1) var(--space-2)',
                       borderRadius: 20,
-                    }}>{s}</span>
+                    }}>{symptomLabel(s)}</span>
                   ))}
                 </div>
               </div>
@@ -318,7 +319,7 @@ export default function HealthReport() {
                       fontSize: 12,
                       padding: 'var(--space-1) var(--space-2)',
                       borderRadius: 20,
-                    }}>{s}</span>
+                    }}>{symptomLabel(s)}</span>
                   ))}
                 </div>
               </div>
