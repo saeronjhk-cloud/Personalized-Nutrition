@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { CHECKUP_ENABLED, MEAL_ENABLED, MEOKSEON_ENABLED } from '../lib/flags'
+import { MEAL_ENABLED, MEOKSEON_ENABLED } from '../lib/flags'
 
 /** 문의 메일(대외용) — 개인 메일 노출 금지. 처리방침 §8 과 같은 값 */
 export const CONTACT_EMAIL = 'contact@saeronmedia.com'
@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="footer-brand">
           <div style={{ fontSize: 20, fontWeight: 700 }}>🧬 서박사의 영양공식</div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
-            {[CHECKUP_ENABLED && '건강검진', '설문', MEAL_ENABLED && '식사 기록'].filter(Boolean).join('·')}을 바탕으로 맞춤 영양제를 추천합니다.
+            내 건강 상태와 생활 습관에 맞춰 식단을 코칭하고, 필요한 영양제를 추천합니다.
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
             (주)새론미디어 | 대표 김재환 | 사업자등록번호 606-86-65033<br />

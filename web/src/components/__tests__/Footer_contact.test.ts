@@ -5,6 +5,7 @@
  *  F3 내 건강(/dashboard)에 운동 모듈 카드 없음(개발 계획 없음)
  *  F4 푸터 서비스 링크가 실제 라우트(내 건강·영양제 추천·건강 변화 리포트 등)
  *  F5 슬로건 «바른 먹거리로…» 줄 삭제
+ *  F6 소개 문구 = 식단 코칭 + 영양제 추천
  */
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -29,6 +30,9 @@ describe('푸터 문의 메일 · 내 건강 모듈', () => {
   })
   it('F5 슬로건 줄 삭제(제이 10-04)', () => {
     expect(footer).not.toContain('바른 먹거리로 건강한 세상을 이룬다')
+  })
+  it('F6 소개 문구 = 식단 코칭 + 영양제 추천(제이 10-04)', () => {
+    expect(footer).toContain('내 건강 상태와 생활 습관에 맞춰 식단을 코칭하고, 필요한 영양제를 추천합니다.')
   })
   it('F4 서비스 링크', () => {
     for (const to of ['/dashboard', '/survey', '/health-report', '/blog', '/resources']) expect(footer).toContain(`to="${to}"`)
