@@ -11,9 +11,6 @@ export default function Footer() {
         <div className="footer-brand">
           <div style={{ fontSize: 20, fontWeight: 700 }}>🧬 서박사의 영양공식</div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
-            바른 먹거리로 건강한 세상을 이룬다
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
             {[CHECKUP_ENABLED && '건강검진', '설문', MEAL_ENABLED && '식사 기록'].filter(Boolean).join('·')}을 바탕으로 맞춤 영양제를 추천합니다.
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
