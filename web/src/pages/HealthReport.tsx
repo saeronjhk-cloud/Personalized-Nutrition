@@ -4,6 +4,7 @@ import type { SurveyRecord, ScoreBreakdown } from '../types'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { symptomLabel } from '../domain/survey/symptoms'
 import { comparePair } from '../domain/survey/history'
+import CheckupCompareSection from '../components/checkup/CheckupCompareSection'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -62,6 +63,10 @@ export default function HealthReport() {
         <Link to="/survey" className="btn btn-primary" style={{ textDecoration: 'none' }}>
           설문 시작하기
         </Link>
+        {/* 설문 비교가 없어도 검진 비교는 보여 준다(IP/integration/health_report_checkup_compare_eval_v1.md) */}
+        <div style={{ maxWidth: 720, margin: 'var(--space-8) auto 0' }}>
+          <CheckupCompareSection />
+        </div>
       </div>
     )
   }
@@ -442,6 +447,9 @@ export default function HealthReport() {
           </div>
         </div>
       )}
+
+      {/* 건강검진 변화 — IP/integration/health_report_checkup_compare_eval_v1.md */}
+      <CheckupCompareSection />
 
       {/* CTA */}
       <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>

@@ -20,6 +20,8 @@ interface Props {
   history: TimeseriesPoint[];
   ranges: Range[];
   height?: number;
+  /** 툴팁 이름(없으면 biomarker_key) — 건강 변화 리포트용 한글 표시명 */
+  label?: string;
 }
 
 export default function TimeseriesChart({
@@ -27,6 +29,7 @@ export default function TimeseriesChart({
   history,
   ranges,
   height = 200,
+  label,
 }: Props) {
   if (history.length <= 1) {
     return (
@@ -68,7 +71,7 @@ export default function TimeseriesChart({
           )}
           <XAxis dataKey="date" tick={{ fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} width={40} />
-          <Tooltip formatter={(value: number) => [value, biomarker_key]} />
+          <Tooltip formatter={(value: number) => [value, label ?? biomarker_key]} />
           <Line
             type="monotone"
             dataKey="value"
