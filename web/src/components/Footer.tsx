@@ -1,4 +1,8 @@
 import { Link } from 'react-router-dom'
+import { CHECKUP_ENABLED, MEAL_ENABLED, MEOKSEON_ENABLED } from '../lib/flags'
+
+/** 문의 메일(대외용) — 개인 메일 노출 금지. 처리방침 §8 과 같은 값 */
+export const CONTACT_EMAIL = 'contact@saeronmedia.com'
 
 export default function Footer() {
   return (
@@ -9,6 +13,9 @@ export default function Footer() {
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
             바른 먹거리로 건강한 세상을 이룬다
           </p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
+            {[CHECKUP_ENABLED && '건강검진', '설문', MEAL_ENABLED && '식사 기록'].filter(Boolean).join('·')}을 바탕으로 맞춤 영양제를 추천합니다.
+          </p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
             (주)새론미디어 | 대표 김재환 | 사업자등록번호 606-86-65033<br />
             서울특별시 송파구 중대로 211, 2층(가락동, 나은빌딩)
@@ -18,7 +25,11 @@ export default function Footer() {
         <div className="footer-links">
           <div className="footer-col">
             <h4>서비스</h4>
+            <Link to="/dashboard">내 건강</Link>
             <Link to="/survey">영양제 추천</Link>
+            {MEAL_ENABLED && <Link to="/meal">식사 기록</Link>}
+            {MEOKSEON_ENABLED && <Link to="/scan">가공식품</Link>}
+            <Link to="/health-report">건강 변화 리포트</Link>
             <Link to="/blog">영양정보 블로그</Link>
             <Link to="/resources">유용한 링크</Link>
           </div>
@@ -31,7 +42,7 @@ export default function Footer() {
           </div>
           <div className="footer-col">
             <h4>문의</h4>
-            <a href="mailto:saeronjhk@gmail.com">saeronjhk@gmail.com</a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </div>
         </div>
       </div>

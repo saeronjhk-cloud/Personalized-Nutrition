@@ -264,7 +264,7 @@ export default function Privacy() {
           사업자등록번호: 606-86-65033<br />
           주소: 서울특별시 송파구 중대로 211, 2층(가락동, 나은빌딩)<br />
           개인정보 보호책임자: 김재환 (대표)<br />
-          이메일: saeronjhk@gmail.com
+          이메일: contact@saeronmedia.com
         </p>
 
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>9. 만 14세 미만 아동의 개인정보 처리</h3>
@@ -296,6 +296,7 @@ export default function Privacy() {
             <p style={{ marginBottom: 'var(--space-1)', fontWeight: 600, color: 'var(--text)' }}>부칙 (개정 이력)</p>
             <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
               <li>2026-09-28 (경미 변경 · 버전 13_v5.0 유지): 로그인 회원의 건강 목표 입력 위치(식사 기록 화면) 안내 문구 추가. 처리 항목·목적·동의 범위·보유 기간 변경 없음.</li>
+              <li>2026-10-03: 개인정보 보호책임자 연락 이메일 변경(contact@saeronmedia.com) — 처리 항목·목적 변경 없음.</li>
               <li>13_v5.0 (2026-07-12 시행): 식사 사진 분석 기능 관련 민감정보(건강정보) 처리·국외이전(OpenAI·Railway, 미국) 조항 신설, 전송 최소화(음식영역 크롭·저해상도·EXIF 제거)·OpenAI 보관(최대 30일)·모델 미학습 명시, 만 14세 이상 서버 확인, 동의 철회 및 회원 탈퇴 시 전수 삭제 반영.</li>
               <li>v4.9 (2026-07-09 시행): 회원 탈퇴(삭제권) 절차 및 운영사 정보 정비.</li>
               <li>v4.x (2026-05-30 시행): 최초 방침 시행.</li>

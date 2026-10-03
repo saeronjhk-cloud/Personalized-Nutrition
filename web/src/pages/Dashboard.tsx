@@ -99,10 +99,10 @@ export default function Dashboard() {
       <div className="survey-card">
         <h2 className="survey-step-title">내 건강</h2>
         <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-2)', lineHeight: 1.6 }}>
-          원하는 항목만 입력해도 맞춤 영양제와 생활 습관 가이드를 받을 수 있어요.
+          원하는 항목만 입력해도 맞춤 영양제 추천을 받을 수 있어요.
         </p>
         <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 'var(--space-6)', lineHeight: 1.6 }}>
-          건강진단·설문·식이·운동 중 편한 것부터 시작하세요. 더 많이 입력할수록 추천이 정밀해집니다.
+          {[CHECKUP_ENABLED && "건강진단", "설문", MEAL_ENABLED && "식이"].filter(Boolean).join("·")} 중 편한 것부터 시작하세요. 더 많이 입력할수록 추천이 정밀해집니다.
         </p>
 
         {!isLoggedIn && (
@@ -257,15 +257,6 @@ export default function Dashboard() {
             </ModuleCard>
           )}
 
-          {/* 운동 */}
-          <ModuleCard emoji="🏃" title="운동" desc="운동 습관에 맞춘 가이드와 관련 기능성을 제안해요.">
-            <div>
-              <StatusBadge text="준비 중" tone="soon" />
-            </div>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: 14 }} disabled>
-              곧 제공됩니다
-            </button>
-          </ModuleCard>
         </div>
 
         <button
