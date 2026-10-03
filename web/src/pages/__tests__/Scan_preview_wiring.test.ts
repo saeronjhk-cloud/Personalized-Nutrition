@@ -75,3 +75,13 @@ describe('Scan — 세션73 U71-5 제품명 오독 제안 배선', () => {
     expect(src).toMatch(/onClick=\{\(\) => \{ setProductName\(nameSuggestion\.to\)/)
   })
 })
+
+describe('Scan — 세션74 U73-1 제품명 제안 계측 배선', () => {
+  it('scan_report_submit 에 source 로 결과 종류만 싣는다(새 이벤트명 없음 · 이름 미전송)', () => {
+    expect(src).toMatch(/source: nameSuggestSource\(nameSuggestOutcome\(nameSuggestion, name\.value\)\)/)
+    expect(src).not.toMatch(/track\('scan_name_suggest/)
+  })
+  it('수락해도 제안을 지우지 않는다(지우면 accepted 가 none 으로 집계됨)', () => {
+    expect(src).not.toMatch(/setProductName\(nameSuggestion\.to\); setNameSuggestion\(null\)/)
+  })
+})

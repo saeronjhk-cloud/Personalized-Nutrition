@@ -44,6 +44,7 @@ import {
 import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 import { reportMayUnconfirmed } from '../domain/meokseon/allergens'
 import { describeLabelDv, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelDv'
+import { nameSuggestOutcome, nameSuggestSource } from '../domain/meokseon/nameSuggestOutcome'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
 // 카메라 스캔은 무의존성 BarcodeDetector(브라우저 네이티브). 미지원/거부 시 이름 검색으로 폴백.
@@ -446,6 +447,9 @@ export default function Scan() {
         error_kind: (outcome.kind === 'partial' && outcome.nutritionCode)
           ? `nutrition_${outcome.nutritionCode}`
           : null,
+        // ★ 세션74 U73-1 — 제품명 제안 계측(accepted·kept·other · 없으면 null). 이름 자체는 안 보낸다.
+        //   제안은 수락해도 state 에 남겨 둔다(화면은 productName === from 일 때만 보이므로 숨겨진다).
+        source: nameSuggestSource(nameSuggestOutcome(nameSuggestion, name.value)),
       })
     } catch (e) {
       // ★ 401 을 «먼저» 가른다. `MeokseonConfirmError` 로 뭉개지면 「잠시 후 다시 시도해 주세요」가
@@ -917,7 +921,7 @@ export default function Scan() {
                 혹시 <strong>{nameSuggestion.to}</strong> 인가요? 사진 글자를 한 글자 잘못 읽었을 수 있어요.{' '}
                 <button type="button" className="btn btn-secondary"
                   style={{ width: 'auto', padding: '2px 10px', fontSize: 12, marginLeft: 4, whiteSpace: 'nowrap' }}
-                  onClick={() => { setProductName(nameSuggestion.to); setNameSuggestion(null); setReportError(null) }}>이 이름으로 바꾸기</button>
+                  onClick={() => { setProductName(nameSuggestion.to); setReportError(null) }}>이 이름으로 바꾸기</button>
               </div>
             )}
 
