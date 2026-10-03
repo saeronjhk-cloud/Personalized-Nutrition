@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import type { SurveyRecord, ScoreBreakdown } from '../types'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { symptomLabel } from '../domain/survey/symptoms'
+import { comparePair } from '../domain/survey/history'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -38,7 +39,8 @@ export default function HealthReport() {
     }
   }, [history])
 
-  if (loading && history.length < 2) {
+  // 로딩 중엔 브라우저 기록으로 먼저 그리지 않음(서버 기록과 개수가 달라 인덱스가 어긋남 — v1.2)
+  if (loading) {
     return (
       <div className="page fade-in" style={{ paddingTop: '12vh', textAlign: 'center' }}>
         <div className="spinner" style={{ margin: '0 auto var(--space-4)' }} />
@@ -64,8 +66,9 @@ export default function HealthReport() {
     )
   }
 
-  const before = history[beforeIdx]
-  const after = history[afterIdx]
+  const pair = comparePair(beforeIdx, afterIdx, history.length)!
+  const before = history[pair.before]
+  const after = history[pair.after]
   const days = daysBetween(before.date, after.date)
 
   // 카테고리별 점수 비교
@@ -138,12 +141,12 @@ export default function HealthReport() {
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 'var(--space-1)' }}>이전</label>
             <select
-              value={beforeIdx}
+              value={pair.before}
               onChange={e => setBeforeIdx(Number(e.target.value))}
               style={{ width: '100%', padding: 'var(--space-2) var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
-                <option key={r.id} value={i} disabled={i === afterIdx}>
+                <option key={r.id} value={i} disabled={i === pair.after}>
                   {formatDate(r.date)}
                 </option>
               ))}
@@ -152,12 +155,12 @@ export default function HealthReport() {
           <div style={{ flex: 1 }}>
             <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 'var(--space-1)' }}>이후</label>
             <select
-              value={afterIdx}
+              value={pair.after}
               onChange={e => setAfterIdx(Number(e.target.value))}
               style={{ width: '100%', padding: 'var(--space-2) var(--space-2)', borderRadius: 6, border: '1px solid var(--border)', fontSize: 13 }}
             >
               {history.map((r, i) => (
-                <option key={r.id} value={i} disabled={i === beforeIdx}>
+                <option key={r.id} value={i} disabled={i === pair.before}>
                   {formatDate(r.date)}
                 </option>
               ))}

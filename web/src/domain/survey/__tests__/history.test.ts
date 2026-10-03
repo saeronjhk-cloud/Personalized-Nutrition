@@ -2,7 +2,9 @@
  * 설문 기록 서버 우선 읽기 H01~H12 · 정본 IP/integration/survey_history_server_eval_v1.md
  */
 import { describe, it, expect } from "vitest";
-import { serverRowsToHistory, chooseHistory, resurveyState } from "../history";
+import { serverRowsToHistory, chooseHistory, resurveyState, comparePair } from "../history";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { RecommendationResult, SurveyRecord } from "../../../types";
 
 const R = (tag: string) => ({ tag } as unknown as RecommendationResult);
@@ -52,4 +54,18 @@ describe("H 설문 기록 서버 우선", () => {
   });
   it("H12 result = compute(answers)", () =>
     expect(serverRowsToHistory([row("a", "2026-09-01T00:00:00Z", { 나이: 57 })], compute)[0].result).toEqual(R("57")));
+});
+
+describe("v1.2 빈 화면 수정 (H13·H14·W4)", () => {
+  it("H13", () => {
+    expect(comparePair(3, 0, 2)).toEqual({ before: 1, after: 0 });
+    expect(comparePair(0, 0, 2)).toEqual({ before: 0, after: 0 });
+    expect(comparePair(0, 0, 0)).toBeNull();
+  });
+  it("H14", () => expect(comparePair(5, 7, 3)).toEqual({ before: 2, after: 2 }));
+  it("W4", () => {
+    const hr = readFileSync(resolve(__dirname, "../../../pages/HealthReport.tsx"), "utf-8");
+    expect(hr).toContain("comparePair(");
+    expect(hr).toContain("if (loading) {");
+  });
 });

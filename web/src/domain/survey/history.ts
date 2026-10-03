@@ -55,3 +55,10 @@ export function resurveyState(history: readonly SurveyRecord[], now: Date): Resu
   const daysSince = latest ? Math.floor((now.getTime() - new Date(latest.date).getTime()) / DAY_MS) : -1;
   return { latest, daysSince, prompt: latest != null && daysSince >= RESURVEY_DAYS, canCompare: history.length >= 2 };
 }
+
+/** 비교 인덱스를 기록 수 안으로 고정 — 기록 수가 줄어도(local→서버 교체 등) 범위 밖 접근으로 화면이 깨지지 않게(v1.2 H13·H14) */
+export function comparePair(beforeIdx: number, afterIdx: number, len: number): { before: number; after: number } | null {
+  if (len <= 0) return null;
+  const clamp = (i: number) => (Number.isInteger(i) && i >= 0 ? Math.min(i, len - 1) : 0);
+  return { before: clamp(beforeIdx), after: clamp(afterIdx) };
+}
