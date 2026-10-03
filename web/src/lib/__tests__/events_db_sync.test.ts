@@ -24,8 +24,8 @@ import { ALL_APP_EVENTS, ALLOWED_PROP_KEYS } from '../events_core'
  *   SQL 파일을 만들고 Supabase 에 붙여넣지 않으면 여전히 초록이다. 적용은 사람이 해야 한다.
  */
 
-// 세션52: 150 이 149 를 대체하는 전체 재동기화다. 새 마이그레이션을 만들면 여기도 옮길 것.
-const SQL_PATH = resolve(__dirname, '../../../supabase/150_app_event_meal_correction_v1.sql')
+// 세션52: 150 이 149 를 대체 · 2026-10-03: 154 가 150 을 대체하는 전체 재동기화. 새 마이그레이션을 만들면 여기도 옮길 것.
+const SQL_PATH = resolve(__dirname, '../../../supabase/154_app_event_coach_v1.sql')
 const sql = readFileSync(SQL_PATH, 'utf8')
 
 /** SQL 문자열에서 주석(-- …)을 걷어낸다. 주석 속 예시 이름을 목록으로 오인하지 않기 위해. */
@@ -42,7 +42,7 @@ describe('app_event 이벤트 목록 ↔ 마이그레이션 CHECK 제약', () =>
   const m = body.match(/app_event_event_enum check \(event in \(([\s\S]*?)\)\)/)
 
   it('마이그레이션에서 이벤트 CHECK 제약을 찾을 수 있다', () => {
-    expect(m, '150_app_event_meal_correction_v1.sql 에서 app_event_event_enum 을 못 찾았다').not.toBeNull()
+    expect(m, '154_app_event_coach_v1.sql 에서 app_event_event_enum 을 못 찾았다').not.toBeNull()
   })
 
   it('★ TS 목록과 SQL 목록이 «같은 집합»이다 (한쪽만 고치면 여기서 걸린다)', () => {
@@ -60,6 +60,14 @@ describe('app_event 이벤트 목록 ↔ 마이그레이션 CHECK 제약', () =>
     const inSql = quoted(m![1])
     expect(new Set(inSql).size).toBe(inSql.length)
     expect(new Set(ALL_APP_EVENTS).size).toBe(ALL_APP_EVENTS.length)
+  })
+
+  it('코칭 카드 계측 이벤트 2종이 양쪽에 있다 (T14)', () => {
+    const inSql = quoted(m![1])
+    for (const e of ['coach_card_shown', 'coach_why_open']) {
+      expect(ALL_APP_EVENTS as readonly string[]).toContain(e)
+      expect(inSql).toContain(e)
+    }
   })
 
   it('이번에 추가한 사진 제보 이벤트 2종이 양쪽에 있다', () => {
@@ -88,7 +96,7 @@ describe('props 화이트리스트 ↔ 마이그레이션 CHECK 제약', () => {
   const m = body.match(/props - array\[([\s\S]*?)\]::text\[\]/)
 
   it('마이그레이션에서 props CHECK 제약을 찾을 수 있다', () => {
-    expect(m, '150_app_event_meal_correction_v1.sql 에서 app_event_props_keys 를 못 찾았다').not.toBeNull()
+    expect(m, '154_app_event_coach_v1.sql 에서 app_event_props_keys 를 못 찾았다').not.toBeNull()
   })
 
   it('★ TS 화이트리스트와 SQL 목록이 «같은 집합»이다', () => {
@@ -106,6 +114,14 @@ describe('props 화이트리스트 ↔ 마이그레이션 CHECK 제약', () => {
     const inSql = quoted(m![1])
     for (const k of ['food_count', 'plate_count', 'mode', 'method', 'cached', 'has_data']) {
       expect(inSql, `${k} 가 다시 빠졌다`).toContain(k)
+    }
+  })
+
+  it('코칭 카드 계측 props 2종이 양쪽에 있다 (T14)', () => {
+    const inSql = quoted(m![1])
+    for (const k of ['coach_card', 'coach_level']) {
+      expect(ALLOWED_PROP_KEYS.has(k)).toBe(true)
+      expect(inSql).toContain(k)
     }
   })
 

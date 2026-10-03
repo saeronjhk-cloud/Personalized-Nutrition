@@ -15,6 +15,10 @@ describe('surfaceOf (이벤트 접두 → sink)', () => {
   it('3. weekly_report* → report', () => {
     expect(surfaceOf('weekly_report_view')).toBe('report')
   })
+  it('3b. coach_* → coach (T13)', () => {
+    expect(surfaceOf('coach_card_shown')).toBe('coach')
+    expect(surfaceOf('coach_why_open')).toBe('coach')
+  })
 })
 
 describe('sanitize (PII 차단 화이트리스트)', () => {

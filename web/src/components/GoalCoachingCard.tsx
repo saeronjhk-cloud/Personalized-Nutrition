@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { loadGoalCoachingInput } from '../lib/goalCoaching'
 import { goalMealCoaching, SLOT_LABEL, type ProteinCard } from '../domain/coaching/goal_meal_coaching'
+import { v1ShownProps } from '../domain/coaching/coach_telemetry'
+import { trackCoachShown } from '../lib/coachTelemetry'
 
 /**
  * /meal «오늘의 식사 코칭» (목표 기반 식사 코칭 v1 — 근육증가 → 끼니 단백질 더하기)
@@ -24,6 +26,12 @@ export default function GoalCoachingCard() {
     })()
     return () => { alive = false }
   }, [])
+
+  // 노출 계측(같은 날 1회) — coach_card_telemetry_eval_v1
+  const level = card?.level ?? null
+  useEffect(() => {
+    if (level) trackCoachShown(v1ShownProps({ level }))
+  }, [level])
 
   if (!card) return null
 

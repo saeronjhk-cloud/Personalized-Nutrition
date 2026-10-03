@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { loadMealGrammarInput } from '../lib/mealGrammar'
 import { mealGrammarCoaching, type MealGrammarResult } from '../domain/coaching/meal_grammar'
+import { coachCardId, grammarShownProps } from '../domain/coaching/coach_telemetry'
+import { trackCoachShown, trackCoachWhyOpen } from '../lib/coachTelemetry'
 
 /**
  * /meal «오늘의 밥상 코칭» (한식 끼니 문법 P1 — G-PRO·G-VEG·G-AM + 사진 검증 루프)
@@ -26,6 +28,12 @@ export default function MealGrammarCard() {
     return () => { alive = false }
   }, [])
 
+  // 노출 계측(같은 날·같은 카드 1회) — coach_card_telemetry_eval_v1
+  const activeRule = res?.active?.rule ?? null
+  useEffect(() => {
+    if (activeRule) trackCoachShown(grammarShownProps({ rule: activeRule }))
+  }, [activeRule])
+
   if (!res || (!res.active && !res.maintenance)) return null
   const a = res.active
 
@@ -38,9 +46,11 @@ export default function MealGrammarCard() {
           {a.evidence_text && (
             <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{a.evidence_text}</div>
           )}
-          <div style={{ marginTop: 'var(--space-1)', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            왜 이 카드? {a.why}
-          </div>
+          <details style={{ marginTop: 'var(--space-1)', fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}
+            onToggle={(e) => { if ((e.currentTarget as HTMLDetailsElement).open) trackCoachWhyOpen(coachCardId(a.rule)) }}>
+            <summary style={{ cursor: 'pointer' }}>왜 이 카드?</summary>
+            {a.why}
+          </details>
         </>
       )}
       {res.maintenance && (
