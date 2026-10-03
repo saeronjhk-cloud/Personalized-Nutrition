@@ -148,6 +148,11 @@ export function splitRatio(eatenRatio: number, people: number): number {
   return clampRatio(eatenRatio / n)
 }
 
+/** 음식별 먹은 양(%) → 내 몫 비율(각 %/100 ÷ 인원, 0~1). 식사 흐름 v2 — 음식별 반영에도 인원 적용(평가 P01). */
+export function perFoodShares(foods: unknown[], pcts: number[], people: number): { food_item_id: string; eaten_ratio: number }[] {
+  return (foods ?? []).map((f, i) => ({ food_item_id: foodItemId(f, i), eaten_ratio: splitRatio((pcts[i] ?? 100) / 100, people) }))
+}
+
 /** C-min(정밀) suggest 바디 — 식후만 전송(식전은 서버가 저장분 crop 참조). leftover_method=photo_ai_hybrid. */
 export function buildPhotoAiHybridSuggestBody(preMealLogId: string, afterImageBase64: string, mime = 'image/jpeg') {
   return { pre_meal_log_id: preMealLogId, leftover_method: 'photo_ai_hybrid' as const, after_image: afterImageBase64, after_image_mime: mime }

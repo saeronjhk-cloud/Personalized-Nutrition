@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  adjustSliderSingle, adjustPerFood, suggestPhotoAi, suggestPhotoAiHybrid, confirmPhotoAi, foodItemId, splitRatio,
+  adjustSliderSingle, adjustPerFood, suggestPhotoAi, suggestPhotoAiHybrid, confirmPhotoAi, splitRatio, perFoodShares,
 } from '../lib/mealLeftover'
 import { MEAL_CMIN_ENABLED } from '../lib/flags'
 import { track } from '../lib/events'
@@ -56,9 +56,12 @@ export default function LeftoverPanel(props: {
       setBusy(false); setErr((e as Error).message)
     }
   }
+  // 인원(÷N): v2 는 세 방식 공통(탭 위 1곳). v1 은 기존대로 «전체» 탭에서만 적용(음식별·사진은 1명 — 동작 불변).
+  const sharePeople = order === 'v2' ? people : 1
   const applyRatio = (p: number) => { setPct(p); return run(() => adjustSliderSingle(mealId, splitRatio(p / 100, people)), { method: 'slider', mode: 'all' }) }
-  const applyPerFood = () => run(() => adjustPerFood(mealId, foods.map((f, i) => ({ food_item_id: foodItemId(f, i), eaten_ratio: (pcts[i] ?? 100) / 100 }))), { method: 'slider', mode: 'perfood' })
-  const confirmPhoto = () => run(() => confirmPhotoAi(mealId, pct / 100), { method: 'photo_ai', mode: 'photo' })
+  const revert = () => { setPct(100); return run(() => adjustSliderSingle(mealId, 1), { method: 'slider', mode: 'all' }) }
+  const applyPerFood = () => run(() => adjustPerFood(mealId, perFoodShares(foods, pcts, sharePeople)), { method: 'slider', mode: 'perfood' })
+  const confirmPhoto = () => run(() => confirmPhotoAi(mealId, splitRatio(pct / 100, sharePeople)), { method: 'photo_ai', mode: 'photo' })
 
   async function onPickAfter(file: File) {
     setBusy(true); setErr(undefined)
@@ -78,10 +81,26 @@ export default function LeftoverPanel(props: {
     : '식후 남은 음식을 촬영하면 AI가 먹은 양을 추정해요. 확인 후에만 저장됩니다.'
   const btn = { width: '100%', minHeight: 44, padding: 'var(--space-2) var(--space-3)', fontSize: 13 } as const
 
+  const peopleRow = (label: string) => (
+    <div data-testid="people-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', margin: 'var(--space-1) 0' }}>
+      <span>{label}</span>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+        <button type="button" className="btn btn-secondary" aria-label="인원 줄이기" disabled={busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) var(--space-3)', fontSize: 15 }} onClick={() => setPeople((p) => Math.max(1, p - 1))}>−</button>
+        <strong style={{ color: 'var(--text)', minWidth: 34, textAlign: 'center' }}>{people}명</strong>
+        <button type="button" className="btn btn-secondary" aria-label="인원 늘리기" disabled={busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) var(--space-3)', fontSize: 15 }} onClick={() => setPeople((p) => Math.min(12, p + 1))}>+</button>
+      </span>
+    </div>
+  )
+
   return (
     <div role="region" aria-label="먹은 양 조절" data-testid="leftover-panel"
       style={{ padding: 'var(--space-2) var(--space-3)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
       {!hideTitle && <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>먹은 양 조절</div>}
+
+      {order === 'v2' && peopleRow('몇 명이 함께 드셨나요?')}
+      {order === 'v2' && people > 1 && (
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: -4 }}>먹은 양을 {people}명으로 나눠 내 몫만 기록해요.</div>
+      )}
 
       <div role="tablist" aria-label="먹은 양 조절 방식"
         style={{ display: 'flex', gap: 'var(--space-1)', padding: 'var(--space-1)', background: 'var(--border)', borderRadius: 'var(--radius-sm, 8px)' }}>
@@ -108,14 +127,7 @@ export default function LeftoverPanel(props: {
             <span>전체 먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
           </div>
           <input type="range" min={0} max={100} step={5} value={pct} onChange={(e) => setPct(Number(e.target.value))} style={{ width: '100%' }} aria-label="전체 먹은 양 비율" />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)', margin: 'var(--space-1) 0' }}>
-            <span>함께 먹은 인원</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <button type="button" className="btn btn-secondary" aria-label="인원 줄이기" disabled={busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) var(--space-3)', fontSize: 15 }} onClick={() => setPeople((p) => Math.max(1, p - 1))}>−</button>
-              <strong style={{ color: 'var(--text)', minWidth: 34, textAlign: 'center' }}>{people}명</strong>
-              <button type="button" className="btn btn-secondary" aria-label="인원 늘리기" disabled={busy} style={{ width: 'auto', minHeight: 40, padding: 'var(--space-1) var(--space-3)', fontSize: 15 }} onClick={() => setPeople((p) => Math.min(12, p + 1))}>+</button>
-            </span>
-          </div>
+          {order !== 'v2' && peopleRow('함께 먹은 인원')}
           <button type="button" className="btn btn-primary" disabled={busy} style={btn} onClick={() => applyRatio(pct)}>{busy ? '반영 중…' : '전체 반영'}</button>
         </>
       )}
@@ -146,7 +158,7 @@ export default function LeftoverPanel(props: {
           <>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               🤖 {note}
-              {typeof previewKcal === 'number' && <><br />미리보기: 약 {previewKcal} kcal (저장 전)</>}
+              {typeof previewKcal === 'number' && <><br />미리보기: 약 {previewKcal} kcal (저장 전{sharePeople > 1 ? ` · 식탁 전체 기준, 반영할 때 ${sharePeople}명으로 나눠요` : ''})</>}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-secondary)' }}>
               <span>먹은 양</span><strong style={{ color: 'var(--text)' }}>{pct}%</strong>
@@ -173,7 +185,7 @@ export default function LeftoverPanel(props: {
 
       {hasAdjustment && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--border-light)', paddingTop: 'var(--space-2)' }}>
-          <button type="button" disabled={busy} onClick={() => applyRatio(100)}
+          <button type="button" disabled={busy} onClick={revert}
             style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', padding: 'var(--space-2) var(--space-1)', minHeight: 40 }}>↩ 마지막 보정 되돌리기</button>
         </div>
       )}
