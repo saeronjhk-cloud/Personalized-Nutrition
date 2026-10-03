@@ -17,6 +17,7 @@ import GoalCoachingCard from '../components/GoalCoachingCard'
 import MealGrammarCard from '../components/MealGrammarCard'
 import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED, MEAL_FLOW_V2_ENABLED, MEAL_PRODUCT_ENABLED } from '../lib/flags'
 import ProductMealCard from '../components/ProductMealCard'
+import CoachAvatar from '../components/CoachAvatar'
 import { ANALYZE_BUSY_MSG, ANALYZE_WAIT_MSG } from '../lib/mealDetail'
 import AfterSaveLeftover from '../components/AfterSaveLeftover'
 import { isBetaPanel } from '../lib/betaPanel'
@@ -317,7 +318,8 @@ export default function Meal() {
           )}
 
           {busy || waiting ? (
-            <div style={{ textAlign: 'center', padding: 'var(--space-4) 0' }}>
+            <div style={{ textAlign: 'center', padding: 'var(--space-3) 0' }}>
+              <CoachAvatar pose="d2_magnifier" size={112} style={{ display: 'block', margin: '0 auto var(--space-2)' }} />
               <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                 {waiting ? ANALYZE_WAIT_MSG : ANALYZE_BUSY_MSG}
               </p>
@@ -349,7 +351,10 @@ export default function Meal() {
 
       {error && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-          <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 'var(--space-3)' }}>{error}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+            <CoachAvatar pose="e2_sorry" size={72} />
+            <p style={{ color: 'var(--danger)', fontSize: 14 }}>{error}</p>
+          </div>
           <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={reset}>다시 시도</button>
         </div>
       )}

@@ -3,6 +3,7 @@ import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
 import { alternatesOf } from '../lib/foodCorrection'
 import { canSaveFoods, renameRequestServing, type ResolvedFood } from '../lib/foodEdit'
 import FoodEditPanel from './FoodEditPanel'
+import CoachAvatar from './CoachAvatar'
 
 type Slot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
@@ -150,7 +151,10 @@ export default function MealResult(props: {
 
       {saved && afterSave ? afterSave : saved ? (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-          <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 'var(--space-3)' }}>✓ 기록에 저장했어요.</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+            <CoachAvatar pose="a1_thumbs" size={72} />
+            <p style={{ color: 'var(--accent)', fontSize: 14 }}>✓ 기록에 저장했어요.</p>
+          </div>
           <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={onReset}>다른 식사 기록하기</button>
         </div>
       ) : (

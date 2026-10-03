@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ProductAddPanel from './ProductAddPanel'
+import CoachAvatar from './CoachAvatar'
 import { productSummary, saveProductMeal } from '../lib/productLog'
 import { defaultMealSlot, type MealFood } from '../lib/nutrilens'
 import { track } from '../lib/events'
@@ -43,7 +44,12 @@ export default function ProductMealCard({ onSaved }: { onSaved: () => void }) {
 
       {open && (
         <div style={{ marginTop: 'var(--space-3)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-          {done && <p style={{ color: 'var(--accent)', fontSize: 13 }}>✓ 기록에 저장했어요. 이어서 다른 제품을 담을 수 있어요.</p>}
+          {done && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <CoachAvatar pose="a1_thumbs" size={56} />
+              <p style={{ color: 'var(--accent)', fontSize: 13 }}>✓ 기록에 저장했어요. 이어서 다른 제품을 담을 수 있어요.</p>
+            </div>
+          )}
           {foods.length > 0 && (
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
               {foods.map((f, i) => (

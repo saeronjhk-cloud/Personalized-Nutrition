@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import LeftoverPanel from './LeftoverPanel'
+import CoachAvatar from './CoachAvatar'
 import { adjustSliderSingle, splitRatio } from '../lib/mealLeftover'
 import { track } from '../lib/events'
 import type { MealFood } from '../lib/nutrilens'
@@ -35,7 +36,10 @@ export default function AfterSaveLeftover(props: { mealId: string; foods: MealFo
   if (doneKcal != null) {
     return (
       <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }} data-testid="after-save-leftover">
-        <p style={{ color: 'var(--accent)', fontSize: 14, marginBottom: 'var(--space-3)' }}>✅ 실제 섭취 약 {doneKcal} kcal로 기록했어요{people > 1 ? ` (${people}명 중 내 몫)` : ''}.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+          <CoachAvatar pose="a2_clap" size={80} />
+          <p style={{ color: 'var(--accent)', fontSize: 14 }}>✅ 실제 섭취 약 {doneKcal} kcal로 기록했어요{people > 1 ? ` (${people}명 중 내 몫)` : ''}.</p>
+        </div>
         <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={onNext}>다른 식사 기록하기</button>
       </div>
     )
@@ -47,8 +51,13 @@ export default function AfterSaveLeftover(props: { mealId: string; foods: MealFo
   const sub = { fontSize: 12, fontWeight: 400, opacity: 0.8 } as const
   return (
     <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }} data-testid="after-save-leftover">
-      <p style={{ color: 'var(--accent)', fontSize: 13, marginBottom: 'var(--space-2)' }}>✓ 기록에 저장했어요.</p>
-      <h3 className="survey-step-title" style={{ fontSize: 16, marginBottom: 'var(--space-1)' }}>② 얼마나 드셨나요?</h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
+        <CoachAvatar pose="a1_thumbs" size={72} />
+        <div>
+          <p style={{ color: 'var(--accent)', fontSize: 13, marginBottom: 'var(--space-1)' }}>✓ 기록에 저장했어요.</p>
+          <h3 className="survey-step-title" style={{ fontSize: 16, margin: 0 }}>② 얼마나 드셨나요?</h3>
+        </div>
+      </div>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-3)', lineHeight: 1.6 }}>
         남긴 음식이 있으면 반영해서 실제로 먹은 양으로 기록해요. 지금 안 해도 돼요 — 다 드신 뒤 «내 최근 식사»에서 해도 됩니다.
       </p>
