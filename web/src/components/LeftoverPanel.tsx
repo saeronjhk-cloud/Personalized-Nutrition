@@ -30,13 +30,17 @@ export default function LeftoverPanel(props: {
   hideTitle?: boolean
   /** 처음 열 탭(없으면 순서의 첫 탭) */
   startMode?: LeftoverMode
+  /** 인원을 상위 카드가 이미 물었으면 그 값(이때 패널 안 인원 선택은 숨김) — AfterSaveLeftover */
+  people?: number
   onApplied: (adjusted: MealSummary) => void
 }) {
   const { mealId, foods, hasAdjustment, order = 'v1', hideTitle, onApplied } = props
   const modes = order === 'v2' ? MODES_V2 : MODES_V1
   const [mode, setMode] = useState<LeftoverMode>(props.startMode ?? modes[0].key)
   const [pct, setPct] = useState<number>(props.initialPct ?? 100)
-  const [people, setPeople] = useState(1)
+  const [peopleState, setPeople] = useState(1)
+  const peopleControlled = typeof props.people === 'number' && props.people >= 1
+  const people = peopleControlled ? Math.floor(props.people as number) : peopleState
   const [pcts, setPcts] = useState<number[]>(() => foods.map(() => 100))
   const [photoPreview, setPhotoPreview] = useState(false)
   const [note, setNote] = useState<string | undefined>()
@@ -97,8 +101,8 @@ export default function LeftoverPanel(props: {
       style={{ padding: 'var(--space-2) var(--space-3)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
       {!hideTitle && <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>먹은 양 조절</div>}
 
-      {order === 'v2' && peopleRow('몇 명이 함께 드셨나요?')}
-      {order === 'v2' && people > 1 && (
+      {order === 'v2' && !peopleControlled && peopleRow('몇 명이 함께 드셨나요?')}
+      {order === 'v2' && !peopleControlled && people > 1 && (
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: -4 }}>먹은 양을 {people}명으로 나눠 내 몫만 기록해요.</div>
       )}
 

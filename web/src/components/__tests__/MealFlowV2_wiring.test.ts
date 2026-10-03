@@ -43,10 +43,11 @@ describe('식사 흐름 v2 — 배선', () => {
   })
   it('W4 먹은 양 패널은 LeftoverPanel 하나', () => {
     expect(history).toContain('<LeftoverPanel ')
-    for (const fn of ['adjustSliderSingle', 'adjustPerFood', 'suggestPhotoAi', 'confirmPhotoAi']) {
-      expect(history).not.toContain(fn)
-      expect(after).not.toContain(fn)
-    }
+    for (const fn of ['adjustSliderSingle', 'adjustPerFood', 'suggestPhotoAi', 'confirmPhotoAi']) expect(history).not.toContain(fn)
+    for (const fn of ['adjustPerFood', 'suggestPhotoAi', 'confirmPhotoAi']) expect(after).not.toContain(fn)
+    // 저장후 카드의 직접 호출은 «다 먹었어요 ÷ N» 한 곳뿐(평가 P07)
+    expect(after.match(/adjustSliderSingle\(/g)?.length).toBe(1)
+    expect(after).toContain('adjustSliderSingle(mealId, splitRatio(1, people))')
   })
   it('W5 상세·저장후 카드에 영양 산식 없음', () => {
     for (const src of [detail, detailLib, after]) {
