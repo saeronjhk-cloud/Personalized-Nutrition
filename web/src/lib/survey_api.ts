@@ -96,6 +96,33 @@ export async function fetchSurveyResponses(userId: string): Promise<{
   return { responses, error: null };
 }
 
+/** 활성 설문 기록 + answers (최신순, 상한 limit) — 건강 변화 리포트 등 «서버 우선» 기록용(IP/integration/survey_history_server_eval_v1.md).
+ *  answers jsonb 우선, 없으면 컬럼 재구성(구 행). 오류면 rows=null. */
+export async function fetchSurveyResponsesWithAnswers(userId: string, limit: number): Promise<{
+  rows: { id: string; created_at: string; answers: SurveyAnswers }[] | null;
+  error: string | null;
+}> {
+  const { data, error } = await supabase
+    .from("survey_responses")
+    .select(
+      "id, created_at, answers, gender, age, height_cm, weight_kg, symptoms, goals, sleep_pattern, stress_level, exercise_freq, diet_pattern, alcohol_freq, current_supplements, conditions, family_history",
+    )
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.error("[survey_api] fetchSurveyResponsesWithAnswers failed:", error.message);
+    return { rows: null, error: error.message };
+  }
+  const rows = (data ?? []).map((row: Record<string, any>) => ({
+    id: row.id as string,
+    created_at: row.created_at as string,
+    answers: row.answers && typeof row.answers === "object" ? (row.answers as SurveyAnswers) : reconstructAnswers(row as any),
+  }));
+  return { rows, error: null };
+}
+
 /** 단건 설문 상세 (결과 보기용). answers jsonb 우선, 없으면 컬럼 재구성. 삭제분 제외. */
 export async function fetchSurveyResponseDetail(
   responseId: string,

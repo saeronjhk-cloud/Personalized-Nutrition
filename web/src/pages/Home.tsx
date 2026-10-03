@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import PageMeta from '../components/PageMeta'
 import NewBlogPopup from '../components/NewBlogPopup'
-import { shouldPromptResurvey, daysSinceLastSurvey, getSurveyHistory } from '../lib/surveyHistory'
+import { useSurveyHistory } from '../lib/surveyHistoryRemote'
+import { resurveyState } from '../domain/survey/history'
 import { MEOKSEON_ENABLED, MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
 
 /* ── 스크롤 시 .visible 추가 훅 (개별 요소용) ── */
@@ -61,6 +62,9 @@ function CountUp({ end, suffix = '' }: { end: number; suffix?: string }) {
 
 export default function Home() {
   useScrollReveal()
+  // 로그인 사용자는 서버 설문 기록 우선(다른 기기·주소에서도 보이게) — IP/integration/survey_history_server_eval_v1.md
+  const { history: surveyHistory } = useSurveyHistory()
+  const resurvey = resurveyState(surveyHistory, new Date())
 
   return (
     <div className="page fade-in">
@@ -68,16 +72,16 @@ export default function Home() {
       <NewBlogPopup />
 
       {/* ━━ 재설문 유도 배너 (30일 이상 경과 시) ━━ */}
-      {shouldPromptResurvey() && (
+      {resurvey.prompt && (
         <div className="resurvey-banner reveal">
           <div className="resurvey-banner__icon">🔄</div>
           <div className="resurvey-banner__text">
             <strong>건강 변화를 확인해보세요!</strong>
-            <span>마지막 분석 후 {daysSinceLastSurvey()}일이 지났어요. 다시 분석하고 변화를 비교해보세요.</span>
+            <span>마지막 분석 후 {resurvey.daysSince}일이 지났어요. 다시 분석하고 변화를 비교해보세요.</span>
           </div>
           <div className="resurvey-banner__actions">
             <Link to="/survey" className="resurvey-banner__btn resurvey-banner__btn--primary">재분석 하기</Link>
-            {getSurveyHistory().length >= 2 && (
+            {resurvey.canCompare && (
               <Link to="/health-report" className="resurvey-banner__btn resurvey-banner__btn--secondary">변화 리포트 보기</Link>
             )}
           </div>

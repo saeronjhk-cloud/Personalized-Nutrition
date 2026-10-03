@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import type { RecommendationResult, SurveyAnswers, Supplement, ScoreBreakdown } from '../types'
-import { saveSurveyRecord, getSurveyHistory } from '../lib/surveyHistory'
+import { saveSurveyRecord } from '../lib/surveyHistory'
+import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 
 interface Props {
   result: RecommendationResult | null
@@ -22,6 +23,8 @@ export default function Results({
   persistHistory = true,
   restartLabel = '🔄 다시 분석하기',
 }: Props) {
+  // 비교 카드용 기록 수 — 로그인 사용자는 서버 우선(IP/integration/survey_history_server_eval_v1.md)
+  const { history: surveyHistory } = useSurveyHistory()
   if (error) {
     return (
       <div className="fade-in" style={{ paddingTop: '15vh', textAlign: 'center' }}>
@@ -224,7 +227,7 @@ export default function Results({
           <h3 className="health-tracking-card__title">건강 변화를 추적하세요</h3>
         </div>
 
-        {getSurveyHistory().length >= 2 ? (
+        {surveyHistory.length >= 2 ? (
           <>
             <p className="health-tracking-card__desc">
               이전 분석 기록이 있어요! 지금 바로 건강 변화 리포트를 확인해보세요.

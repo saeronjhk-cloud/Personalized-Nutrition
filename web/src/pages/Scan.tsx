@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getLatestRecord } from '../lib/surveyHistory'
+import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { personalizeProduct } from '../domain/meokseon/personalize'
 import { withGoals } from '../domain/goals/goals'
 import { loadEffectiveGoals } from '../lib/userGoals'
@@ -183,9 +183,11 @@ export default function Scan() {
   // null = 아직 모름(깜빡임 방지). 비로그인 안내 배너는 false 일 때만 띄운다.
   const [signedIn, setSignedIn] = useState<boolean | null>(null)
 
-  const latestRecord = getLatestRecord()
+  // 개인화용 최근 설문 — 로그인 사용자는 서버 우선(IP/integration/survey_history_server_eval_v1.md)
+  const { history: surveyHistory } = useSurveyHistory()
+  const latestRecord = surveyHistory[0] ?? null
   // Phase G — 로그인 + 식사 기록 ON: 목표는 user_goals(식사 기록에서 관리)에서 읽는다.
-  //   기저질환 등 나머지는 기존처럼 최근 설문(localStorage). null = 아직 모름/해당 없음 → 설문 목표 그대로.
+  //   기저질환 등 나머지는 최근 설문(로그인=서버 우선, 비로그인=localStorage). null = 아직 모름/해당 없음 → 설문 목표 그대로.
   const [managedGoals, setManagedGoals] = useState<string[] | null>(null)
   useEffect(() => {
     if (!MEAL_ENABLED) return

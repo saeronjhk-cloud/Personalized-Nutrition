@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import type { SurveyRecord, ScoreBreakdown } from '../types'
-import { getSurveyHistory } from '../lib/surveyHistory'
+import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -24,19 +24,27 @@ function changeLabel(diff: number): { text: string; color: string; emoji: string
 }
 
 export default function HealthReport() {
-  const [history, setHistory] = useState<SurveyRecord[]>([])
+  // 로그인 사용자는 서버 설문 기록 우선 — IP/integration/survey_history_server_eval_v1.md
+  const { history, loading } = useSurveyHistory()
   const [beforeIdx, setBeforeIdx] = useState(0)
   const [afterIdx, setAfterIdx] = useState(0)
 
   useEffect(() => {
-    const records = getSurveyHistory()
-    setHistory(records)
-    if (records.length >= 2) {
+    if (history.length >= 2) {
       // 기본: 가장 오래된 것 vs 가장 최근 것
-      setBeforeIdx(records.length - 1)
+      setBeforeIdx(history.length - 1)
       setAfterIdx(0)
     }
-  }, [])
+  }, [history])
+
+  if (loading && history.length < 2) {
+    return (
+      <div className="page fade-in" style={{ paddingTop: '12vh', textAlign: 'center' }}>
+        <div className="spinner" style={{ margin: '0 auto var(--space-4)' }} />
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>설문 기록을 불러오는 중...</p>
+      </div>
+    )
+  }
 
   if (history.length < 2) {
     return (
