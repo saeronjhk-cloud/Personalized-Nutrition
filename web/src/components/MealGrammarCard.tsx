@@ -3,6 +3,8 @@ import { loadMealGrammarInput } from '../lib/mealGrammar'
 import { mealGrammarCoaching, type MealGrammarResult } from '../domain/coaching/meal_grammar'
 import { coachCardId, grammarShownProps } from '../domain/coaching/coach_telemetry'
 import { trackCoachShown, trackCoachWhyOpen } from '../lib/coachTelemetry'
+import { grammarPose } from '../domain/coaching/coach_pose'
+import CoachAvatar from './CoachAvatar'
 
 /**
  * /meal «오늘의 밥상 코칭» (한식 끼니 문법 P1 — G-PRO·G-VEG·G-AM + 사진 검증 루프)
@@ -36,9 +38,12 @@ export default function MealGrammarCard() {
 
   if (!res || (!res.active && !res.maintenance)) return null
   const a = res.active
+  const pose = grammarPose(res)
 
   return (
-    <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }} data-testid="meal-grammar-card">
+    <div className="survey-card" style={{ marginBottom: 'var(--space-4)', display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start' }} data-testid="meal-grammar-card">
+      {pose && <CoachAvatar pose={pose} size={56} />}
+      <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍚 오늘의 밥상 코칭</div>
       {a && (
         <>
@@ -56,6 +61,7 @@ export default function MealGrammarCard() {
       {res.maintenance && (
         <div style={{ marginTop: 'var(--space-2)', fontSize: 13, color: 'var(--text-secondary)' }}>✓ {res.maintenance.text}</div>
       )}
+      </div>
     </div>
   )
 }
