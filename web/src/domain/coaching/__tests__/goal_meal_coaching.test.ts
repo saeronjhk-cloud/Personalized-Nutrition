@@ -18,6 +18,7 @@ import {
 } from "../goal_meal_coaching";
 import { DEFAULT_GOAL_COACHING_PARAMS as P } from "../goal_coaching_params";
 import { GOAL_OPTIONS } from "../../goals/goals";
+import { proteinRoleBySlot } from "../meal_grammar";
 
 const B = (protein_g: number | null): CoachMeal => ({ slot: "breakfast", protein_g });
 const L = (protein_g: number | null): CoachMeal => ({ slot: "lunch", protein_g });
@@ -263,5 +264,39 @@ describe("목표 식사 코칭 v1 — 보조", () => {
     const r = goalMealCoaching(U70({ goals: ["체중관리"], meals: LOW3, params: { ...P, WEIGHT_PROTEIN_CARD: true } }));
     expect(r.cards).toHaveLength(1);
     expect(r.cards[0].goal).toBe("체중관리");
+  });
+});
+
+describe("v2 단백질 주 판정 = G-PRO (C23~C29 · IP/integration/goal_meal_coaching_eval_v1.md v2)", () => {
+  it("C23 반찬 있음 → 카드 0", () =>
+    expect(goalMealCoaching(U70({ meals: [B(5)], proteinRoleBySlot: { breakfast: true } })).cards).toHaveLength(0));
+  it("C24 반찬 없음 → 카드 1 strong", () => {
+    const r = goalMealCoaching(U70({ meals: [B(5)], proteinRoleBySlot: { breakfast: false } }));
+    expect(r.cards).toHaveLength(1);
+    expect(r.cards[0].level).toBe("strong");
+  });
+  it("C25 미상 → 카드 0", () =>
+    expect(goalMealCoaching(U70({ meals: [B(5)], proteinRoleBySlot: { breakfast: null } })).cards).toHaveLength(0));
+  it("C26 아침 있음·점심 없음 → 점심만", () => {
+    const r = goalMealCoaching(U70({ meals: [B(10), L(10)], proteinRoleBySlot: { breakfast: true, lunch: false } }));
+    expect(r.cards[0].meals.map((m) => m.slot)).toEqual(["lunch"]);
+    expect(r.cards[0].text.startsWith("오늘 점심 ")).toBe(true);
+  });
+  it("C27 맵 없음 → 종전 동작", () =>
+    expect(goalMealCoaching(U70({ meals: [B(10)] })).cards).toHaveLength(1));
+  it("C28 맵에 키 없음 → 미상 → 제외", () =>
+    expect(goalMealCoaching(U70({ meals: [B(10), L(30)], proteinRoleBySlot: { lunch: false } })).cards).toHaveLength(0));
+  it("C29 통합 실례: 참치 샐러드 점심 0 · 피자 저녁 1", () => {
+    const now = new Date(2026, 8, 11, 21, 0);
+    const at = (h: number) => new Date(2026, 8, 11, h, 0).toISOString();
+    const rows = [
+      { eaten_at: at(12), meal_slot: "lunch", foods: [{ name_ko: "바게트" }, { name_ko: "참치 샐러드" }] },
+      { eaten_at: at(19), meal_slot: "dinner", foods: [{ name_ko: "피자" }, { name_ko: "샐러드" }] },
+    ];
+    const role = proteinRoleBySlot(rows, now);
+    expect(role).toMatchObject({ lunch: true, dinner: false });
+    const r = goalMealCoaching(U70({ weightKg: 82, age: 58, meals: [L(5.3), D(22.8)], proteinRoleBySlot: role }));
+    expect(r.cards).toHaveLength(1);
+    expect(r.cards[0].meals.map((m) => m.slot)).toEqual(["dinner"]);
   });
 });

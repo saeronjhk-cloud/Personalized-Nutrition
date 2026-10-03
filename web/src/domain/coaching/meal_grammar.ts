@@ -150,6 +150,14 @@ export function judgeMeal(m: GrammarMeal): JudgedMeal {
   };
 }
 
+/** 오늘(로컬) 끼니별 단백질 반찬 판정 — 같은 slot 은 합쳐서 판정. v1 g 카드의 주 판정 게이트(D-SIM1, goal_meal_coaching 평가 v2) */
+export function proteinRoleBySlot(rows: readonly GrammarMealRow[], now: Date): Partial<Record<MealSlot, boolean | null>> {
+  const today = localDayKey(now);
+  const out: Partial<Record<MealSlot, boolean | null>> = {};
+  for (const m of mealsFromRows(rows, now, 1).map(judgeMeal)) if (m.day === today) out[m.slot] = m.protein;
+  return out;
+}
+
 /** 규칙별 «기회»·«성공» (null = 이 끼니는 이 규칙의 기회 아님) */
 export function ruleOutcome(rule: GrammarRuleId, m: JudgedMeal): boolean | null {
   if (rule === "G-AM") {

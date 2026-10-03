@@ -65,6 +65,9 @@ export interface CoachingInput {
   /** 최신 검진 eGFR (없으면 null) */
   egfr: number | null;
   meals: CoachMeal[];
+  /** 오늘 끼니별 «단백질 반찬» 판정(true 있음 / false 없음 / null 미상) — 주어지면 false 끼니만 g 부족 판정(D-SIM1, 평가 v2 C23~C29).
+   *  사진 g 과소추정 오경보 제거. 없으면 종전 동작. 출처 meal_grammar.ts proteinRoleBySlot */
+  proteinRoleBySlot?: Partial<Record<MealSlot, boolean | null>>;
   /** 최근 7일 나트륨 — v1 은 판정에 쓰지 않음(데이터 가드 전) */
   sodium7d?: { avg_mg: number; known: boolean } | null;
   params?: GoalCoachingParams;
@@ -174,6 +177,7 @@ export function goalMealCoaching(input: CoachingInput): CoachingResult {
   const shortfalls: MealShortfall[] = [];
   for (const m of mergeBySlot(input.meals)) {
     if (!MAIN_SLOTS.includes(m.slot) || m.protein_g == null) continue;
+    if (input.proteinRoleBySlot && input.proteinRoleBySlot[m.slot] !== false) continue; // 반찬 있음·미상 → g 판정 안 함
     const level = shortLevel(m.protein_g, target, p);
     if (level) shortfalls.push({ slot: m.slot, protein_g: m.protein_g, target_g: target, level });
   }
@@ -199,6 +203,8 @@ export interface CoachMealRow {
   meal_slot: string | null;
   summary?: { total_protein_g?: number | null } | null;
   adjusted_summary?: { total_protein_g?: number | null } | null;
+  /** 음식 목록(단백질 반찬 판정용, D-SIM1) */
+  foods?: unknown;
 }
 
 export function mealRowsToCoachMeals(rows: readonly CoachMealRow[]): CoachMeal[] {

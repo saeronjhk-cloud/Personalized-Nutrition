@@ -11,6 +11,7 @@ import { fetchCheckupRecords, fetchCheckupRecordDetail, fetchMyProfile } from '.
 import { resolveEgfr } from '../domain/checkup/egfr'
 import { egfrDemographics } from '../domain/checkup/egfr_inputs'
 import { mealRowsToCoachMeals, type CoachingInput, type CoachMealRow } from '../domain/coaching/goal_meal_coaching'
+import { proteinRoleBySlot } from '../domain/coaching/meal_grammar'
 
 /** 오늘 0시(로컬) — 운영 브라우저는 KST */
 export function startOfLocalDay(now: Date = new Date()): Date {
@@ -22,7 +23,7 @@ export function startOfLocalDay(now: Date = new Date()): Date {
 async function fetchTodayMealRows(userId: string): Promise<CoachMealRow[] | null> {
   const { data, error } = await supabase
     .from('meal_log')
-    .select('eaten_at, meal_slot, summary, adjusted_summary')
+    .select('eaten_at, meal_slot, summary, adjusted_summary, foods')
     .eq('user_id', userId)
     .gte('eaten_at', startOfLocalDay().toISOString())
     .order('eaten_at', { ascending: true })
@@ -76,5 +77,7 @@ export async function loadGoalCoachingInput(): Promise<CoachingInput | null> {
     conditions: Array.isArray(a?.기저질환) ? a!.기저질환 : [],
     egfr,
     meals: mealRowsToCoachMeals(rows),
+    // 단백질 주 판정 = 반찬 있음/없음(D-SIM1) — 사진 g 과소추정 오경보 제거
+    proteinRoleBySlot: proteinRoleBySlot(rows.map((r) => ({ eaten_at: r.eaten_at, meal_slot: r.meal_slot, foods: r.foods ?? null })), new Date()),
   }
 }

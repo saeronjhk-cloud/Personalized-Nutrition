@@ -26,7 +26,8 @@ describe("목표 식사 코칭 — /meal 배선", () => {
 
   it("W3 로더: 실섭취 우선 규칙 공유(mealRowsToCoachMeals) · meal_slot·adjusted_summary 조회 · MEAL 플래그 전달", () => {
     expect(loader).toContain("mealRowsToCoachMeals(");
-    expect(loader).toContain("'eaten_at, meal_slot, summary, adjusted_summary'");
+    expect(loader).toContain("'eaten_at, meal_slot, summary, adjusted_summary, foods'");
+    expect(loader).toContain("proteinRoleBySlot(");
     expect(loader).toContain("mealEnabled: MEAL_ENABLED");
   });
 

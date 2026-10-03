@@ -2,13 +2,16 @@
  * 코칭 사전 시뮬레이션 v1 — 운영 meal_log 익명 추출(IP/integration/sim/sim_export_v1.sql)을 «실제 도메인 코드» 로 재생
  * 실행: cd web && TZ=Asia/Seoul node_modules/.bin/vite-node ../tools/sim_coaching_v1.ts -- <csv> [out.md]
  * 출력: 사용자·일 단위 발화율 · 규칙별 실패율 · 졸업 · v1(g) vs G-PRO 불일치 · P2(병목) 가 고정 순서와 다른 날 비율
+ * 옵션 --legacy: v1 단백질 카드를 D-SIM1 이전(g 단독 판정)으로 재생해 비교.
  * 원칙: 판정 로직을 다시 짜지 않는다 — meal_grammar.ts · goal_meal_coaching.ts 를 그대로 호출(원칙5·결과 동일성).
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { mealGrammarCoaching, mealsFromRows, judgeMeal, localDayKey, type GrammarMealRow } from "../web/src/domain/coaching/meal_grammar";
+import { mealGrammarCoaching, mealsFromRows, judgeMeal, localDayKey, proteinRoleBySlot, type GrammarMealRow } from "../web/src/domain/coaching/meal_grammar";
 import { DEFAULT_MEAL_GRAMMAR_PARAMS, type GrammarRuleId } from "../web/src/domain/coaching/meal_grammar_params";
 import { goalMealCoaching, mealRowsToCoachMeals, perMealTargetG } from "../web/src/domain/coaching/goal_meal_coaching";
 import { DEFAULT_GOAL_COACHING_PARAMS } from "../web/src/domain/coaching/goal_coaching_params";
+
+const LEGACY = process.argv.includes("--legacy");
 
 // ── CSV (RFC4180 최소 구현: 따옴표·이스케이프·줄바꿈 포함 필드) ──
 export function parseCsv(text: string): Record<string, string>[] {
@@ -49,7 +52,9 @@ export function simulate(recs: Record<string, string>[]) {
       const upto = u.rows.filter((r) => new Date(r.eaten_at).getTime() <= now.getTime());
       const today = upto.filter((r) => localDayKey(new Date(r.eaten_at)) === d);
       const v1 = goalMealCoaching({ mealEnabled: true, loggedIn: true, goals: u.goals, weightKg: u.weight, heightCm: u.height, age: u.age, conditions, egfr,
-        meals: mealRowsToCoachMeals(today.map((r) => ({ eaten_at: r.eaten_at, meal_slot: r.meal_slot, summary: { total_protein_g: r.protein_g } }))) });
+        meals: mealRowsToCoachMeals(today.map((r) => ({ eaten_at: r.eaten_at, meal_slot: r.meal_slot, summary: { total_protein_g: r.protein_g } }))),
+        // 운영 로더와 동일(D-SIM1): 단백질 반찬 «없음» 끼니만 g 판정. --legacy 면 종전 v1
+        proteinRoleBySlot: LEGACY ? undefined : proteinRoleBySlot(today, now) });
       const v1Visible = v1.cards.length > 0;
       const base = { mealEnabled: true, loggedIn: true, rows: upto, now, conditions, egfr, v1CardVisible: v1Visible };
       const g = mealGrammarCoaching(base);
@@ -113,7 +118,7 @@ export function report(t: ReturnType<typeof simulate>): string {
   ].join("\n");
 }
 
-const argv = process.argv.slice(2).filter((a) => a !== "--");
+const argv = process.argv.slice(2).filter((a) => a !== "--" && a !== "--legacy");
 if (argv[0]) {
   const out = report(simulate(parseCsv(readFileSync(argv[0], "utf8"))));
   if (argv[1]) writeFileSync(argv[1], out + "\n", "utf8");
