@@ -35,7 +35,7 @@ describe("G 규칙·카드", () => {
     const r = mealGrammarCoaching(IN([row("lunch", ["쌀밥", "김치찌개", "배추김치"])]));
     expect(r.active?.rule).toBe("G-PRO");
     expect(r.active?.slots).toEqual(["lunch"]);
-    expect(r.active?.text).toBe("오늘 점심에는 단백질 반찬이 없었습니다. 다음 끼니에 달걀·두부·생선 중 한 가지를 더합니다.");
+    expect(r.active?.text).toBe("오늘 점심에는 단백질 반찬이 없었습니다. 다음 끼니에 달걀이나 두부 한 가지를 더합니다.");
   });
   it("G02 둘 다 충족 → 없음", () => {
     const r = mealGrammarCoaching(IN([row("lunch", ["쌀밥", "제육볶음", "상추"])]));
@@ -169,5 +169,13 @@ describe("V 검증 루프", () => {
     expect(evidenceText("G-AM", 0, 0, 14)).toBeNull();
     const r = mealGrammarCoaching(IN([row("breakfast", ["사과"])]));
     expect(r.active?.evidence_text).toBe("최근 14일 단백질 반찬이 있었던 아침 0/1");
+  });
+});
+
+describe("E-SYNC 승인요청서 E 원문 일치 (IP/integration/meal_grammar_p1_eval_v1.md v3)", () => {
+  it("G-PRO⊃E1 행동 · G-AM⊃E3 · G-VEG⊃E4", () => {
+    expect(GRAMMAR_TEMPLATES["G-PRO"]).toContain("다음 끼니에 달걀이나 두부 한 가지를 더합니다.");
+    expect(GRAMMAR_TEMPLATES["G-AM"]).toContain("내일 아침은 우유나 달걀 하나부터 시작합니다.");
+    expect(GRAMMAR_TEMPLATES["G-VEG"]).toContain("다음 끼니에 나물이나 쌈 한 가지를 더합니다.");
   });
 });
