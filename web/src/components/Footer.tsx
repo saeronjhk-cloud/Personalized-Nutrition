@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="footer-brand">
           <div style={{ fontSize: 20, fontWeight: 700 }}>🧬 서박사의 영양공식</div>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
-            내 건강 상태와 생활 습관에 맞춰 식단을 코칭하고, 필요한 영양제를 추천합니다.
+            내 건강 상태와 생활 습관에 맞춰 식단과 건강기능식품을 코칭합니다.
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
             (주)새론미디어 | 대표 김재환 | 사업자등록번호 606-86-65033<br />
