@@ -33,6 +33,8 @@ export interface DetailFoodRow {
   carbs: number
   fat: number
   mark: '직접 수정' | '직접 추가' | null
+  /** 라벨 DB 에 일부 영양소 값이 없음(가공식품) */
+  partial: boolean
 }
 export interface MealDetailView {
   when: string
@@ -69,6 +71,7 @@ export function mealDetailView(r: MealRecord): MealDetailView {
       kcal: Math.round(n(f?.calories_kcal)),
       protein: r1(f?.protein_g), carbs: r1(f?.carbs_g), fat: r1(f?.fat_g),
       mark: f?.user_edit === 'renamed' ? '직접 수정' : f?.user_edit === 'added' ? '직접 추가' : null,
+      partial: Array.isArray((f as { missing_nutrients?: unknown }).missing_nutrients) && ((f as { missing_nutrients?: unknown[] }).missing_nutrients as unknown[]).length > 0,
     }
   })
   return {

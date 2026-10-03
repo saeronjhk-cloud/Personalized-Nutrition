@@ -11,7 +11,7 @@ vi.mock('../supabase', () => ({
   },
 }))
 
-import { productFoodFromPortion, productSummary, saveProductMeal, type PortionProduct, type Portion } from '../productLog'
+import { productFoodFromPortion, productSummary, saveProductMeal, nutrientText, type PortionProduct, type Portion } from '../productLog'
 
 const product: PortionProduct = { product_id: 7, barcode: '8801043014809', product_name: '새우깡', brand: '농심', total_content: 90, content_unit: 'g' }
 const portion: Portion = {
@@ -29,6 +29,10 @@ describe('가공식품 기록 — 매핑·저장', () => {
       match_confidence: 'product_label', barcode: '8801043014809', product_id: 7, brand: '농심', db_matched: true,
     })
     expect(f.portion).toEqual({ kind: 'pack', qty: 0.5, basis: 'per_100g', approx: false })
+    // M05 값 없는 영양소는 표식 + 화면 «정보 없음»(0 으로 보이지 않음)
+    expect(f.missing_nutrients).toEqual(['sugar_g'])
+    expect(nutrientText(null, 'g')).toBe('정보 없음')
+    expect(nutrientText(0, 'g')).toBe('0g')
     expect(productFoodFromPortion(product, { ok: false, reason: 'need_total_content' })).toBeNull()
     expect(productFoodFromPortion(product, null)).toBeNull()
   })

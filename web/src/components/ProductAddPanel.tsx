@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { searchProducts, type MsSearchItem } from '../lib/meokseon'
 import {
-  getPortion, productFoodFromPortion, REASON_TEXT,
+  getPortion, productFoodFromPortion, REASON_TEXT, nutrientText,
   type PortionKind, type PortionResponse,
 } from '../lib/productLog'
 import type { MealFood } from '../lib/nutrilens'
@@ -195,7 +195,12 @@ export default function ProductAddPanel({ onAdd }: { onAdd: (food: MealFood) => 
           {food && (
             <div style={{ fontSize: 13, color: 'var(--text)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2) var(--space-3)', lineHeight: 1.6 }}>
               <strong>{food.amount}</strong> · 약 {Math.round(food.calories_kcal)} kcal{picked.portion?.approx ? ' (대략)' : ''}<br />
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>탄수 {food.carbs_g}g · 단백질 {food.protein_g}g · 지방 {food.fat_g}g · 당류 {food.sugar_g}g · 나트륨 {food.sodium_mg}mg</span>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                탄수 {nutrientText(picked.portion?.nutrients?.carbs_g, 'g')} · 단백질 {nutrientText(picked.portion?.nutrients?.protein_g, 'g')} · 지방 {nutrientText(picked.portion?.nutrients?.fat_g, 'g')} · 당류 {nutrientText(picked.portion?.nutrients?.sugar_g, 'g')} · 나트륨 {nutrientText(picked.portion?.nutrients?.sodium_mg, 'mg')}
+              </span>
+              {(food.missing_nutrients?.length ?? 0) > 0 && (
+                <><br /><span data-testid="missing-note" style={{ fontSize: 11, color: 'var(--text-muted)' }}>«정보 없음» 항목은 제품 DB에 값이 없어 합계에 더해지지 않아요.</span></>
+              )}
             </div>
           )}
           <button type="button" className="btn btn-primary" disabled={busy || !food} style={{ width: '100%', minHeight: 44 }}

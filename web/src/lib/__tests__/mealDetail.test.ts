@@ -82,13 +82,15 @@ describe('D. 상세 뷰 모델', () => {
   })
   it('D03 음식 행', () => {
     const [f1, f2] = mealDetailView(rec()).foods
-    expect(f1).toEqual({ key: 'food_01', name: '국밥', grams: 500, amountText: '500g', kcal: 500, protein: 3.1, carbs: 20.1, fat: 1, mark: null })
+    expect(f1).toEqual({ key: 'food_01', name: '국밥', grams: 500, amountText: '500g', kcal: 500, protein: 3.1, carbs: 20.1, fat: 1, mark: null, partial: false })
     expect(f2.grams).toBeNull()
     expect(f2.mark).toBe('직접 추가')
     expect(f2.amountText).toBeNull()
     // 가공식품은 먹은 양 라벨
     const pv = mealDetailView(rec({ foods: [food('새우깡', 175, { barcode: '8801043014809', amount: '½개(45g)', estimated_serving_g: 45 })] }))
     expect(pv.foods[0].amountText).toBe('½개(45g)')
+    const pp = mealDetailView(rec({ foods: [food('새우깡', 210, { barcode: '8801043012607', amount: '½개(45g)', missing_nutrients: ['carbs_g', 'sugar_g', 'sodium_mg'] })] }))
+    expect(pp.foods[0].partial).toBe(true)
   })
   it('D04 빈 foods·이상값 → 0, throw 없음', () => {
     const v = mealDetailView(rec({ foods: [{ name_ko: '', calories_kcal: 'x' } as any], summary: {} as any }))

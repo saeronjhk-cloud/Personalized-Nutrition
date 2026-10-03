@@ -66,6 +66,16 @@ export async function getPortion(barcode: string, kind?: PortionKind, qty?: numb
   }
 }
 
+const MISSING_KEYS: [keyof PortionNutrients, string][] = [
+  ['calories_kcal', 'calories_kcal'], ['carbs_g', 'carbs_g'], ['protein_g', 'protein_g'], ['fat_g', 'fat_g'],
+  ['sodium_mg', 'sodium_mg'], ['sugar_g', 'sugar_g'], ['fiber_g', 'fiber_g'],
+]
+
+/** 미리보기 표시용 — 값 없으면 «정보 없음» (0 으로 보이지 않게) */
+export function nutrientText(v: number | null | undefined, unit: string): string {
+  return typeof v === 'number' && Number.isFinite(v) ? `${v}${unit}` : '정보 없음'
+}
+
 const n0 = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
 
 /** 서버 portion → MealFood (숫자는 옮기기만 · null → 0). 계산 불가면 null. */
@@ -93,6 +103,8 @@ export function productFoodFromPortion(product: PortionProduct, portion: Portion
     product_id: product.product_id,
     brand: product.brand ?? null,
     portion: { kind: portion.kind, qty: portion.qty, basis: portion.basis, approx: !!portion.approx },
+    // 라벨 DB 에 값이 없는 영양소(합계에는 0 으로 들어감) — 화면은 «정보 없음»으로 보여 준다
+    missing_nutrients: MISSING_KEYS.filter(([k]) => nu[k] == null).map(([, m]) => m),
   } as MealFood
 }
 

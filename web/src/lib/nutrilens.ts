@@ -40,6 +40,8 @@ export interface MealFood {
   product_id?: number
   brand?: string | null
   portion?: { kind?: string; qty?: number; basis?: string; approx?: boolean }
+  /** 라벨 DB 에 없던 영양소 키(MealFood 필드명) — 합계엔 0, 화면엔 «정보 없음» */
+  missing_nutrients?: string[]
 }
 export interface MealSummary {
   total_calories_kcal: number

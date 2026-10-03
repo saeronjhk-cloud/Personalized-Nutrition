@@ -34,7 +34,7 @@ export default function MealDetail({ record }: { record: MealRecord }) {
               <span style={{ fontSize: 13, color: 'var(--text)', flexShrink: 0 }}>{f.kcal} kcal</span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              탄수 {f.carbs}g · 단백질 {f.protein}g · 지방 {f.fat}g{f.mark ? ` · ${f.mark}` : ''}
+              탄수 {f.carbs}g · 단백질 {f.protein}g · 지방 {f.fat}g{f.mark ? ` · ${f.mark}` : ''}{f.partial ? ' · 일부 영양 정보 없음' : ''}
             </div>
           </li>
         ))}
