@@ -72,8 +72,9 @@ describe("K 건강검진 비교", () => {
   it("W1 배선", () => {
     const hr = readFileSync(resolve(__dirname, "../../../pages/HealthReport.tsx"), "utf-8");
     const sec = readFileSync(resolve(__dirname, "../../../components/checkup/CheckupCompareSection.tsx"), "utf-8");
-    expect(hr.match(/<CheckupCompareSection/g)?.length).toBe(2);
+    // v2(리포트 레이아웃): 위·아래 배치별로 여러 번 렌더 — 로더는 lib/checkupCompare.ts 로 이동
+    expect((hr.match(/<CheckupCompareSection/g)?.length ?? 0) >= 2).toBe(true);
     expect(sec).toContain("CHECKUP_ENABLED");
-    expect(sec).toContain("compareCheckups(");
+    expect(readFileSync(resolve(__dirname, "../../../lib/checkupCompare.ts"), "utf-8")).toContain("compareCheckups(");
   });
 });

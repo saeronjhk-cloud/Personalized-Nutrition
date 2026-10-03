@@ -5,6 +5,9 @@ import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { symptomLabel } from '../domain/survey/symptoms'
 import { comparePair } from '../domain/survey/history'
 import CheckupCompareSection from '../components/checkup/CheckupCompareSection'
+import { useCheckupCompare } from '../lib/checkupCompare'
+import { checkupPlacement, overallSummary } from '../domain/survey/report'
+import { CHECKUP_ENABLED } from '../lib/flags'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -29,6 +32,9 @@ function changeLabel(diff: number): { text: string; color: string; emoji: string
 export default function HealthReport() {
   // 로그인 사용자는 서버 설문 기록 우선 — IP/integration/survey_history_server_eval_v1.md
   const { history, loading } = useSurveyHistory()
+  // 검진 비교(페이지 소유 — 종합 요약과 검진 섹션이 같은 비교를 씀) — IP/integration/health_report_layout_v2_eval.md
+  const cc = useCheckupCompare()
+  const placement = checkupPlacement({ checkupEnabled: CHECKUP_ENABLED, state: cc.state, count: cc.data?.history.length ?? 0 })
   const [beforeIdx, setBeforeIdx] = useState(0)
   const [afterIdx, setAfterIdx] = useState(0)
 
@@ -63,9 +69,10 @@ export default function HealthReport() {
         <Link to="/survey" className="btn btn-primary" style={{ textDecoration: 'none' }}>
           설문 시작하기
         </Link>
-        {/* 설문 비교가 없어도 검진 비교는 보여 준다(IP/integration/health_report_checkup_compare_eval_v1.md) */}
+        {/* 설문 비교가 없어도 검진 비교는 보여 준다 — 검진 ≥2 면 전체, 아니면 한 줄 */}
         <div style={{ maxWidth: 720, margin: 'var(--space-8) auto 0' }}>
-          <CheckupCompareSection />
+          {placement === 'top' && <CheckupCompareSection cc={cc} />}
+          {placement === 'bottom' && <CheckupCompareSection cc={cc} variant="compact" />}
         </div>
       </div>
     )
@@ -132,10 +139,37 @@ export default function HealthReport() {
         <div style={{ fontSize: 40, marginBottom: 'var(--space-2)' }}>📊</div>
         <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 'var(--space-1)' }}>건강 변화 리포트</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-          {formatDate(before.date)} → {formatDate(after.date)} ({days}일 경과)
+          건강검진 → 설문 → 영양제 추천 순으로 변화를 보여 드려요
         </p>
       </div>
 
+      {/* 종합 요약 — 3영역 한 줄씩(없는 영역 생략) */}
+      {(() => {
+        const lines = overallSummary({
+          checkup: cc.cmp ? { rows: cc.cmp.rows } : null,
+          survey: { diffs: comparisons.map(c => c.diff) },
+          supps: { added: addedSupps.length, removed: removedSupps.length, kept: keptSupps.length },
+        })
+        return lines.length > 0 && (
+          <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 'var(--space-4) var(--space-5)', marginBottom: 'var(--space-5)', border: '1px solid var(--border)', boxShadow: 'var(--shadow)' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>한눈에 보기</div>
+            {lines.map(l => (
+              <div key={l.key} style={{ display: 'flex', gap: 'var(--space-3)', fontSize: 14, padding: '6px 0', borderTop: l.key === lines[0].key ? 'none' : '1px solid var(--border)' }}>
+                <span style={{ minWidth: 92, fontWeight: 600 }}>{l.icon} {l.label}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{l.text}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
+
+      {/* 🩺 건강검진 변화 — 비교 가능하면 맨 위(검진 → 설문 → 추천) */}
+      {placement === 'top' && <CheckupCompareSection cc={cc} />}
+
+      {/* 📝 설문 변화 */}
+      <h2 style={{ fontSize: 18, fontWeight: 800, margin: 'var(--space-6) 0 var(--space-3)', display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+        <span>📝 설문 변화</span><span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>설문 {formatDate(before.date)} → {formatDate(after.date)} ({days}일)</span>
+      </h2>
       {/* 기간 선택 (기록이 3개 이상일 때) */}
       {history.length >= 3 && (
         <div style={{
@@ -174,7 +208,7 @@ export default function HealthReport() {
         </div>
       )}
 
-      {/* 종합 요약 카드 */}
+      {/* 설문 점수 총평 */}
       <div style={{
         background: 'var(--bg-card)',
         borderRadius: 'var(--radius)',
@@ -183,48 +217,53 @@ export default function HealthReport() {
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow)',
       }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+        <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 36, marginBottom: 'var(--space-1)' }}>{overallLabel.emoji}</div>
           <div style={{ fontSize: 18, fontWeight: 700, color: overallLabel.color }}>
             {totalDiff < 0 ? '전반적으로 개선되었어요!' : totalDiff === 0 ? '전반적으로 유지되고 있어요' : '일부 관리가 필요해요'}
           </div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>설문 응답 점수 기준</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)', textAlign: 'center' }}>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>건강 유형</div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>
-              {before.result.persona.emoji} → {after.result.persona.emoji}
+      </div>
+
+      {/* 신체 변화 (체중/BMI) */}
+      {(before.answers.체중 !== after.answers.체중 || before.result.nutrition_info.bmi.value !== after.result.nutrition_info.bmi.value) && (
+        <div style={{ marginBottom: 'var(--space-5)' }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <span>⚖️</span> 신체 변화 <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>(설문에 입력한 값)</span>
+          </h3>
+          <div style={{
+            background: 'var(--bg-card)',
+            borderRadius: 'var(--radius)',
+            padding: 'var(--space-4)',
+            border: '1px solid var(--border)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 'var(--space-4)',
+            textAlign: 'center',
+          }}>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>체중</div>
+              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
+                {before.answers.체중}kg → {after.answers.체중}kg
+              </div>
+              <div style={{ fontSize: 12, color: after.answers.체중 < before.answers.체중 ? 'var(--success)' : 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
+                {after.answers.체중 - before.answers.체중 > 0 ? '+' : ''}{(after.answers.체중 - before.answers.체중).toFixed(1)}kg
+              </div>
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-              {before.result.persona.name === after.result.persona.name
-                ? '유지' : after.result.persona.name}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>필요 영양제</div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>
-              {before.result.recommendations.length}종 → {after.result.recommendations.length}종
-            </div>
-            <div style={{ fontSize: 11, color: after.result.recommendations.length < before.result.recommendations.length ? 'var(--success)' : 'var(--text-secondary)' }}>
-              {after.result.recommendations.length < before.result.recommendations.length
-                ? `${before.result.recommendations.length - after.result.recommendations.length}종 감소`
-                : after.result.recommendations.length === before.result.recommendations.length
-                  ? '변화 없음'
-                  : `${after.result.recommendations.length - before.result.recommendations.length}종 증가`}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>월 비용</div>
-            <div style={{ fontSize: 13, fontWeight: 600 }}>
-              {costAfter < costBefore ? '↓' : costAfter > costBefore ? '↑' : '='}
-            </div>
-            <div style={{ fontSize: 11, color: costAfter < costBefore ? 'var(--success)' : 'var(--text-secondary)' }}>
-              ₩{costAfter.toLocaleString()}
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>BMI</div>
+              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
+                {before.result.nutrition_info.bmi.value} → {after.result.nutrition_info.bmi.value}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
+                {after.result.nutrition_info.bmi.label}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 카테고리별 변화 */}
       <div style={{ marginBottom: 'var(--space-5)' }}>
@@ -336,10 +375,57 @@ export default function HealthReport() {
         </div>
       )}
 
+      {/* 💊 추천 변화 */}
+      <h2 style={{ fontSize: 18, fontWeight: 800, margin: 'var(--space-6) 0 var(--space-3)', display: 'flex', alignItems: 'baseline', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+        <span>💊 영양제 추천 변화</span>
+      </h2>
+      <div style={{
+        background: 'var(--bg-card)',
+        borderRadius: 'var(--radius)',
+        padding: 'var(--space-4)',
+        marginBottom: 'var(--space-4)',
+        border: '1px solid var(--border)',
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-3)', textAlign: 'center' }}>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>건강 유형</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {before.result.persona.emoji} → {after.result.persona.emoji}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+              {before.result.persona.name === after.result.persona.name
+                ? '유지' : after.result.persona.name}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>필요 영양제</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {before.result.recommendations.length}종 → {after.result.recommendations.length}종
+            </div>
+            <div style={{ fontSize: 11, color: after.result.recommendations.length < before.result.recommendations.length ? 'var(--success)' : 'var(--text-secondary)' }}>
+              {after.result.recommendations.length < before.result.recommendations.length
+                ? `${before.result.recommendations.length - after.result.recommendations.length}종 감소`
+                : after.result.recommendations.length === before.result.recommendations.length
+                  ? '변화 없음'
+                  : `${after.result.recommendations.length - before.result.recommendations.length}종 증가`}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>월 비용</div>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              {costAfter < costBefore ? '↓' : costAfter > costBefore ? '↑' : '='}
+            </div>
+            <div style={{ fontSize: 11, color: costAfter < costBefore ? 'var(--success)' : 'var(--text-secondary)' }}>
+              ₩{costAfter.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 영양제 변화 */}
       <div style={{ marginBottom: 'var(--space-5)' }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-          <span>💊</span> 영양제 변화
+          <span>🔁</span> 영양제 목록 변화
         </h3>
         <div style={{
           background: 'var(--bg-card)',
@@ -410,46 +496,8 @@ export default function HealthReport() {
         </div>
       </div>
 
-      {/* 신체 변화 (체중/BMI) */}
-      {(before.answers.체중 !== after.answers.체중 || before.result.nutrition_info.bmi.value !== after.result.nutrition_info.bmi.value) && (
-        <div style={{ marginBottom: 'var(--space-5)' }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-            <span>⚖️</span> 신체 변화
-          </h3>
-          <div style={{
-            background: 'var(--bg-card)',
-            borderRadius: 'var(--radius)',
-            padding: 'var(--space-4)',
-            border: '1px solid var(--border)',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 'var(--space-4)',
-            textAlign: 'center',
-          }}>
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>체중</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
-                {before.answers.체중}kg → {after.answers.체중}kg
-              </div>
-              <div style={{ fontSize: 12, color: after.answers.체중 < before.answers.체중 ? 'var(--success)' : 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
-                {after.answers.체중 - before.answers.체중 > 0 ? '+' : ''}{(after.answers.체중 - before.answers.체중).toFixed(1)}kg
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>BMI</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginTop: 'var(--space-1)' }}>
-                {before.result.nutrition_info.bmi.value} → {after.result.nutrition_info.bmi.value}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
-                {after.result.nutrition_info.bmi.label}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 건강검진 변화 — IP/integration/health_report_checkup_compare_eval_v1.md */}
-      <CheckupCompareSection />
+      {/* 검진 0·1건·오류 → 아래 한 줄 */}
+      {placement === 'bottom' && <CheckupCompareSection cc={cc} variant="compact" />}
 
       {/* CTA */}
       <div style={{ textAlign: 'center', marginTop: 'var(--space-6)' }}>
@@ -471,7 +519,7 @@ export default function HealthReport() {
       </div>
 
       <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 'var(--space-6)' }}>
-        본 리포트는 설문 응답 기반 참고 정보이며, 의학적 진단을 대체하지 않습니다.
+        본 리포트는 설문 응답·검진 수치 기반 참고 정보이며, 의학적 진단을 대체하지 않습니다.
       </p>
     </div>
   )

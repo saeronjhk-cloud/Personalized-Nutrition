@@ -5,6 +5,7 @@ import { fetchSurveyResponses } from "../lib/survey_api";
 import { CHECKUP_ENABLED, MEAL_ENABLED } from "../lib/flags";
 import { loadRecentMealDays } from "../lib/dietSummary";
 import { dietCardStatus, DIET_CARD_WINDOW_DAYS } from "../domain/unified/diet_card";
+import { reportEntryCard } from "../domain/survey/report";
 
 interface ModuleStatus {
   checkupCount: number;
@@ -127,6 +128,37 @@ export default function Dashboard() {
             </button>
           </div>
         )}
+
+        {/* 건강 변화 리포트 입구 — IP/integration/health_report_layout_v2_eval.md (L09~L12) */}
+        {(() => {
+          const rc = reportEntryCard({ checkupEnabled: CHECKUP_ENABLED, isLoggedIn, checkupCount: status.checkupCount, surveyCount: status.surveyCount });
+          if (loading || !rc.show) return null;
+          return (
+            <div
+              className="card"
+              style={{
+                padding: "var(--space-4)",
+                marginBottom: "var(--space-5)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "var(--space-3)",
+                flexWrap: "wrap",
+                border: rc.canCompare ? "1px solid var(--primary)" : "1px solid var(--border)",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700 }}>📊 건강 변화 리포트</div>
+                <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 2 }}>{rc.text}</div>
+              </div>
+              {rc.canCompare && (
+                <button type="button" className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => navigate("/health-report")}>
+                  변화 보기
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
         <div
           style={{

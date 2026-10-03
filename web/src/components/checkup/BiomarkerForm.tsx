@@ -531,6 +531,13 @@ export default function BiomarkerForm() {
           <RecommendationList results={results} />
 
           {saved && (
+            <p style={{ marginTop: 'var(--space-4)', fontSize: 14 }}>
+              <a href="/health-report" onClick={(e) => { e.preventDefault(); navigate("/health-report"); }} style={{ fontWeight: 600 }}>
+                📊 건강 변화 리포트에서 이전 검진과 비교하기 →
+              </a>
+            </p>
+          )}
+          {saved && (
             <button
               type="button"
               className="btn btn-secondary"

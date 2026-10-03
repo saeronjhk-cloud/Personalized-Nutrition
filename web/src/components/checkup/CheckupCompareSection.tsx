@@ -3,16 +3,13 @@
  * 판정·정렬은 domain/checkup/compare.ts(순수) · 평가 IP/integration/health_report_checkup_compare_eval_v1.md
  * CHECKUP_ENABLED + 로그인일 때만. 검진 수치 해석은 참고용(진단 아님).
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { CHECKUP_ENABLED } from '../../lib/flags'
-import { fetchMyProfile, fetchCheckupHistory, fetchBiomarkerRules, fetchRanges } from '../../lib/checkup_api'
-import { normalizeHistory, getBiomarkerSeries, CHANGE_COLORS, type HistoryPoint } from '../../domain/checkup/timeseries'
-import { compareCheckups, trendKeys, CHANGE_LABEL_KO, type CheckupRuleLite } from '../../domain/checkup/compare'
-import type { Range } from '../../domain/checkup/engine'
+import { getBiomarkerSeries, CHANGE_COLORS } from '../../domain/checkup/timeseries'
+import { trendKeys, CHANGE_LABEL_KO } from '../../domain/checkup/compare'
+import type { CheckupCompareState } from '../../lib/checkupCompare'
 import TimeseriesChart from './TimeseriesChart'
-
-type Loaded = { history: HistoryPoint[]; ranges: Range[]; rules: CheckupRuleLite[]; sexKnown: boolean }
 
 function fmtDate(d: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d)
@@ -21,47 +18,31 @@ function fmtDate(d: string): string {
 
 const card = { background: 'var(--bg-card)', borderRadius: 'var(--radius)', padding: 'var(--space-4)', border: '1px solid var(--border)' } as const
 
-export default function CheckupCompareSection() {
-  const [state, setState] = useState<'loading' | 'off' | 'error' | 'ready'>('loading')
-  const [data, setData] = useState<Loaded | null>(null)
-  const [beforeIdx, setBeforeIdx] = useState(0)
-  const [afterIdx, setAfterIdx] = useState(0)
-
-  useEffect(() => {
-    if (!CHECKUP_ENABLED) { setState('off'); return }
-    let alive = true
-    ;(async () => {
-      const prof = await fetchMyProfile()
-      if (!prof.isLoggedIn || !prof.userId) { if (alive) setState('off'); return }
-      const sex = prof.profile?.sex === 'M' || prof.profile?.sex === 'F' ? prof.profile.sex : null
-      const [h, rules, ranges] = await Promise.all([
-        fetchCheckupHistory(prof.userId),
-        fetchBiomarkerRules(),
-        sex ? fetchRanges(sex) : Promise.resolve({ ranges: [], error: null }),
-      ])
-      if (!alive) return
-      if (h.error) { setState('error'); return }
-      const history = normalizeHistory(h.history)
-      setData({ history, ranges: (ranges.ranges ?? []) as Range[], rules: rules.data ?? [], sexKnown: sex !== null })
-      setBeforeIdx(0)
-      setAfterIdx(Math.max(0, history.length - 1))
-      setState('ready')
-    })()
-    return () => { alive = false }
-  }, [])
-
-  const cmp = useMemo(
-    () => (data ? compareCheckups(data.history, beforeIdx, afterIdx, data.ranges, data.rules) : null),
-    [data, beforeIdx, afterIdx],
-  )
+/** cc = useCheckupCompare() (페이지 소유). variant 'compact' = 검진 0·1건·오류일 때 아래쪽 한 줄 안내 */
+export default function CheckupCompareSection({ cc, variant = 'full' }: { cc: CheckupCompareState; variant?: 'full' | 'compact' }) {
+  const { state, data, beforeIdx, afterIdx, setBeforeIdx, setAfterIdx, cmp } = cc
   const trends = useMemo(() => (cmp ? trendKeys(cmp.rows, 5) : []), [cmp])
 
+  if (!CHECKUP_ENABLED) return null
   if (state === 'off') return null
+
+  if (variant === 'compact') {
+    return (
+      <div style={{ ...card, marginBottom: 'var(--space-5)', fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+        🩺 {state === 'error'
+          ? '검진 기록을 불러오지 못했어요.'
+          : !data || data.history.length === 0
+            ? '건강검진 결과를 입력하면 검진 수치 변화도 함께 볼 수 있어요.'
+            : `검진 결과가 1건(${fmtDate(data.history[0].recorded_date)}) 있어요. 다음 검진을 입력하면 수치 변화를 비교해 드려요.`}{' '}
+        <Link to="/checkup" style={{ fontWeight: 600 }}>검진 결과 입력 →</Link>
+      </div>
+    )
+  }
 
   return (
     <div style={{ marginBottom: 'var(--space-5)', textAlign: 'left' }}>
       <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-        <span>🩺</span> 건강검진 변화
+        <span>🩺</span> 건강검진 변화{cmp ? <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}> · {fmtDate(cmp.beforeDate)} → {fmtDate(cmp.afterDate)}</span> : null}
       </h3>
 
       {state === 'loading' && <div style={card}><p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>검진 기록을 불러오는 중...</p></div>}
