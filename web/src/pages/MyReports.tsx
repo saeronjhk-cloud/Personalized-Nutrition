@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import CoachAvatar from '../components/CoachAvatar'
 import { listMyContributions, MeokseonAuthError, meokseonConfigured } from '../lib/meokseon'
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
@@ -83,7 +84,10 @@ export default function MyReports() {
   return (
     <div className="survey-container fade-in">
       <div className="survey-card" style={CARD}>
-        <h2 className="survey-step-title">{CONTRIBUTIONS_TITLE}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <CoachAvatar pose="d1_clipboard" size={56} />
+          <h2 className="survey-step-title">{CONTRIBUTIONS_TITLE}</h2>
+        </div>
 
         {phase === 'loading' && (
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>불러오는 중…</p>

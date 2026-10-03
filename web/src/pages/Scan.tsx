@@ -14,6 +14,8 @@ import {
 } from '../lib/scanHistory'
 import { supabase } from '../lib/supabase'
 import AllergenCard from '../components/AllergenCard'
+// 세션75 — 서박사 캐릭터(장식). 배치 정본 backends/먹선/IP/설계_먹선_서박사캐릭터배치_v1_2026-10-03.md · 알레르기 블록엔 두지 않는다.
+import CoachAvatar from '../components/CoachAvatar'
 import AdditiveList from '../components/AdditiveList'
 import {
   buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, GRADE_HIDDEN_NOTICE,
@@ -789,9 +791,15 @@ export default function Scan() {
       const reportAdditives = buildAdditiveList({ additives: analysis.additives })
       return (
         <div>
-          <p style={{ color: outcome.kind === 'saved' ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 14, marginBottom: 'var(--space-2)' }}>
-            {outcome.headline}
-          </p>
+          {/* 세션75 — 박수는 «서버가 저장했다»(outcome.kind === 'saved')일 때만. 세션55 «거짓 확인» 교훈.
+              부분 저장(partial)은 경고가 바로 아래 오므로 캐릭터 없음. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-2)' }}>
+            {outcome.kind === 'saved' && <CoachAvatar pose="a2_clap" size={64} />}
+            {outcome.kind === 'rejected' && <CoachAvatar pose="e2_sorry" size={48} />}
+            <p style={{ color: outcome.kind === 'saved' ? 'var(--accent)' : 'var(--text-secondary)', fontSize: 14 }}>
+              {outcome.headline}
+            </p>
+          </div>
           {/* ★★★ 부분 저장 — 「저장됐다」 바로 «아래»에서 「영양은 못 읽었다」를 말한다.
               둘 중 하나만 말하면 거짓이다. 이 블록을 지우면 사용자는 영양이 빠진 걸 모른다.
               ⚠ 조건을 `outcome.nutritionNote` 로 둔다 — 사유 코드를 몰라도(=UNKNOWN) 뜬다.
@@ -974,6 +982,13 @@ export default function Scan() {
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 'var(--space-2)' }}>{submitGate.reason}</p>
         )}
 
+        {reportBusy === 'analyze' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+            <CoachAvatar pose="d2_magnifier" size={48} />
+            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>사진을 읽고 있어요…</p>
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           {!analysis ? (
             <button
@@ -1123,11 +1138,22 @@ export default function Scan() {
         </div>
       )}
 
-      {error && <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}><p style={{ color: 'var(--danger)', fontSize: 14 }}>{error}</p></div>}
+      {loading && (
+        <div className="survey-card" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <CoachAvatar pose="d2_magnifier" size={72} />
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>제품 정보를 찾고 있어요…</p>
+        </div>
+      )}
+
+      {error && <div className="survey-card" style={{ marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}><CoachAvatar pose="e2_sorry" size={72} /><p style={{ color: 'var(--danger)', fontSize: 14 }}>{error}</p></div>}
 
       {notFound && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-          <h3 className="survey-step-title" style={{ fontSize: 16 }}>아직 검토 중인 제품이에요</h3>
+          {/* 미등록 = «모름». 웃는 얼굴 금지(안전으로 읽힘) → B4 고민. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            <CoachAvatar pose="b4_think" size={64} />
+            <h3 className="survey-step-title" style={{ fontSize: 16 }}>아직 검토 중인 제품이에요</h3>
+          </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>
             {/* ⚠ 2026-08-21 — 여기는 「**제품 앞면**과 …」이라고 말했지만 앞면 슬롯이 «없었다».
                 안내문이 실제 입력과 어긋나 있었다. 실제로 받는 두 장에 맞춰 고친다.
@@ -1368,11 +1394,20 @@ export default function Scan() {
                       </li>
                     ))}
                   </ul>
+                  {/* 주의 항목 «아래»·작게 — 문구를 가리거나 밀어내지 않는다(혼내지 않음 · C2 팁). */}
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-2)' }}><CoachAvatar pose="c2_advice" size={48} /></div>
                 </>
               ) : personal.judgedCount > 0 && !personal.hasUnknown ? (
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>내 설문 기준으로 주의할 항목은 없어요. 먹선 신호등 기준 양호합니다. 🙆</p>
+                // 엄지척은 «전부 판정 + 주의 0»에서만. 회색(판정 없음)이 섞이면 이 분기에 오지 않는다.
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <CoachAvatar pose="a1_thumbs" size={48} />
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>내 설문 기준으로 주의할 항목은 없어요. 먹선 신호등 기준 양호합니다. 🙆</p>
+                </div>
               ) : (
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <CoachAvatar pose="b4_think" size={48} />
+                  <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)</p>
+                </div>
               )}
             </div>
           ) : (
