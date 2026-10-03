@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import type { SurveyAnswers } from "../types";
+import { surveySexKnown } from "../domain/checkup/egfr_inputs";
 
 // =============================================================================
 // 내 설문 기록 관리 (Soft delete) — 검진(checkup_api)과 동일 패턴
@@ -21,6 +22,8 @@ export interface SurveyResponseDetail {
   id: string;
   created_at: string;
   answers: SurveyAnswers;
+  /** 성별이 실제 응답인가(구 행의 null→"male" 채움이면 false) — eGFR 산출용(IP/integration/egfr_ckd_epi_eval_v1.md v2). 다른 화면은 answers 그대로 */
+  genderKnown: boolean;
 }
 
 /** survey_responses 행 → SurveyAnswers (answers jsonb 없으면 컬럼에서 재구성, 구 행 폴백) */
@@ -123,7 +126,7 @@ export async function fetchSurveyResponseDetail(
       : reconstructAnswers(row as any);
 
   return {
-    detail: { id: row.id, created_at: row.created_at, answers },
+    detail: { id: row.id, created_at: row.created_at, answers, genderKnown: surveySexKnown(row) },
     error: null,
   };
 }
