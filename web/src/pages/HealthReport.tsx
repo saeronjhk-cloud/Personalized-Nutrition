@@ -8,6 +8,7 @@ import CheckupCompareSection from '../components/checkup/CheckupCompareSection'
 import { useCheckupCompare } from '../lib/checkupCompare'
 import { checkupPlacement, overallSummary } from '../domain/survey/report'
 import { CHECKUP_ENABLED } from '../lib/flags'
+import { isLegacyDefaultBody, showBodyChange } from '../domain/survey/body_input'
 
 /** 날짜를 "2026년 4월 16일" 형태로 */
 function formatDate(iso: string): string {
@@ -228,7 +229,15 @@ export default function HealthReport() {
       </div>
 
       {/* 신체 변화 (체중/BMI) */}
-      {(before.answers.체중 !== after.answers.체중 || before.result.nutrition_info.bmi.value !== after.result.nutrition_info.bmi.value) && (
+      {(isLegacyDefaultBody(before.answers) || isLegacyDefaultBody(after.answers)) && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-4)' }}>
+          ⚖️ 신체 변화: 설문 초기값(170cm·65kg·30세) 그대로 제출된 기록이 있어 비교에서 뺐어요.
+        </div>
+      )}
+      {showBodyChange(
+        { answers: before.answers, bmi: before.result.nutrition_info.bmi.value },
+        { answers: after.answers, bmi: after.result.nutrition_info.bmi.value },
+      ) && (
         <div style={{ marginBottom: 'var(--space-5)' }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 'var(--space-3)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
             <span>⚖️</span> 신체 변화 <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>(설문에 입력한 값)</span>

@@ -45,12 +45,11 @@ import BetaLanding from './pages/BetaLanding'
 import LoginEmail from "./components/auth/LoginEmail";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
+import { EMPTY_BODY, bodyIssueText, bodyStepIssues } from './domain/survey/body_input'
 
+// 신체 정보는 빈칸 시작 — 초기값 그대로 제출 방지 (IP/integration/survey_initial_values_eval_v1.md)
 const INITIAL_ANSWERS: SurveyAnswers = {
-  성별: 'male',
-  나이: 30,
-  신장: 170,
-  체중: 65,
+  ...EMPTY_BODY,
   체중변화: '변화없음',
   증상: [],
   목표: [],
@@ -113,6 +112,13 @@ function SurveyFlow() {
   }, [])
 
   const submitSurvey = useCallback(async () => {
+    // 신체 정보 미입력 백스톱(앞으로가기 등으로 1단계를 건너뛴 경우) — survey_initial_values_eval_v1
+    const bodyIssues = bodyStepIssues(answers)
+    if (bodyIssues.length > 0) {
+      setError(`기본 신체 정보가 비어 있어요. 처음 단계에서 ${bodyIssueText(bodyIssues)}.`)
+      setStep('results')
+      return
+    }
     // 만 14세 미만 아동 이용 제한(처리방침 §9 · 백스톱). 제출 차단.
     if ((answers.나이 ?? 0) < 14) {
       setError('본 서비스는 만 14세 미만은 이용할 수 없습니다. 나이를 확인해 주세요.')

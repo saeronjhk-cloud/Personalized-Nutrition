@@ -12,6 +12,7 @@ import { resolveEgfr } from '../domain/checkup/egfr'
 import { egfrDemographics } from '../domain/checkup/egfr_inputs'
 import { mealRowsToCoachMeals, type CoachingInput, type CoachMealRow } from '../domain/coaching/goal_meal_coaching'
 import { proteinRoleBySlot } from '../domain/coaching/meal_grammar'
+import { trustedBody } from '../domain/survey/body_input'
 
 /** 오늘 0시(로컬) — 운영 브라우저는 KST */
 export function startOfLocalDay(now: Date = new Date()): Date {
@@ -56,24 +57,25 @@ export async function loadGoalCoachingInput(): Promise<CoachingInput | null> {
   const latest = surveys.responses[0]
   const det = latest ? (await fetchSurveyResponseDetail(latest.id, user.id)).detail ?? null : null
   const a = det?.answers ?? null
-  const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null)
+  // 초기값(170/65/30) 그대로 제출 의심 기록은 신체값·성별 미상 — survey_initial_values_eval_v1 (V15·V16)
+  const body = trustedBody(a, det?.genderKnown ?? false)
   // eGFR 성별·나이: 검진 프로필 우선 → 설문 실응답 → 미상(낮은 값) — IP/integration/egfr_ckd_epi_eval_v1.md v2 (E15~E25)
   const demo = egfrDemographics({
     profileSex: prof?.profile?.sex,
     profileBirthYear: prof?.profile?.birth_year,
     recordedDate: checkup?.recordedDate,
-    surveySex: a?.성별,
-    surveySexKnown: det?.genderKnown ?? false,
-    surveyAge: num(a?.나이),
+    surveySex: body.sex ?? undefined,
+    surveySexKnown: body.sexKnown,
+    surveyAge: body.age,
   })
   const egfr = resolveEgfr(checkup?.values ?? null, demo.age, demo.sex).value
   return {
     mealEnabled: MEAL_ENABLED,
     loggedIn: true,
     goals: goals.goals,
-    weightKg: num(a?.체중),
-    heightCm: num(a?.신장),
-    age: num(a?.나이),
+    weightKg: body.weightKg,
+    heightCm: body.heightCm,
+    age: body.age,
     conditions: Array.isArray(a?.기저질환) ? a!.기저질환 : [],
     egfr,
     meals: mealRowsToCoachMeals(rows),

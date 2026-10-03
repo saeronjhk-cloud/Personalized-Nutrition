@@ -4,6 +4,7 @@ import type { Step, SurveyAnswers } from '../types'
 import ProgressBar from '../components/ProgressBar'
 import { GOAL_OPTIONS, surveySteps } from '../domain/goals/goals'
 import { SYMPTOM_GROUPS } from '../domain/survey/symptoms'
+import { BODY_LIMITS, bodyIssueText, bodyStepIssues } from '../domain/survey/body_input'
 
 interface Props {
   step: Step
@@ -89,17 +90,25 @@ export default function Questions({ step, answers, onUpdate, onNext, onBack, onS
 function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpdate: (p: Partial<SurveyAnswers>) => void; onNext: () => void }) {
   const [heightText, setHeightText] = useState(String(answers.신장 || ''))
   const [weightText, setWeightText] = useState(String(answers.체중 || ''))
+  const [ageText, setAgeText] = useState(String(answers.나이 || ''))
+  const issues = bodyStepIssues(answers)
+
+  const handleAge = (val: string) => {
+    setAgeText(val)
+    const num = parseInt(val, 10)
+    onUpdate({ 나이: isNaN(num) ? 0 : num })
+  }
 
   const handleHeight = (val: string) => {
     setHeightText(val)
     const num = parseFloat(val)
-    if (!isNaN(num)) onUpdate({ 신장: num })
+    onUpdate({ 신장: isNaN(num) ? 0 : num })
   }
 
   const handleWeight = (val: string) => {
     setWeightText(val)
     const num = parseFloat(val)
-    if (!isNaN(num)) onUpdate({ 체중: num })
+    onUpdate({ 체중: isNaN(num) ? 0 : num })
   }
 
   return (
@@ -121,9 +130,10 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
       <div className="input-group">
         <label>나이</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-          <input type="range" min={10} max={90} value={answers.나이}
-            onChange={e => onUpdate({ 나이: +e.target.value })} style={{ flex: 1 }} />
-          <span style={{ fontWeight: 600, minWidth: 50, textAlign: 'right' }}>{answers.나이}세</span>
+          <input type="number" className="input-field" inputMode="numeric" placeholder="예: 45"
+            min={BODY_LIMITS.age.min} max={BODY_LIMITS.age.max} value={ageText}
+            onChange={e => handleAge(e.target.value)} style={{ flex: 1 }} />
+          <span style={{ fontWeight: 600, minWidth: 24, textAlign: 'right' }}>세</span>
         </div>
       </div>
 
@@ -131,14 +141,14 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
         <div className="input-group" style={{ flex: 1 }}>
           <label>키 (cm)</label>
           <input type="number" className="input-field" value={heightText}
-            onChange={e => handleHeight(e.target.value)}
-            onBlur={() => { if (!heightText) { setHeightText('170'); onUpdate({ 신장: 170 }); } }} />
+            inputMode="decimal" placeholder="예: 170"
+            onChange={e => handleHeight(e.target.value)} />
         </div>
         <div className="input-group" style={{ flex: 1 }}>
           <label>몸무게 (kg)</label>
           <input type="number" className="input-field" step="0.1" value={weightText}
-            onChange={e => handleWeight(e.target.value)}
-            onBlur={() => { if (!weightText) { setWeightText('65'); onUpdate({ 체중: 65 }); } }} />
+            inputMode="decimal" placeholder="예: 65"
+            onChange={e => handleWeight(e.target.value)} />
         </div>
       </div>
 
@@ -170,9 +180,15 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
         </div>
       )}
 
-      <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-4)' }}>
+      <button className="btn btn-primary" onClick={onNext} disabled={issues.length > 0} style={{ marginTop: 'var(--space-4)' }}>
         다음 →
       </button>
+      {issues.length > 0 && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', textAlign: 'center' }}>
+          {bodyIssueText(issues)}
+          {(answers.나이 > 0 || answers.신장 > 0 || answers.체중 > 0) && ` (나이 ${BODY_LIMITS.age.min}~${BODY_LIMITS.age.max}세 · 키 ${BODY_LIMITS.height.min}~${BODY_LIMITS.height.max}cm · 몸무게 ${BODY_LIMITS.weight.min}~${BODY_LIMITS.weight.max}kg)`}
+        </div>
+      )}
     </div>
   )
 }

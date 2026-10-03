@@ -10,6 +10,7 @@ import { mealGrammarCoaching, mealsFromRows, judgeMeal, localDayKey, proteinRole
 import { DEFAULT_MEAL_GRAMMAR_PARAMS, type GrammarRuleId } from "../web/src/domain/coaching/meal_grammar_params";
 import { goalMealCoaching, mealRowsToCoachMeals, perMealTargetG } from "../web/src/domain/coaching/goal_meal_coaching";
 import { DEFAULT_GOAL_COACHING_PARAMS } from "../web/src/domain/coaching/goal_coaching_params";
+import { trustedBody } from "../web/src/domain/survey/body_input";
 
 const LEGACY = process.argv.includes("--legacy");
 
@@ -31,12 +32,18 @@ const num = (s: string) => (s === "" || s == null ? null : Number.isFinite(Numbe
 const bool = (s: string) => s === "true" || s === "t";
 const jparse = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
 
+// 운영 로더와 같은 입력(규칙 33): 초기값(170/65/30) 의심 기록은 신체값 미상 — survey_initial_values_eval_v1
+function simBody(weight: number | null, height: number | null, age: number | null) {
+  const t = trustedBody({ 체중: weight ?? undefined, 신장: height ?? undefined, 나이: age ?? undefined });
+  return { weight: t.weightKg, height: t.heightCm, age: t.age };
+}
+
 interface U { rows: (GrammarMealRow & { protein_g: number | null })[]; goals: string[]; weight: number | null; height: number | null; age: number | null; cond: boolean; egfrLow: boolean }
 
 export function simulate(recs: Record<string, string>[]) {
   const users = new Map<string, U>();
   for (const r of recs) {
-    const u = users.get(r.u) ?? { rows: [], goals: (jparse(r.goals) as string[]) ?? [], weight: num(r.weight_kg), height: num(r.height_cm), age: num(r.age), cond: bool(r.cond_excluded), egfrLow: bool(r.egfr_low) };
+    const u = users.get(r.u) ?? { rows: [], goals: (jparse(r.goals) as string[]) ?? [], ...simBody(num(r.weight_kg), num(r.height_cm), num(r.age)), cond: bool(r.cond_excluded), egfrLow: bool(r.egfr_low) };
     u.rows.push({ eaten_at: `${r.eaten_kst}:00+09:00`, meal_slot: r.meal_slot || null, foods: jparse(r.foods), protein_g: num(r.protein_g) });
     users.set(r.u, u);
   }
