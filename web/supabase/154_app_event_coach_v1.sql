@@ -17,6 +17,10 @@
 --        order by occurred_at desc limit 20;
 -- ============================================================================
 
+-- 기존 제약 제거(멱등의 핵심 — 이 두 줄이 없으면 «already exists» 로 실패한다)
+alter table public.app_event drop constraint if exists app_event_event_enum;
+alter table public.app_event drop constraint if exists app_event_props_keys;
+
 -- ── 이벤트 화이트리스트 (src/lib/events_core.ts 의 AppEvent 와 «글자까지» 같아야 한다) ──
 --    검사: src/lib/__tests__/events_db_sync.test.ts 가 이 파일과 TS 를 대조한다.
 alter table public.app_event add constraint app_event_event_enum check (event in (

@@ -92,6 +92,17 @@ describe('app_event 이벤트 목록 ↔ 마이그레이션 CHECK 제약', () =>
   })
 })
 
+describe('마이그레이션 멱등성 (2026-10-03 154 실행 실패 «already exists» 재발 방지)', () => {
+  it('두 제약 모두 add 전에 drop constraint if exists 가 있다', () => {
+    for (const c of ['app_event_event_enum', 'app_event_props_keys']) {
+      const drop = body.indexOf(`drop constraint if exists ${c}`)
+      const add = body.indexOf(`add constraint ${c}`)
+      expect(drop, `${c} drop if exists 없음`).toBeGreaterThanOrEqual(0)
+      expect(drop, `${c} drop 이 add 보다 뒤`).toBeLessThan(add)
+    }
+  })
+})
+
 describe('props 화이트리스트 ↔ 마이그레이션 CHECK 제약', () => {
   const m = body.match(/props - array\[([\s\S]*?)\]::text\[\]/)
 
