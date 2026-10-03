@@ -75,3 +75,10 @@ export const MEAL_GRAMMAR_ENABLED = import.meta.env.VITE_MEAL_GRAMMAR_ENABLED ==
  *   + 기록 카드 눌러 상세 보기. 기본 false. 설계 IP/integration/meal_flow_v2_design_v1.md · 활성화: VITE_MEAL_FLOW_V2=true
  */
 export const MEAL_FLOW_V2_ENABLED = import.meta.env.VITE_MEAL_FLOW_V2 === 'true'
+
+/**
+ * MEAL_PRODUCT_ENABLED: 식사 기록에 가공식품(먹선 바코드·이름 검색) + 먹은 양 기록. 기본 false.
+ *   선행: 먹선 서버 GET /api/products/:barcode/portion 배포 · VITE_MEOKSEON_API_URL 설정.
+ *   설계 IP/integration/meal_product_log_design_v1.md · 활성화: VITE_MEAL_PRODUCT_ENABLED=true
+ */
+export const MEAL_PRODUCT_ENABLED = import.meta.env.VITE_MEAL_PRODUCT_ENABLED === 'true'

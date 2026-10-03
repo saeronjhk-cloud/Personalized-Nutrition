@@ -92,7 +92,7 @@ export default function MealHistory({ reloadKey = 0 }: { reloadKey?: number }) {
           const sub = `${slotLabel(r.meal_slot)} · ${kcalOf(r)} kcal${status ? ' (보정됨)' : ''} · ${new Date(r.eaten_at).toLocaleDateString()}`
           const thumb = r.thumbUrl
             ? <img src={r.thumbUrl} alt="" style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover', flexShrink: 0 }} />
-            : <span style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🍽️</span>
+            : <span style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.source === 'barcode' ? '📦' : '🍽️'}</span>
           const leftoverPanel = isOpen && (
             <LeftoverPanel mealId={r.id} foods={foods} hasAdjustment={!!status}
               initialPct={typeof r.eaten_ratio === 'number' ? Math.round(r.eaten_ratio * 100) : 100}

@@ -10,7 +10,7 @@ export default function MealDetail({ record }: { record: MealRecord }) {
         <img src={record.thumbUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)' }} />
       )}
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-        {v.when}{record.meal_session_id ? ' · 🍱 정찬' : ''}
+        {v.when}{record.meal_session_id ? ' · 🍱 정찬' : ''}{record.source === 'barcode' ? ' · 📦 가공식품' : ''}
       </div>
       {v.kcalBefore != null && (
         <div style={{ fontSize: 13, color: 'var(--text)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2) var(--space-3)' }}>
@@ -29,7 +29,7 @@ export default function MealDetail({ record }: { record: MealRecord }) {
           <li key={f.key} style={{ borderTop: '1px solid var(--border-light)', padding: 'var(--space-2) 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--space-2)', alignItems: 'baseline' }}>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {f.name}{f.grams != null && <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}> · {f.grams}g</span>}
+                {f.name}{f.amountText != null && <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}> · {f.amountText}</span>}
               </span>
               <span style={{ fontSize: 13, color: 'var(--text)', flexShrink: 0 }}>{f.kcal} kcal</span>
             </div>

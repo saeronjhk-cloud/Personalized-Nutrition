@@ -15,7 +15,8 @@ import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
 import GoalCoachingCard from '../components/GoalCoachingCard'
 import MealGrammarCard from '../components/MealGrammarCard'
-import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED, MEAL_FLOW_V2_ENABLED } from '../lib/flags'
+import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED, MEAL_FLOW_V2_ENABLED, MEAL_PRODUCT_ENABLED } from '../lib/flags'
+import ProductMealCard from '../components/ProductMealCard'
 import { ANALYZE_BUSY_MSG, ANALYZE_WAIT_MSG } from '../lib/mealDetail'
 import AfterSaveLeftover from '../components/AfterSaveLeftover'
 import { isBetaPanel } from '../lib/betaPanel'
@@ -335,6 +336,8 @@ export default function Meal() {
           )}
         </div>
       )}
+
+      {!result && MEAL_PRODUCT_ENABLED && <ProductMealCard onSaved={() => setHistoryKey((k) => k + 1)} />}
 
       {!result && <MealHistory reloadKey={historyKey} />}
 

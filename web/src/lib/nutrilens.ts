@@ -35,6 +35,11 @@ export interface MealFood {
   food_item_id?: string
   /** 'after_save' = 기록 목록에서 저장 뒤에 고친 음식 (정정 데이터 점검용) */
   edit_stage?: 'after_save'
+  /** 가공식품(먹선) — 바코드·제품 id·브랜드·먹은 양 단위(가공식품 기록 v1) */
+  barcode?: string
+  product_id?: number
+  brand?: string | null
+  portion?: { kind?: string; qty?: number; basis?: string; approx?: boolean }
 }
 export interface MealSummary {
   total_calories_kcal: number

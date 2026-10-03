@@ -19,6 +19,8 @@ export interface MealRecord {
   /** 먹은 양 비율(0~1) · 방법 — 상태 라벨용(식사 흐름 v2) */
   eaten_ratio?: number | null
   leftover_method?: string | null
+  /** 'photo' | 'barcode'(가공식품 기록) … */
+  source?: string | null
 }
 
 const SLOT_LABEL: Record<string, string> = { breakfast: '아침', lunch: '점심', dinner: '저녁', snack: '간식' }
@@ -35,7 +37,7 @@ export function titleOf(r: MealRecord): string {
   return names.length <= 2 ? names.join(', ') : `${names[0]} 외 ${names.length - 1}`
 }
 
-export const MEAL_LIST_COLUMNS = 'id, eaten_at, meal_slot, foods, summary, photo_path, adjusted_summary, updated_at, meal_session_id, eaten_ratio, leftover_method'
+export const MEAL_LIST_COLUMNS = 'id, eaten_at, meal_slot, foods, summary, photo_path, adjusted_summary, updated_at, meal_session_id, eaten_ratio, leftover_method, source'
 
 /** 최근 meal_log(최신순) + 사진 signed URL. 로그인 필요(RLS 본인). */
 export async function listMeals(limit = 30): Promise<MealRecord[]> {
@@ -67,6 +69,7 @@ export async function listMeals(limit = 30): Promise<MealRecord[]> {
     meal_session_id: r.meal_session_id ?? null,
     eaten_ratio: typeof r.eaten_ratio === 'number' ? r.eaten_ratio : (r.eaten_ratio != null ? Number(r.eaten_ratio) : null),
     leftover_method: r.leftover_method ?? null,
+    source: r.source ?? null,
     thumbUrl: r.photo_path ? signed[r.photo_path] ?? null : null,
   }))
 }

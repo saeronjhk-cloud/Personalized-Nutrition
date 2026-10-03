@@ -26,6 +26,8 @@ export interface DetailFoodRow {
   key: string
   name: string
   grams: number | null
+  /** 양 표기 — 가공식품은 먹은 양 라벨(«½개(35g)»), 그 외 «Ng» · 없으면 null */
+  amountText: string | null
   kcal: number
   protein: number
   carbs: number
@@ -62,6 +64,8 @@ export function mealDetailView(r: MealRecord): MealDetailView {
       key: (f as { food_item_id?: string }).food_item_id ?? String(i),
       name: f?.name_ko || `음식 ${i + 1}`,
       grams: typeof g === 'number' && Number.isFinite(g) && g > 0 ? Math.round(g) : null,
+      amountText: (f as { barcode?: string }).barcode && f?.amount ? String(f.amount)
+        : (typeof g === 'number' && Number.isFinite(g) && g > 0 ? `${Math.round(g)}g` : null),
       kcal: Math.round(n(f?.calories_kcal)),
       protein: r1(f?.protein_g), carbs: r1(f?.carbs_g), fat: r1(f?.fat_g),
       mark: f?.user_edit === 'renamed' ? '직접 수정' : f?.user_edit === 'added' ? '직접 추가' : null,
