@@ -124,13 +124,16 @@ describe("목표 식사 코칭 v1 — 평가셋 C01~C22", () => {
     expect(goalMealCoaching(U70({ meals })).cards).toHaveLength(0);
   });
 
-  it("C15 체중관리 단독 · 저단백 → 카드 0 (WEIGHT_PROTEIN_CARD=false) · 열량 카드는 어떤 경우에도 0", () => {
+  it("C15 체중관리 단독 · 저단백 → WEIGHT_PROTEIN_CARD=false 면 카드 0 · 기본값(true, 서박사 D5 승인)이면 단백질 카드만 · 열량 카드는 어떤 경우에도 0", () => {
     const meals: CoachMeal[] = [
       { slot: "breakfast", protein_g: 10, kcal: 1200 },
       { slot: "lunch", protein_g: 10, kcal: 1500 },
     ];
-    const r = goalMealCoaching(U70({ goals: ["체중관리"], meals }));
+    const r = goalMealCoaching(U70({ goals: ["체중관리"], meals, params: { ...P, WEIGHT_PROTEIN_CARD: false } }));
     expect(r.cards).toHaveLength(0);
+    const rD = goalMealCoaching(U70({ goals: ["체중관리"], meals }));
+    expect(rD.cards.length).toBeGreaterThan(0);
+    expect(rD.cards.every((c) => c.reason_code === "NL_LOW_PROTEIN_MEAL")).toBe(true);
     // G2=(B) 채택 시에도 단백질 카드뿐 — 열량 카드 없음
     const rB = goalMealCoaching(U70({ goals: ["체중관리"], meals, params: { ...P, WEIGHT_PROTEIN_CARD: true } }));
     expect(rB.cards.every((c) => c.reason_code === "NL_LOW_PROTEIN_MEAL")).toBe(true);
@@ -255,7 +258,7 @@ describe("목표 식사 코칭 v1 — 보조", () => {
   it("S4 파라미터 기본값 = 설계 §4 표", () => {
     expect(P).toMatchObject({
       PER_MEAL_G_PER_KG: 0.4, ELDERLY_MIN_G: 25, ELDERLY_AGE: 65, SHORT_NORMAL: 0.2, SHORT_STRONG: 0.4,
-      EGFR_BLOCK: 60, WEIGHT_PROTEIN_CARD: false, UNDERWEIGHT_BMI: 18.5, SODIUM_COACHING: false,
+      EGFR_BLOCK: 60, WEIGHT_PROTEIN_CARD: true, UNDERWEIGHT_BMI: 18.5, SODIUM_COACHING: false,
     });
     expect(P.EXCLUDE_CONDITIONS).toEqual(["신장질환"]);
   });

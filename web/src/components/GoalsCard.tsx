@@ -10,6 +10,7 @@ import {
   validateGoalsForSave,
 } from "../domain/goals/goals";
 import ConsentGate from "./ConsentGate";
+import { GOAL_COACHING_ENABLED } from "../lib/flags";
 
 /**
  * 식사 기록 «내 건강 목표» 카드 (웹앱트랙 Phase G · D1 13종 전부)
@@ -100,7 +101,10 @@ export default function GoalsCard() {
       {editing && (
         <>
           <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "var(--space-2) 0", lineHeight: 1.6 }}>
-            여러 개 고를 수 있어요. 고른 목표는 맞춤 영양제 추천에 쓰여요. 목표에 맞춘 식사 조언은 준비 중이에요.
+            여러 개 고를 수 있어요. 고른 목표는 맞춤 영양제 추천에 쓰여요.{' '}
+            {GOAL_COACHING_ENABLED
+              ? '근육 증가·체중 관리 목표는 식사 기록에 맞춘 단백질 조언도 드려요. 다른 목표의 식사 조언은 준비 중이에요.'
+              : '목표에 맞춘 식사 조언은 준비 중이에요.'}
           </p>
           <div className="grid-2">
             {GOAL_OPTIONS.map((g) => {

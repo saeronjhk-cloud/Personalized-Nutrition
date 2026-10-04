@@ -3,6 +3,7 @@
  *
  * 정본: IP/integration/goal_meal_coaching_design_v1.md §4 · 평가셋 IP/integration/goal_meal_coaching_eval_v1.md
  * 서박사 확정(IP/웹앱트랙_서박사_질의패킷_목표식사코칭_v1.md E1~E4·G2~G5)이 오면 «값만» 바꾼다. 로직 불변.
+ * ✅ 2026-10-04 서박사 구두 승인 — 승인요청서(20260930) D1~D7 전 항목 «그대로». 기록 IP/웹앱트랙_서박사_회신기록부_코칭체계.md
  * ⚠ 값 변경 = 평가셋 기대 숫자만 갱신(케이스 삭제 금지). 확정 전 운영 ON 금지(VITE_GOAL_COACHING_ENABLED).
  */
 import { UNDERWEIGHT_BMI } from "../goals/goals";
@@ -37,7 +38,7 @@ export const DEFAULT_GOAL_COACHING_PARAMS: GoalCoachingParams = {
   SHORT_STRONG: 0.4,
   EGFR_BLOCK: 60,
   EXCLUDE_CONDITIONS: ["신장질환"],
-  WEIGHT_PROTEIN_CARD: false,
+  WEIGHT_PROTEIN_CARD: true, // 서박사 D5 «그대로»(단백질 더하기 카드만) — 2026-10-04 구두 승인 · IP/웹앱트랙_서박사_회신기록부_코칭체계.md
   UNDERWEIGHT_BMI,
   SODIUM_COACHING: false,
 };
