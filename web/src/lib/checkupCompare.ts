@@ -1,16 +1,21 @@
 /**
  * 건강 변화 리포트 — 검진 비교 데이터·선택 상태 (IO + 훅). 페이지가 소유해서 종합 요약과 검진 섹션이 같은 비교를 씀.
- * 순수 판정: domain/checkup/compare.ts · 평가 IP/integration/health_report_checkup_compare_eval_v1.md · health_report_layout_v2_eval.md
+ * 순수 판정: domain/checkup/compare.ts · eGFR 산출 행 domain/checkup/egfr_report.ts(health_report_egfr_eval_v1.md) · 평가 IP/integration/health_report_checkup_compare_eval_v1.md · health_report_layout_v2_eval.md
  */
 import { useEffect, useMemo, useState } from 'react'
 import { CHECKUP_ENABLED } from './flags'
 import { fetchMyProfile, fetchCheckupHistory, fetchBiomarkerRules, fetchRanges } from './checkup_api'
 import { normalizeHistory, type HistoryPoint } from '../domain/checkup/timeseries'
 import { compareCheckups, type CheckupComparison, type CheckupRuleLite } from '../domain/checkup/compare'
+import { withDerivedEgfr, withEgfrSupport } from '../domain/checkup/egfr_report'
 import type { Range } from '../domain/checkup/engine'
 import type { CheckupLoadState } from '../domain/survey/report'
 
-export interface CheckupData { history: HistoryPoint[]; ranges: Range[]; rules: CheckupRuleLite[]; sexKnown: boolean }
+export interface CheckupData {
+  history: HistoryPoint[]; ranges: Range[]; rules: CheckupRuleLite[]; sexKnown: boolean
+  /** 크레아티닌으로 산출한 eGFR 기록 수 · 성별 미상이라 낮은 쪽 값을 썼는지 */
+  egfr: { derivedCount: number; sexAssumed: boolean }
+}
 
 export interface CheckupCompareState {
   state: CheckupLoadState
@@ -43,8 +48,10 @@ export function useCheckupCompare(): CheckupCompareState {
         ])
         if (!alive) return
         if (h.error) { setState('error'); return }
-        const history = normalizeHistory(h.history)
-        setData({ history, ranges: (ranges.ranges ?? []) as Range[], rules: rules.data ?? [], sexKnown: sex !== null })
+        const derived = withDerivedEgfr(h.history, prof.profile)
+        const history = normalizeHistory(derived.rows)
+        const sup = withEgfrSupport((ranges.ranges ?? []) as Range[], rules.data ?? [])
+        setData({ history, ranges: sup.ranges, rules: sup.rules, sexKnown: sex !== null, egfr: { derivedCount: derived.derivedCount, sexAssumed: derived.sexAssumed } })
         setBeforeIdx(0)
         setAfterIdx(Math.max(0, history.length - 1))
         setState('ready')

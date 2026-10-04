@@ -95,6 +95,11 @@ export default function CheckupCompareSection({ cc, variant = 'full' }: { cc: Ch
                 ))}
                 {cmp.rows.length === 0 && <p style={{ margin: 0, padding: 'var(--space-4)', fontSize: 14, color: 'var(--text-secondary)' }}>두 검진에 함께 있는 수치가 없어요.</p>}
               </div>
+              {data.egfr.derivedCount > 0 && cmp.rows.some((r) => r.key === 'egfr') && (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-2)' }}>
+                  eGFR 은 검진 크레아티닌·나이·성별로 계산한 추정값이에요(CKD-EPI 2021).{data.egfr.sexAssumed ? ' 성별 정보가 없어 더 낮게 나오는 쪽 값을 보여 드려요.' : ''}
+                </p>
+              )}
               {cmp.onlyOneSide > 0 && (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-3)' }}>한쪽 검진에만 있는 수치 {cmp.onlyOneSide}개는 비교에서 뺐어요.</p>
               )}
