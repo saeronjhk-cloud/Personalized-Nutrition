@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import FoodEditPanel from './FoodEditPanel'
+import ProductAddPanel from './ProductAddPanel'
+import { MEAL_PRODUCT_ENABLED } from '../lib/flags'
+import type { MealFood } from '../lib/nutrilens'
 import { renameRequestServing } from '../lib/foodEdit'
 import type { MealRecord } from '../lib/mealHistory'
 import {
-  startSavedEdit, draftRename, draftRemove, draftAdd, canSaveDraft, needsLeftoverResetConfirm,
+  startSavedEdit, draftRename, draftRemove, draftAdd, draftAddProduct, canSaveDraft, needsLeftoverResetConfirm,
   saveSavedEdit, EMPTY_FOODS_MSG, LEFTOVER_RESET_CONFIRM, type SavedEditDraft,
 } from '../lib/mealSavedEdit'
 
@@ -13,10 +16,16 @@ import {
  * - 보정(먹은 양)된 식사는 저장 전에 «보정 초기화» 확인을 한 번 받는다(제이 결정 D2).
  * 설계 IP/integration/meal_saved_edit_design_v1.md
  */
+/** 먹선 가공식품 행 — 수정 대신 삭제·다시 담기(설계 meal_saved_edit_product D5) */
+function isProductFood(f: MealFood): boolean {
+  return !!f.barcode || f.match_confidence === 'product_label'
+}
+
 export default function MealSavedEditPanel(props: { record: MealRecord; onClose: () => void; onSaved: () => void }) {
   const { record, onClose, onSaved } = props
   const [draft, setDraft] = useState<SavedEditDraft>(() => startSavedEdit(record))
   const [editing, setEditing] = useState<number | 'add' | null>(null)
+  const [addTab, setAddTab] = useState<'food' | 'product'>('food')
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -53,12 +62,12 @@ export default function MealSavedEditPanel(props: { record: MealRecord; onClose:
                 <div style={{ fontSize: 14, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name_ko}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                   약 {Math.round(Number(f.calories_kcal) || 0)} kcal
-                  {f.user_edit === 'renamed' ? ' · 직접 수정' : f.user_edit === 'added' ? ' · 직접 추가' : ''}
+                  {isProductFood(f) ? ` · 📦 가공식품${f.amount ? ` ${f.amount}` : ''}` : f.user_edit === 'renamed' ? ' · 직접 수정' : f.user_edit === 'added' ? ' · 직접 추가' : ''}
                 </div>
               </div>
               {editing !== i && (
                 <>
-                  <button type="button" className="btn btn-secondary" disabled={busy} aria-label={`${f.name_ko} 이름 바꾸기`} style={smallBtn} onClick={() => { setErr(null); setEditing(i) }}>수정</button>
+                  {!isProductFood(f) && (<button type="button" className="btn btn-secondary" disabled={busy} aria-label={`${f.name_ko} 이름 바꾸기`} style={smallBtn} onClick={() => { setErr(null); setEditing(i) }}>수정</button>)}
                   <button type="button" className="btn btn-secondary" disabled={busy} aria-label={`${f.name_ko} 삭제`} style={{ ...smallBtn, color: 'var(--text-muted)' }}
                     onClick={() => { setEditing(null); setErr(null); setDraft((d) => draftRemove(d, i)) }}>삭제</button>
                 </>
@@ -75,9 +84,31 @@ export default function MealSavedEditPanel(props: { record: MealRecord; onClose:
       {draft.foods.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{EMPTY_FOODS_MSG}</div>}
 
       {editing === 'add' ? (
-        <FoodEditPanel mode="add" servingG={null}
-          onPicked={(food) => { setDraft((d) => draftAdd(d, food)); setEditing(null) }}
-          onCancel={() => setEditing(null)} />
+        <div>
+          {MEAL_PRODUCT_ENABLED && (
+            <div role="tablist" style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+              {([['food', '🍽️ 음식'], ['product', '📦 가공식품']] as const).map(([k, label]) => (
+                <button key={k} type="button" role="tab" aria-selected={addTab === k}
+                  className={`btn ${addTab === k ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1, minHeight: 40, padding: 'var(--space-1) 0', fontSize: 13 }}
+                  onClick={() => setAddTab(k)}>{label}</button>
+              ))}
+            </div>
+          )}
+          {MEAL_PRODUCT_ENABLED && addTab === 'product' ? (
+            <>
+              {/* 사진 식사 = 드시기 전 양(보정은 저장 뒤) · 가공식품만 기록 = 드신 양 — 설계 meal_saved_edit_product D2 */}
+              <ProductAddPanel context={record.source === 'barcode' ? 'product' : 'photo'}
+                onAdd={(food) => { setDraft((d) => draftAddProduct(d, food)); setEditing(null); setAddTab('food') }} />
+              <button type="button" onClick={() => { setEditing(null); setAddTab('food') }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', minHeight: 40, width: '100%' }}>취소</button>
+            </>
+          ) : (
+            <FoodEditPanel mode="add" servingG={null}
+              onPicked={(food) => { setDraft((d) => draftAdd(d, food)); setEditing(null) }}
+              onCancel={() => setEditing(null)} />
+          )}
+        </div>
       ) : (
         <button type="button" className="btn btn-secondary" disabled={busy} style={{ width: '100%', minHeight: 44, fontSize: 13 }}
           onClick={() => { setErr(null); setEditing('add') }}>+ 빠진 음식 추가</button>

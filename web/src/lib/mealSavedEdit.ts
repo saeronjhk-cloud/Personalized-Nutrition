@@ -10,7 +10,7 @@
  */
 import { supabase } from './supabase'
 import type { AnalyzeResult, MealFood, MealSummary } from './nutrilens'
-import { renameFood, removeFood, addFood, assignFoodItemIds, nextFoodItemId, type ResolvedFood } from './foodEdit'
+import { renameFood, removeFood, addFood, addProductFood, assignFoodItemIds, nextFoodItemId, type ResolvedFood } from './foodEdit'
 import { isAdjusted, type MealRecord } from './mealHistory'
 
 export interface SavedEditDraft {
@@ -71,6 +71,17 @@ export function draftRemove(d: SavedEditDraft, index: number): SavedEditDraft {
 
 export function draftAdd(d: SavedEditDraft, resolved: ResolvedFood | null): SavedEditDraft {
   const next = fromResult(addFood(asResult(d), resolved), d)
+  if (next === d) return d
+  const foods = next.foods.slice()
+  const last = foods.length - 1
+  const id = nextFoodItemId(d.knownIds.map((k) => ({ food_item_id: k })))
+  foods[last] = stamp({ ...foods[last], food_item_id: id })
+  return { ...next, foods, knownIds: [...d.knownIds, id] }
+}
+
+/** 가공식품(먹선 /portion 값)을 초안 끝에 — 새 id(지운 번호 재사용 금지) + after_save 표식. 설계 meal_saved_edit_product D3 */
+export function draftAddProduct(d: SavedEditDraft, food: MealFood | null): SavedEditDraft {
+  const next = fromResult(addProductFood(asResult(d), food), d)
   if (next === d) return d
   const foods = next.foods.slice()
   const last = foods.length - 1
