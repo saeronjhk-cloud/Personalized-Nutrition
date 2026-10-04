@@ -29,6 +29,6 @@ describe('홈 개편 v1 가드', () => {
   it('H14 재방문 홈 = 승인 코칭 카드 재사용(새 판정 없음)', () => {
     expect(returning).toContain('<MealGrammarCard />')
     expect(returning).toContain('<GoalCoachingCard />')
-    expect(returning).toContain('todayCard(')
+    expect(returning).toContain('todayCards(')
   })
 })

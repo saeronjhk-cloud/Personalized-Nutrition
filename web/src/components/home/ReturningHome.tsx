@@ -4,7 +4,7 @@
  */
 import { Link } from 'react-router-dom'
 import { MEAL_ENABLED, MEAL_GRAMMAR_ENABLED, GOAL_COACHING_ENABLED, CHECKUP_ENABLED } from '../../lib/flags'
-import { todaySlots, todayCard, greeting } from '../../domain/home/home_mode'
+import { todaySlots, todayCards, greeting } from '../../domain/home/home_mode'
 import MealGrammarCard from '../MealGrammarCard'
 import GoalCoachingCard from '../GoalCoachingCard'
 
@@ -17,7 +17,7 @@ function fmtToday(d: Date): string {
 export default function ReturningHome({ todayRows }: { todayRows: { eaten_at: string; meal_slot: string | null }[] }) {
   const now = new Date()
   const slots = todaySlots(todayRows, now)
-  const card = todayCard({ meal: MEAL_ENABLED, mealGrammar: MEAL_GRAMMAR_ENABLED, goalCoaching: GOAL_COACHING_ENABLED })
+  const cards = todayCards({ meal: MEAL_ENABLED, mealGrammar: MEAL_GRAMMAR_ENABLED, goalCoaching: GOAL_COACHING_ENABLED })
   const links = [
     ...(MEAL_ENABLED ? [{ to: '/meal', label: '🍽️ 식사 기록' }, { to: '/weekly-report', label: '📅 주간 리포트' }] : []),
     { to: '/health-report', label: '📈 건강 변화 리포트' },
@@ -46,9 +46,10 @@ export default function ReturningHome({ todayRows }: { todayRows: { eaten_at: st
         </div>
       )}
 
-      {card && (
+      {cards.length > 0 && (
         <div className="returning-home__one" aria-label="오늘의 한 가지">
-          {card === 'grammar' ? <MealGrammarCard /> : <GoalCoachingCard />}
+          {cards.includes('goal') && <GoalCoachingCard />}
+          {cards.includes('grammar') && <MealGrammarCard />}
         </div>
       )}
 

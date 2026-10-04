@@ -44,12 +44,17 @@ export function todaySlots(rows: readonly { eaten_at: string; meal_slot: string 
   return out;
 }
 
-/** 오늘의 한 가지: 끼니 문법(P1) 우선 → 목표 코칭(v1) → 없음 */
-export function todayCard(f: Pick<HomeFlags, "meal" | "mealGrammar" | "goalCoaching">): "grammar" | "goal" | null {
-  if (!f.meal) return null;
-  if (f.mealGrammar) return "grammar";
-  if (f.goalCoaching) return "goal";
-  return null;
+/**
+ * 오늘의 한 가지: /meal 과 같은 순서로 켜진 카드를 모두 둔다(v1 목표 코칭 → 끼니 문법 P1).
+ * 두 카드는 서로 중복을 막는다(v1 단백질 카드가 보이면 P1 이 G-PRO·G-AM 을 내지 않음, 설계 §5-4) →
+ * 한쪽만 고르면 v1 이 보이는 날 홈에 아무 카드도 안 나오는 문제(10-04 수정). 각 카드는 판정이 없으면 스스로 숨는다.
+ */
+export function todayCards(f: Pick<HomeFlags, "meal" | "mealGrammar" | "goalCoaching">): ("goal" | "grammar")[] {
+  if (!f.meal) return [];
+  const out: ("goal" | "grammar")[] = [];
+  if (f.goalCoaching) out.push("goal");
+  if (f.mealGrammar) out.push("grammar");
+  return out;
 }
 
 export function greeting(now: Date = new Date()): string {
