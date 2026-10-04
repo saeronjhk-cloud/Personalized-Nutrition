@@ -23,8 +23,8 @@ describe('사진 식사 + 가공식품 — 배선', () => {
     expect(meal).toContain('addProductFood(prev, food)')
   })
   it('W3 context=photo 질문·안내 · 기본 질문 불변', () => {
-    expect(panel).toContain('상에 얼마나 있었나요?')
-    expect(panel).toContain('드신 양은 저장한 뒤 다른 음식과 함께 정해요')
+    expect(panel).toContain('드시기 전에 얼마나 있었나요?')
+    expect(panel).toContain('실제로 드신 양은 저장한 뒤 다른 음식과 함께 정해요')
     expect(panel).toContain('얼마나 드셨나요?')
   })
   it('W4 가공식품 행: 배지 · 수정 숨김 · 정보 없음', () => {

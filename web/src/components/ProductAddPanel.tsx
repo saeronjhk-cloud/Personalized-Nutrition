@@ -172,9 +172,9 @@ export default function ProductAddPanel({ onAdd, context = 'product' }: { onAdd:
             <strong style={{ fontSize: 15, color: 'var(--text)' }}>{picked.product.product_name}</strong>
             <button type="button" onClick={reset} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', minHeight: 40 }}>다른 제품</button>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{context === 'photo' ? '상에 얼마나 있었나요?' : '얼마나 드셨나요?'}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{context === 'photo' ? '드시기 전에 얼마나 있었나요?' : '얼마나 드셨나요?'}</div>
           {context === 'photo' && (
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>드신 양은 저장한 뒤 다른 음식과 함께 정해요.</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>실제로 드신 양은 저장한 뒤 다른 음식과 함께 정해요.</div>
           )}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-1)' }}>
             {opt('pack')?.available && PACK_CHIPS.map((qty) => (
