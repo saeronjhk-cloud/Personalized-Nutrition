@@ -62,6 +62,11 @@ export function renameFood(result: AnalyzeResult, index: number, resolved: Resol
   delete next.alternates
   delete next.alternates_reason
   delete next.db_candidate
+  // 가공식품 행을 일반 음식으로 바꾸면 제품 표기(바코드·양 라벨·결손 표식)를 지운다
+  // (안 지우면 상세가 옛 «½개(45g)»를 새 음식 숫자와 함께 보여준다 — 사진+가공식품 설계 D5)
+  if (cur.barcode || cur.match_confidence === 'product_label') {
+    for (const k of PRODUCT_KEYS) delete next[k]
+  }
   if (Array.isArray(cur.quality_flags)) next.quality_flags = cur.quality_flags.filter((q) => q !== 'low_confidence')
   if (added) {
     next.user_edit = 'added'
@@ -89,6 +94,17 @@ export function addFood(result: AnalyzeResult, resolved: ResolvedFood | null): A
   if (!resolved || !Array.isArray(result?.foods)) return result
   const item = { ...fromResolved(resolved), user_edit: 'added', name_source: 'user_added' } as unknown as MealFood
   return withFoods(result, [...result.foods, item])
+}
+
+const PRODUCT_KEYS = ['barcode', 'product_id', 'brand', 'portion', 'missing_nutrients', 'amount'] as const
+
+/**
+ * 가공식품(먹선 /portion 이 계산한 MealFood)을 사진 식사 끝에 붙인다 — 숫자는 옮기기만, 합계는 재합산.
+ * 설계 IP/integration/meal_photo_product_mix_design_v1.md · food=null → 원본 그대로.
+ */
+export function addProductFood(result: AnalyzeResult, food: MealFood | null): AnalyzeResult {
+  if (!food || !Array.isArray(result?.foods)) return result
+  return withFoods(result, [...result.foods, { ...food }])
 }
 
 /** 음식이 하나 이상 있어야 저장할 수 있다. */

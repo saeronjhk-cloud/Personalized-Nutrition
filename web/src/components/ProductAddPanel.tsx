@@ -20,7 +20,11 @@ function scanSupported(): boolean {
     && !!navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function'
 }
 
-export default function ProductAddPanel({ onAdd }: { onAdd: (food: MealFood) => void }) {
+/**
+ * context='photo' — 사진 식사에 섞어 담을 때. 여기서 고르는 양은 «상에 있던 양»이고,
+ * 드신 양·인원(÷N)은 저장 뒤 ②에서 다른 음식과 함께 곱해진다(이중 차감 방지 — 설계 meal_photo_product_mix D2).
+ */
+export default function ProductAddPanel({ onAdd, context = 'product' }: { onAdd: (food: MealFood) => void; context?: 'product' | 'photo' }) {
   const [q, setQ] = useState('')
   const [items, setItems] = useState<MsSearchItem[]>([])
   const [msg, setMsg] = useState<string | null>(null)
@@ -168,7 +172,10 @@ export default function ProductAddPanel({ onAdd }: { onAdd: (food: MealFood) => 
             <strong style={{ fontSize: 15, color: 'var(--text)' }}>{picked.product.product_name}</strong>
             <button type="button" onClick={reset} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', minHeight: 40 }}>다른 제품</button>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>얼마나 드셨나요?</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{context === 'photo' ? '상에 얼마나 있었나요?' : '얼마나 드셨나요?'}</div>
+          {context === 'photo' && (
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>드신 양은 저장한 뒤 다른 음식과 함께 정해요.</div>
+          )}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-1)' }}>
             {opt('pack')?.available && PACK_CHIPS.map((qty) => (
               <button key={qty} type="button" className={`btn ${sel?.kind === 'pack' && sel.qty === qty ? 'btn-primary' : 'btn-secondary'}`} disabled={busy}

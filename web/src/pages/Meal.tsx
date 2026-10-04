@@ -4,10 +4,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
   reencodeImage, analyzeMeal, saveMeal, genMealId, defaultMealSlot, nutrilensConfigured,
-  type AnalyzeResult,
+  type AnalyzeResult, type MealFood,
 } from '../lib/nutrilens'
 import { applyAlternate } from '../lib/foodCorrection'
-import { renameFood, removeFood, addFood, canSaveFoods, type ResolvedFood } from '../lib/foodEdit'
+import { renameFood, removeFood, addFood, addProductFood, canSaveFoods, type ResolvedFood } from '../lib/foodEdit'
 import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
@@ -135,6 +135,8 @@ export default function Meal() {
     onRename: (i: number, food: ResolvedFood) => setResult((prev) => (prev ? renameFood(prev, i, food) : prev)),
     onRemove: (i: number) => setResult((prev) => (prev ? removeFood(prev, i) : prev)),
     onAdd: (food: ResolvedFood) => setResult((prev) => (prev ? addFood(prev, food) : prev)),
+    // 사진+가공식품 v1 — 양은 «상에 있던 양», 드신 양·인원은 저장 뒤 ②에서(설계 meal_photo_product_mix D2)
+    onAddProduct: MEAL_PRODUCT_ENABLED ? (food: MealFood) => setResult((prev) => (prev ? addProductFood(prev, food) : prev)) : undefined,
   } : undefined
 
   function onCorrect(index: number, altName: string) {

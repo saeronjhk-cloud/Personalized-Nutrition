@@ -3,6 +3,7 @@ import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
 import { alternatesOf } from '../lib/foodCorrection'
 import { canSaveFoods, renameRequestServing, type ResolvedFood } from '../lib/foodEdit'
 import FoodEditPanel from './FoodEditPanel'
+import ProductAddPanel from './ProductAddPanel'
 import CoachAvatar from './CoachAvatar'
 
 type Slot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -22,6 +23,15 @@ const MACROS: { key: keyof MealFood; label: string; unit: string }[] = [
   { key: 'sodium_mg', label: '나트륨', unit: 'mg' },
 ]
 function num(v: unknown): number { return typeof v === 'number' && isFinite(v) ? v : 0 }
+/** 먹선 가공식품 행(바코드) — 수정 대신 삭제·다시 담기 */
+function isProduct(f: MealFood): boolean {
+  return !!f.barcode || f.match_confidence === 'product_label'
+}
+/** 라벨 DB 에 없던 영양소는 0 이 아니라 «정보 없음»(규칙 37) */
+function cellText(f: MealFood, key: keyof MealFood, unit: string): string {
+  if ((f.missing_nutrients ?? []).includes(String(key))) return '정보 없음'
+  return `${Math.round(num(f[key]) * 10) / 10}${unit}`
+}
 function isLowConfidence(f: MealFood): boolean {
   return f.match_confidence === 'low' || (f.quality_flags ?? []).includes('low_confidence')
 }
@@ -42,6 +52,8 @@ export default function MealResult(props: {
     onRename: (index: number, food: ResolvedFood) => void
     onRemove: (index: number) => void
     onAdd: (food: ResolvedFood) => void
+    /** 사진+가공식품 v1 (MEAL_PRODUCT_ENABLED) — 있으면 추가 영역에 «📦 가공식품» 탭 */
+    onAddProduct?: (food: MealFood) => void
   }
   /** 식사 흐름 v2 — ① 제목·설명. afterSave 가 있으면 저장 뒤 카드를 그것으로 바꾼다(② 얼마나 드셨나요?) */
   flowV2?: boolean
@@ -50,6 +62,8 @@ export default function MealResult(props: {
   const { result, previewUrl, slot, onSlot, saved, busy, onSave, onReset, onCorrect, edit, flowV2, afterSave } = props
   // 편집 중인 행: 음식 index · 'add' · null
   const [editing, setEditing] = useState<number | 'add' | null>(null)
+  const [addTab, setAddTab] = useState<'food' | 'product'>('food')
+  const onAddProduct = edit?.onAddProduct
   const editable = !!edit && !saved
   const canSave = canSaveFoods(result)
   return (
@@ -86,13 +100,15 @@ export default function MealResult(props: {
                 {isLowConfidence(f) && (
                   <span style={{ fontSize: 11, color: 'var(--warning)', background: 'var(--border-light)', padding: 'var(--space-1) var(--space-2)', borderRadius: 'var(--radius-pill)' }}>확인 필요</span>
                 )}
-                {f.user_edit && (
+                {isProduct(f) ? (
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>📦 가공식품</span>
+                ) : f.user_edit && (
                   <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{f.user_edit === 'added' ? '직접 추가' : '직접 수정'}</span>
                 )}
                 {editable && editing !== i && (
                   <span style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--space-1)' }}>
-                    <button type="button" aria-label={`${f.name_ko} 이름 바꾸기`} onClick={() => setEditing(i)}
-                      style={{ fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-2)', cursor: 'pointer', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-secondary)' }}>수정</button>
+                    {!isProduct(f) && (<button type="button" aria-label={`${f.name_ko} 이름 바꾸기`} onClick={() => setEditing(i)}
+                      style={{ fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-2)', cursor: 'pointer', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-secondary)' }}>수정</button>)}
                     <button type="button" aria-label={`${f.name_ko} 삭제`} onClick={() => { setEditing(null); edit!.onRemove(i) }}
                       style={{ fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-2)', cursor: 'pointer', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-pill)', background: 'transparent', color: 'var(--text-secondary)' }}>삭제</button>
                   </span>
@@ -100,7 +116,7 @@ export default function MealResult(props: {
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', fontSize: 13, color: 'var(--text-secondary)' }}>
                 {MACROS.map(({ key, label, unit }) => (
-                  <span key={key}>{label} {Math.round(num(f[key]) * 10) / 10}{unit}</span>
+                  <span key={key}>{label} {cellText(f, key, unit)}</span>
                 ))}
               </div>
               {/* 세션52 — 사진만으로는 구별할 수 없는 쌍(설렁탕↔곰탕 · 꽃게탕↔해물탕).
@@ -137,9 +153,29 @@ export default function MealResult(props: {
           <p style={{ fontSize: 13, color: 'var(--warning)', marginTop: 'var(--space-2)' }}>음식을 하나 이상 남겨 주세요.</p>
         )}
         {editable && (editing === 'add' ? (
-          <FoodEditPanel mode="add" servingG={null}
-            onPicked={(food) => { edit!.onAdd(food); setEditing(null) }}
-            onCancel={() => setEditing(null)} />
+          <div style={{ marginTop: 'var(--space-3)' }}>
+            {onAddProduct && (
+              <div role="tablist" style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
+                {([['food', '🍽️ 음식'], ['product', '📦 가공식품']] as const).map(([k, label]) => (
+                  <button key={k} type="button" role="tab" aria-selected={addTab === k}
+                    className={`btn ${addTab === k ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ flex: 1, minHeight: 40, padding: 'var(--space-1) 0', fontSize: 13 }}
+                    onClick={() => setAddTab(k)}>{label}</button>
+                ))}
+              </div>
+            )}
+            {onAddProduct && addTab === 'product' ? (
+              <>
+                <ProductAddPanel context="photo" onAdd={(food) => { onAddProduct(food); setEditing(null); setAddTab('food') }} />
+                <button type="button" onClick={() => { setEditing(null); setAddTab('food') }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 12, cursor: 'pointer', minHeight: 40, width: '100%' }}>취소</button>
+              </>
+            ) : (
+              <FoodEditPanel mode="add" servingG={null}
+                onPicked={(food) => { edit!.onAdd(food); setEditing(null) }}
+                onCancel={() => setEditing(null)} />
+            )}
+          </div>
         ) : (
           <button type="button" className="btn btn-secondary" style={{ width: '100%', marginTop: 'var(--space-3)', minHeight: 44 }}
             onClick={() => setEditing('add')}>+ 빠진 음식 추가</button>
