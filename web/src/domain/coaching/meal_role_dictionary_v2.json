@@ -1,6 +1,6 @@
 {
  "version": "meal_role_dictionary_v2",
- "note": "정본 IP/meal_role_dictionary_v2.json (v2 = 운영 집계 2026-10-02 반영) · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
+ "note": "정본 IP/meal_role_dictionary_v2.json (v2 = 운영 집계 2026-10-02 반영 · v3 패치 2026-10-04 해조류·양념·진미채·스팸 등 R73~R86) · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
  "roles": [
   "RICE",
   "NOODLE",
@@ -32,6 +32,9 @@
   ],
   "간자장": [
    "NOODLE"
+  ],
+  "간장": [
+   "OTHER"
   ],
   "간장게장": [
    "PROTEIN"
@@ -110,6 +113,9 @@
   ],
   "고추잡채": [
    "VEG"
+  ],
+  "고추장": [
+   "OTHER"
   ],
   "고추장아찌": [
    "PICKLE"
@@ -416,6 +422,9 @@
   "돼지껍데기볶음": [
    "PROTEIN"
   ],
+  "된장": [
+   "OTHER"
+  ],
   "된장찌개": [
    "BROTH"
   ],
@@ -438,6 +447,9 @@
   "두부전골": [
    "PROTEIN",
    "BROTH"
+  ],
+  "들기름": [
+   "OTHER"
   ],
   "들깨칼국수": [
    "NOODLE"
@@ -795,6 +807,9 @@
    "PROTEIN",
    "BROTH"
   ],
+  "숭늉": [
+   "BEVERAGE"
+  ],
   "시금치나물": [
    "VEG"
   ],
@@ -814,6 +829,9 @@
   ],
   "쌀밥": [
    "RICE"
+  ],
+  "쌈장": [
+   "OTHER"
   ],
   "쑥갓나물무침": [
    "VEG"
@@ -1112,6 +1130,9 @@
   ],
   "찰떡": [
    "GRAIN_OTHER"
+  ],
+  "참기름": [
+   "OTHER"
   ],
   "참꼬막": [
    "PROTEIN"
@@ -4185,6 +4206,95 @@
    "p": "옥수수",
    "r": [
     "OTHER"
+   ]
+  },
+  {
+   "m": "e",
+   "p": "김",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "김자반",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "김가루",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "미역",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "톳",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "다시마",
+   "r": [
+    "OTHER"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "진미채",
+   "r": [
+    "PROTEIN"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "스팸",
+   "r": [
+    "PROTEIN"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "무말랭이",
+   "r": [
+    "VEG"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "누룽지",
+   "r": [
+    "RICE"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "디저트",
+   "r": [
+    "SNACK_SWEET"
+   ]
+  },
+  {
+   "m": "c",
+   "p": "파이",
+   "r": [
+    "SNACK_SWEET"
+   ],
+   "u": [
+    "파인",
+    "스파이시",
+    "파이프"
    ]
   }
  ]

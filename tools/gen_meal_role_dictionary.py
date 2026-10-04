@@ -71,6 +71,11 @@ RULES += [E("전", "OTHER"), C("부침", "OTHER"), C("튀김", "OTHER"), C("볶�
           C("소스", "OTHER", ["요리"]), C("넛", "OTHER"), C("견과", "OTHER"), C("아몬드", "OTHER"), C("호두", "OTHER"),
           C("피스타치오", "OTHER"), C("생크림", "OTHER"), C("올리브", "OTHER"), C("마늘", "OTHER"), C("케첩", "OTHER"),
           C("마요", "OTHER"), C("드레싱", "OTHER"), C("버터", "OTHER"), C("잼", "OTHER"), C("옥수수", "OTHER")]
+# v3 (2026-10-04, 운영 실측 «김» UNKNOWN — 평가 IP/integration/meal_grammar_p1_eval_v1.md R73~R86)
+RULES += [E("김", "OTHER"), C("김자반", "OTHER"), C("김가루", "OTHER"),
+          C("미역", "OTHER"), C("톳", "OTHER"), C("다시마", "OTHER"),
+          C("진미채", "PROTEIN"), C("스팸", "PROTEIN"), C("무말랭이", "VEG"), C("누룽지", "RICE"),
+          C("디저트", "SNACK_SWEET"), C("파이", "SNACK_SWEET", ["파인", "스파이시", "파이프"])]
 
 def norm(s: str) -> str:
     s = unicodedata.normalize("NFC", s or "")
@@ -104,6 +109,8 @@ CAT = {
 }
 # 수기 예외(최종값) — 이름-재료 원칙의 예외·카테고리 오류 교정. 근거는 설계 §1.
 OVERRIDE = {
+    # v3 양념·기름(정확 일치만 — 된장찌개·간장게장 등 요리는 규칙대로)
+    "고추장": ["OTHER"], "쌈장": ["OTHER"], "된장": ["OTHER"], "간장": ["OTHER"], "들기름": ["OTHER"], "참기름": ["OTHER"], "숭늉": ["BEVERAGE"],
     "치즈라면": ["NOODLE"], "유부초밥": ["RICE"], "치즈김밥": ["RICE"], "알밥": ["RICE"], "김치김밥": ["RICE"],
     "샐러드김밥": ["RICE"], "짬뽕밥": ["RICE"], "자장밥": ["RICE"], "잡채밥": ["RICE"], "잡탕밥": ["RICE", "PROTEIN"],
     "산채비빔밥": ["RICE", "VEG"], "열무비빔밥": ["RICE", "VEG"], "전주비빔밥": ["RICE", "VEG"], "일반비빔밥": ["RICE", "VEG"],
@@ -156,7 +163,7 @@ def main():
         entries.setdefault(k, v)
     doc = {
         "version": "meal_role_dictionary_v2",
-        "note": "정본 IP/meal_role_dictionary_v2.json (v2 = 운영 집계 2026-10-02 반영) · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
+        "note": "정본 IP/meal_role_dictionary_v2.json (v2 = 운영 집계 2026-10-02 반영 · v3 패치 2026-10-04 해조류·양념·진미채·스팸 등 R73~R86) · 생성 tools/gen_meal_role_dictionary.py · 설계 IP/integration/meal_grammar_p1_design_v1.md",
         "roles": ROLE_ORDER + ["UNKNOWN"],
         "entries": dict(sorted(entries.items())),
         "rules": RULES,

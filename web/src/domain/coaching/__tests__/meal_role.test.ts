@@ -7,6 +7,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { resolveRoles, normalizeFoodName, ROLES, MEAL_ROLE_DICTIONARY } from "../meal_role";
+import { judgeMeal } from "../meal_grammar";
 
 const R: [string, string, string][] = [
   ["R01", "쌀밥", "RICE"],
@@ -87,6 +88,20 @@ const R: [string, string, string][] = [
   ["R70b", "올리브", "OTHER"],
   ["R70c", "튀긴 마늘", "OTHER"],
   ["R72", "크림 소스 피자", "GRAIN_OTHER"],
+  // v3 — 운영 실측 10-04(«김» UNKNOWN 으로 끼니 단백질 미상 → 카드 0) · IP/integration/meal_grammar_p1_eval_v1.md «R v3»
+  ...["김", "조미김", "구운김", "돌김", "파래김", "재래김", "도시락김", "양념김"].map((n) => ["R73", n, "OTHER"] as [string, string, string]),
+  ["R74", "김자반", "OTHER"], ["R74b", "김가루", "OTHER"],
+  ...["미역", "미역무침", "톳무침", "다시마"].map((n) => ["R75", n, "OTHER"] as [string, string, string]),
+  ["R76", "미역국", "BROTH"],
+  ["R78", "진미채", "PROTEIN"], ["R78b", "진미채볶음", "PROTEIN"],
+  ["R79", "스팸", "PROTEIN"], ["R79b", "스팸구이", "PROTEIN"],
+  ...["고추장", "쌈장", "된장", "간장", "들기름", "참기름"].map((n) => ["R80", n, "OTHER"] as [string, string, string]),
+  ["R81", "된장찌개", "BROTH"], ["R81b", "간장게장", "PROTEIN"],
+  ["R82", "무말랭이무침", "VEG"],
+  ["R83", "누룽지", "RICE"],
+  ["R84", "숭늉", "BEVERAGE"],
+  ["R85", "디저트", "SNACK_SWEET"], ["R85b", "애플파이", "SNACK_SWEET"],
+  ["R86", "김치", "KIMCHI"], ["R86b", "김밥", "RICE"], ["R86c", "김치찌개", "BROTH"],
 ];
 
 const sorted = (a: readonly string[]) => [...a].sort();
@@ -103,6 +118,14 @@ describe("R role 해석", () => {
   it("R71 굴전·굴국 ⊇ PROTEIN («굴» 예외 회귀 방지)", () => {
     expect(resolveRoles("굴전")).toContain("PROTEIN");
     expect(resolveRoles("굴국")).toContain("PROTEIN");
+  });
+  it("R77 접미 «김» 규칙이 튀김을 바꾸지 않음", () => {
+    expect(resolveRoles("새우튀김")).toContain("PROTEIN");
+    expect(resolveRoles("김말이튀김")).toEqual(MEAL_ROLE_DICTIONARY.entries["김말이튀김"]);
+  });
+  it("G-R3 운영 실측 점심 [흰밥, 무국, 김치, 상추무침, 김] → 주식 O · 단백질 반찬 X · 채소 O", () => {
+    const j = judgeMeal({ day: "2026-10-04", slot: "lunch", names: ["흰밥", "무국", "김치", "상추무침", "김"] });
+    expect([j.staple, j.protein, j.veg]).toEqual([true, false, true]);
   });
   it("비문자열 입력 → UNKNOWN", () => {
     expect(resolveRoles(null)).toEqual(["UNKNOWN"]);
