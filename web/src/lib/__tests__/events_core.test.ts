@@ -19,6 +19,11 @@ describe('surfaceOf (이벤트 접두 → sink)', () => {
     expect(surfaceOf('coach_card_shown')).toBe('coach')
     expect(surfaceOf('coach_why_open')).toBe('coach')
   })
+  it('3c. home_* → home (H15)', () => {
+    expect(surfaceOf('home_cta_click')).toBe('home')
+    expect(surfaceOf('home_start_choice')).toBe('home')
+    expect(sanitize({ home_mode: 'visitor', cta: 'start', start_choice: 'meal', bmi: 30 })).toEqual({ home_mode: 'visitor', cta: 'start', start_choice: 'meal' })
+  })
 })
 
 describe('sanitize (PII 차단 화이트리스트)', () => {

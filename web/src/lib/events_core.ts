@@ -16,7 +16,7 @@
  *   초과분은 CHECK 에 걸려 INSERT 가 조용히 거부됐고 `track` 이 실패를 삼켜 아무도 몰랐다.
  *   배열로 두면 `events_db_sync.test.ts` 가 마이그레이션 SQL 과 직접 대조할 수 있다.
  *
- * 추가할 때: 이 배열 + 최신 전체 재동기화 SQL(현재 `supabase/154_app_event_coach_v1.sql`)을 «함께» 고칠 것.
+ * 추가할 때: 이 배열 + 최신 전체 재동기화 SQL(현재 `supabase/155_app_event_home_v1.sql`)을 «함께» 고칠 것.
  *   한쪽만 고치면 위 테스트가 빨갛게 잡는다.
  */
 export const ALL_APP_EVENTS = [
@@ -59,6 +59,9 @@ export const ALL_APP_EVENTS = [
   // ── coach(코칭 카드) — 154 · IP/integration/coach_card_telemetry_eval_v1.md ──
   'coach_card_shown',        // 코칭 카드 노출(같은 브라우저·같은 날·같은 카드 1회)
   'coach_why_open',          // «왜 이 카드?» 펼침
+  // ── home(홈 개편 v1) — 155 · IP/integration/home_redesign_v1_design.md ──
+  'home_cta_click',          // 홈 대표 CTA·보조 링크 클릭
+  'home_start_choice',       // 시작 선택 시트에서 고른 시작점
 ] as const
 
 export type AppEvent = typeof ALL_APP_EVENTS[number]
@@ -84,6 +87,10 @@ export const ALLOWED_PROP_KEYS = new Set<string>([
   // coach 계열(154) — enum 문자열만(건강 수치·음식명 없음)
   'coach_card',       // 'g_pro' | 'g_veg' | 'g_am' | 'v1_protein'
   'coach_level',      // 'normal' | 'strong' (v1 만)
+  // home 계열(155) — enum 문자열만
+  'home_mode',        // 'visitor' | 'returning'
+  'cta',              // 'start' | 'final' | 'scan_link'
+  'start_choice',     // 'meal' | 'survey' | 'checkup' | 'scan'
 ])
 
 /* ⚠ 2026-08-06 실측 — 이 목록과 DB 제약이 «1:1 이 아니었다».
@@ -99,11 +106,12 @@ export const ALLOWED_PROP_KEYS = new Set<string>([
  *   개인정보 유입 경로가 될 수 있어 임의로 추가하지 않았다. 의도한 지표라면 함께 등록할 것.
  */
 
-/** 이벤트 접두 → surface 도출(sink 분류). scan_* / meal_* / weekly_report* / coach_* */
+/** 이벤트 접두 → surface 도출(sink 분류). scan_* / meal_* / weekly_report* / coach_* / home_* */
 export function surfaceOf(event: AppEvent): string {
   if (event.startsWith('meal_')) return 'meal'
   if (event.startsWith('weekly_report')) return 'report'
   if (event.startsWith('coach_')) return 'coach'
+  if (event.startsWith('home_')) return 'home'
   return 'scan'
 }
 
