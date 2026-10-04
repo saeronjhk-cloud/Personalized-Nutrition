@@ -54,6 +54,8 @@ export interface MsNutrition {
   source_license?: string | null
   /** ★ 세션73 U71-3 — 라벨 인쇄 % ↔ 우리 계산 % (domain/meokseon/labelDv.ts). 제보 영양일 때만 · 없으면 null. */
   label_dv?: unknown
+  /** ★ 2026-10-03 서버 962b992 — 저장 영양의 기준(per_100g|per_100ml|per_100_unknown|per_serving). 표 머리 문구(세션75b). */
+  basis?: string | null
 }
 
 // 먹선 신호등(정본 판정). 개인화는 이 색을 "소비"만 하고 자체 임계를 만들지 않는다.

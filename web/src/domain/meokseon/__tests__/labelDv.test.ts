@@ -32,6 +32,10 @@ describe('describeLabelDv', () => {
   it('basisPhrase — 내용량 모르면 숫자를 지어내지 않는다', () => {
     expect(basisPhrase('per_total', null)).toBe('총 내용량 기준')
     expect(basisPhrase('per_100ml')).toBe('100ml 기준')
+    // ★ 세션75b — 1회 제공량은 양을 알면 함께(호두정과 운영 실물: serving_size 10 · g)
+    expect(basisPhrase('per_serving', { serving_size: 10, content_unit: 'g' })).toBe('1회 제공량 10g 기준')
+    expect(basisPhrase('per_serving', null)).toBe('1회 제공량 기준')
+    expect(basisPhrase('per_100_unknown')).toBe('100g·100ml 기준(단위 미확인)')
   })
   it('배선 — Scan 이 영양 카드 안에서 describeLabelDv 를 쓴다(표에 섞지 않음)', () => {
     const src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../../pages/Scan.tsx'), 'utf8')

@@ -21,15 +21,16 @@ export function basisPhrase(basis: string | null | undefined, product?: { total_
   const amt = (n: unknown, u: unknown) => (typeof n === 'number' && n > 0 ? `${n}${typeof u === 'string' && u ? u : ''}` : '')
   switch (basis) {
     case 'per_total': { const a = amt(product?.total_content, product?.content_unit); return a ? `총 내용량 ${a} 기준` : '총 내용량 기준' }
-    case 'per_serving': return '1회 제공량 기준'
+    case 'per_serving': { const a = amt(product?.serving_size, product?.content_unit); return a ? `1회 제공량 ${a} 기준` : '1회 제공량 기준' }
     case 'per_100g': return '100g 기준'
     case 'per_100ml': return '100ml 기준'
+    case 'per_100_unknown': return '100g·100ml 기준(단위 미확인)'
     default: return '라벨 표기 기준'
   }
 }
 
 /** 순수 — 서버 값 → 화면 모델. 보여 줄 것이 없으면 null. 테스트 대상. */
-export function describeLabelDv(v: unknown, product?: { total_content?: number | null; content_unit?: string | null } | null): LabelDvView | null {
+export function describeLabelDv(v: unknown, product?: { total_content?: number | null; content_unit?: string | null; serving_size?: number | null } | null): LabelDvView | null {
   if (!v || typeof v !== 'object') return null
   const lv = v as Partial<LabelDv>
   const items = lv.items && typeof lv.items === 'object' ? lv.items : null

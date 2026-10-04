@@ -45,7 +45,8 @@ import {
 } from '../domain/meokseon/reportNutrition'
 import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 import { reportMayUnconfirmed } from '../domain/meokseon/allergens'
-import { describeLabelDv, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelDv'
+import { describeLabelDv, basisPhrase, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelDv'
+import { withIra } from '../domain/meokseon/koreanParticle'
 import { nameSuggestOutcome, nameSuggestSource } from '../domain/meokseon/nameSuggestOutcome'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
@@ -1291,6 +1292,8 @@ export default function Scan() {
           {result.nutrition && completeness?.nutrition.state === 'present' && (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>영양성분</h3>
+              {/* ★ 세션75b — 표의 기준을 표 머리에(아래 라벨 %와 기준이 다를 수 있어 섞어 읽지 않게). 서버 basis 그대로 · 지어내지 않음. */}
+              <p data-testid="nutri-basis" style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>{basisPhrase(result.nutrition.basis ?? null, result.product)}</p>
               <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                 <tbody>
                   {NUTRIENTS.map(({ key, label, unit }) => {
@@ -1390,7 +1393,7 @@ export default function Scan() {
                     {personal.warnings.map((f) => (
                       <li key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 14 }}>
                         <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: f.color === 'red' ? 'var(--danger)' : 'var(--warning)' }} />
-                        <span><strong>{f.label}</strong> — {f.reason}이라 주의해서 보세요. <span style={{ color: 'var(--text-muted)' }}>(먹선 신호등: {f.color === 'red' ? '빨강' : '노랑'})</span></span>
+                        <span><strong>{f.label}</strong> — {withIra(f.reason)} 주의해서 보세요. <span style={{ color: 'var(--text-muted)' }}>(먹선 신호등: {f.color === 'red' ? '빨강' : '노랑'})</span></span>
                       </li>
                     ))}
                   </ul>
