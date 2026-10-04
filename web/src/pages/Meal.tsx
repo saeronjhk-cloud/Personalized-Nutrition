@@ -13,9 +13,8 @@ import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
 import BetaFeedback from '../components/BetaFeedback'
 import GoalsCard from '../components/GoalsCard'
-import GoalCoachingCard from '../components/GoalCoachingCard'
-import MealGrammarCard from '../components/MealGrammarCard'
-import { GOAL_COACHING_ENABLED, MEAL_EDIT_ENABLED, MEAL_GRAMMAR_ENABLED, MEAL_FLOW_V2_ENABLED, MEAL_PRODUCT_ENABLED } from '../lib/flags'
+import CoachCards from '../components/CoachCards'
+import { MEAL_EDIT_ENABLED, MEAL_FLOW_V2_ENABLED, MEAL_PRODUCT_ENABLED } from '../lib/flags'
 import ProductMealCard from '../components/ProductMealCard'
 import CoachAvatar from '../components/CoachAvatar'
 import { ANALYZE_BUSY_MSG, ANALYZE_WAIT_MSG } from '../lib/mealDetail'
@@ -256,12 +255,11 @@ export default function Meal() {
         </div>
       )}
 
+      {/* 서박사 코칭 카드 — 첫 화면 맨 위(목표 카드보다 먼저 보이게) · IP/integration/coach_card_placement_eval_v1.md M1 */}
+      {!result && <CoachCards />}
+
       {/* Phase G — 건강 목표는 식사 기록에서 관리 (맞춤 영양제 추천이 참조) */}
       {!result && <GoalsCard />}
-
-      {/* 목표 기반 식사 코칭 v1 — 기본 OFF, 서박사 확정 전 운영 ON 금지 */}
-      {!result && GOAL_COACHING_ENABLED && <GoalCoachingCard />}
-      {!result && MEAL_GRAMMAR_ENABLED && <MealGrammarCard />}
 
       {closed && !result && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
@@ -370,9 +368,16 @@ export default function Meal() {
             edit={editHandlers}
             flowV2={MEAL_FLOW_V2_ENABLED}
             afterSave={MEAL_FLOW_V2_ENABLED && savedId
-              ? <AfterSaveLeftover mealId={savedId} foods={result.foods} onNext={() => { reset(); setHistoryKey((k) => k + 1) }} />
+              ? (
+                <>
+                  {/* 저장 직후 — 저장 버튼이 있던 자리에 이번 기록이 반영된 코칭 카드(M2·M3). savedId 로 새로 읽음 */}
+                  <CoachCards key={savedId} />
+                  <AfterSaveLeftover mealId={savedId} foods={result.foods} onNext={() => { reset(); setHistoryKey((k) => k + 1) }} />
+                </>
+              )
               : undefined}
           />
+          {saved && !MEAL_FLOW_V2_ENABLED && <CoachCards key={savedId ?? 'saved'} />}
           {/* 세션54 — 베타 패널 피드백. 저장 전후 무관하게 보인다(정정 칩은 저장 전에만). job_id 로 사진과 잇는다. */}
           <BetaFeedback jobId={jobIdRef.current} foods={result.foods.map((f) => f.name_ko)} page="/meal" />
         </>

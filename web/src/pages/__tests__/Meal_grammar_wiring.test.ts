@@ -8,6 +8,7 @@ import { resolve } from "node:path";
 
 const read = (p: string) => readFileSync(resolve(__dirname, p), "utf-8");
 const meal = read("../Meal.tsx");
+const coach = read("../../components/CoachCards.tsx");
 const card = read("../../components/MealGrammarCard.tsx");
 const loader = read("../../lib/mealGrammar.ts");
 const flags = read("../../lib/flags.ts");
@@ -17,8 +18,9 @@ const role = read("../../domain/coaching/meal_role.ts");
 describe("한식 끼니 문법 P1 — /meal 배선", () => {
   it("W1 플래그 게이트: 기본 false · Meal.tsx 는 플래그로만 렌더(1곳)", () => {
     expect(flags).toContain("export const MEAL_GRAMMAR_ENABLED = import.meta.env.VITE_MEAL_GRAMMAR_ENABLED === 'true'");
-    expect(meal).toContain("MEAL_GRAMMAR_ENABLED && <MealGrammarCard />");
-    expect(meal.match(/<MealGrammarCard/g)).toHaveLength(1);
+    expect(coach).toContain("MEAL_GRAMMAR_ENABLED && <MealGrammarCard />");
+    expect(coach.match(/<MealGrammarCard/g)).toHaveLength(1);
+    expect(meal).not.toContain("<MealGrammarCard");
   });
   it("W2 카드는 mealGrammarCoaching 결과만 그림 · 이름 해석·문구 생성 0", () => {
     expect(card).toContain("mealGrammarCoaching(");

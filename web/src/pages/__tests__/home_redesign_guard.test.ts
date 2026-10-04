@@ -27,8 +27,7 @@ describe('홈 개편 v1 가드', () => {
     expect(home).not.toMatch(/CountUp|15개 페르소나|390\+|120\+|36가지/)
   })
   it('H14 재방문 홈 = 승인 코칭 카드 재사용(새 판정 없음)', () => {
-    expect(returning).toContain('<MealGrammarCard />')
-    expect(returning).toContain('<GoalCoachingCard />')
+    expect(returning).toContain('<CoachCards />')
     expect(returning).toContain('todayCards(')
   })
 })

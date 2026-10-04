@@ -8,6 +8,7 @@ import { resolve } from "node:path";
 
 const read = (p: string) => readFileSync(resolve(__dirname, p), "utf-8");
 const meal = read("../Meal.tsx");
+const coach = read("../../components/CoachCards.tsx");
 const card = read("../../components/GoalCoachingCard.tsx");
 const loader = read("../../lib/goalCoaching.ts");
 const flags = read("../../lib/flags.ts");
@@ -15,8 +16,10 @@ const flags = read("../../lib/flags.ts");
 describe("목표 식사 코칭 — /meal 배선", () => {
   it("W1 플래그 게이트: GOAL_COACHING_ENABLED 기본 false(=== 'true') · Meal.tsx 는 플래그로만 렌더", () => {
     expect(flags).toContain("export const GOAL_COACHING_ENABLED = import.meta.env.VITE_GOAL_COACHING_ENABLED === 'true'");
-    expect(meal).toContain("GOAL_COACHING_ENABLED && <GoalCoachingCard />");
-    expect(meal.match(/<GoalCoachingCard/g)).toHaveLength(1);
+    // 2026-10-04: 카드 묶음 CoachCards 로 이동(첫 화면·저장 직후·홈 공용) — coach_card_placement_eval_v1
+    expect(coach).toContain("GOAL_COACHING_ENABLED && <GoalCoachingCard />");
+    expect(coach.match(/<GoalCoachingCard/g)).toHaveLength(1);
+    expect(meal).not.toContain("<GoalCoachingCard");
   });
 
   it("W2 판정은 goalMealCoaching() 한 곳 · 카드가 숫자를 새로 만들지 않음", () => {

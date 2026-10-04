@@ -5,8 +5,7 @@
 import { Link } from 'react-router-dom'
 import { MEAL_ENABLED, MEAL_GRAMMAR_ENABLED, GOAL_COACHING_ENABLED, CHECKUP_ENABLED } from '../../lib/flags'
 import { todaySlots, todayCards, greeting } from '../../domain/home/home_mode'
-import MealGrammarCard from '../MealGrammarCard'
-import GoalCoachingCard from '../GoalCoachingCard'
+import CoachCards from '../CoachCards'
 
 const SLOT_NAMES = ['아침', '점심', '저녁'] as const
 
@@ -48,8 +47,7 @@ export default function ReturningHome({ todayRows }: { todayRows: { eaten_at: st
 
       {cards.length > 0 && (
         <div className="returning-home__one" aria-label="오늘의 한 가지">
-          {cards.includes('goal') && <GoalCoachingCard />}
-          {cards.includes('grammar') && <MealGrammarCard />}
+          <CoachCards />
         </div>
       )}
 

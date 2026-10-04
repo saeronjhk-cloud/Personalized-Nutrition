@@ -33,7 +33,10 @@ describe('식사 흐름 v2 — 배선', () => {
     expect(history).toContain("order={MEAL_FLOW_V2_ENABLED ? 'v2' : 'v1'}")
   })
   it('W3 저장 id 있을 때만 · 식후 사진은 suggest → confirm 2단계', () => {
-    expect(meal).toMatch(/MEAL_FLOW_V2_ENABLED && savedId\s*\n\s*\? <AfterSaveLeftover mealId=\{savedId\}/)
+    // 2026-10-04: 저장 직후 코칭 카드가 같은 자리에 함께 들어감(coach_card_placement_eval_v1 M2) — 저장 id 조건은 그대로
+    const after_ = meal.slice(meal.indexOf('afterSave={MEAL_FLOW_V2_ENABLED && savedId'))
+    expect(after_.length).toBeGreaterThan(0)
+    expect(after_.slice(0, after_.indexOf(': undefined}'))).toContain('<AfterSaveLeftover mealId={savedId}')
     // confirmPhotoAi 는 미리보기(photoPreview) 화면의 버튼에서만 호출
     expect(panel.match(/confirmPhotoAi\(/g)?.length).toBe(1)
     expect(panel).toContain('onClick={confirmPhoto}')
