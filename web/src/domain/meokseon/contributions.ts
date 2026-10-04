@@ -116,7 +116,8 @@ export function describeContributionNutrition(nutritionStatus: unknown): string 
   if (nutritionStatus === null || nutritionStatus === undefined) return null
   const v = typeof nutritionStatus === 'string' ? nutritionStatus.trim() : ''
   if (!v) return null
-  return v === 'ok' ? '영양정보까지 저장됨' : '영양정보는 저장되지 않음'
+  // ★ 세션75d — 제보는 승인 전까지 제품에 반영되지 않는다(세션66 C6). «저장됨»은 거짓이었다.
+  return v === 'ok' ? '영양정보 읽힘 · 확인 후 반영' : '영양정보는 확인하지 못함'
 }
 
 /** 목록에 그릴 이름. 없으면 바코드, 그것도 없으면 «이름을 지어내지 않고» 그렇게 말한다. */

@@ -104,3 +104,22 @@ describe('MyReports — 판정·문구를 화면에서 만들지 않는다', () 
     expect(code).not.toMatch(/deviceId|device_id/)
   })
 })
+
+describe('MyReports — 세션75d «내가 보낸 내용» 펼치기 (제이 실물 10-04)', () => {
+  const detail = readFileSync(resolve(HERE, '../../components/MyReportDetail.tsx'), 'utf8')
+  it('★ 카드를 누르면 제품 화면이 아니라 «내가 보낸 내용»을 펼친다 (승인 전 제품 화면은 비어 있다)', () => {
+    expect(code).toMatch(/setOpenId\(open \? null : it\.id\)/)
+    expect(code).toMatch(/<MyReportDetail id=\{it\.id\} \/>/)
+    expect(code).toMatch(/aria-expanded=\{open\}/)
+  })
+  it('제품 화면 길은 펼친 뒤 버튼으로 남는다 · 바코드 없으면 이유를 말한다', () => {
+    expect(code).toMatch(/navigate\(`\/scan\?barcode=\$\{encodeURIComponent\(barcode\)\}`\)/)
+    expect(code).toMatch(/CONTRIBUTION_NO_BARCODE_NOTE/)
+  })
+  it('상세는 서버 상세 API 와 domain 정본만 쓴다 · 401 을 실패와 섞지 않는다', () => {
+    expect(detail).toMatch(/getMyContribution\(id\)/)
+    expect(detail).toMatch(/MeokseonAuthError/)
+    expect(detail).toMatch(/DETAIL_PENDING_NOTE/)
+    expect(detail).toMatch(/DETAIL_LOAD_ERROR/)
+  })
+})

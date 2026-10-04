@@ -641,3 +641,18 @@ describe('★ A9 — IARC note 의 비대칭을 없앤다', () => {
     }
   })
 })
+
+// ★ 세션75e — 서버 검출기 v2 의 «용도명만 적힌» 첨가물(match_type: class_only) 표시 (제이 결정 10-04)
+import { toAdditiveView as _tav, CLASS_ONLY_NOTE as _CON } from '../additives'
+describe('class_only (용도명만 표기)', () => {
+  it('이름은 용도명 그대로 · 용도 칸은 «용도만 적혀 있음» (되풀이 금지)', () => {
+    const v = _tav({ name: '산도조절제', category: '산도조절제', match_type: 'class_only' }, 0)
+    expect(v.name).toBe('산도조절제')
+    expect(v.functionText).toBe(_CON)
+    expect(v.functionText).not.toBe('산도조절제')
+  })
+  it('일반 물질은 종전 그대로(category = 용도)', () => {
+    const v = _tav({ name: '아질산나트륨', category: '발색제', match_type: 'exact' }, 0)
+    expect(v.functionText).toBe('발색제')
+  })
+})

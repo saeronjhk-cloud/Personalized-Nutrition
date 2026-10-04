@@ -66,7 +66,8 @@ describe('AllergenCard 불완전성 고지', () => {
     it(`고지가 나온다 — ${f.name}`, () => {
       const html = renderToStaticMarkup(<AllergenCard result={f.input as MsProductResult | null} />)
       expect(html).toContain(NOTICE_MARK)
-      expect(html).toContain('아직 검증 중인 기능')
+      // ★ 세션75d — 「검증 중」 상자는 걷고(전체 고지로 이관) «포장 직접 확인» 한 줄만 모든 상태에 남긴다.
+      expect(html).not.toContain('아직 검증 중인 기능')
       expect(html).toContain('반드시 포장의 알레르기 표기를 직접 확인')
     })
   }

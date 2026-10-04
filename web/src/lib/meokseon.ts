@@ -1,4 +1,5 @@
 import { getDeviceId } from './deviceId'
+import { normalizeContributionDetail, type ContributionDetail } from '../domain/meokseon/contributionDetail'
 import { getMeokseonAccessToken } from './meokseonAuth'
 import { makeArchiveCopy } from './reportArchive'   // 세션72f — 관리자 검토용 축소본
 import { normalizeContributionPage, type MyContributionPage } from '../domain/meokseon/contributions'
@@ -814,4 +815,25 @@ export async function listMyContributions(params?: {
   }
 
   return normalizeContributionPage(json.data)
+}
+
+/**
+ * ★ 세션75d — 「내가 보낸 제보」 한 건의 내용 — GET /api/contributions/mine/:id (인증 필수).
+ *   승인 전 제보는 제품 화면에 없으므로 «내가 보낸 것»을 보는 유일한 길이다.
+ *   404(남의 것·없는 것) → null · 401 → MeokseonAuthError · 그 밖 실패 → 던진다(조용히 빈 화면 금지).
+ */
+export async function getMyContribution(id: number): Promise<ContributionDetail | null> {
+  if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
+  if (!Number.isSafeInteger(id) || id < 1) return null
+  const headers = await authHeaders()
+  const res = await fetch(`${BASE}/api/contributions/mine/${id}`, { headers })
+  let json: any = null
+  try { json = await res.json() } catch { /* 비-JSON */ }
+  throwIfUnauthorized(res, json)
+  if (res.status === 404) return null
+  if (!res.ok || !json || json.success !== true) {
+    const msg = (json && (json.message || json.error?.message)) || undefined
+    throw new MeokseonContributionsError(res.status, typeof msg === 'string' ? msg : undefined)
+  }
+  return normalizeContributionDetail(json.data)
 }

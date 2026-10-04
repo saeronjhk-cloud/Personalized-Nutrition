@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CoachAvatar from '../components/CoachAvatar'
+import MyReportDetail from '../components/MyReportDetail'
 import { listMyContributions, MeokseonAuthError, meokseonConfigured } from '../lib/meokseon'
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
@@ -51,6 +52,8 @@ export default function MyReports() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [items, setItems] = useState<MyContribution[]>([])
   const [total, setTotal] = useState(0)
+  // ★ 세션75d — 펼친 카드(내가 보낸 내용). 한 번에 하나.
+  const [openId, setOpenId] = useState<number | null>(null)
 
   const load = useCallback(async () => {
     setPhase('loading')
@@ -155,25 +158,27 @@ export default function MyReports() {
                     </div>
                   </>
                 )
+                // ★ 세션75d (제이 실물 10-04) — 카드를 누르면 제품 화면으로 가던 것을 «내가 보낸 내용» 펼치기로 바꿨다.
+                //   제보는 승인 전까지 제품에 반영되지 않아(세션66 C6) 제품 화면은 비어 있었다. 제품 화면 길은 버튼으로 남긴다.
+                const open = openId === it.id
                 return (
-                  <li key={it.id} style={{ border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)' }}>
-                    {barcode ? (
+                  <li key={it.id} style={{ border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2) var(--space-3)' }}>
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      onClick={() => setOpenId(open ? null : it.id)}
+                      style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}
+                    >{row}<div style={{ ...MUTED, marginTop: 'var(--space-1)', color: 'var(--accent)' }}>{open ? '접기 ▲' : '내가 보낸 내용 보기 ▼'}</div></button>
+                    {open && <MyReportDetail id={it.id} />}
+                    {open && (barcode ? (
                       // 바코드가 있으면 그 제품 화면으로. 앱의 제품 조회는 «바코드»가 키다.
-                      <button
-                        type="button"
+                      <button type="button" className="btn-secondary"
                         onClick={() => navigate(`/scan?barcode=${encodeURIComponent(barcode)}`)}
-                        style={{
-                          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-                          textAlign: 'left', padding: 'var(--space-2) var(--space-3)',
-                        }}
-                      >{row}</button>
+                        style={{ marginTop: 'var(--space-2)', fontSize: 13 }}>제품 화면 보기</button>
                     ) : (
                       // ⚠ 갈 곳이 없으면 «왜» 없는지 말한다. 눌러도 아무 일 없는 버튼을 두지 않는다.
-                      <div style={{ padding: 'var(--space-2) var(--space-3)' }}>
-                        {row}
-                        <div style={{ ...MUTED, marginTop: 'var(--space-1)' }}>{CONTRIBUTION_NO_BARCODE_NOTE}</div>
-                      </div>
-                    )}
+                      <div style={{ ...MUTED, marginTop: 'var(--space-1)' }}>{CONTRIBUTION_NO_BARCODE_NOTE}</div>
+                    ))}
                   </li>
                 )
               })}

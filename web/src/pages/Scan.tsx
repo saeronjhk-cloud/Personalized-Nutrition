@@ -47,6 +47,7 @@ import { CONTRIBUTIONS_TITLE } from '../domain/meokseon/contributions'
 import { reportMayUnconfirmed } from '../domain/meokseon/allergens'
 import { describeLabelDv, basisPhrase, LABEL_DV_DIFFER_NOTE } from '../domain/meokseon/labelDv'
 import { withIra } from '../domain/meokseon/koreanParticle'
+import { readingNotice } from '../domain/meokseon/readingNotice'
 import { nameSuggestOutcome, nameSuggestSource } from '../domain/meokseon/nameSuggestOutcome'
 
 // P1.5 먹선 후킹 — 무료 조회(카메라 바코드 스캔 주력 + 이름 검색 폴백).
@@ -1219,6 +1220,13 @@ export default function Scan() {
               </div>
             </div>
           </div>
+
+          {/* ★ 세션75d (제이 결정 10-04) — 판독 불완전 고지를 «한 곳»에. 알레르기 카드의 「검증 중」 상자를 대신한다.
+              문구 정본: domain/meokseon/readingNotice.ts (제보 제품 / 공공 자료 제품 두 갈래). */}
+          <p data-testid="reading-notice" data-kind={readingNotice(result.product).kind}
+             style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
+            {readingNotice(result.product).text}
+          </p>
 
           {/* ★ 알레르기는 안전 항목이라 첨가물·영양보다 «먼저» 온다.
               미수집일 때도 카드를 띄운다 — 침묵은 「없음」으로 읽힌다. */}

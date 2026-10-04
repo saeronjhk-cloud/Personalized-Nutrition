@@ -122,13 +122,16 @@ describe('describeContributionStatus — 없는 상태를 지어내지 않는다
 })
 
 describe('describeContributionNutrition', () => {
-  it("'ok' 만 «저장됨»이다", () => {
-    expect(describeContributionNutrition('ok')).toBe('영양정보까지 저장됨')
+  // ★ 세션75d (제이 실물 10-04) — 종전 「영양정보까지 저장됨」은 «제품에 저장됐다»로 읽혔지만
+  //   제보는 승인 전까지 제품에 반영되지 않는다(세션66 C6). 사실대로: 읽혔고, 확인 후 반영된다.
+  it("'ok' 만 «읽힘»이다 — 제품에 저장됐다고 말하지 않는다", () => {
+    expect(describeContributionNutrition('ok')).toBe('영양정보 읽힘 · 확인 후 반영')
+    expect(describeContributionNutrition('ok')).not.toContain('저장됨')
   })
 
   it('★ 모르는 값은 「저장 안 됨」쪽으로 읽는다 (Render Conservative)', () => {
-    expect(describeContributionNutrition('incomplete')).toBe('영양정보는 저장되지 않음')
-    expect(describeContributionNutrition('partial')).toBe('영양정보는 저장되지 않음')
+    expect(describeContributionNutrition('incomplete')).toBe('영양정보는 확인하지 못함')
+    expect(describeContributionNutrition('partial')).toBe('영양정보는 확인하지 못함')
   })
 
   it('★★ 서버가 말이 없으면 «아무 말도 하지 않는다»', () => {

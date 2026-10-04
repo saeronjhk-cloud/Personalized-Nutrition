@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { ALLERGEN_PACKAGE_LINE } from '../domain/meokseon/readingNotice'
 import { describeAllergens, describeAllergenProvenance, type AllergenView } from '../domain/meokseon/allergens'
 // ★ 세션61 U60-7 — `MsProductResult` 를 더는 import 하지 않는다.
 //   prop 타입을 `describeAllergens` 의 시그니처에서 유도하므로 필요 없어졌고,
@@ -103,24 +104,15 @@ function Body({ view }: { view: AllergenView }) {
  * 둘을 합치면, 알레르겐이 표시된 제품에서는 고지가 사라져 가장 위험한 경우에 침묵하게 된다.
  */
 function IncompleteNotice() {
+  // ★ 세션75d (제이 결정 2026-10-04) — 「아직 검증 중인 기능」 노란 상자를 걷었다.
+  //   판독 불완전 고지는 제품 화면 맨 위 «전체 고지» 하나가 맡는다(domain/meokseon/readingNotice.ts).
+  //   알레르기는 틀리면 생명과 직결되므로 «포장 직접 확인» 한 줄은 모든 상태에서 남긴다(아래 테스트가 지킨다).
   return (
     <p
       data-testid="allergen-incomplete-notice"
-      style={{
-        fontSize: 12,
-        lineHeight: 1.6,
-        color: '#8a5a00',
-        background: '#fff8e1',
-        border: '1px solid #ffe0a3',
-        borderRadius: 'var(--radius-sm)',
-        padding: 'var(--space-2) var(--space-2)',
-        marginTop: 'var(--space-3)',
-        marginBottom: 0,
-      }}
+      style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-secondary)', marginTop: 'var(--space-3)', marginBottom: 0 }}
     >
-      이 알레르기 표시는 <strong>아직 검증 중인 기능</strong>이에요.
-      표기가 있어도 <strong>목록에 나오지 않는 알레르겐이 있을 수 있어요.</strong>{' '}
-      알레르기가 있다면 <strong>반드시 포장의 알레르기 표기를 직접 확인</strong>해 주세요.
+      {ALLERGEN_PACKAGE_LINE}
     </p>
   )
 }

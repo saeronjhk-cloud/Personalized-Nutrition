@@ -227,6 +227,9 @@ export const UNKNOWN_COLOR_NOTE =
  * ⚠ 앱의 다른 문구는 해요체인데 이 문장만 합니다체다 —
  *   검토 결론에 실린 «원문 그대로»를 쓴 것이다. 문체 통일은 제이 판단 대상으로 남긴다.
  */
+/** ★ 세션75e — 라벨에 물질명 없이 용도명만 적힌 첨가물(예: «산도조절제», «향미증진제1»). */
+export const CLASS_ONLY_NOTE = '라벨에 용도만 적혀 있어요(구체적인 물질명 없음)'
+
 export const GRADE_HIDDEN_NOTICE =
   '첨가물 위험 등급은 현재 평가 체계를 재검토하고 있어 표시하지 않습니다. '
   + '아래는 제품 표시사항에서 인식한 첨가물과 일반적 용도입니다.'
@@ -585,7 +588,10 @@ export function toAdditiveView(row: Row, index: number): AdditiveView {
   const name = pickStr(row, ['name_ko', 'name', 'name_kr', 'name_en']) || '이름 미상'
   const rawColorStr = pickStr(row, ['mfras_grade', 'color', 'risk_color', 'v1_risk_color'])
   const color = normalizeColor(rawColorStr)
-  const fn = describeFunction(row)
+  // ★ 세션75e (제이 결정 10-04 «용도명 그대로 표시») — 서버 검출기 v2 가 물질명 없이 용도명만 적힌 표기를
+  //   `match_type: 'class_only'` 로 준다(예: «산도조절제»). 「일반적 용도: 산도조절제」로 되풀이하지 않고 사실대로 말한다.
+  const classOnly = str(row['match_type']) === 'class_only'
+  const fn = classOnly ? { text: CLASS_ONLY_NOTE, known: true, source: 'category' as const } : describeFunction(row)
   const id = str(row['additive_id']) || str(row['id'])
 
   return {
