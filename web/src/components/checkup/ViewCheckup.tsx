@@ -5,6 +5,7 @@ import {
   fetchRanges,
   fetchCheckupRecordDetail,
   fetchBiomarkerRules,
+  type BiomarkerRule,
 } from "../../lib/checkup_api";
 import { withEgfrInput } from "../../domain/checkup/egfr_input";
 import {
@@ -26,7 +27,7 @@ export default function ViewCheckup() {
   const [needsSex, setNeedsSex] = useState(false);
 
   const [recordedDate, setRecordedDate] = useState("");
-  const [names, setNames] = useState<Record<string, string>>({});
+  const [rules, setRules] = useState<BiomarkerRule[]>([]);
   const [egfrDerived, setEgfrDerived] = useState(false);
   const [results, setResults] = useState<CategoryResult[]>([]);
 
@@ -85,7 +86,7 @@ export default function ViewCheckup() {
       }
 
       setRecordedDate(detailResult.detail.recorded_date);
-      setNames(Object.fromEntries((rulesResult.data ?? []).map((r) => [r.biomarker_key, r.display_name_ko])));
+      setRules(rulesResult.data ?? []);
       // 신장 판정 = eGFR 중심(판정표 v1.2) — 결과지 eGFR 없으면 크레아티닌으로 추정(저장 안 함)
       const eg = withEgfrInput(input, { sex, birthYear: profile.profile?.birth_year ?? null, recordedDate: detailResult.detail.recorded_date });
       setEgfrDerived(eg.derived);
@@ -191,7 +192,7 @@ export default function ViewCheckup() {
                 eGFR 은 결과지 값이 없어 크레아티닌·성별·나이로 계산한 추정값이에요(CKD-EPI 2021).
               </p>
             )}
-            <RecommendationList results={results} names={names} />
+            <RecommendationList results={results} rules={rules} />
           </div>
         )}
 

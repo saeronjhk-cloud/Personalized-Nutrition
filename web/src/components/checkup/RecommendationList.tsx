@@ -1,47 +1,45 @@
 import { useMemo } from "react";
 import type { CategoryResult } from "../../domain/checkup/engine";
-import CategoryCard from "./CategoryCard";
+import {
+  buildResultView,
+  RESULT_DISCLAIMER,
+  RESULT_SOURCE,
+  type ItemStatus,
+  type RuleLite,
+  type ViewItem,
+} from "../../domain/checkup/result_view";
 
+/**
+ * 검진 결과 화면 (BiomarkerForm·ViewCheckup 공용)
+ * 영역별 묶음 · 범위 내는 접힘 · 면책 1회 — IP/integration/checkup_result_view_eval_v1.md
+ * 판정·묶음은 buildResultView() 한 곳(새 판정 0). 톤 문구는 결정 D2 대로 현행.
+ */
 interface Props {
   results: CategoryResult[];
-  names?: Record<string, string>;
+  rules: RuleLite[];
 }
 
-function isManagementRecommended(result: CategoryResult): boolean {
-  if (result.level === "unknown" || result.level === "normal") return false;
-  return true;
-}
+const COLOR: Record<ItemStatus, string> = {
+  referral: "var(--danger)",
+  out: "#b45309",
+  in: "#047857",
+  unknown: "var(--text-muted)",
+};
 
-function groupByFunctionalNeeds(results: CategoryResult[]): {
-  groups: [string, CategoryResult[]][];
-  unknown: CategoryResult[];
-} {
-  const unknown = results.filter((result) => result.level === "unknown");
-  const known = results.filter((result) => result.level !== "unknown");
-  const map = new Map<string, CategoryResult[]>();
-
-  for (const result of known) {
-    const needs = result.functional_needs.length > 0 ? result.functional_needs : ["기타"];
-    for (const need of needs) {
-      const list = map.get(need) ?? [];
-      if (!list.some((item) => item.biomarker_key === result.biomarker_key)) {
-        list.push(result);
-      }
-      map.set(need, list);
-    }
-  }
-
-  const groups = Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b, "ko"));
-  return { groups, unknown };
-}
-
-export default function RecommendationList({ results, names }: Props) {
-  const { groups, unknown } = useMemo(() => groupByFunctionalNeeds(results), [results]);
-
-  const managementCount = useMemo(
-    () => results.filter(isManagementRecommended).length,
-    [results],
+function Item({ it }: { it: ViewItem }) {
+  return (
+    <li style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)", fontSize: 14, lineHeight: 1.6, padding: "6px 0", borderBottom: "1px solid var(--border-light)" }}>
+      <span style={{ color: "var(--text)" }}>
+        {it.name} <strong>{it.value}</strong>
+        {it.unit && <span style={{ color: "var(--text-muted)", fontSize: 12 }}> {it.unit}</span>}
+      </span>
+      <span style={{ color: COLOR[it.status], fontWeight: 600, whiteSpace: "nowrap" }}>{it.label}</span>
+    </li>
   );
+}
+
+export default function RecommendationList({ results, rules }: Props) {
+  const view = useMemo(() => buildResultView(results, rules), [results, rules]);
 
   if (results.length === 0) {
     return (
@@ -51,19 +49,53 @@ export default function RecommendationList({ results, names }: Props) {
     );
   }
 
+  const s = view.summary;
   return (
-    <section style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
-      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--text)" }}>
-        전체 {results.length}개 분석, 관리 권장 {managementCount}개
+    <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }} data-testid="checkup-result-view">
+      <p style={{ margin: 0, fontSize: 14, color: "var(--text)" }}>
+        <strong>{s.referral + s.out + s.in + s.unknown}개 항목</strong>
+        {" · "}
+        {s.referral > 0 && <span style={{ color: COLOR.referral }}>의료진 상담 권장 {s.referral} · </span>}
+        <span style={{ color: COLOR.out }}>참고범위 밖 {s.out}</span>
+        {" · "}
+        <span style={{ color: COLOR.in }}>참고범위 내 {s.in}</span>
+        {s.unknown > 0 && <span style={{ color: COLOR.unknown }}> · 판정 기준 없음 {s.unknown}</span>}
       </p>
 
-      {groups.map(([categoryName, categoryResults]) => (
-        <CategoryCard key={categoryName} categoryName={categoryName} results={categoryResults} names={names} />
+      {view.sections.map((sec) => (
+        <article key={sec.area} className="card" style={{ padding: "var(--space-4) var(--space-5)", borderLeft: `4px solid ${COLOR[sec.status]}` }}>
+          <h4 style={{ margin: "0 0 var(--space-2)", fontSize: 16, fontWeight: 700, color: "var(--text)" }}>{sec.area}</h4>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {sec.items.map((it) => <Item key={it.key} it={it} />)}
+          </ul>
+          {sec.toneBody && (
+            <p style={{ margin: "var(--space-3) 0 0", fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{sec.toneBody}</p>
+          )}
+        </article>
       ))}
 
-      {unknown.length > 0 && (
-        <CategoryCard categoryName="입력 부족" results={unknown} names={names} />
+      {view.inRange.length > 0 && (
+        <details className="card" style={{ padding: "var(--space-3) var(--space-5)", borderLeft: `4px solid ${COLOR.in}` }} open={view.sections.length === 0}>
+          <summary style={{ cursor: "pointer", fontSize: 15, fontWeight: 600, color: "var(--text)" }}>참고범위 내 {view.inRange.length}개</summary>
+          <ul style={{ listStyle: "none", margin: "var(--space-2) 0 0", padding: 0 }}>
+            {view.inRange.map((it) => <Item key={it.key} it={it} />)}
+          </ul>
+        </details>
       )}
+
+      {view.unknown.length > 0 && (
+        <article className="card" style={{ padding: "var(--space-3) var(--space-5)", borderLeft: `4px solid ${COLOR.unknown}` }}>
+          <h4 style={{ margin: "0 0 var(--space-2)", fontSize: 15, fontWeight: 600 }}>판정 기준 없음</h4>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            {view.unknown.map((it) => <Item key={it.key} it={it} />)}
+          </ul>
+        </article>
+      )}
+
+      <footer style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }} data-testid="checkup-result-disclaimer">
+        <p style={{ margin: 0 }}>{RESULT_DISCLAIMER}</p>
+        <p style={{ margin: "var(--space-1) 0 0" }}>{RESULT_SOURCE}</p>
+      </footer>
     </section>
   );
 }

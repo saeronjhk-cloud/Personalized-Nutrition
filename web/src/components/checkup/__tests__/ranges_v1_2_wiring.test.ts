@@ -20,9 +20,9 @@ describe("판정표 v1.2 배선", () => {
     expect(form).toContain('data-testid="egfr-derived-note"');
     expect(view).toContain('data-testid="egfr-derived-note"');
   });
-  it("W2 결과 카드 한글 이름", () => {
+  it("W2 결과 화면 한글 이름(rules 전달 — checkup_result_view_eval_v1 로 대체)", () => {
     expect(card).toContain("names?.[result.biomarker_key] ?? result.biomarker_key");
-    expect(form).toContain("names={Object.fromEntries(rules.map(");
-    expect(view).toContain("names={names}");
+    expect(form).toContain("<RecommendationList results={results} rules={rules} />");
+    expect(view).toContain("<RecommendationList results={results} rules={rules} />");
   });
 });

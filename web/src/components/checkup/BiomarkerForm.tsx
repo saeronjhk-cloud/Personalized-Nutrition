@@ -595,7 +595,7 @@ export default function BiomarkerForm() {
               eGFR 은 결과지 값이 없어 크레아티닌·성별·나이로 계산한 추정값이에요(CKD-EPI 2021). 저장되지 않아요.
             </p>
           )}
-          <RecommendationList results={results} names={Object.fromEntries(rules.map((r) => [r.biomarker_key, r.display_name_ko]))} />
+          <RecommendationList results={results} rules={rules} />
 
           {saved && (
             <p style={{ marginTop: 'var(--space-4)', fontSize: 14 }}>
