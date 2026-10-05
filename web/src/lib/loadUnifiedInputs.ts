@@ -12,6 +12,7 @@ import { fetchSurveyResponses, fetchSurveyResponseDetail } from "./survey_api";
 import { CHECKUP_ENABLED, MEAL_ENABLED } from "./flags";
 import { loadRecentDietSummary } from "./dietSummary";
 import { loadEffectiveGoals } from "./userGoals";
+import { withEgfrInput } from "../domain/checkup/egfr_input";
 import { runEngine, type Range, type CategoryResult, type BiomarkerInput } from "../domain/checkup/engine";
 import { planInputLoads, type LoadedInputs } from "../domain/unified/compose";
 import type { DietDailyAvg } from "../domain/unified/diet_adapter";
@@ -42,7 +43,9 @@ export async function loadUnifiedInputs(opts: { skipLatestSurvey?: boolean } = {
     if (!detail.detail || rangeRes.error) return null;
     const input: BiomarkerInput = {};
     for (const [key, v] of Object.entries(detail.detail.values)) input[key] = v.value;
-    return runEngine(input, rangeRes.ranges as Range[]);
+    // 신장 판정 = eGFR 중심(판정표 v1.2) — 결과지 eGFR 없으면 크레아티닌으로 추정
+    const eg = withEgfrInput(input, { sex: profile.profile?.sex ?? null, birthYear: profile.profile?.birth_year ?? null, recordedDate: detail.detail.recorded_date });
+    return runEngine(eg.input, rangeRes.ranges as Range[]);
   };
 
   // 최신 설문 → answers

@@ -26,6 +26,7 @@ import {
   CHANGE_COLORS,
   type HistoryPoint,
 } from "../../domain/checkup/timeseries";
+import { withEgfrInput } from "../../domain/checkup/egfr_input";
 import { implausibleValues, implausibleMessage, sameDateRecord, sameDateMessage } from "../../domain/checkup/input_guard";
 import RecommendationList from "./RecommendationList";
 import TimeseriesChart from "./TimeseriesChart";
@@ -72,6 +73,7 @@ export default function BiomarkerForm() {
   // 입력 가드 — IP/integration/checkup_input_guard_eval_v1.md
   const [inputWarnings, setInputWarnings] = useState<string[]>([]);
   const [dupDate, setDupDate] = useState<string | null>(null);
+  const [egfrDerived, setEgfrDerived] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,8 +232,11 @@ export default function BiomarkerForm() {
       return;
     }
 
-    const input = buildBiomarkerInput();
-    const engineResults = runEngine(input, ranges as Range[]);
+    // 신장 판정 = eGFR 중심(판정표 v1.2) — 결과지 eGFR 없으면 크레아티닌으로 추정(분석에만, 저장 안 함)
+    const by = parseInt(birthYear, 10);
+    const eg = withEgfrInput(buildBiomarkerInput(), { sex: activeSex, birthYear: Number.isNaN(by) ? null : by, recordedDate });
+    setEgfrDerived(eg.derived);
+    const engineResults = runEngine(eg.input, ranges as Range[]);
     setRanges(ranges as Range[]);
     setResults(engineResults);
     console.log("[BiomarkerForm] engine results:", engineResults);
@@ -585,7 +590,12 @@ export default function BiomarkerForm() {
           <h3 className="section-title" style={{ fontSize: 16, marginBottom: 'var(--space-3)' }}>
             분석 결과
           </h3>
-          <RecommendationList results={results} />
+          {egfrDerived && (
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 var(--space-2)" }} data-testid="egfr-derived-note">
+              eGFR 은 결과지 값이 없어 크레아티닌·성별·나이로 계산한 추정값이에요(CKD-EPI 2021). 저장되지 않아요.
+            </p>
+          )}
+          <RecommendationList results={results} names={Object.fromEntries(rules.map((r) => [r.biomarker_key, r.display_name_ko]))} />
 
           {saved && (
             <p style={{ marginTop: 'var(--space-4)', fontSize: 14 }}>

@@ -55,9 +55,11 @@ function formatTitle(categoryName: string): string {
 interface Props {
   categoryName: string;
   results: CategoryResult[];
+  /** biomarker_key → 한글 이름(없으면 키 그대로) — checkup_ranges_v1_2_eval W3 */
+  names?: Record<string, string>;
 }
 
-export default function CategoryCard({ categoryName, results }: Props) {
+export default function CategoryCard({ categoryName, results, names }: Props) {
   const accentLevel = pickMostSevereLevel(results);
   const accentColor = levelAccentColor(accentLevel);
   const tone = pickMostSevereTone(results);
@@ -96,7 +98,7 @@ export default function CategoryCard({ categoryName, results }: Props) {
                 lineHeight: 1.5,
               }}
             >
-              <strong>{result.biomarker_key}</strong>
+              <strong>{names?.[result.biomarker_key] ?? result.biomarker_key}</strong>
               {" — "}
               {result.value}
               {" — "}

@@ -4,6 +4,7 @@ import CategoryCard from "./CategoryCard";
 
 interface Props {
   results: CategoryResult[];
+  names?: Record<string, string>;
 }
 
 function isManagementRecommended(result: CategoryResult): boolean {
@@ -34,7 +35,7 @@ function groupByFunctionalNeeds(results: CategoryResult[]): {
   return { groups, unknown };
 }
 
-export default function RecommendationList({ results }: Props) {
+export default function RecommendationList({ results, names }: Props) {
   const { groups, unknown } = useMemo(() => groupByFunctionalNeeds(results), [results]);
 
   const managementCount = useMemo(
@@ -57,11 +58,11 @@ export default function RecommendationList({ results }: Props) {
       </p>
 
       {groups.map(([categoryName, categoryResults]) => (
-        <CategoryCard key={categoryName} categoryName={categoryName} results={categoryResults} />
+        <CategoryCard key={categoryName} categoryName={categoryName} results={categoryResults} names={names} />
       ))}
 
       {unknown.length > 0 && (
-        <CategoryCard categoryName="입력 부족" results={unknown} />
+        <CategoryCard categoryName="입력 부족" results={unknown} names={names} />
       )}
     </section>
   );

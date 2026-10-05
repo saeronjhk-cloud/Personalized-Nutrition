@@ -4,7 +4,9 @@ import {
   fetchMyProfile,
   fetchRanges,
   fetchCheckupRecordDetail,
+  fetchBiomarkerRules,
 } from "../../lib/checkup_api";
+import { withEgfrInput } from "../../domain/checkup/egfr_input";
 import {
   runEngine,
   type BiomarkerInput,
@@ -24,6 +26,8 @@ export default function ViewCheckup() {
   const [needsSex, setNeedsSex] = useState(false);
 
   const [recordedDate, setRecordedDate] = useState("");
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [egfrDerived, setEgfrDerived] = useState(false);
   const [results, setResults] = useState<CategoryResult[]>([]);
 
   useEffect(() => {
@@ -52,9 +56,10 @@ export default function ViewCheckup() {
         return;
       }
 
-      const [detailResult, rangeResult] = await Promise.all([
+      const [detailResult, rangeResult, rulesResult] = await Promise.all([
         fetchCheckupRecordDetail(recordId, profile.userId),
         fetchRanges(sex),
+        fetchBiomarkerRules(),
       ]);
       if (cancelled) return;
 
@@ -80,7 +85,11 @@ export default function ViewCheckup() {
       }
 
       setRecordedDate(detailResult.detail.recorded_date);
-      setResults(runEngine(input, rangeResult.ranges as Range[]));
+      setNames(Object.fromEntries((rulesResult.data ?? []).map((r) => [r.biomarker_key, r.display_name_ko])));
+      // 신장 판정 = eGFR 중심(판정표 v1.2) — 결과지 eGFR 없으면 크레아티닌으로 추정(저장 안 함)
+      const eg = withEgfrInput(input, { sex, birthYear: profile.profile?.birth_year ?? null, recordedDate: detailResult.detail.recorded_date });
+      setEgfrDerived(eg.derived);
+      setResults(runEngine(eg.input, rangeResult.ranges as Range[]));
       setLoading(false);
     }
     load();
@@ -177,7 +186,12 @@ export default function ViewCheckup() {
                 </p>
               </div>
             )}
-            <RecommendationList results={results} />
+            {egfrDerived && (
+              <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 var(--space-2)" }} data-testid="egfr-derived-note">
+                eGFR 은 결과지 값이 없어 크레아티닌·성별·나이로 계산한 추정값이에요(CKD-EPI 2021).
+              </p>
+            )}
+            <RecommendationList results={results} names={names} />
           </div>
         )}
 

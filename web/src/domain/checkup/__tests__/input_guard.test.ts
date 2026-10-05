@@ -2,12 +2,12 @@
 import { describe, it, expect } from "vitest";
 import { PLAUSIBLE_BOUNDS, implausibleValues, implausibleMessage, sameDateRecord, sameDateMessage } from "../input_guard";
 import { rangesFromMap, type BiomarkerMap } from "../range_gaps";
-import v11json from "../biomarker_map_v1_1.json";
+import v11json from "../biomarker_map_v1_2.json";
 
 const v11 = v11json as unknown as BiomarkerMap;
 
 describe("검진 입력 가드", () => {
-  it("P01 15항목 1:1", () => {
+  it("P01 판정표 v1.2 18항목 1:1", () => {
     expect(Object.keys(PLAUSIBLE_BOUNDS).sort()).toEqual(Object.keys(v11.biomarkers).sort());
   });
   it("P02 BMI 83 → 체중 힌트", () => {
@@ -49,7 +49,7 @@ describe("검진 입력 가드", () => {
     }
   });
   it("P08 모르는 키 통과", () => {
-    expect(implausibleValues({ waist: 999 })).toEqual([]);
+    expect(implausibleValues({ ferritin: 99999 })).toEqual([]);
   });
   it("P09 문구 고정", () => {
     expect(implausibleMessage(implausibleValues({ BMI: 83 })[0], "체질량지수", "kg/m²"))
