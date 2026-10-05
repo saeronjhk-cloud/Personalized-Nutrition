@@ -9,6 +9,7 @@ import PageMeta from '../components/PageMeta'
 import NewBlogPopup from '../components/NewBlogPopup'
 import StartChooser from '../components/home/StartChooser'
 import ReturningHome from '../components/home/ReturningHome'
+import MealDemo from '../components/home/MealDemo'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { useHomeData } from '../lib/homeData'
 import { track } from '../lib/events'
@@ -120,6 +121,9 @@ function VisitorHome({ mode }: { mode: HomeMode }) {
         )}
         <div className="hero-trust-line">식품영양학 박사가 설계한 알고리즘 · 김재환 대표 · 서형주 자문 · 장은재 자문</div>
       </section>
+
+      {/* ━━ 10초 밥상 데모 (P1 · home_demo_eval_v1) ━━ */}
+      {MEAL_ENABLED && <MealDemo />}
 
       <Journey />
       <Experts />
