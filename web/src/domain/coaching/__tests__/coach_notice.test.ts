@@ -78,7 +78,7 @@ describe("코칭 안내 N", () => {
     expect(n?.unknown_names).toEqual(["플랫화이트"]);
   });
   it("N16 문구 고정·금지어 0", () => {
-    expect(NOTICE_TEXT.SNACK_ONLY).toBe("간식은 코칭 대상이 아니에요. 아침·점심·저녁 끼니를 기록하면 코칭이 시작돼요.");
+    expect(NOTICE_TEXT.SNACK_ONLY).toBe("간식은 끼니 코칭에 들어가지 않아요. 아침·점심·저녁 끼니를 기록하면 코칭이 시작돼요.");
     expect(NOTICE_TEXT.NO_STAPLE).toBe("밥이나 면이 있는 끼니를 기록하면 반찬 코칭이 시작돼요.");
     expect(NOTICE_TEXT.UNKNOWN).toBe("아직 알아보지 못한 음식이 있어 오늘 끼니를 판정하지 못했어요: {names}. 음식 이름을 고치면 코칭이 다시 계산돼요.");
     for (const t of Object.values(NOTICE_TEXT)) for (const w of ["kcal", "점수", "감량", "GLP-1", "보장", "최초", "유일", "서박사"]) expect(t).not.toContain(w);

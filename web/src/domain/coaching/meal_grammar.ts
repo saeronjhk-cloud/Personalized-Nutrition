@@ -253,7 +253,7 @@ export interface CoachNotice {
 export const NOTICE_TEXT: Record<CoachNoticeReason, string> = {
   UNKNOWN: "아직 알아보지 못한 음식이 있어 오늘 끼니를 판정하지 못했어요: {names}. 음식 이름을 고치면 코칭이 다시 계산돼요.",
   NO_STAPLE: "밥이나 면이 있는 끼니를 기록하면 반찬 코칭이 시작돼요.",
-  SNACK_ONLY: "간식은 코칭 대상이 아니에요. 아침·점심·저녁 끼니를 기록하면 코칭이 시작돼요.",
+  SNACK_ONLY: "간식은 끼니 코칭에 들어가지 않아요. 아침·점심·저녁 끼니를 기록하면 코칭이 시작돼요.",
 };
 
 const NOTICE_MAX_NAMES = 3;
