@@ -658,6 +658,8 @@ export async function confirmPhotoReport(params: {
   analysisToken: string
   productName: string
   barcode?: string | null
+  /** ★ 세션75f — 관리자 확인 결과 메일 신청(옵트인). true 일 때만 보낸다. */
+  notifyResult?: boolean
 }): Promise<MsPhotoConfirmResult> {
   if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
 
@@ -675,6 +677,7 @@ export async function confirmPhotoReport(params: {
     device_id: getDeviceId(),
   }
   if (params.barcode) body.barcode = params.barcode
+  if (params.notifyResult === true) body.notify_result = true   // ★ 세션75f — 옵트인일 때만
 
   // ★ 세션64c — 저장 호출도 인증 필수다. 토큰이 없으면 여기서 던진다.
   const auth = await authHeaders()

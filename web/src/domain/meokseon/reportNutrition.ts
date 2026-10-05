@@ -281,7 +281,8 @@ export function buildReportNutrition(input: ReportNutritionInput): ReportNutriti
  *   ★ 엔진이 이상치 경고(`traffic_light.sanity_warnings`)를 냈으면 «색»은 접는다(숫자는 고지와 함께 보임).
  */
 export const PREVIEW_DISCLAIMER =
-  '사진에서 읽은 내용이라 완전하지 않을 수 있어요. 보내 주시면 관리자가 확인한 뒤 확정된 정보를 알려드릴게요.'
+  // ★ 세션75f — «알려드릴게요» 약속 제거(메일은 신청자에게만 · 아래 체크박스).
+  '사진에서 읽은 내용이라 완전하지 않을 수 있어요. 보내 주시면 관리자가 확인한 뒤 확정된 정보로 반영해요.'
 
 export const PREVIEW_SANITY_NOTE =
   '일부 수치가 라벨 기준과 맞지 않아 보여 신호등은 표시하지 않았어요. 관리자가 확인할게요.'

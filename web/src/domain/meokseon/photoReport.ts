@@ -281,7 +281,13 @@ export type NutritionRejectCode =
   | 'PUBLIC_DATA_PROTECTED'
 
 /* ── 저장됐다는 말 (기존 문구를 그대로 옮겨 왔다 — 여기가 정본이다) ── */
-export const REPORT_SAVED_NEW = '제보 감사합니다! 검토 후 등록되면 알려드릴게요.'
+// ★ 세션75f — «알려드릴게요»는 메일 신청자에게만 지킬 수 있는 약속이라 기본 문구에서 뺐다(신청자는 NOTIFY_RESULT_SENT_NOTE 를 덧붙인다).
+export const REPORT_SAVED_NEW = '제보 감사합니다! 관리자 확인 후 등록돼요.'
+
+/** ★ 세션75f — 관리자 확인 결과 메일(옵트인 · 제이 결정 10-04). 기본 꺼짐. 서버 contributorNotify 가 신청자에게만 1회 발송. */
+export const NOTIFY_RESULT_LABEL = '관리자 확인 결과를 로그인한 메일로 받기'
+export const NOTIFY_RESULT_NOTE = '확인이 끝나면 이 제보에 대해 한 번만 보내 드려요.'
+export const NOTIFY_RESULT_SENT_NOTE = '확인이 끝나면 결과를 메일로 보내 드릴게요.'
 export const REPORT_SAVED_EXISTING = '보내주셔서 감사합니다! 검토 후 이 제품 정보에 반영해 드릴게요.'
 
 /**

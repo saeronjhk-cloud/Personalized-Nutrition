@@ -33,6 +33,7 @@ import {
   seedProductNameForExisting, canSubmitReport, checkProductName, classifyConfirmFailure, describeReadback,
   classifyPhotoReportOutcome, NUTRITION_RETAKE_CTA,
   CONFIRM_FALLBACK_MESSAGE,
+  NOTIFY_RESULT_LABEL, NOTIFY_RESULT_NOTE, NOTIFY_RESULT_SENT_NOTE,   // 세션75f
 } from '../domain/meokseon/photoReport'
 import {
   REPORT_LOGIN_HEADLINE, REPORT_LOGIN_WHY, REPORT_LOGIN_SCAN_OK, REPORT_LOGIN_CTA,
@@ -147,6 +148,8 @@ export default function Scan() {
   // ★ 정본 제품명. OCR 값은 여기 «초기값»으로만 들어온다(제이 결정 ①).
   const [productName, setProductName] = useState('')
   const [reportBusy, setReportBusy] = useState<'analyze' | 'confirm' | null>(null)
+  // ★ 세션75f — 관리자 확인 결과 메일 신청(옵트인 · 기본 꺼짐)
+  const [notifyResult, setNotifyResult] = useState(false)
   const [reportError, setReportError] = useState<string | null>(null)
   // 2단계 성공 후에만 채워진다. **서버가 실제로 받은 뒤에만** true 가 된다.
   //   2026-08-06 이전에는 버튼이 로컬 상태만 바꾸고 「제보 감사합니다」를 띄웠다(거짓 확인).
@@ -286,7 +289,7 @@ export default function Scan() {
     setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null)
     setReportOpen(false); setLabelImage(null); setNutritionImage(null)
     setReportBusy(null); setReportError(null)
-    setAnalysis(null); setProductName(''); setConfirmed(null)
+    setAnalysis(null); setProductName(''); setConfirmed(null); setNotifyResult(false)   // 세션75f — 다음 제보는 다시 «꺼짐»에서
     setLoginGateOpen(false); setAuthBlocked(false)
   }
 
@@ -423,6 +426,7 @@ export default function Scan() {
         analysisToken: analysis.analysisToken,
         productName: name.value,
         barcode: reportBarcode,
+        notifyResult,
       })
       setConfirmed({
         saved: r.saved,
@@ -802,6 +806,10 @@ export default function Scan() {
               {outcome.headline}
             </p>
           </div>
+          {/* ★ 세션75f — 메일을 신청하고 «저장됐을» 때만 약속한다(저장 안 된 제보는 결정 대상이 아니라 메일도 없다). */}
+          {notifyResult && outcome.kind !== 'rejected' && (
+            <p data-testid="notify-result-sent" style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-2)' }}>{NOTIFY_RESULT_SENT_NOTE}</p>
+          )}
           {/* ★★★ 부분 저장 — 「저장됐다」 바로 «아래»에서 「영양은 못 읽었다」를 말한다.
               둘 중 하나만 말하면 거짓이다. 이 블록을 지우면 사용자는 영양이 빠진 걸 모른다.
               ⚠ 조건을 `outcome.nutritionNote` 로 둔다 — 사유 코드를 몰라도(=UNKNOWN) 뜬다.
@@ -991,6 +999,14 @@ export default function Scan() {
           </div>
         )}
 
+        {/* ★ 세션75f — 관리자 확인 결과 메일(옵트인). 읽어본 뒤 «보내기» 앞에만 보인다. 문구 정본: photoReport.ts */}
+        {analysis && !confirmed && (
+          <label data-testid="notify-result" style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-start', fontSize: 13, color: 'var(--text-secondary)', margin: 'var(--space-2) 0' }}>
+            <input type="checkbox" checked={notifyResult} onChange={(e) => setNotifyResult(e.target.checked)} style={{ marginTop: 3 }} />
+            <span>{NOTIFY_RESULT_LABEL}<br /><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{NOTIFY_RESULT_NOTE}</span></span>
+          </label>
+        )}
+
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           {!analysis ? (
             <button
@@ -1161,7 +1177,7 @@ export default function Scan() {
                 안내문이 실제 입력과 어긋나 있었다. 실제로 받는 두 장에 맞춰 고친다.
                 (앞면 슬롯을 새로 만들라는 뜻이 아니다 — 문구를 사실에 맞춘 것이다.) */}
             바코드 <strong>{notFound}</strong> 는 아직 데이터베이스에 없어요. 원재료·알레르기 표기와 영양성분표를 찍어 보내주시면
-            검토 후 등록해 드릴게요. (등록되면 알려드릴게요.)
+            검토 후 등록해 드릴게요. (원하시면 확인 결과를 메일로 받아 보실 수 있어요.)
           </p>
           {!reportOpen && !confirmed ? (
             <>

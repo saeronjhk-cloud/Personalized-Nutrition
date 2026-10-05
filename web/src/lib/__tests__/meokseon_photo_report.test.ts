@@ -382,6 +382,20 @@ describe('confirmPhotoReport — 요청 형태 (JSON, 서버 계약)', () => {
   })
 })
 
+describe('★ 세션75f — 결과 메일 신청(옵트인)', () => {
+  it('notifyResult=true 일 때만 notify_result:true 를 싣는다 · 기본은 싣지 않는다', async () => {
+    const { confirmPhotoReport } = await loadModule()
+    fetchMock.mockResolvedValue(okResponse({ save_result: { id: 9 } }))
+    await confirmPhotoReport({ analysisToken: 't1', productName: '신라면', notifyResult: true })
+    await confirmPhotoReport({ analysisToken: 't2', productName: '신라면' })
+    await confirmPhotoReport({ analysisToken: 't3', productName: '신라면', notifyResult: false })
+    const bodies = fetchMock.mock.calls.map(([, init]) => JSON.parse(init.body as string))
+    expect(bodies[0].notify_result).toBe(true)
+    expect('notify_result' in bodies[1]).toBe(false)
+    expect('notify_result' in bodies[2]).toBe(false)
+  })
+})
+
 describe('★ §3-b. 저장을 «했다»고 함부로 말하지 않는다', () => {
   it('save_result 가 없으면 saved=false 다 — 분석만 된 것을 「저장됐다」로 읽지 않는다', async () => {
     const { confirmPhotoReport } = await loadModule()
