@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { track } from '../lib/events'
+import { PHOTO_GUIDE_TIPS, referenceNote } from '../lib/photoGuide'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import {
@@ -312,6 +313,11 @@ export default function Meal() {
           <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)', lineHeight: 1.6 }}>
             먹은 음식을 찍으면 칼로리·영양을 추정해 드려요. (사진 기준 추정치예요.)
           </p>
+          {/* 기준 도구 촬영 안내 — 엔진 ref_detection 이 크기 보정에 쓴다(meal_photo_reference_guide_v1 G1) */}
+          {!previewUrl && PHOTO_GUIDE_TIPS.map((t) => (
+            <p key={t} style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-1)', lineHeight: 1.5 }}>{t}</p>
+          ))}
+          {!previewUrl && <div style={{ height: 'var(--space-2)' }} />}
 
           {previewUrl && (
             <img src={previewUrl} alt="선택한 식사 사진" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 'var(--radius)', marginBottom: 'var(--space-3)' }} />
@@ -361,6 +367,10 @@ export default function Meal() {
 
       {result && (
         <>
+          {/* 기준 도구 검출 피드백 — 엔진 값 그대로, 미검출이면 표시 없음(G2) */}
+          {referenceNote(result.reference) && (
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-2)' }}>{referenceNote(result.reference)}</div>
+          )}
           <MealResult
             result={result} previewUrl={previewUrl} slot={slot} onSlot={setSlot}
             saved={saved} busy={busy} onSave={onSave} onReset={reset}
