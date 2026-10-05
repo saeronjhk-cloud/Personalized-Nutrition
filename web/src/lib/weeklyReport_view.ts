@@ -31,6 +31,15 @@ export interface NextAction {
 }
 export interface P2Teaser { show: boolean; message?: string | null }
 export interface Coverage { days_logged: number; meals: number }
+/** 룰 v2(엔진 weekly.v3) — 끼니를 빠뜨린 날 보완. 설계 IP/integration/weekly_missed_meal_design_v1.md */
+export interface Completeness {
+  complete_days: number
+  incomplete_days: number
+  /** 충분한 날이 없어 부족 판정을 보류한 영양소 */
+  withheld: Nutrient[]
+  /** 기록이 모자란 날을 빼고 다시 판정한 영양소 */
+  rechecked: Nutrient[]
+}
 
 export interface WeeklyReportData {
   top_food_groups: FoodGroup[]
@@ -40,6 +49,7 @@ export interface WeeklyReportData {
   coverage: Coverage
   /** 누적 v1(엔진 weekly.v2). 옛 엔진이면 없음 → 누적 섹션 숨김. 뷰는 weeklyAccumulation_view.ts */
   accumulation?: Accumulation | null
+  completeness?: Completeness | null
   calc_version?: string
 }
 export interface WeeklyReport {
@@ -138,6 +148,24 @@ export interface WeeklyRenderModel {
   flagCount: number         // 영양 flags 개수
   showFlagsSuccess: boolean // flags 0 → "균형이 잘 잡힌" 배너
   showP2: boolean           // p2 티저(show && message)
+  /** 부족 판정 보류 안내(보류 없으면 null) — 엔진 completeness.withheld */
+  withheldNote: string | null
+  /** 재확인 각주(재확인 없으면 null) — 엔진 completeness.rechecked·incomplete_days */
+  recheckNote: string | null
+}
+
+/** «열량·단백질» 처럼 우선순위 순으로 잇는다. */
+function joinNutrients(ns: Nutrient[]): string {
+  return ns.map((n) => NUTRIENT_LABEL[n]).join('·')
+}
+export function withheldNote(c: Completeness | null | undefined): string | null {
+  const w = c?.withheld ?? []
+  if (w.length === 0) return null
+  return `${joinNutrients(w)} 부족 여부는 판단하지 않았어요. 하루 식사를 모두 기록한 날이 없어요.`
+}
+export function recheckNote(c: Completeness | null | undefined): string | null {
+  if (!c || (c.rechecked ?? []).length === 0 || !(c.incomplete_days > 0)) return null
+  return `기록이 적은 날 ${c.incomplete_days}일은 부족 판정에서 뺐어요.`
 }
 export interface WeeklyRenderState {
   loading: boolean
@@ -149,6 +177,7 @@ export function weeklyRenderModel(s: WeeklyRenderState): WeeklyRenderModel {
   const base: WeeklyRenderModel = {
     mode: 'empty', errorRetryable: false, cached: false,
     showFoodGroups: false, flagCount: 0, showFlagsSuccess: false, showP2: false,
+    withheldNote: null, recheckNote: null,
   }
   if (s.loading) return { ...base, mode: 'loading' }
   if (s.error) return { ...base, mode: 'error', errorRetryable: !!s.error.retryable }
@@ -163,7 +192,10 @@ export function weeklyRenderModel(s: WeeklyRenderState): WeeklyRenderModel {
     cached,
     showFoodGroups: (rep.top_food_groups?.length ?? 0) > 0,
     flagCount: flags.length,
-    showFlagsSuccess: flags.length === 0,
+    // 보류가 있으면 «균형이 잘 잡힌» 이라고 말하지 않는다(판단하지 않은 것이지 괜찮은 것이 아님)
+    showFlagsSuccess: flags.length === 0 && (rep.completeness?.withheld ?? []).length === 0,
+    withheldNote: withheldNote(rep.completeness),
+    recheckNote: recheckNote(rep.completeness),
     showP2: !!(rep.p2_teaser?.show && rep.p2_teaser?.message),
   }
 }

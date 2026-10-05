@@ -102,7 +102,7 @@ export default function WeeklyReport() {
                   <div style={{ ...card, borderColor: 'var(--success)' }}>
                     <span style={{ color: 'var(--success)', fontWeight: 700 }}>균형이 잘 잡힌 한 주였어요 ✓</span>
                   </div>
-                ) : (
+                ) : vm.flagCount === 0 ? null : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                     {report.macro_balance.flags.map((f, i) => {
                       const v = flagView(f)
@@ -121,6 +121,14 @@ export default function WeeklyReport() {
                   </div>
                 )}
               </section>
+
+              {/* 2-0) 끼니 빠뜨린 날 보완 — 보류·재확인 안내(엔진 completeness) */}
+              {(vm.withheldNote || vm.recheckNote) && (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, margin: 'calc(-1 * var(--space-2)) 0 var(--space-4)' }}>
+                  {vm.withheldNote && <div>ⓘ {vm.withheldNote}</div>}
+                  {vm.recheckNote && <div>ⓘ {vm.recheckNote}</div>}
+                </div>
+              )}
 
               {/* 2-1) 누적 — 나트륨·당류 · 가공식품·첨가물 (엔진 weekly.v2, 없으면 숨김) */}
               <WeeklyAccumulation accumulation={report.accumulation} />
