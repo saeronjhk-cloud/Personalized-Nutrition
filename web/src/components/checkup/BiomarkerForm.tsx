@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   fetchBiomarkerRules,
   fetchMyProfile,
   fetchRanges,
   fetchCheckupHistory,
+  fetchCheckupRecords,
   groupBiomarkersByCategory,
   saveCheckup,
   type BiomarkerRule,
@@ -25,6 +26,7 @@ import {
   CHANGE_COLORS,
   type HistoryPoint,
 } from "../../domain/checkup/timeseries";
+import { implausibleValues, implausibleMessage, sameDateRecord, sameDateMessage } from "../../domain/checkup/input_guard";
 import RecommendationList from "./RecommendationList";
 import TimeseriesChart from "./TimeseriesChart";
 import {
@@ -33,8 +35,11 @@ import {
   matchToRules,
 } from "../../lib/checkupImport";
 
+/** 오늘(로컬) YYYY-MM-DD — toISOString()(UTC)은 한국 오전 9시 전엔 어제 날짜가 됨(input_guard 평가 W3) */
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
 export default function BiomarkerForm() {
@@ -64,6 +69,9 @@ export default function BiomarkerForm() {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  // 입력 가드 — IP/integration/checkup_input_guard_eval_v1.md
+  const [inputWarnings, setInputWarnings] = useState<string[]>([]);
+  const [dupDate, setDupDate] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -176,6 +184,14 @@ export default function BiomarkerForm() {
     return input;
   }
 
+  /** 있을 수 없는 값이면 안내 문구 목록(없으면 []) */
+  function checkPlausible(): string[] {
+    return implausibleValues(buildBiomarkerInput()).map((it) => {
+      const rule = rules.find((r) => r.biomarker_key === it.key);
+      return implausibleMessage(it, rule?.display_name_ko ?? it.key, rule?.unit ?? "");
+    });
+  }
+
   function buildRulesByKey(): Record<string, { unit: string }> {
     const rulesByKey: Record<string, { unit: string }> = {};
     for (const rule of rules) {
@@ -190,6 +206,13 @@ export default function BiomarkerForm() {
     const activeSex = sex === "M" || sex === "F" ? sex : null;
     if (!activeSex) {
       alert("성별을 선택해 주세요.");
+      return;
+    }
+
+    const warnings = checkPlausible();
+    setInputWarnings(warnings);
+    if (warnings.length > 0) {
+      setResults([]);
       return;
     }
 
@@ -215,7 +238,7 @@ export default function BiomarkerForm() {
     setAnalyzing(false);
   }
 
-  async function handleSave() {
+  async function handleSave(force = false) {
     const activeSex = sex === "M" || sex === "F" ? sex : null;
     const birthYearNum = parseInt(birthYear, 10);
 
@@ -228,9 +251,23 @@ export default function BiomarkerForm() {
       return;
     }
 
+    const warnings = checkPlausible();
+    setInputWarnings(warnings);
+    if (warnings.length > 0) return;
+
     setSaving(true);
     setSaveError(null);
     setSaveMessage(null);
+
+    if (!force) {
+      const { records, error: recErr } = await fetchCheckupRecords(userId);
+      if (!recErr && sameDateRecord(records, recordedDate)) {
+        setSaving(false);
+        setDupDate(recordedDate);
+        return;
+      }
+    }
+    setDupDate(null);
 
     const saveResult = await saveCheckup({
       user_id: userId,
@@ -495,6 +532,15 @@ export default function BiomarkerForm() {
         </section>
       ))}
 
+      {inputWarnings.length > 0 && (
+        <div className="survey-card" data-testid="checkup-input-warnings" style={{ borderColor: "var(--warning)", background: "var(--warning-bg)" }}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: "var(--space-2)" }}>입력값을 확인해 주세요</div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.7 }}>
+            {inputWarnings.map((w) => <li key={w}>{w}</li>)}
+          </ul>
+        </div>
+      )}
+
       <button
         type="submit"
         className="btn btn-accent"
@@ -511,10 +557,21 @@ export default function BiomarkerForm() {
             className="btn btn-primary"
             style={{ marginBottom: 'var(--space-3)', fontSize: 16 }}
             disabled={saving || saved}
-            onClick={handleSave}
+            onClick={() => handleSave()}
           >
             {saving ? "저장 중..." : saved ? "저장 완료" : "저장하기"}
           </button>
+          {dupDate && (
+            <div className="survey-card" data-testid="checkup-dup-date" style={{ marginBottom: "var(--space-3)", borderColor: "var(--warning)", background: "var(--warning-bg)" }}>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{sameDateMessage(dupDate)}</p>
+              <div style={{ display: "flex", gap: "var(--space-3)", marginTop: "var(--space-2)", flexWrap: "wrap", alignItems: "center" }}>
+                <Link to="/checkup/manage" className="text-link">기록 관리로 가기 →</Link>
+                <button type="button" className="btn btn-secondary" style={{ width: "auto", padding: "6px 14px", fontSize: 13 }} disabled={saving} onClick={() => handleSave(true)}>
+                  그래도 새로 저장
+                </button>
+              </div>
+            </div>
+          )}
           {saveMessage && (
             <p style={{ color: "#16a34a", fontSize: 14, marginBottom: 'var(--space-3)', lineHeight: 1.5 }}>
               {saveMessage}

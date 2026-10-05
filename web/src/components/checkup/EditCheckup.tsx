@@ -8,6 +8,7 @@ import {
   updateCheckup,
   type BiomarkerRule,
 } from "../../lib/checkup_api";
+import { implausibleValues, implausibleMessage } from "../../domain/checkup/input_guard";
 
 export default function EditCheckup() {
   const navigate = useNavigate();
@@ -102,6 +103,16 @@ export default function EditCheckup() {
     const rules_by_key: Record<string, { unit: string }> = {};
     for (const rule of rules) {
       rules_by_key[rule.biomarker_key] = { unit: rule.unit };
+    }
+
+    // 입력 가드 — IP/integration/checkup_input_guard_eval_v1.md W2
+    const warnings = implausibleValues(biomarker_input).map((it) => {
+      const rule = rules.find((r) => r.biomarker_key === it.key);
+      return implausibleMessage(it, rule?.display_name_ko ?? it.key, rule?.unit ?? "");
+    });
+    if (warnings.length > 0) {
+      setSaveError(`입력값을 확인해 주세요. ${warnings.join(" / ")}`);
+      return;
     }
 
     setSaving(true);
