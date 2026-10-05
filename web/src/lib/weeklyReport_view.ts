@@ -3,6 +3,8 @@
  * 엔진 계약(report.v1): top_food_groups / macro_balance{avg,flags} / next_action / p2_teaser / coverage.
  * 근거 IP: 06 주간리포트 룰 스냅샷, 95 weekly_report 테이블, 96 이식 런북.
  */
+import type { Accumulation } from './weeklyAccumulation_view'
+
 const KST_OFFSET_MS = 9 * 3600 * 1000
 const DAY_MS = 86400_000
 
@@ -36,6 +38,9 @@ export interface WeeklyReportData {
   next_action: NextAction
   p2_teaser: P2Teaser
   coverage: Coverage
+  /** 누적 v1(엔진 weekly.v2). 옛 엔진이면 없음 → 누적 섹션 숨김. 뷰는 weeklyAccumulation_view.ts */
+  accumulation?: Accumulation | null
+  calc_version?: string
 }
 export interface WeeklyReport {
   report_id: string

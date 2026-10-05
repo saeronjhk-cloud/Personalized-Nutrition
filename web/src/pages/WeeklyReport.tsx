@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { fetchWeeklyReport, markWeeklyViewed } from '../lib/weeklyReport'
 import { track } from '../lib/events'
+import WeeklyAccumulation from '../components/WeeklyAccumulation'
 import {
   lastCompletedWeekStart, prevWeek, nextWeek, isAfterLastCompleted,
   formatWeekRange, flagView, coverageCaption, isInsufficient, weeklyRenderModel,
@@ -120,6 +121,9 @@ export default function WeeklyReport() {
                   </div>
                 )}
               </section>
+
+              {/* 2-1) 누적 — 나트륨·당류 · 가공식품·첨가물 (엔진 weekly.v2, 없으면 숨김) */}
+              <WeeklyAccumulation accumulation={report.accumulation} />
 
               {/* 3) 다음 행동 */}
               <section style={{ marginBottom: 'var(--space-4)' }}>
