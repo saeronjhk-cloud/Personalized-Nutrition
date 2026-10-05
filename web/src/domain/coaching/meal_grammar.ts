@@ -238,3 +238,50 @@ export function mealGrammarCoaching(input: MealGrammarInput): MealGrammarResult 
 
   return { active, maintenance, blocked_reason, stats };
 }
+
+// ── «판정 대상 없음» 안내 (IP/integration/coach_notice_eval_v1.md N01~N16) ────────────
+// 새 판정 0 — ruleOutcome·judgeMeal·resolveRoles 결과만 읽어 «왜 카드가 없는지» 한 줄로 알린다.
+export type CoachNoticeReason = "UNKNOWN" | "NO_STAPLE" | "SNACK_ONLY";
+
+export interface CoachNotice {
+  reason: CoachNoticeReason;
+  text: string;
+  /** UNKNOWN 일 때 알아보지 못한 음식(등장 순서·중복 제거, 전체) */
+  unknown_names: string[];
+}
+
+export const NOTICE_TEXT: Record<CoachNoticeReason, string> = {
+  UNKNOWN: "아직 알아보지 못한 음식이 있어 오늘 끼니를 판정하지 못했어요: {names}. 음식 이름을 고치면 코칭이 다시 계산돼요.",
+  NO_STAPLE: "밥이나 면이 있는 끼니를 기록하면 반찬 코칭이 시작돼요.",
+  SNACK_ONLY: "간식은 코칭 대상이 아니에요. 아침·점심·저녁 끼니를 기록하면 코칭이 시작돼요.",
+};
+
+const NOTICE_MAX_NAMES = 3;
+
+export function todayCoachNotice(input: MealGrammarInput): CoachNotice | null {
+  if (!input.mealEnabled || !input.loggedIn || input.v1CardVisible) return null;
+  const p = input.params ?? DEFAULT_MEAL_GRAMMAR_PARAMS;
+  const safety = DEFAULT_GOAL_COACHING_PARAMS;
+  const blocked = input.conditions.some((c) => safety.EXCLUDE_CONDITIONS.includes(c))
+    || (input.egfr != null && Number.isFinite(input.egfr) && input.egfr < safety.EGFR_BLOCK);
+  const rules = RULE_IDS.filter((r) => !(blocked && PROTEIN_RULES.includes(r)));
+
+  const today = localDayKey(input.now);
+  const todays = mealsFromRows(input.rows, input.now, p.VERIFY_WINDOW_DAYS).map(judgeMeal).filter((m) => m.day === today);
+  if (todays.length === 0) return null;
+  if (todays.some((m) => rules.some((r) => ruleOutcome(r, m) !== null))) return null;
+
+  const mains = todays.filter((m) => MAIN_SLOTS.includes(m.slot));
+  if (mains.length === 0) return { reason: "SNACK_ONLY", text: NOTICE_TEXT.SNACK_ONLY, unknown_names: [] };
+
+  const unknown: string[] = [];
+  for (const m of mains) for (const n of m.names) {
+    const name = n.trim();
+    if (name && resolveRoles(name).includes("UNKNOWN") && !unknown.includes(name)) unknown.push(name);
+  }
+  if (unknown.length > 0) {
+    const shown = unknown.slice(0, NOTICE_MAX_NAMES).join("·") + (unknown.length > NOTICE_MAX_NAMES ? ` 외 ${unknown.length - NOTICE_MAX_NAMES}` : "");
+    return { reason: "UNKNOWN", text: NOTICE_TEXT.UNKNOWN.replace("{names}", shown), unknown_names: unknown };
+  }
+  return { reason: "NO_STAPLE", text: NOTICE_TEXT.NO_STAPLE, unknown_names: [] };
+}

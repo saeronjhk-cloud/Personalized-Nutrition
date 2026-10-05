@@ -6,6 +6,7 @@ import { resolve } from 'node:path'
 const meal = readFileSync(resolve(__dirname, '../Meal.tsx'), 'utf-8')
 const coach = readFileSync(resolve(__dirname, '../../components/CoachCards.tsx'), 'utf-8')
 const home = readFileSync(resolve(__dirname, '../../components/home/ReturningHome.tsx'), 'utf-8')
+const grammarCard = readFileSync(resolve(__dirname, '../../components/MealGrammarCard.tsx'), 'utf-8')
 
 describe('코칭 카드 위치', () => {
   it('M1 /meal 첫 화면: 코칭 카드가 목표 카드(GoalsCard)보다 먼저', () => {
@@ -31,5 +32,13 @@ describe('코칭 카드 위치', () => {
   })
   it('M6 새 판정 없음(묶음은 렌더만)', () => {
     expect(coach).not.toMatch(/goalMealCoaching\(|mealGrammarCoaching\(|resolveRoles/)
+  })
+  it('W1(coach_notice_eval_v1) 안내는 활성·유지 줄이 없을 때만 · todayCoachNotice 결과만 렌더', () => {
+    expect(grammarCard).toContain('setNotice(todayCoachNotice(input))')
+    expect(grammarCard).toContain('data-testid="coach-notice"')
+    const i = grammarCard.indexOf('if (!res.active && !res.maintenance) {')
+    expect(i).toBeGreaterThan(0)
+    expect(grammarCard.indexOf('data-testid="coach-notice"')).toBeGreaterThan(i)
+    expect(grammarCard).not.toMatch(/NOTICE_TEXT|resolveRoles/)
   })
 })
