@@ -9,6 +9,7 @@ import {
   type ViewItem,
 } from "../../domain/checkup/result_view";
 import { urgentChecks, URGENT_FOOTER } from "../../domain/checkup/urgent_check";
+import { formatBiomarkerValue } from "../../domain/checkup/urine_protein";
 
 /**
  * 검진 결과 화면 (BiomarkerForm·ViewCheckup 공용)
@@ -31,7 +32,7 @@ function Item({ it }: { it: ViewItem }) {
   return (
     <li style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)", fontSize: 14, lineHeight: 1.6, padding: "6px 0", borderBottom: "1px solid var(--border-light)" }}>
       <span style={{ color: "var(--text)" }}>
-        {it.name} <strong>{it.value}</strong>
+        {it.name} <strong>{formatBiomarkerValue(it.key, it.value)}</strong>
         {it.unit && <span style={{ color: "var(--text-muted)", fontSize: 12 }}> {it.unit}</span>}
       </span>
       <span style={{ color: COLOR[it.status], fontWeight: 600, whiteSpace: "nowrap" }}>{it.label}</span>

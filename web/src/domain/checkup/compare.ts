@@ -3,6 +3,7 @@
  * 평가: IP/integration/health_report_checkup_compare_eval_v1.md (K01~K12) · 의료 자문 아님
  * 판정은 기존 timeseries.classifyChange(구간 기반) 재사용 — 새 임계 없음.
  */
+import { isOrdinalKey } from "./urine_protein";
 import type { Range } from "./engine";
 import { classifyChange, getChangeRate, type ChangeClass, type HistoryPoint } from "./timeseries";
 import { comparePair } from "../survey/history";
@@ -83,7 +84,8 @@ export function compareCheckups(
 }
 
 /** 추이 그래프 대상: «유지» 제외 상위 n, 부족하면 |변화율| 순으로 채움 */
-export function trendKeys(rows: readonly CompareRow[], n = 5): string[] {
+export function trendKeys(allRows: readonly CompareRow[], n = 5): string[] {
+  const rows = allRows.filter((r) => !isOrdinalKey(r.key)); // 단계형(요단백)은 숫자 그래프 제외(평가 T01)
   const out = rows.filter((r) => r.classification !== "stable").map((r) => r.key).slice(0, n);
   const rest = rows.filter((r) => !out.includes(r.key)).sort((x, y) => Math.abs(y.changeRate) - Math.abs(x.changeRate));
   for (const r of rest) { if (out.length >= n) break; out.push(r.key); }

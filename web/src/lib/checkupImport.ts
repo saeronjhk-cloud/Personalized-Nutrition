@@ -11,6 +11,7 @@
 // =============================================================================
 
 import type { BiomarkerRule } from "./checkup_api";
+import { parseUrineProtein } from "../domain/checkup/urine_protein";
 
 export interface ParsedItem {
   /** 결과지에 표기된 원본 라벨 (예: "공복혈당") */
@@ -67,6 +68,7 @@ const CONCEPT_ALIASES: Record<string, string[]> = {
   creatinine: ["혈청크레아티닌", "크레아티닌"],
   egfr: ["신사구체여과율", "eGFR", "사구체여과율"],
   ferritin: ["페리틴", "혈청페리틴"],
+  urine_protein: ["요단백", "요 단백", "뇨단백"],
 };
 
 // 정규화된 alias → 개념 id 역인덱스 (긴 alias 우선 매칭을 위해 길이 내림차순)
@@ -176,6 +178,16 @@ export function parseCheckupText(text: string): ParsedCheckup {
           pushItem(items, seen, "blood_pressure_systolic", line, bp[1]);
           pushItem(items, seen, "blood_pressure_diastolic", line, bp[2]);
           seen.add(concept);
+        }
+        continue;
+      }
+
+      // 요단백: 숫자가 아니라 기호(음성/±/+1…) → 순서 코드 (평가 I02·I03)
+      if (concept === "urine_protein") {
+        const code = parseUrineProtein(tail);
+        if (code !== null && !seen.has(concept)) {
+          seen.add(concept);
+          items.push({ label: concept, value: code, raw: line.trim() });
         }
         continue;
       }

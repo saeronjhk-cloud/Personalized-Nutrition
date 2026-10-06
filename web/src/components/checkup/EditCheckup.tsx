@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { INVERTED_BADGE, inputHint } from "../../domain/checkup/input_hint";
+import BiomarkerValueInput from "./BiomarkerValueInput";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchMyProfile,
@@ -247,16 +248,7 @@ export default function EditCheckup() {
                       </p>
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
-                      <input
-                        id={`edit-biomarker-${rule.biomarker_key}`}
-                        type="number"
-                        step="any"
-                        className="input-field"
-                        placeholder="수치 입력"
-                        value={values[rule.biomarker_key] ?? ""}
-                        onChange={(e) => handleValueChange(rule.biomarker_key, e.target.value)}
-                        style={{ flex: 1 }}
-                      />
+                      <BiomarkerValueInput id={`edit-biomarker-${rule.biomarker_key}`} biomarkerKey={rule.biomarker_key} value={values[rule.biomarker_key] ?? ""} onChange={(v) => handleValueChange(rule.biomarker_key, v)} />
                       {rule.unit && (
                         <span style={{ fontSize: 14, color: "var(--text-secondary)", minWidth: 48 }}>
                           {rule.unit}

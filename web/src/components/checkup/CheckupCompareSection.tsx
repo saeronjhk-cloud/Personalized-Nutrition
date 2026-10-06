@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import { CHECKUP_ENABLED } from '../../lib/flags'
 import { getBiomarkerSeries, CHANGE_COLORS } from '../../domain/checkup/timeseries'
 import { trendKeys, CHANGE_LABEL_KO } from '../../domain/checkup/compare'
+import { formatBiomarkerValue, isOrdinalKey } from '../../domain/checkup/urine_protein'
 import type { CheckupCompareState } from '../../lib/checkupCompare'
 import TimeseriesChart from './TimeseriesChart'
 
@@ -85,8 +86,8 @@ export default function CheckupCompareSection({ cc, variant = 'full' }: { cc: Ch
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: 14, fontWeight: 600 }}>{r.name}</div>
                       <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                        {r.prev} → <strong>{r.curr}</strong> {r.unit}
-                        <span style={{ color: 'var(--text-muted)' }}> ({r.delta > 0 ? '+' : ''}{r.delta}, {r.changeRate > 0 ? '+' : ''}{r.changeRate}%)</span>
+                        {formatBiomarkerValue(r.key, r.prev)} → <strong>{formatBiomarkerValue(r.key, r.curr)}</strong> {r.unit}
+                        {!isOrdinalKey(r.key) && <span style={{ color: 'var(--text-muted)' }}> ({r.delta > 0 ? '+' : ''}{r.delta}, {r.changeRate > 0 ? '+' : ''}{r.changeRate}%)</span>}
                         {r.currLabel && <span style={{ color: 'var(--text-muted)' }}> · {r.currLabel}</span>}
                       </div>
                     </div>

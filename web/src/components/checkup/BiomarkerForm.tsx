@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { INVERTED_BADGE, inputHint } from "../../domain/checkup/input_hint";
+import BiomarkerValueInput from "./BiomarkerValueInput";
 import { Link, useNavigate } from "react-router-dom";
 import {
   fetchBiomarkerRules,
@@ -516,16 +517,7 @@ export default function BiomarkerForm() {
                   <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>{inputHint(rule.biomarker_key)}</p>
                 )}
                 <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
-                  <input
-                    id={`biomarker-${rule.biomarker_key}`}
-                    type="number"
-                    step="any"
-                    className="input-field"
-                    placeholder="수치 입력"
-                    value={values[rule.biomarker_key] ?? ""}
-                    onChange={(e) => handleValueChange(rule.biomarker_key, e.target.value)}
-                    style={{ flex: 1 }}
-                  />
+                  <BiomarkerValueInput id={`biomarker-${rule.biomarker_key}`} biomarkerKey={rule.biomarker_key} value={values[rule.biomarker_key] ?? ""} onChange={(v) => handleValueChange(rule.biomarker_key, v)} />
                   {rule.unit && (
                     <span style={{ fontSize: 14, color: "var(--text-secondary)", minWidth: 48 }}>
                       {rule.unit}

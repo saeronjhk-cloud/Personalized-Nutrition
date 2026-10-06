@@ -1,3 +1,4 @@
+import { isOrdinalKey } from "./urine_protein";
 import type { Range } from "./engine";
 
 export interface CheckupHistoryRow {
@@ -116,6 +117,7 @@ export function getTopChanges(
     const prevVal = prev.biomarkers[biomarkerKey];
     const currVal = curr.biomarkers[biomarkerKey];
     if (typeof prevVal !== "number" || typeof currVal !== "number") continue;
+    if (isOrdinalKey(biomarkerKey)) continue; // 요단백 등 단계형은 변화율 무의미(평가 T01)
 
     changes.push({
       biomarker_key: biomarkerKey,

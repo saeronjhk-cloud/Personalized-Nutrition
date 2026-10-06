@@ -1,0 +1,887 @@
+{
+  "schema_version": "1.3.0",
+  "last_updated": "2026-10-06",
+  "evidence_base": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) 단일 기준 + 꼬리(저혈당·저혈압·혈색소 상한·비타민D 상한) — IP/integration/검진판정기준_외부자문_회신기록_v1.md",
+  "disclaimer_default": "이 결과는 입력한 검사값을 공인 참고기준과 비교한 건강정보이며 진단이 아닙니다.",
+  "biomarkers": {
+    "HbA1c": {
+      "display_name_ko": "당화혈색소",
+      "unit": "%",
+      "category_group": "당대사",
+      "inverted": false,
+      "note": null,
+      "source": "대한당뇨병학회 진료지침(고시 항목 아님)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 5.7,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 5.7,
+          "max": 6.5,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "혈당조절"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 6.5,
+          "max": 99,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈당조절"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "fasting_glucose": {
+      "display_name_ko": "공복혈당",
+      "unit": "mg/dL",
+      "category_group": "당대사",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) + 하한 70(대한당뇨병학회 저혈당 기준)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 70,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        },
+        {
+          "min": 70,
+          "max": 100,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 100,
+          "max": 126,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "혈당조절"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 126,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈당조절"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "total_cholesterol": {
+      "display_name_ko": "총콜레스테롤",
+      "unit": "mg/dL",
+      "category_group": "지질대사",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 200,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 200,
+          "max": 240,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "콜레스테롤개선"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 240,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "콜레스테롤개선"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "LDL": {
+      "display_name_ko": "LDL 콜레스테롤",
+      "unit": "mg/dL",
+      "category_group": "지질대사",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 130,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 130,
+          "max": 160,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "콜레스테롤개선",
+            "혈중중성지방개선"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 160,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "콜레스테롤개선"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "HDL": {
+      "display_name_ko": "HDL 콜레스테롤",
+      "unit": "mg/dL",
+      "category_group": "지질대사",
+      "inverted": true,
+      "note": "HDL은 높을수록 좋음 - 역방향 해석",
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 40,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈행개선"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        },
+        {
+          "min": 40,
+          "max": 60,
+          "level": "watch",
+          "label_ko": "참고범위보다 낮음",
+          "functional_needs": [
+            "혈행개선"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 60,
+          "max": 999,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        }
+      ]
+    },
+    "triglyceride": {
+      "display_name_ko": "중성지방",
+      "unit": "mg/dL",
+      "category_group": "지질대사",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 150,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 150,
+          "max": 200,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "혈중중성지방개선"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 200,
+          "max": 9999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈중중성지방개선"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "blood_pressure_systolic": {
+      "display_name_ko": "수축기혈압",
+      "unit": "mmHg",
+      "category_group": "혈압",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) + 하한 90(저혈압 재확인)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 90,
+          "level": "low",
+          "label_ko": "참고범위보다 낮음",
+          "functional_needs": [],
+          "tone": "관리권장"
+        },
+        {
+          "min": 90,
+          "max": 120,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 120,
+          "max": 140,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "혈압조절"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 140,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈압조절"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "blood_pressure_diastolic": {
+      "display_name_ko": "이완기혈압",
+      "unit": "mmHg",
+      "category_group": "혈압",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) + 하한 60(저혈압 재확인)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 60,
+          "level": "low",
+          "label_ko": "참고범위보다 낮음",
+          "functional_needs": [],
+          "tone": "관리권장"
+        },
+        {
+          "min": 60,
+          "max": 80,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 80,
+          "max": 90,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "혈압조절"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 90,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "혈압조절"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "AST": {
+      "display_name_ko": "AST (간기능)",
+      "unit": "U/L",
+      "category_group": "간기능",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 41,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 41,
+          "max": 51,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 51,
+          "max": 9999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "ALT": {
+      "display_name_ko": "ALT (간기능)",
+      "unit": "U/L",
+      "category_group": "간기능",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 36,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 36,
+          "max": 46,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 46,
+          "max": 9999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "GGT": {
+      "display_name_ko": "감마GTP",
+      "unit": "U/L",
+      "category_group": "간기능",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 64,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "M"
+        },
+        {
+          "min": 64,
+          "max": 78,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "관리권장",
+          "sex_specific": "M"
+        },
+        {
+          "min": 78,
+          "max": 9999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "M"
+        },
+        {
+          "min": 0,
+          "max": 36,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "F"
+        },
+        {
+          "min": 36,
+          "max": 46,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "관리권장",
+          "sex_specific": "F"
+        },
+        {
+          "min": 46,
+          "max": 9999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "간건강"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "F"
+        }
+      ]
+    },
+    "creatinine": {
+      "display_name_ko": "크레아티닌",
+      "unit": "mg/dL",
+      "category_group": "신장기능",
+      "inverted": false,
+      "note": "신장은 기능성 원료 인정 항목 없음 - 추천 비활성",
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) (신장 판정은 eGFR 중심)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 1.51,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 1.51,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "egfr": {
+      "display_name_ko": "eGFR(신사구체여과율)",
+      "unit": "mL/min/1.73m²",
+      "category_group": "신장기능",
+      "inverted": true,
+      "note": "높을수록 좋음 - 결과지에 없으면 크레아티닌으로 추정",
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) · 결과지 값 없으면 크레아티닌·성별·나이로 CKD-EPI 2021 추정",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 60,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        },
+        {
+          "min": 60,
+          "max": 999,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        }
+      ]
+    },
+    "urine_protein": {
+      "display_name_ko": "요단백",
+      "unit": "",
+      "category_group": "신장기능",
+      "inverted": false,
+      "note": "순서 코드 저장: 음성 0 · 약양성(±) 0.5 · 양성 +1~+4 → 1~4. 화면은 기호로 표시.",
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) (정상A 음성 · 정상B 약양성 · 질환의심 양성 이상)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 0.5,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 0.5,
+          "max": 1,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [],
+          "tone": "관리권장"
+        },
+        {
+          "min": 1,
+          "max": 99,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "BMI": {
+      "display_name_ko": "체질량지수",
+      "unit": "kg/m²",
+      "category_group": "체중관리",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 18.5,
+          "level": "low",
+          "label_ko": "참고범위보다 낮음",
+          "functional_needs": [],
+          "tone": "관리권장"
+        },
+        {
+          "min": 18.5,
+          "max": 25,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 25,
+          "max": 30,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [
+            "체지방감소"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 30,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "체지방감소"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "waist": {
+      "display_name_ko": "허리둘레",
+      "unit": "cm",
+      "category_group": "체중관리",
+      "inverted": false,
+      "note": null,
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 90,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "M"
+        },
+        {
+          "min": 90,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "체지방감소"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "M"
+        },
+        {
+          "min": 0,
+          "max": 85,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "F"
+        },
+        {
+          "min": 85,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "체지방감소"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "F"
+        }
+      ]
+    },
+    "hemoglobin": {
+      "display_name_ko": "혈색소",
+      "unit": "g/dL",
+      "category_group": "빈혈",
+      "inverted": true,
+      "note": "low일수록 빈혈",
+      "source": "보건복지부 고시 건강검진 실시기준 별표4 별첨(2026-6호) + 상한(외부 자문 A·B: 남 18·여 17 이상 상담)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 12,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "철분보충"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "M"
+        },
+        {
+          "min": 12,
+          "max": 13,
+          "level": "low",
+          "label_ko": "참고범위보다 약간 낮음",
+          "functional_needs": [
+            "철분보충"
+          ],
+          "tone": "관리권장",
+          "sex_specific": "M"
+        },
+        {
+          "min": 13,
+          "max": 16.6,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "M"
+        },
+        {
+          "min": 16.6,
+          "max": 18,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [],
+          "tone": "관리권장",
+          "sex_specific": "M"
+        },
+        {
+          "min": 18,
+          "max": 99,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "M"
+        },
+        {
+          "min": 0,
+          "max": 10,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [
+            "철분보충"
+          ],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "F"
+        },
+        {
+          "min": 10,
+          "max": 12,
+          "level": "low",
+          "label_ko": "참고범위보다 약간 낮음",
+          "functional_needs": [
+            "철분보충"
+          ],
+          "tone": "관리권장",
+          "sex_specific": "F"
+        },
+        {
+          "min": 12,
+          "max": 15.6,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지",
+          "sex_specific": "F"
+        },
+        {
+          "min": 15.6,
+          "max": 17,
+          "level": "watch",
+          "label_ko": "참고범위보다 높음",
+          "functional_needs": [],
+          "tone": "관리권장",
+          "sex_specific": "F"
+        },
+        {
+          "min": 17,
+          "max": 99,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true,
+          "sex_specific": "F"
+        }
+      ]
+    },
+    "TSH": {
+      "display_name_ko": "갑상선자극호르몬",
+      "unit": "mIU/L",
+      "category_group": "갑상선",
+      "inverted": false,
+      "note": "갑상선은 기능성 원료 인정 항목 없음 - 추천 비활성",
+      "source": "일반 참고범위(고시 항목 아님)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 0.4,
+          "level": "low",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        },
+        {
+          "min": 0.4,
+          "max": 4.51,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 4.51,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    },
+    "vitamin_D": {
+      "display_name_ko": "비타민 D",
+      "unit": "ng/mL",
+      "category_group": "영양상태",
+      "inverted": false,
+      "note": null,
+      "source": "Endocrine Society 지침(고시 항목 아님) · 100 이상 상담(외부 자문 A·B)",
+      "ranges": [
+        {
+          "min": 0,
+          "max": 20,
+          "level": "low",
+          "label_ko": "참고범위보다 낮음",
+          "functional_needs": [
+            "비타민D보충"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 20,
+          "max": 30,
+          "level": "watch",
+          "label_ko": "참고범위보다 약간 낮음",
+          "functional_needs": [
+            "비타민D보충"
+          ],
+          "tone": "관리권장"
+        },
+        {
+          "min": 30,
+          "max": 100,
+          "level": "normal",
+          "label_ko": "참고범위 내",
+          "functional_needs": [],
+          "tone": "유지"
+        },
+        {
+          "min": 100,
+          "max": 999,
+          "level": "high",
+          "label_ko": "의료진 상담 권장",
+          "functional_needs": [],
+          "tone": "전문가상담권장",
+          "force_medical_referral": true
+        }
+      ]
+    }
+  },
+  "global_rules": {
+    "force_medical_referral_template": "이 수치는 의료 전문가 상담이 필요한 범위입니다. 건강기능식품은 보조적 관리 수단이며, 진단·치료를 대체할 수 없습니다.",
+    "min_biomarkers_for_recommendation": 1,
+    "max_functional_needs_per_user": 3,
+    "priority_rule": "force_medical_referral가 true인 항목이 있으면 해당 카테고리는 의료 referral만 표시, 제품 추천 비활성"
+  }
+}

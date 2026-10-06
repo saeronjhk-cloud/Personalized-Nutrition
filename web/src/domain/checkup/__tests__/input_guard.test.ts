@@ -2,12 +2,12 @@
 import { describe, it, expect } from "vitest";
 import { PLAUSIBLE_BOUNDS, implausibleValues, implausibleMessage, sameDateRecord, sameDateMessage } from "../input_guard";
 import { rangesFromMap, type BiomarkerMap } from "../range_gaps";
-import v11json from "../biomarker_map_v1_2.json";
+import v11json from "../biomarker_map_v1_3.json"; // v1.3 = v1.2 + 요단백
 
 const v11 = v11json as unknown as BiomarkerMap;
 
 describe("검진 입력 가드", () => {
-  it("P01 판정표 v1.2 18항목 1:1", () => {
+  it("P01 판정표 v1.3 19항목 1:1", () => {
     expect(Object.keys(PLAUSIBLE_BOUNDS).sort()).toEqual(Object.keys(v11.biomarkers).sort());
   });
   it("P02 BMI 83 → 체중 힌트", () => {

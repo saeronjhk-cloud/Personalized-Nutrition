@@ -21,12 +21,16 @@ export const PLAUSIBLE_BOUNDS: Record<string, readonly [number, number]> = {
   hemoglobin: [3, 25],
   TSH: [0.001, 150],
   vitamin_D: [2, 200],
+  urine_protein: [0, 4],
 };
+
+const URINE_CODES = new Set([0, 0.5, 1, 2, 3, 4]);
 
 const HINT: Record<string, (v: number) => string | null> = {
   BMI: () => "체중(kg)이 아니라 체질량지수예요. 결과지의 ‘체질량지수’ 값을 적어 주세요.",
   fasting_glucose: (v) => (v < 20 ? "mmol/L 로 적으셨다면 18을 곱한 값(mg/dL)을 적어 주세요." : null),
   vitamin_D: (v) => (v > 200 ? "nmol/L 로 적으셨다면 2.5로 나눈 값(ng/mL)을 적어 주세요." : null),
+  urine_protein: () => "요단백은 음성(-)·약양성(±)·양성(+1~+4) 중에서 골라 주세요.",
 };
 
 export interface ImplausibleItem { key: string; value: number; min: number; max: number; hint: string | null }
@@ -36,7 +40,8 @@ export function implausibleValues(input: Record<string, number>): ImplausibleIte
   for (const [key, value] of Object.entries(input)) {
     const b = PLAUSIBLE_BOUNDS[key];
     if (!b || typeof value !== "number" || Number.isNaN(value)) continue;
-    if (value < b[0] || value > b[1]) out.push({ key, value, min: b[0], max: b[1], hint: HINT[key]?.(value) ?? null });
+    const offCode = key === "urine_protein" && !URINE_CODES.has(value);
+    if (offCode || value < b[0] || value > b[1]) out.push({ key, value, min: b[0], max: b[1], hint: HINT[key]?.(value) ?? null });
   }
   return out;
 }
