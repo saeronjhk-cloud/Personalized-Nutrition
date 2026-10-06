@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { INVERTED_BADGE, inputHint } from "../../domain/checkup/input_hint";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchMyProfile,
@@ -236,13 +237,13 @@ export default function EditCheckup() {
                             fontWeight: 400,
                           }}
                         >
-                          (낮을수록 양호)
+                          {INVERTED_BADGE}
                         </span>
                       )}
                     </label>
-                    {rule.note && (
+                    {inputHint(rule.biomarker_key) && (
                       <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>
-                        {rule.note}
+                        {inputHint(rule.biomarker_key)}
                       </p>
                     )}
                     <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>

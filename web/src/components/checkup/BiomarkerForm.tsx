@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { INVERTED_BADGE, inputHint } from "../../domain/checkup/input_hint";
 import { Link, useNavigate } from "react-router-dom";
 import {
   fetchBiomarkerRules,
@@ -507,12 +508,12 @@ export default function BiomarkerForm() {
                         fontWeight: 400,
                       }}
                     >
-                      (낮을수록 양호)
+                      {INVERTED_BADGE}
                     </span>
                   )}
                 </label>
-                {rule.note && (
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>{rule.note}</p>
+                {inputHint(rule.biomarker_key) && (
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: "var(--space-2)" }}>{inputHint(rule.biomarker_key)}</p>
                 )}
                 <div style={{ display: "flex", alignItems: "center", gap: 'var(--space-2)' }}>
                   <input
