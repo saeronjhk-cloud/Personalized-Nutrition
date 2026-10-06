@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchMyProfile,
@@ -99,10 +99,6 @@ export default function ViewCheckup() {
     };
   }, [recordId]);
 
-  const referralCount = useMemo(
-    () => results.filter((r) => r.force_medical_referral).length,
-    [results],
-  );
 
   if (loading) {
     return (
@@ -172,21 +168,6 @@ export default function ViewCheckup() {
           <p style={{ color: "var(--danger)", fontSize: 14 }}>불러오기 오류: {loadError}</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 'var(--space-4)' }}>
-            {referralCount > 0 && (
-              <div
-                className="card"
-                style={{
-                  padding: 'var(--space-4)',
-                  background: "rgba(220, 38, 38, 0.06)",
-                  border: "1px solid rgba(220, 38, 38, 0.25)",
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 14, color: "#b91c1c", lineHeight: 1.6 }}>
-                  전문가 상담이 권장되는 항목이 {referralCount}개 있습니다. 자세한 내용은
-                  의료 전문가와 상담해 주세요.
-                </p>
-              </div>
-            )}
             {egfrDerived && (
               <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 var(--space-2)" }} data-testid="egfr-derived-note">
                 eGFR 은 결과지 값이 없어 크레아티닌·성별·나이로 계산한 추정값이에요(CKD-EPI 2021).

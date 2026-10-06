@@ -6,7 +6,6 @@ const read = (p: string) => readFileSync(resolve(__dirname, p), "utf-8");
 const form = read("../BiomarkerForm.tsx");
 const view = read("../ViewCheckup.tsx");
 const unified = read("../../../lib/loadUnifiedInputs.ts");
-const card = read("../CategoryCard.tsx");
 
 describe("판정표 v1.2 배선", () => {
   it("W1 runEngine 전에 withEgfrInput · 저장은 원본 입력", () => {
@@ -20,8 +19,7 @@ describe("판정표 v1.2 배선", () => {
     expect(form).toContain('data-testid="egfr-derived-note"');
     expect(view).toContain('data-testid="egfr-derived-note"');
   });
-  it("W2 결과 화면 한글 이름(rules 전달 — checkup_result_view_eval_v1 로 대체)", () => {
-    expect(card).toContain("names?.[result.biomarker_key] ?? result.biomarker_key");
+  it("W2 결과 화면 한글 이름(rules 전달 — CategoryCard 는 result_view_eval_v2 C01 로 삭제)", () => {
     expect(form).toContain("<RecommendationList results={results} rules={rules} />");
     expect(view).toContain("<RecommendationList results={results} rules={rules} />");
   });

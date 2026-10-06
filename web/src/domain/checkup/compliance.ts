@@ -3,6 +3,8 @@ export const ALLOWED_TONE_TEMPLATES: Record<string, string> = {
   관리권장:
     "관리가 필요한 수치가 있습니다. 식약처 인정 기능성 영양제 보충이 도움이 될 수 있습니다.",
   전문가상담권장: "주의가 필요한 수치가 있습니다. 의료 전문가 상담을 권장합니다.",
+  // 기능성 연결 없는 범위 밖 영역 — 정본 IP/integration/checkup_result_view_eval_v2.md
+  생활관리권장: "참고범위를 벗어난 수치가 있습니다. 생활 습관을 점검하고, 다음 검진에서 다시 확인해 보세요.",
 };
 
 export const BANNED_WORDS = [
