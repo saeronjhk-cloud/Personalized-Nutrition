@@ -8,6 +8,7 @@ import {
   type RuleLite,
   type ViewItem,
 } from "../../domain/checkup/result_view";
+import { urgentChecks, URGENT_FOOTER } from "../../domain/checkup/urgent_check";
 
 /**
  * 검진 결과 화면 (BiomarkerForm·ViewCheckup 공용)
@@ -40,6 +41,8 @@ function Item({ it }: { it: ViewItem }) {
 
 export default function RecommendationList({ results, rules }: Props) {
   const view = useMemo(() => buildResultView(results, rules), [results, rules]);
+  const urgent = useMemo(() => urgentChecks(results), [results]);
+  const nameOf = useMemo(() => new Map(rules.map((r) => [r.biomarker_key, r])), [rules]);
 
   if (results.length === 0) {
     return (
@@ -52,6 +55,26 @@ export default function RecommendationList({ results, rules }: Props) {
   const s = view.summary;
   return (
     <section style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }} data-testid="checkup-result-view">
+      {urgent.length > 0 && (
+        <div role="alert" data-testid="checkup-urgent" style={{ border: "2px solid var(--danger)", borderRadius: 12, padding: "var(--space-4) var(--space-5)", background: "rgba(220, 38, 38, 0.06)" }}>
+          <p style={{ margin: "0 0 var(--space-2)", fontSize: 13, fontWeight: 700, color: "var(--danger)" }}>신속 확인이 필요해요</p>
+          {urgent.map((u) => (
+            <div key={u.id} style={{ marginTop: "var(--space-2)" }}>
+              <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text)" }}>
+                {u.title}
+                <span style={{ fontWeight: 500, color: "var(--text-secondary)", fontSize: 14 }}>
+                  {" "}({u.values.map((v) => `${nameOf.get(v.key)?.display_name_ko ?? v.key} ${v.value}`).join(" · ")})
+                </span>
+              </h4>
+              <ol style={{ margin: "var(--space-2) 0 0", paddingLeft: 20, fontSize: 14, lineHeight: 1.7, color: "var(--text)" }}>
+                {u.steps.map((st) => <li key={st}>{st}</li>)}
+              </ol>
+              <p style={{ margin: "var(--space-2) 0 0", fontSize: 14, lineHeight: 1.7, fontWeight: 600, color: "var(--danger)" }}>{u.emergency}</p>
+            </div>
+          ))}
+          <p style={{ margin: "var(--space-3) 0 0", fontSize: 12, color: "var(--text-muted)" }}>{URGENT_FOOTER}</p>
+        </div>
+      )}
       <p style={{ margin: 0, fontSize: 14, color: "var(--text)" }}>
         <strong>{s.referral + s.out + s.in + s.unknown}개 항목</strong>
         {" · "}
