@@ -75,6 +75,9 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
+import { readSignal } from './additiveSignal'
+import type { SignalView } from './additiveSignal'
+
 /**
  * ★★★★ 4색 위해성 등급을 «화면에» 표시할 것인가. (2026-08-23 외부검토로 false)
  *
@@ -158,6 +161,8 @@ export interface AdditiveView {
   adi: AdiInfo
   /** 이 줄을 접지 않고 펼친 채로 둘 것인가(주황·빨강·등급미상) */
   alert: boolean
+  /** ★ 세션75j — 신호등 v3(서버 `signal`). 없으면 null(옛 응답) */
+  signal: SignalView | null
 }
 
 export interface AdditiveListView {
@@ -198,6 +203,11 @@ export interface AdditiveListView {
    *   (`.tmp/s65/U64-3_재측정_판정.md` §1·§4).
    */
   unlisted: number
+  /**
+   * ★ 세션75j — 저장된 첨가물이 0개일 때 서버가 원재료 원문에서 찾은 것(`derived_additives`).
+   *   `total`·`items` 와 «섞지 않는다»(저장된 것과 출처가 다르다). 없으면 null.
+   */
+  derived: { source: 'own' | 'sibling' | null; items: AdditiveView[] } | null
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -608,6 +618,7 @@ export function toAdditiveView(row: Row, index: number): AdditiveView {
     iarc: describeIarc(row['iarc_group']),
     adi: describeAdi(row['adi_type'], row['adi_value']),
     alert: ALERT_COLORS.includes(color),
+    signal: readSignal(row['signal']),
   }
 }
 
@@ -626,6 +637,8 @@ export interface AdditiveSummaryLike {
     /** ★ 세션65 신설 — 서버가 계산한 `max(0, detected_total - total)`. 없으면 0 으로 본다. */
     unlisted?: unknown
   } | null
+  /** ★ 세션75j — `{source, items:[{name, match_type, signal}]}` | null */
+  derived_additives?: unknown
 }
 
 /**
@@ -697,5 +710,21 @@ export function buildAdditiveList(summary: AdditiveSummaryLike | null | undefine
      *   ⇒ 서버가 계산해서 내려준 값을 그대로 쓴다. 앱은 빼기를 다시 하지 않는다.
      */
     unlisted: readUnlisted(summary),
+    derived: readDerived(summary),
   }
+}
+
+/**
+ * ★ 세션75j — 서버 `derived_additives` → 뷰. 모양이 다르거나 비면 null.
+ *   이름 가나다순(위해성 순서로 새지 않게 — 위 byName 과 같은 이유).
+ */
+export function readDerived(summary: AdditiveSummaryLike | null | undefined): AdditiveListView['derived'] {
+  const d = summary?.derived_additives
+  if (!d || typeof d !== 'object') return null
+  const o = d as Record<string, unknown>
+  const rows: Row[] = Array.isArray(o['items']) ? (o['items'] as unknown[]).filter((r): r is Row => !!r && typeof r === 'object') : []
+  if (!rows.length) return null
+  const src = o['source'] === 'own' || o['source'] === 'sibling' ? (o['source'] as 'own' | 'sibling') : null
+  const items = rows.map(toAdditiveView).sort((a, b) => a.name.localeCompare(b.name, 'ko') || a.key.localeCompare(b.key))
+  return { source: src, items }
 }

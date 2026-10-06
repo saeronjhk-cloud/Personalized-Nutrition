@@ -116,6 +116,13 @@ export interface MsProductResult {
   context?: unknown
   sources?: unknown
   data_freshness?: unknown
+  /**
+   * ★ 세션75j — 원재료 원문. 키가 없으면 «모름»(구버전 서버·조회 실패), null 이면 서버가 «없다»고 말한 것.
+   *   `domain/meokseon/productCompleteness.ts:readIngredients` 가 이 구분으로 결손 배너를 켠다.
+   */
+  ingredients_text?: string | null
+  /** 'own' = 이 바코드 자신의 원재료 · 'sibling' = 같은 품목제조번호의 다른 바코드에서 가져온 것 */
+  ingredients_source?: 'own' | 'sibling' | null
 }
 
 export interface MsAdditiveSummary {

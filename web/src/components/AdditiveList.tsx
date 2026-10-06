@@ -7,6 +7,8 @@ import {
   EVIDENCE_TOGGLE_LABEL, EVIDENCE_SOURCE_NOTE, ADDITIVE_COUNT_CAVEAT,
   describeUnlistedAdditives,
 } from '../domain/meokseon/additives'
+import type { SignalView } from '../domain/meokseon/additiveSignal'
+import { SIGNAL_SECTION_NOTE, DERIVED_TITLE, DERIVED_NOTE, SIBLING_INGREDIENT_NOTE } from '../domain/meokseon/additiveSignal'
 
 /**
  * 첨가물 개별 목록.
@@ -91,6 +93,27 @@ function Evidence({ item }: { item: AdditiveView }) {
  * ⚠ 용도 결측도 «같은 모양»으로 그린다. 경고 색·아이콘을 쓰지 않는다 —
  *   결측을 붉게 칠하면 「이 첨가물이 문제」로 읽힌다. 그건 사실이 아니다(A8).
  */
+// ★ 세션75j — 신호등 v3 한 줄(색 점 + 이름 + 이유) + 참고 표시 + 국내 기준. 판정은 서버, 여기는 그리기만.
+function SignalLine({ signal }: { signal: SignalView }) {
+  return (
+    <div data-testid="additive-signal" data-color={signal.color} style={{ marginTop: 'var(--space-1)' }}>
+      <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text)' }}>
+        <span aria-hidden="true">{signal.emoji}</span> <strong>{signal.label}</strong>
+        {signal.reason ? <span style={{ color: 'var(--text-secondary)' }}> — {signal.reason}</span> : null}
+      </div>
+      {signal.badges.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+          {signal.badges.map((b) => (
+            <span key={b} style={{ fontSize: 'var(--font-caption)', border: '1px solid var(--border-light)', borderRadius: 999, padding: '1px 8px', color: 'var(--text-secondary)' }}>{b}</span>
+          ))}
+        </div>
+      )}
+      {signal.iarcNote && <div style={{ ...NOTE, marginTop: 4 }}>{signal.iarcNote}</div>}
+      {signal.domestic && <div style={{ ...NOTE, marginTop: 4 }}>{signal.domestic}</div>}
+    </div>
+  )
+}
+
 function PlainItem({ item }: { item: AdditiveView }) {
   return (
     <li
@@ -102,6 +125,7 @@ function PlainItem({ item }: { item: AdditiveView }) {
       }}
     >
       <div style={{ fontSize: 'var(--font-body)', fontWeight: 600, color: 'var(--text)' }}>{item.name}</div>
+      {item.signal && <SignalLine signal={item.signal} />}
       <div
         style={{
           fontSize: 'var(--font-sm)',
@@ -214,7 +238,8 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
   //   ⇒ 그릴 줄이 없어도 «할 말»이 남아 있으면 그린다.
   // ⚠ 여기에 블록 주석(`/** … */`)을 쓰지 말 것. 여는 중괄호 «바로 뒤»의 블록 주석은
   //   `additives*.test.ts` 의 주석 스트리퍼가 `{ … */}` 로 오인해 함수 본문을 통째로 걷어낸다.
-  if (view.total === 0 && view.unlisted === 0) return null
+  if (view.total === 0 && view.unlisted === 0 && !view.derived) return null
+  const anySignal = view.items.some((it) => it.signal) || !!view.derived
 
   return (
     <div style={{ marginTop: 'var(--space-3)' }}>
@@ -230,6 +255,18 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
           ⚠ 문구는 여기 적지 않는다. 정본은 `domain/meokseon/additives.ts` 한 곳이다 —
             화면에 다시 적으면 문구가 갈라지고, 갈라진 쪽은 아무도 검토하지 않는다.
           ⚠ `view.unlisted` 는 **서버가 계산해 준 값**이다. 여기서 다시 빼지 말 것. */}
+      {/* ★ 세션75j — 저장된 첨가물이 없을 때만 서버가 원재료에서 찾은 목록을 «따로» 보여준다 */}
+      {view.derived && (
+        <div data-testid="derived-additives" style={{ marginTop: view.items.length ? 'var(--space-3)' : 0 }}>
+          <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text)' }}>{DERIVED_TITLE} {view.derived.items.length}종</div>
+          <p style={{ ...NOTE, marginTop: 4 }}>{DERIVED_NOTE}</p>
+          {view.derived.source === 'sibling' && <p style={{ ...NOTE, marginTop: 2 }}>{SIBLING_INGREDIENT_NOTE}</p>}
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', listStyle: 'none', margin: 'var(--space-2) 0 0', padding: 0 }}>
+            {view.derived.items.map((it) => <PlainItem key={it.key} item={it} />)}
+          </ul>
+        </div>
+      )}
+
       {view.unlisted > 0 && (
         <p style={{ ...NOTE, marginTop: 'var(--space-2)' }}>{describeUnlistedAdditives(view.unlisted)}</p>
       )}
@@ -246,6 +283,7 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
           <p style={NOTE}>{FUNCTION_CAVEAT}</p>
           <p style={NOTE}>{FUNCTION_MISSING_CAVEAT}</p>
           <p style={NOTE}>{EVIDENCE_SOURCE_NOTE}</p>
+          {anySignal && <p data-testid="signal-note" style={NOTE}>{SIGNAL_SECTION_NOTE}</p>}
         </div>
       )}
     </div>

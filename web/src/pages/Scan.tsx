@@ -17,6 +17,7 @@ import AllergenCard from '../components/AllergenCard'
 // 세션75 — 서박사 캐릭터(장식). 배치 정본 backends/먹선/IP/설계_먹선_서박사캐릭터배치_v1_2026-10-03.md · 알레르기 블록엔 두지 않는다.
 import CoachAvatar from '../components/CoachAvatar'
 import AdditiveList from '../components/AdditiveList'
+import { SIGNAL_V3_NOTICE, INGREDIENTS_TITLE, SIBLING_INGREDIENT_NOTE, SIBLING_NUTRITION_NOTE } from '../domain/meokseon/additiveSignal'
 import {
   buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, GRADE_HIDDEN_NOTICE,
   type AdditiveColor,
@@ -1248,6 +1249,17 @@ export default function Scan() {
               미수집일 때도 카드를 띄운다 — 침묵은 「없음」으로 읽힌다. */}
           <AllergenCard result={result} />
 
+          {/* ★ 세션75j — 원재료 원문(서버가 실어 줄 때만). 형제 바코드에서 온 것이면 출처를 «반드시» 말한다. */}
+          {typeof result.ingredients_text === 'string' && result.ingredients_text.trim() && (
+            <div className="survey-card" data-testid="ingredients-card" data-source={result.ingredients_source ?? ''} style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="survey-step-title" style={{ fontSize: 16 }}>{INGREDIENTS_TITLE}</h3>
+              <p style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--text)', whiteSpace: 'pre-wrap', margin: 'var(--space-1) 0 0' }}>{result.ingredients_text}</p>
+              {result.ingredients_source === 'sibling' && (
+                <p data-testid="ingredients-sibling-note" style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-2) 0 0' }}>{SIBLING_INGREDIENT_NOTE}</p>
+              )}
+            </div>
+          )}
+
           {/* 첨가물 — ★★ 2026-08-23 외부검토: **4색 등급 표시를 껐다.**
               끈 방법은 `domain/meokseon/additives.ts` 의 `SHOW_RISK_GRADE` 하나다.
               그 상수를 true 로 되돌리면 아래 4색 안내문·pill 이 그대로 살아난다(코드는 남아 있다).
@@ -1263,7 +1275,7 @@ export default function Scan() {
                   종전 조건(`total === 0`)만으로는 「저장 0개 · 라벨에서 검출 11개」인 제품에서
                   「등록된 첨가물 정보가 없어요」 한 줄만 남는다. 그건 침묵이 아니라 **오정보**다 —
                   라벨에는 있었고 우리가 그것을 잃은 것이다. 그 경우엔 목록 대신 경고를 낸다. */}
-              {additiveView.total === 0 && additiveView.unlisted === 0 ? (
+              {additiveView.total === 0 && additiveView.unlisted === 0 && !additiveView.derived ? (
                 <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>등록된 첨가물 정보가 없어요.</p>
               ) : (
                 <>
@@ -1299,7 +1311,8 @@ export default function Scan() {
                        ⚠ 「이 앱을 믿지 마세요」로 읽히면 실패다 — 어디까지 사실을 말할 수 있고
                           어디부터 아직 판단하지 않는지 «경계»를 보여주는 문장이다. */
                     <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-3)', lineHeight: 1.6 }}>
-                      {GRADE_HIDDEN_NOTICE}
+                      {/* ★ 세션75j — 신호등 v3 가 있으면 그 안내, 없으면 종전 안내(GRADE_HIDDEN_NOTICE) */}
+                      {additiveView.items.some((it) => it.signal) || additiveView.derived ? SIGNAL_V3_NOTICE : GRADE_HIDDEN_NOTICE}
                     </p>
                   )}
                   <AdditiveList view={additiveView} />
@@ -1318,6 +1331,9 @@ export default function Scan() {
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>영양성분</h3>
               {/* ★ 세션75b — 표의 기준을 표 머리에(아래 라벨 %와 기준이 다를 수 있어 섞어 읽지 않게). 서버 basis 그대로 · 지어내지 않음. */}
               <p data-testid="nutri-basis" style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>{basisPhrase(result.nutrition.basis ?? null, result.product)}</p>
+              {result.nutrition.source === 'entity_profile' && (
+                <p data-testid="nutri-sibling-note" style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>{SIBLING_NUTRITION_NOTE}</p>
+              )}
               <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                 <tbody>
                   {NUTRIENTS.map(({ key, label, unit }) => {
