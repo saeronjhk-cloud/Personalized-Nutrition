@@ -692,7 +692,8 @@ export default function Scan() {
             </div>
             {!SHOW_RISK_GRADE && (
               <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', margin: 'var(--space-1) 0 0', lineHeight: 1.6 }}>
-                {GRADE_HIDDEN_NOTICE}
+                {/* ★ 세션75l — 제보 화면도 상품 화면과 같은 규칙: 신호가 실리면 v3 안내 */}
+                {reportAdditives.items.some((it) => it.signal) ? SIGNAL_V3_NOTICE : GRADE_HIDDEN_NOTICE}
               </p>
             )}
             <AdditiveList view={reportAdditives} />

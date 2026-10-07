@@ -77,3 +77,16 @@ describe('배선', () => {
     expect(GRADE_HIDDEN_NOTICE).toContain('표시하지 않습니다')
   })
 })
+
+describe('★ 세션75l — 제보(사진 인식) 화면', () => {
+  it('검출기 v2 행 모양({name, match_type, raw, signal})도 신호가 읽힌다', () => {
+    const v = buildAdditiveList({ additives: [
+      { name: '아스파탐', match_type: 'exact', raw: '아스파탐(감미료)', signal: SIG },
+      { name: '향료', match_type: 'class_only', raw: '향료', signal: { ...SIG, color: 'gray', emoji: '⚪', color_label: '성분 특정 불가', rule: 'R0', badges: [] } },
+    ] })
+    expect(v.items.map((i) => i.signal?.color).sort()).toEqual(['gray', 'orange'])
+  })
+  it('Scan 제보 상세: 신호가 있으면 v3 안내(상품 화면과 같은 규칙)', () => {
+    expect(scan).toMatch(/reportAdditives\.items\.some\(\(it\) => it\.signal\) \? SIGNAL_V3_NOTICE : GRADE_HIDDEN_NOTICE/)
+  })
+})
