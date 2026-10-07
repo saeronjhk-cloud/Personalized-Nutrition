@@ -5,6 +5,7 @@
  */
 import { supabase } from './supabase'
 import { CHECKUP_ENABLED, MEAL_ENABLED } from './flags'
+import { CHECKUP_COMBINE_PAUSED } from '../domain/checkup/interim_pause'
 import { loadEffectiveGoals } from './userGoals'
 import { fetchSurveyResponses, fetchSurveyResponseDetail } from './survey_api'
 import { fetchCheckupRecords, fetchCheckupRecordDetail, fetchMyProfile } from './checkup_api'
@@ -36,7 +37,7 @@ async function fetchTodayMealRows(userId: string): Promise<CoachMealRow[] | null
 /** 최신 검진 수치+검진일(CHECKUP 켜짐만) — eGFR 은 아래 resolveEgfr 로 측정값 우선, 없으면 크레아티닌 CKD-EPI 2021 산출
  *  (운영 DB 에 'egfr' 키 없음 10-02 확인 · 평가 IP/integration/egfr_ckd_epi_eval_v1.md) */
 async function fetchLatestCheckup(userId: string): Promise<{ values: Record<string, { value: number; unit?: string | null }>; recordedDate: string | null } | null> {
-  if (!CHECKUP_ENABLED) return null
+  if (!CHECKUP_ENABLED || CHECKUP_COMBINE_PAUSED) return null // 임시 조치 v1 P07
   const recs = await fetchCheckupRecords(userId)
   if (recs.records.length === 0) return null
   const d = await fetchCheckupRecordDetail(recs.records[0].id, userId)

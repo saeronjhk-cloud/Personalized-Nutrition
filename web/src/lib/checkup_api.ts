@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { CHECKUP_SAVE_PAUSED, PAUSE_SAVE_ERROR } from "../domain/checkup/interim_pause";
 
 export interface BiomarkerRule {
   biomarker_key: string;
@@ -156,6 +157,8 @@ export async function saveCheckup(params: {
   values_count: number;
   error: string | null;
 }> {
+  // 임시 조치 v1 P02 — 정정 배포 전 신규 저장 중단(네트워크 호출 없음)
+  if (CHECKUP_SAVE_PAUSED) return { record_id: null, values_count: 0, error: PAUSE_SAVE_ERROR };
   const { user_id, sex, birth_year, recorded_date, biomarker_input, rules_by_key } = params;
 
   const { data: profileRows, error: profileError } = await supabase
@@ -396,6 +399,7 @@ export async function restoreCheckup(
   recordId: string,
   userId: string,
 ): Promise<{ id: string | null; error: string | null }> {
+  if (CHECKUP_SAVE_PAUSED) return { id: null, error: PAUSE_SAVE_ERROR }; // 임시 조치 v1 P04
   const { data, error } = await supabase
     .from("checkup_records")
     .update({ deleted_at: null })
@@ -421,6 +425,7 @@ export async function updateCheckup(params: {
   biomarker_input: { [key: string]: number };
   rules_by_key: { [key: string]: { unit: string } };
 }): Promise<{ record_id: string | null; values_count: number; error: string | null }> {
+  if (CHECKUP_SAVE_PAUSED) return { record_id: null, values_count: 0, error: PAUSE_SAVE_ERROR }; // 임시 조치 v1 P03
   const { recordId, userId, recorded_date, biomarker_input, rules_by_key } = params;
 
   // 1) 회차 메타(날짜 등) 변경 — 변경할 값이 있을 때만.

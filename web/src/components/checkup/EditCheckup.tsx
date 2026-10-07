@@ -11,6 +11,7 @@ import {
   type BiomarkerRule,
 } from "../../lib/checkup_api";
 import { implausibleValues, implausibleMessage } from "../../domain/checkup/input_guard";
+import { CHECKUP_SAVE_PAUSED, PAUSE_NOTICE } from "../../domain/checkup/interim_pause";
 
 export default function EditCheckup() {
   const navigate = useNavigate();
@@ -279,12 +280,15 @@ export default function EditCheckup() {
               type="button"
               className="btn btn-primary"
               style={{ flex: 1, fontSize: 16 }}
-              disabled={saving}
+              disabled={saving || CHECKUP_SAVE_PAUSED}
               onClick={handleSave}
             >
               {saving ? "저장 중..." : "수정 저장"}
             </button>
           </div>
+          {CHECKUP_SAVE_PAUSED && (
+            <p data-testid="checkup-edit-paused" style={{ margin: "var(--space-3) 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--text-secondary)" }}>{PAUSE_NOTICE}</p>
+          )}
         </div>
       </div>
     </div>

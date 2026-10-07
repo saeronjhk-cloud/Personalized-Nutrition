@@ -10,6 +10,7 @@ import {
 } from "./checkup_api";
 import { fetchSurveyResponses, fetchSurveyResponseDetail } from "./survey_api";
 import { CHECKUP_ENABLED, MEAL_ENABLED } from "./flags";
+import { CHECKUP_COMBINE_PAUSED } from "../domain/checkup/interim_pause";
 import { loadRecentDietSummary } from "./dietSummary";
 import { loadEffectiveGoals } from "./userGoals";
 import { withEgfrInput } from "../domain/checkup/egfr_input";
@@ -33,7 +34,7 @@ export async function loadUnifiedInputs(opts: { skipLatestSurvey?: boolean } = {
 
   // 최신 검진 → CategoryResult[] (CHECKUP_ENABLED 게이트 — G10)
   const loadCheckup = async (): Promise<CategoryResult[] | null> => {
-    if (!plan.checkup) return null;
+    if (!plan.checkup || CHECKUP_COMBINE_PAUSED) return null; // 임시 조치 v1 P06 — 고지 정정 전 결합 이용 중단
     const recs = await fetchCheckupRecords(userId);
     if (recs.records.length === 0) return null;
     const [detail, rangeRes] = await Promise.all([

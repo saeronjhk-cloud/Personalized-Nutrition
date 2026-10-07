@@ -37,6 +37,7 @@ import {
   parseCheckupText,
   matchToRules,
 } from "../../lib/checkupImport";
+import { CHECKUP_SAVE_PAUSED, PAUSE_NOTICE } from "../../domain/checkup/interim_pause";
 
 /** 오늘(로컬) YYYY-MM-DD — toISOString()(UTC)은 한국 오전 9시 전엔 어제 날짜가 됨(input_guard 평가 W3) */
 function todayISO(): string {
@@ -550,6 +551,11 @@ export default function BiomarkerForm() {
 
       {results.length > 0 && (
         <section>
+          {CHECKUP_SAVE_PAUSED ? (
+          <div className="survey-card" data-testid="checkup-save-paused" style={{ marginBottom: "var(--space-3)", borderColor: "var(--warning)", background: "var(--warning-bg)" }}>
+            <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{PAUSE_NOTICE}</p>
+          </div>
+          ) : (
           <button
             type="button"
             className="btn btn-primary"
@@ -559,6 +565,7 @@ export default function BiomarkerForm() {
           >
             {saving ? "저장 중..." : saved ? "저장 완료" : "저장하기"}
           </button>
+          )}
           {dupDate && (
             <div className="survey-card" data-testid="checkup-dup-date" style={{ marginBottom: "var(--space-3)", borderColor: "var(--warning)", background: "var(--warning-bg)" }}>
               <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{sameDateMessage(dupDate)}</p>

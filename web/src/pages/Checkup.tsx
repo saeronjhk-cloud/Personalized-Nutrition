@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BiomarkerForm from "../components/checkup/BiomarkerForm";
 import CheckupConsentGate from "../components/CheckupConsentGate";
+import { CHECKUP_COMBINE_PAUSED } from "../domain/checkup/interim_pause";
 import { hasConsentedCheckup, markCheckupConsent } from "../lib/analytics";
 
 export default function Checkup() {
@@ -42,9 +43,11 @@ export default function Checkup() {
             검진 기록 관리
           </button>
         </div>
-        <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-6)', lineHeight: 1.6 }}>
-          검진 수치를 입력하면 설문 결과와 함께 더 정밀한 영양제 추천을 받을 수 있습니다.
-        </p>
+        {!CHECKUP_COMBINE_PAUSED && (
+          <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 'var(--space-6)', lineHeight: 1.6 }}>
+            검진 수치를 입력하면 설문 결과와 함께 더 정밀한 영양제 추천을 받을 수 있습니다.
+          </p>
+        )}
         <BiomarkerForm />
       </div>
     </div>
