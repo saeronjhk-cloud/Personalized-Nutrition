@@ -1,3 +1,6 @@
+import { CHECKUP_ENABLED } from '../lib/flags'
+import { CHECKUP_POLICY_EFFECTIVE } from '../domain/checkup/consent_v2'
+
 export default function Terms() {
   return (
     <div className="page fade-in" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-12)' }}>
@@ -22,7 +25,7 @@ export default function Terms() {
           ③ 회원 전용 기능은 다음과 같습니다. (일부 기능은 향후 단계적으로 제공될 수 있습니다.)
         </p>
         <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
-          <li>검진 데이터 기반 정밀 추천 (향후 Phase C)</li>
+          {CHECKUP_ENABLED && <li>건강검진 기록·해석(별도 동의) 및 선택 동의 시 검진 정보를 반영한 맞춤 추천</li>}
           <li>추천 결과 이메일 저장</li>
           <li>페르소나 이력 추적</li>
         </ul>
@@ -31,6 +34,9 @@ export default function Terms() {
         <p style={{ marginBottom: 'var(--space-4)' }}>
           본 서비스는 이용자가 입력한 건강 설문 정보를 기반으로 맞춤 영양제를 추천하는 정보 제공 서비스입니다.
           본 서비스는 의학적 진단, 치료, 처방을 대체하지 않으며, 의료 행위에 해당하지 않습니다.
+          {CHECKUP_ENABLED && (
+            <span data-testid="terms-checkup-other-person"> 이용자는 타인의 건강검진 결과를 그 사람의 동의 없이 입력해서는 안 되며, 이를 위반하여 생긴 책임은 입력한 이용자에게 있습니다.</span>
+          )}
         </p>
 
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>제4조 (면책 조항)</h3>
@@ -65,7 +71,7 @@ export default function Terms() {
         </p>
 
         <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-          시행일: 2026년 5월 30일
+          시행일: 2026년 5월 30일{CHECKUP_ENABLED && ` · 개정: ${CHECKUP_POLICY_EFFECTIVE}(건강검진 기능 문구 정정)`}
         </p>
       </div>
     </div>

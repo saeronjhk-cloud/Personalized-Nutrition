@@ -1,19 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BiomarkerForm from "../components/checkup/BiomarkerForm";
 import CheckupConsentGate from "../components/CheckupConsentGate";
 import { CHECKUP_COMBINE_PAUSED } from "../domain/checkup/interim_pause";
-import { hasConsentedCheckup, markCheckupConsent } from "../lib/analytics";
+import { decideGateMode, GATE_LOGIN_REQUIRED, GATE_STATUS_ERROR, type GateMode } from "../domain/checkup/consent_v2";
+import { hasConsentedCheckup } from "../lib/analytics";
+import { fetchCheckupConsentStatus, giveCheckupConsent } from "../lib/checkupConsent";
+import { supabase } from "../lib/supabase";
 
 export default function Checkup() {
   const navigate = useNavigate();
-  const [consented, setConsented] = useState(hasConsentedCheckup());
+  const [mode, setMode] = useState<GateMode | "loading">("loading");
 
-  // 검진 민감정보 수집·이용 opt-in 동의(#3) 게이트. 미동의 시 입력 화면 진입 차단.
-  if (!consented) {
+  // 검진 동의 v2 게이트(SQL 161 서버 기록이 권위). 평가 IP/integration/checkup_consent_v2_eval_v1.md A05~A07
+  async function refresh() {
+    const { data: { user } } = await supabase.auth.getUser();
+    const status = user ? await fetchCheckupConsentStatus() : null;
+    setMode(decideGateMode({ loggedIn: !!user, status, legacyLocalConsent: hasConsentedCheckup() }));
+  }
+  useEffect(() => { refresh(); }, []);
+
+  if (mode === "loading") {
+    return <div className="survey-container fade-in"><div className="survey-card">불러오는 중…</div></div>;
+  }
+  if (mode === "login" || mode === "error") {
+    return (
+      <div className="survey-container fade-in">
+        <div className="survey-card">
+          <p data-testid={`checkup-gate-${mode}`} style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7, marginBottom: "var(--space-4)" }}>
+            {mode === "login" ? GATE_LOGIN_REQUIRED : GATE_STATUS_ERROR}
+          </p>
+          <button type="button" className="btn btn-primary" onClick={() => (mode === "login" ? navigate("/login") : refresh())}>
+            {mode === "login" ? "로그인" : "다시 시도"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if (mode === "first" || mode === "reconsent") {
     return (
       <CheckupConsentGate
-        onAccept={() => { markCheckupConsent(); setConsented(true); }}
+        mode={mode}
+        onAccept={async ({ core, age14, combine }) => {
+          await giveCheckupConsent(core, age14, combine);   // 실패 시 throw → 게이트가 오류 표시(A04)
+          await refresh();
+        }}
         onDecline={() => navigate("/")}
       />
     );

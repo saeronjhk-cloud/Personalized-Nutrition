@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
-import { MEAL_ENABLED } from '../lib/flags'
+import { MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
+import { fetchCheckupConsentStatus, revokeCheckupCombine, revokeCheckupConsent } from '../lib/checkupConsent'
+import {
+  accountRevokeState, type CheckupConsentStatus, ACCOUNT_BLOCK_TITLE, ACCOUNT_BTN_COMBINE, ACCOUNT_DONE_COMBINE,
+  ACCOUNT_BTN_CORE, ACCOUNT_CONFIRM_CORE, ACCOUNT_DONE_CORE, ACCOUNT_NONE, ACCOUNT_REVOKE_ERROR,
+} from '../domain/checkup/consent_v2'
 import { adminWhoami } from '../lib/meokseonAdmin'   // 세션72d
 import { hasServerMealConsent, revokeMealConsentServer, revokeMealConsent } from '../lib/mealConsent'
 
@@ -17,6 +22,10 @@ export default function Account() {
   const [error, setError] = useState<string | null>(null)
   const [mealConsented, setMealConsented] = useState(false)
   const [mealMsg, setMealMsg] = useState<string | null>(null)
+  const [checkupStatus, setCheckupStatus] = useState<CheckupConsentStatus | null>(null)   // 검진 동의 v2(SQL 161)
+  const [checkupMsg, setCheckupMsg] = useState<string | null>(null)
+  const [checkupConfirmOpen, setCheckupConfirmOpen] = useState(false)
+  const [checkupBusy, setCheckupBusy] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)   // 세션72d — 관리자에게만 /admin 링크(판정은 서버)
 
   useEffect(() => {
@@ -28,6 +37,10 @@ export default function Account() {
       if (user) adminWhoami().then((w) => { if (alive) setIsAdmin(w.admin) }).catch(() => { /* 일반 사용자: 403 → 링크 없음 */ })
       if (user && MEAL_ENABLED) {
         try { setMealConsented(await hasServerMealConsent()) } catch { /* noop */ }
+      }
+      if (user && CHECKUP_ENABLED) {
+        const st = await fetchCheckupConsentStatus()
+        if (alive) setCheckupStatus(st)
       }
       setLoading(false)
     })()
@@ -43,6 +56,28 @@ export default function Account() {
     } catch {
       setMealMsg('철회 처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.')
     }
+  }
+
+  async function handleRevokeCheckupCombine() {
+    try {
+      await revokeCheckupCombine()
+      setCheckupStatus(await fetchCheckupConsentStatus())
+      setCheckupMsg(ACCOUNT_DONE_COMBINE)
+    } catch {
+      setCheckupMsg(ACCOUNT_REVOKE_ERROR)
+    }
+  }
+
+  async function handleRevokeCheckupCore() {
+    setCheckupBusy(true)
+    try {
+      await revokeCheckupConsent()
+      setCheckupStatus(await fetchCheckupConsentStatus())
+      setCheckupMsg(ACCOUNT_DONE_CORE)
+    } catch {
+      setCheckupMsg(ACCOUNT_REVOKE_ERROR)
+    }
+    setCheckupBusy(false); setCheckupConfirmOpen(false)
   }
 
   async function handleLogout() {
@@ -113,6 +148,26 @@ export default function Account() {
               </div>
             )}
 
+            {CHECKUP_ENABLED && (() => {
+              const rs = accountRevokeState(checkupStatus)
+              return (
+                <div data-testid="account-checkup-consent" style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)', marginBottom: 'var(--space-6)' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>{ACCOUNT_BLOCK_TITLE}</h3>
+                  {checkupMsg && <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{checkupMsg}</p>}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                    {rs.showCombineRevoke && (
+                      <button type="button" className="btn btn-secondary" data-testid="checkup-revoke-combine" onClick={handleRevokeCheckupCombine}>
+                        {ACCOUNT_BTN_COMBINE}
+                      </button>
+                    )}
+                    <button type="button" className="btn btn-secondary" data-testid="checkup-revoke-core" disabled={!rs.coreRevokeEnabled} onClick={() => setCheckupConfirmOpen(true)}>
+                      {rs.coreRevokeEnabled ? ACCOUNT_BTN_CORE : ACCOUNT_NONE}
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
+
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)' }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--danger)', marginBottom: 'var(--space-2)' }}>회원 탈퇴</h3>
               <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>
@@ -137,6 +192,18 @@ export default function Account() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={checkupConfirmOpen}
+        danger
+        busy={checkupBusy}
+        title={ACCOUNT_BTN_CORE}
+        description={ACCOUNT_CONFIRM_CORE}
+        confirmLabel="철회하고 삭제"
+        cancelLabel="취소"
+        onConfirm={handleRevokeCheckupCore}
+        onCancel={() => setCheckupConfirmOpen(false)}
+      />
 
       <ConfirmDialog
         open={confirmOpen}

@@ -1,4 +1,5 @@
-import { MEAL_ENABLED } from '../lib/flags'
+import { MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
+import { CHECKUP_POLICY_EFFECTIVE } from '../domain/checkup/consent_v2'
 
 export default function Privacy() {
   return (
@@ -55,10 +56,14 @@ export default function Privacy() {
           <li>※ 개인의 건강 설문에 따라 계산된 맞춤 주의 사유·개인화 영양소 항목, 설문 응답값, 건강검진 결과값은 스캔 이력에 <strong>저장하지 않으며</strong>, "내 기준으로 보기"는 조회 시점에 다시 계산합니다.</li>
         </ul>
 
-        <p style={{ marginBottom: 'var(--space-2)', fontWeight: 600, color: 'var(--text)' }}>④ 향후 도입 예정 (선택, Phase C)</p>
-        <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
-          <li>검진 데이터 (혈액검사 등 — 민감정보에 해당하며, 별도 동의를 받은 경우에만 수집)</li>
-        </ul>
+        {CHECKUP_ENABLED && (
+          <>
+            <p style={{ marginBottom: 'var(--space-2)', fontWeight: 600, color: 'var(--text)' }}>④ 건강검진 기능(로그인 회원, 별도 동의 시)</p>
+            <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
+              <li>이용자가 입력하거나 결과지 PDF에서 이용자 기기 안에서 읽어 들인 건강검진 수치(혈압·혈당·지질·간기능·신장기능·체격·요단백 등), 검진일, 성별·연령대, 입력일시, 적용 기준표 버전 및 해석 결과 — <strong>민감정보</strong></li>
+            </ul>
+          </>
+        )}
         <p style={{ marginBottom: 'var(--space-4)' }}>
           <strong>수집하지 않는 정보:</strong> 이름, 전화번호, 주소, 주민등록번호, 결제 정보,
           계정 비밀번호, 얼굴 사진 등 직접 개인을 식별할 수 있는 일체의 정보(이메일은 회원가입 시에만 수집).
@@ -74,6 +79,23 @@ export default function Privacy() {
           {MEAL_ENABLED && '로그인 회원의 건강 목표는 식사 기록 화면에서 입력·수정하며, 같은 별도 동의 범위와 보유기간으로 처리합니다. '}
           (가족력은 본인의 건강관리 참고 범위에서만 입력하며, 가족 구성원의 식별정보는 수집하지 않습니다.)
         </p>
+
+        {CHECKUP_ENABLED && (
+          <>
+            <p data-testid="privacy-checkup-section" style={{ marginBottom: 'var(--space-2)', fontWeight: 600, color: 'var(--text)' }}>건강검진 정보(민감정보)의 별도 동의</p>
+            <p style={{ marginBottom: 'var(--space-2)' }}>
+              건강검진 정보는 「개인정보 보호법」 제23조의 <strong>민감정보</strong>이며, 회사는 다른 개인정보 처리 동의와 <strong>분리된 별도 동의</strong>를 받은 경우에만 처리합니다.
+            </p>
+            <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
+              <li><strong>필수 목적</strong>(검진 기능 이용 조건): 참고범위 안내, 의료진 상담 권고, 본인 검진 기록 저장·비교·추이 관리</li>
+              <li><strong>선택 목적</strong>(별도 선택 동의 시에만): 설문 응답·식사 기록과 결합한 맞춤 건강기능식품 추천, 식사 코칭, 주간 리포트</li>
+              <li><strong>보유기간</strong>: 입력일부터 730일. 회원 탈퇴, 기록 삭제 요청, 필수 동의 철회 시 지체 없이 파기(선택 동의만 철회하면 결합 이용을 중단하고 결합 결과를 삭제)</li>
+              <li><strong>거부 권리와 불이익</strong>: 필수 동의를 거부하면 검진 기능을 이용할 수 없으나 회원가입과 다른 기능은 이용할 수 있습니다. 선택 동의를 거부해도 검진 기록·해석과 다른 기능은 이용할 수 있으며, 검진 정보가 반영된 맞춤 추천·코칭·리포트만 제공되지 않습니다.</li>
+              <li><strong>결과지 PDF</strong>: 서버로 전송·저장하지 않으며 이용자 기기 안에서 수치만 추출합니다.</li>
+              <li><strong>만 14세 미만</strong>: 검진 기능을 이용할 수 없습니다.</li>
+            </ul>
+          </>
+        )}
 
         <div
           style={{
@@ -134,7 +156,13 @@ export default function Privacy() {
           <li><strong>비회원 세션 기반 설문·추천 데이터:</strong> 생성일로부터 최대 730일(약 2년) 또는 삭제요청 시까지 보관 후 파기합니다.</li>
           <li><strong>개인을 식별할 수 없도록 집계된 통계 데이터:</strong> 서비스 품질 개선 및 연구 목적으로 보관할 수 있으며, 서비스 종료 시 지체 없이 파기합니다.</li>
           <li><strong>백업 데이터:</strong> 데이터베이스는 일 단위로 자동 백업되며 현재 운영 플랜 기준 7일간 보관 후 순차적으로 파기됩니다. 데이터베이스 백업에는 저장소(Storage)에 보관된 사진 객체 자체가 포함되지 않으며, 저장사업자의 내부 복제·캐시 및 삭제 완료주기는 계약·운영 설정에 따라 확인·관리합니다.</li>
-          {MEAL_ENABLED && (
+          {CHECKUP_ENABLED && (
+            <li><strong>건강검진 정보:</strong> 입력일부터 730일, 또는 회원 탈퇴·기록 삭제 요청·필수 동의 철회 시 지체 없이 파기합니다.</li>
+          )}
+          {CHECKUP_ENABLED && (
+            <li><strong>식사 사진·건강검진 동의 증빙(최소 메타):</strong> 회원 탈퇴 또는 동의 철회 후에도 적법한 별도 동의·철회가 있었다는 사실을 증명하고 분쟁에 대응하기 위한 <strong>회사의 정당한 이익</strong>에 근거하여, 식별키·동의/철회 시각·동의한 문구 버전·동의문 해시·동의 항목(필수/선택) 등 최소 정보(<strong>건강정보·검진 수치·사진·음식/영양값 제외</strong>)를 탈퇴·철회일부터 <strong>3년</strong>간 분리 보관한 후 지체 없이 파기합니다. 다만 분쟁·조사·소송이 개시된 경우 해당 절차 종료 시까지 보관합니다.</li>
+          )}
+          {MEAL_ENABLED && !CHECKUP_ENABLED && (
             <li><strong>식사 사진 분석 동의 증빙(최소 메타):</strong> 회원 탈퇴 또는 동의 철회 후에도 적법한 별도 동의·철회가 있었다는 사실을 증명하고 분쟁에 대응하기 위한 <strong>회사의 정당한 이익</strong>에 근거하여, 식별키·동의/철회 시각·동의한 정책 버전·동의문 해시 등 최소 정보(<strong>건강정보·사진·음식/영양값 제외</strong>)를 탈퇴·철회일부터 3년간 분리 보관한 후 지체 없이 파기합니다. 다만 분쟁·조사·소송이 개시된 경우 해당 절차 종료 시까지 보관합니다.</li>
           )}
         </ul>
@@ -153,7 +181,9 @@ export default function Privacy() {
         {[
           {
             name: 'Supabase, Inc.', country: '대한민국(서울 리전) 저장 · 운영·기술지원 과정에서 국외(미국·싱가포르 등 Supabase 및 승인된 재수탁자 소재)에서 조회 가능 — 실제 접근 국가·법인은 수탁자 현황에 따라 관리',
-            items: '이메일, 회원 식별 정보, 설문 응답(건강 관련 민감정보 포함), 추천 결과, 제품 스캔 이력'
+            items: '이메일, 회원 식별 정보, 설문 응답(건강 관련 민감정보 포함), '
+              + (CHECKUP_ENABLED ? '건강검진 수치·해석 결과(검진 기능 이용 시), ' : '')
+              + '추천 결과, 제품 스캔 이력'
               + (MEAL_ENABLED ? ', 식사 사진 및 그로부터 추정된 음식·영양 정보(식사 기록 기능 이용 시)' : '') + '(로그인 회원)',
             when: '서비스 이용(설문 저장·로그인·스캔 저장) 시 정보통신망(HTTPS)을 통해 전송'
               + (MEAL_ENABLED ? ' (식사 사진 원본은 대한민국(서울) 소재 비공개 저장소에 보관)' : ''),
@@ -285,7 +315,9 @@ export default function Privacy() {
 
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>11. 방침 변경</h3>
         <p style={{ marginBottom: 'var(--space-2)' }}>
-          {MEAL_ENABLED
+          {CHECKUP_ENABLED
+            ? `본 개인정보처리방침(버전 13_v5.1)은 ${CHECKUP_POLICY_EFFECTIVE}부터 시행됩니다. (직전 개정: 2026년 7월 12일)`
+            : MEAL_ENABLED
             ? '본 개인정보처리방침(버전 13_v5.0)은 2026년 7월 12일부터 시행됩니다. (직전 개정: 2026년 7월 9일)'
             : '본 개인정보처리방침은 2026년 7월 9일부터 시행됩니다. (직전 개정: 2026년 5월 30일)'}
           {' '}개인정보 수집·이용 목적, 처리 항목, 국외이전 대상 등 중요한 변경이 있을 경우 시행 최소 7일 전(이용자에게 불리하거나 민감한 변경은 최소 30일 전)에 서비스 내 공지로 사전 안내합니다.
@@ -295,6 +327,9 @@ export default function Privacy() {
           <>
             <p style={{ marginBottom: 'var(--space-1)', fontWeight: 600, color: 'var(--text)' }}>부칙 (개정 이력)</p>
             <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
+              {CHECKUP_ENABLED && (
+                <li>13_v5.1 ({CHECKUP_POLICY_EFFECTIVE} 시행): 건강검진 기능 처리 조항 신설(항목·필수/선택 목적·보유기간·거부 불이익·PDF 미전송), 위탁 항목에 건강검진 정보 추가, 동의 증빙 보관 대상에 건강검진 동의 추가, 만 14세 미만 검진 기능 제한. <strong>기존 이용자는 다음 검진 기능 이용 시 다시 동의를 받습니다.</strong></li>
+              )}
               <li>2026-09-28 (경미 변경 · 버전 13_v5.0 유지): 로그인 회원의 건강 목표 입력 위치(식사 기록 화면) 안내 문구 추가. 처리 항목·목적·동의 범위·보유 기간 변경 없음.</li>
               <li>2026-10-03: 개인정보 보호책임자 연락 이메일 변경(contact@saeronmedia.com) — 처리 항목·목적 변경 없음.</li>
               <li>13_v5.0 (2026-07-12 시행): 식사 사진 분석 기능 관련 민감정보(건강정보) 처리·국외이전(OpenAI·Railway, 미국) 조항 신설, 전송 최소화(음식영역 크롭·저해상도·EXIF 제거)·OpenAI 보관(최대 30일)·모델 미학습 명시, 만 14세 이상 서버 확인, 동의 철회 및 회원 탈퇴 시 전수 삭제 반영.</li>
