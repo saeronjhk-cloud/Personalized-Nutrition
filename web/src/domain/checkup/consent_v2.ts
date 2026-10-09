@@ -20,16 +20,19 @@ export interface CheckupConsentStatus {
 
 export type GateMode = "login" | "first" | "reconsent" | "pass" | "error";
 
-/** 게이트 화면 결정. status=null 은 서버 확인 실패(진입 차단 — 거짓 통과 금지). */
+/**
+ * 게이트 화면 결정. status=null 은 서버 확인 실패(진입 차단 — 거짓 통과 금지).
+ * 재동의 안내는 서버 needs_reconsent(= v2 이후 동의문 버전이 바뀐 경우)일 때만.
+ * 제이 결정 2026-10-09 18:47: 기존 검진 기록 보유자는 제이 1명 → 옛 localStorage 동의·기존 기록 기준 재동의 안내 불필요(처음 동의 화면으로 충분).
+ */
 export function decideGateMode(args: {
   loggedIn: boolean;
   status: CheckupConsentStatus | null;
-  legacyLocalConsent: boolean;
 }): GateMode {
   if (!args.loggedIn) return "login";
   if (!args.status) return "error";
   if (args.status.core_active) return "pass";
-  if (args.status.needs_reconsent || args.legacyLocalConsent || args.status.record_count > 0) return "reconsent";
+  if (args.status.needs_reconsent) return "reconsent";
   return "first";
 }
 

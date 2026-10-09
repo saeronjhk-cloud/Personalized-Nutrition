@@ -8,13 +8,12 @@ const ST = (o: Partial<C.CheckupConsentStatus> = {}): C.CheckupConsentStatus =>
   ({ has_row: false, core_active: false, combine_active: false, needs_reconsent: false, record_count: 0, ...o });
 
 describe("게이트 모드(A05~A07)", () => {
-  it("A07 비로그인 → login", () => expect(C.decideGateMode({ loggedIn: false, status: null, legacyLocalConsent: false })).toBe("login"));
-  it("서버 확인 실패 → error(거짓 통과 금지)", () => expect(C.decideGateMode({ loggedIn: true, status: null, legacyLocalConsent: true })).toBe("error"));
-  it("A06 core_active → pass", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ has_row: true, core_active: true }), legacyLocalConsent: false })).toBe("pass"));
-  it("A05 옛 localStorage 동의만 → reconsent", () => expect(C.decideGateMode({ loggedIn: true, status: ST(), legacyLocalConsent: true })).toBe("reconsent"));
-  it("A05 서버 needs_reconsent(문구 버전 변경) → reconsent", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ has_row: true, needs_reconsent: true }), legacyLocalConsent: false })).toBe("reconsent"));
-  it("A05 동의 없이 기존 기록 보유 → reconsent", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ record_count: 1 }), legacyLocalConsent: false })).toBe("reconsent"));
-  it("처음 → first", () => expect(C.decideGateMode({ loggedIn: true, status: ST(), legacyLocalConsent: false })).toBe("first"));
+  it("A07 비로그인 → login", () => expect(C.decideGateMode({ loggedIn: false, status: null })).toBe("login"));
+  it("서버 확인 실패 → error(거짓 통과 금지)", () => expect(C.decideGateMode({ loggedIn: true, status: null })).toBe("error"));
+  it("A06 core_active → pass", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ has_row: true, core_active: true }) })).toBe("pass"));
+  it("A05 서버 needs_reconsent(동의문 버전 변경) → reconsent", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ has_row: true, needs_reconsent: true }) })).toBe("reconsent"));
+  it("A05b 동의 없이 기존 기록만 보유 → first(제이 결정 10-09: 재동의 안내 불필요)", () => expect(C.decideGateMode({ loggedIn: true, status: ST({ record_count: 1 }) })).toBe("first"));
+  it("처음 → first", () => expect(C.decideGateMode({ loggedIn: true, status: ST() })).toBe("first"));
 });
 
 describe("A02 제출 조건", () => {

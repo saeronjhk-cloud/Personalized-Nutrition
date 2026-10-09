@@ -4,7 +4,6 @@ import BiomarkerForm from "../components/checkup/BiomarkerForm";
 import CheckupConsentGate from "../components/CheckupConsentGate";
 import { CHECKUP_COMBINE_PAUSED } from "../domain/checkup/interim_pause";
 import { decideGateMode, GATE_LOGIN_REQUIRED, GATE_STATUS_ERROR, type GateMode } from "../domain/checkup/consent_v2";
-import { hasConsentedCheckup } from "../lib/analytics";
 import { fetchCheckupConsentStatus, giveCheckupConsent } from "../lib/checkupConsent";
 import { supabase } from "../lib/supabase";
 
@@ -16,7 +15,7 @@ export default function Checkup() {
   async function refresh() {
     const { data: { user } } = await supabase.auth.getUser();
     const status = user ? await fetchCheckupConsentStatus() : null;
-    setMode(decideGateMode({ loggedIn: !!user, status, legacyLocalConsent: hasConsentedCheckup() }));
+    setMode(decideGateMode({ loggedIn: !!user, status }));
   }
   useEffect(() => { refresh(); }, []);
 
