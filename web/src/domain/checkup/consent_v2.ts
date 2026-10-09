@@ -8,7 +8,7 @@ export const CHECKUP_NOTICE_VERSION = "checkup_v2";
 export const CHECKUP_POLICY_VERSION = "13_v5.1";
 export const CHECKUP_CONSENT_CHANNEL = "web_checkup_gate";
 /** 처리방침 13_v5.1 시행일(배포일). ⚠️ 배포일이 바뀌면 이 한 줄만 고칠 것. */
-export const CHECKUP_POLICY_EFFECTIVE = "2026년 10월 10일";
+export const CHECKUP_POLICY_EFFECTIVE = "2026년 10월 9일";
 
 export interface CheckupConsentStatus {
   has_row: boolean;
