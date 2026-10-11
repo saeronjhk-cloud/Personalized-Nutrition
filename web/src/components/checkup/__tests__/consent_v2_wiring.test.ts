@@ -57,10 +57,10 @@ describe("동의 v2 배선", () => {
     expect(s).not.toContain("향후 Phase C");
     expect(s).toContain("타인의 건강검진 결과를 그 사람의 동의 없이 입력해서는 안 되며");
   });
-  it("A14 임시 조치 상수는 아직 true(해제는 실측 후 별도 커밋)", () => {
+  it("A14→U01 임시 조치 해제(10-11, 실측 R1~R3 후 별도 커밋)", () => {
     const s = read("../../../domain/checkup/interim_pause.ts");
-    expect(s).toContain("export const CHECKUP_SAVE_PAUSED = true;");
-    expect(s).toContain("export const CHECKUP_COMBINE_PAUSED = true;");
+    expect(s).toMatch(/export const CHECKUP_SAVE_PAUSED = false;/);
+    expect(s).toMatch(/export const CHECKUP_COMBINE_PAUSED = false;/);
   });
   it("SQL 161 핵심(RESTRICTIVE·RPC 전용 쓰기·감사 3년·160 되돌리기 주석만)", () => {
     const s = read("../../../../supabase/161_checkup_consent.sql");

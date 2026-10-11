@@ -1,4 +1,5 @@
-/** 검진 임시 조치 v1 P02~P05 · 정본 IP/integration/checkup_interim_pause_eval_v1.md */
+/** 검진 임시 조치 v1 P02~P05 → 해제 후 U02(중단 장치 회귀) · 정본 IP/integration/checkup_interim_pause_eval_v1.md
+ *  10-11 상수는 false 로 해제됨. 이 파일은 «다시 true 로 켜면 여전히 막히는지»를 지킨다 → 상수를 true 로 모킹. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const calls: string[] = [];
@@ -6,6 +7,7 @@ vi.mock("../supabase", () => {
   const chain: any = new Proxy({}, { get: (_t, k) => (k === "then" ? (r: any) => r({ data: [{ id: "r1" }], error: null }) : () => chain) });
   return { supabase: { from: (t: string) => { calls.push(t); return chain; } } };
 });
+vi.mock("../../domain/checkup/interim_pause", async (orig) => ({ ...(await orig<any>()), CHECKUP_SAVE_PAUSED: true, CHECKUP_COMBINE_PAUSED: true }));
 import { saveCheckup, updateCheckup, restoreCheckup, deleteCheckup } from "../checkup_api";
 import { PAUSE_SAVE_ERROR } from "../../domain/checkup/interim_pause";
 

@@ -3,8 +3,8 @@
  * 근거: IP/integration/검진동의_외부자문_회신기록_v1.md 공통 지적 C1·C2 · 평가 IP/integration/checkup_interim_pause_eval_v1.md
  * 해제 = 두 값을 false 로 + SQL 160 되돌리기(동의 서버 기록 SQL 161 적용 후)
  */
-export const CHECKUP_SAVE_PAUSED = true;
-export const CHECKUP_COMBINE_PAUSED = true;
+export const CHECKUP_SAVE_PAUSED = false;   // 10-11 해제(동의 v2·SQL 161·162·실측 R1~R3 완료) — 재중단 시 true
+export const CHECKUP_COMBINE_PAUSED = false; // 10-11 해제 — 결합은 이제 선택 동의(combine_active)로 판정
 
 export const PAUSE_NOTICE =
   "검진 기록 저장은 개인정보 처리 절차를 정비하는 동안 잠시 멈췄어요. 분석 결과는 지금처럼 이 화면에서 볼 수 있고, 입력한 수치는 서버에 저장되지 않아요. 저장해 둔 기록은 보기와 삭제만 할 수 있어요.";
