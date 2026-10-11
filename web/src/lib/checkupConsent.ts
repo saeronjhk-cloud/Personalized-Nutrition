@@ -3,7 +3,7 @@
  * 로컬 캐시가 계정을 따라다니지 않아 갇힘 발생). 평가 IP/integration/checkup_consent_v2_eval_v1.md
  */
 import { supabase } from "./supabase";
-import { CHECKUP_CONSENT_CHANNEL, type CheckupConsentStatus } from "../domain/checkup/consent_v2";
+import { CHECKUP_CONSENT_CHANNEL, ACCOUNT_CONSENT_CHANNEL, type CheckupConsentStatus } from "../domain/checkup/consent_v2";
 
 /** 서버 동의 상태. 실패 시 null(호출부는 진입 차단). */
 export async function fetchCheckupConsentStatus(): Promise<CheckupConsentStatus | null> {
@@ -31,6 +31,12 @@ export async function giveCheckupConsent(core: boolean, age14: boolean, combine:
     p_combine: combine,
     p_channel: CHECKUP_CONSENT_CHANNEL,
   });
+  if (error) throw error;
+}
+
+/** 버튼 C — 필수 동의 후 선택(결합) 동의만 추가(SQL 162). 실패 throw. */
+export async function giveCheckupCombine(): Promise<void> {
+  const { error } = await supabase.rpc("give_checkup_combine", { p_channel: ACCOUNT_CONSENT_CHANNEL });
   if (error) throw error;
 }
 

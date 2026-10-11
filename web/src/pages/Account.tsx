@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
-import { fetchCheckupConsentStatus, revokeCheckupCombine, revokeCheckupConsent } from '../lib/checkupConsent'
+import { fetchCheckupConsentStatus, giveCheckupCombine, revokeCheckupCombine, revokeCheckupConsent } from '../lib/checkupConsent'
 import {
   accountRevokeState, type CheckupConsentStatus, ACCOUNT_BLOCK_TITLE, ACCOUNT_BTN_COMBINE, ACCOUNT_DONE_COMBINE,
   ACCOUNT_BTN_CORE, ACCOUNT_CONFIRM_CORE, ACCOUNT_DONE_CORE, ACCOUNT_NONE, ACCOUNT_REVOKE_ERROR,
+  ACCOUNT_BTN_COMBINE_GRANT, ACCOUNT_DONE_COMBINE_GRANT, GATE_COMBINE_BULLETS, GATE_SUBMIT_ERROR,
 } from '../domain/checkup/consent_v2'
 import { adminWhoami } from '../lib/meokseonAdmin'   // 세션72d
 import { hasServerMealConsent, revokeMealConsentServer, revokeMealConsent } from '../lib/mealConsent'
@@ -65,6 +66,16 @@ export default function Account() {
       setCheckupMsg(ACCOUNT_DONE_COMBINE)
     } catch {
       setCheckupMsg(ACCOUNT_REVOKE_ERROR)
+    }
+  }
+
+  async function handleGrantCheckupCombine() {
+    try {
+      await giveCheckupCombine()
+      setCheckupStatus(await fetchCheckupConsentStatus())
+      setCheckupMsg(ACCOUNT_DONE_COMBINE_GRANT)
+    } catch {
+      setCheckupMsg(GATE_SUBMIT_ERROR)
     }
   }
 
@@ -154,6 +165,16 @@ export default function Account() {
                 <div data-testid="account-checkup-consent" style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)', marginBottom: 'var(--space-6)' }}>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>{ACCOUNT_BLOCK_TITLE}</h3>
                   {checkupMsg && <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{checkupMsg}</p>}
+                  {rs.showCombineGrant && (
+                    <div data-testid="checkup-combine-grant-block" style={{ marginBottom: 'var(--space-3)' }}>
+                      <ul style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, paddingLeft: 'var(--space-5)', marginBottom: 'var(--space-2)' }}>
+                        {GATE_COMBINE_BULLETS.map((b) => <li key={b}>{b}</li>)}
+                      </ul>
+                      <button type="button" className="btn btn-primary" data-testid="checkup-grant-combine" onClick={handleGrantCheckupCombine}>
+                        {ACCOUNT_BTN_COMBINE_GRANT}
+                      </button>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                     {rs.showCombineRevoke && (
                       <button type="button" className="btn btn-secondary" data-testid="checkup-revoke-combine" onClick={handleRevokeCheckupCombine}>

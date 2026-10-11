@@ -31,6 +31,19 @@ describe("동의 v2 배선", () => {
     expect(s).toContain("description={ACCOUNT_CONFIRM_CORE}");
     expect(s.indexOf("{rs.showCombineRevoke && (")).toBeLessThan(s.indexOf('data-testid="checkup-revoke-combine"'));
   });
+  it("A15 계정 화면 결합 동의하기(버튼 C) — 선택 고지 4줄 + 버튼", () => {
+    const s = read("../../../pages/Account.tsx");
+    const i = s.indexOf("{rs.showCombineGrant && (");
+    expect(i).toBeGreaterThan(0);
+    expect(s.indexOf("GATE_COMBINE_BULLETS.map")).toBeGreaterThan(i);
+    expect(s.indexOf('data-testid="checkup-grant-combine"')).toBeGreaterThan(s.indexOf("GATE_COMBINE_BULLETS.map"));
+  });
+  it("SQL 162 — core 필수 확인 후 결합 동의만 갱신", () => {
+    const s = read("../../../../supabase/162_checkup_combine_grant.sql");
+    expect(s).toContain("if not public.checkup_consent_core_active(v_uid) then");
+    expect(s).toContain("set combine_consented_at = now(), combine_revoked_at = null");
+    expect(s).toContain("grant execute on function public.give_checkup_combine(text) to authenticated;");
+  });
   it("A12 처리방침 13_v5.1", () => {
     const s = read("../../../pages/Privacy.tsx");
     expect(s).not.toContain("향후 도입 예정");

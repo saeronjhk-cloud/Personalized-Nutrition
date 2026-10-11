@@ -32,8 +32,17 @@ describe("계정 철회 버튼(A09~A11)", () => {
     expect(C.accountRevokeState(ST({ record_count: 2 })).coreRevokeEnabled).toBe(true);
   });
   it("A11 둘 다 없음 → 비활성", () => {
-    expect(C.accountRevokeState(ST())).toEqual({ showCombineRevoke: false, coreRevokeEnabled: false });
-    expect(C.accountRevokeState(null)).toEqual({ showCombineRevoke: false, coreRevokeEnabled: false });
+    expect(C.accountRevokeState(ST())).toEqual({ showCombineRevoke: false, showCombineGrant: false, coreRevokeEnabled: false });
+    expect(C.accountRevokeState(null)).toEqual({ showCombineRevoke: false, showCombineGrant: false, coreRevokeEnabled: false });
+  });
+  it("A15 필수만 동의(결합 없음) → 결합 동의하기 노출, 철회 A 없음 (10-11 실측 빈틈)", () => {
+    const r = C.accountRevokeState(ST({ has_row: true, core_active: true }));
+    expect(r.showCombineGrant).toBe(true);
+    expect(r.showCombineRevoke).toBe(false);
+  });
+  it("A15 결합까지 동의 → 결합 동의하기 숨김 · 필수 미동의 → 숨김", () => {
+    expect(C.accountRevokeState(ST({ has_row: true, core_active: true, combine_active: true })).showCombineGrant).toBe(false);
+    expect(C.accountRevokeState(ST({ record_count: 3 })).showCombineGrant).toBe(false);
   });
 });
 
@@ -46,6 +55,7 @@ describe("A01 문구 = 정본 v2 §1·§4·§5 (복사본 1:1)", () => {
     ...C.GATE_COMBINE_BULLETS, C.GATE_CHECK_COMBINE, C.GATE_BTN_ACCEPT, C.GATE_BTN_DECLINE,
     C.RECONSENT_TITLE, C.RECONSENT_BODY, C.ACCOUNT_BTN_COMBINE, C.ACCOUNT_DONE_COMBINE,
     C.ACCOUNT_BTN_CORE, C.ACCOUNT_CONFIRM_CORE, C.ACCOUNT_DONE_CORE, C.ACCOUNT_NONE,
+    C.ACCOUNT_BTN_COMBINE_GRANT, C.ACCOUNT_DONE_COMBINE_GRANT,
   ];
   it.each(strings.map((s) => [s.slice(0, 24), s]))("%s…", (_k, s) => {
     expect(N).toContain(norm(s));

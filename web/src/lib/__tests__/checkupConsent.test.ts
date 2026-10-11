@@ -11,7 +11,7 @@ const rpc = {
   mockImplementation: (f: Impl) => { impl = f; },
 };
 vi.mock("../supabase", () => ({ supabase: { rpc: (...a: any[]) => { calls.push(a); return impl(...a); } } }));
-import { giveCheckupConsent, fetchCheckupConsentStatus, isCheckupCombineActive, revokeCheckupConsent, revokeCheckupCombine } from "../checkupConsent";
+import { giveCheckupCombine, giveCheckupConsent, fetchCheckupConsentStatus, isCheckupCombineActive, revokeCheckupConsent, revokeCheckupCombine } from "../checkupConsent";
 
 beforeEach(() => { calls.length = 0; impl = async () => ({ data: null, error: null }); });
 
@@ -43,6 +43,12 @@ describe("checkupConsent", () => {
     expect(await isCheckupCombineActive("u")).toBe(false);
     rpc.mockImplementation(() => Promise.reject(new Error("net")));
     expect(await isCheckupCombineActive("u")).toBe(false);
+  });
+  it("A16 결합 동의 추가(SQL 162) 인자·실패 throw", async () => {
+    await giveCheckupCombine();
+    expect(calls).toEqual([["give_checkup_combine", { p_channel: "web_account" }]]);
+    rpc.mockResolvedValue({ data: null, error: { message: "core consent required" } });
+    await expect(giveCheckupCombine()).rejects.toBeTruthy();
   });
   it("철회 A·B 호출·실패 throw", async () => {
     rpc.mockResolvedValue({ data: { checkup_records: 2, biomarker_values: 9 }, error: null });

@@ -44,11 +44,14 @@ export function canSubmitConsent(core: boolean, age14: boolean): boolean {
 /** 계정 화면 철회 버튼 상태(A09~A11). */
 export function accountRevokeState(s: CheckupConsentStatus | null): {
   showCombineRevoke: boolean;
+  showCombineGrant: boolean;
   coreRevokeEnabled: boolean;
 } {
-  if (!s) return { showCombineRevoke: false, coreRevokeEnabled: false };
+  if (!s) return { showCombineRevoke: false, showCombineGrant: false, coreRevokeEnabled: false };
   return {
     showCombineRevoke: s.combine_active,
+    // 정본 §4 버튼 C(10-11): 필수 동의는 있는데 선택(결합) 동의가 없을 때 — 나중에 결합 동의할 경로
+    showCombineGrant: s.core_active && !s.combine_active,
     coreRevokeEnabled: s.has_row || s.record_count > 0,
   };
 }
@@ -100,4 +103,8 @@ export const ACCOUNT_CONFIRM_CORE =
 export const ACCOUNT_DONE_CORE =
   "검진 기능 동의를 철회하고 검진 기록을 모두 삭제했어요. 계정과 다른 기능은 계속 이용할 수 있어요.";
 export const ACCOUNT_NONE = "동의 내역 없음";
+export const ACCOUNT_BTN_COMBINE_GRANT = "검진 결합 이용 동의하기";
+export const ACCOUNT_DONE_COMBINE_GRANT =
+  "검진 정보를 맞춤 추천·코칭·리포트에 쓰는 데 동의했어요. 이 화면에서 언제든 철회할 수 있어요.";
+export const ACCOUNT_CONSENT_CHANNEL = "web_account";
 export const ACCOUNT_REVOKE_ERROR = "철회 처리 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.";
