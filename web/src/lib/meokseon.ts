@@ -119,7 +119,11 @@ export interface MsProductResult {
    */
   allergens_from_ingredients?: {
     names: string[]
-    evidence?: { allergen: string; token: string }[]
+    evidence?: { allergen: string; token: string; via?: string }[]
+    /** ★ 서버 v2 — 원재료명에 있는 복합원재료 토큰(복합조미·스프·소스 등). */
+    composite?: string[]
+    /** ★ 서버 v2 — true = 원재료명에 안 드러난 알레르기가 있을 가능성이 높다(HACCP 실측 0.65 vs 0.33). */
+    missing_likely?: boolean
     rules_version?: string
     ingredient_source?: string | null
   } | null

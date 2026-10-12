@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { ALLERGEN_PACKAGE_LINE } from '../domain/meokseon/readingNotice'
-import { describeAllergens, describeAllergenProvenance, describeIngredientAllergens, type AllergenView } from '../domain/meokseon/allergens'
+import { describeAllergens, describeAllergenProvenance, describeIngredientAllergens, ingredientAllergensMissingLikely, type AllergenView } from '../domain/meokseon/allergens'
 // ★ 세션61 U60-7 — `MsProductResult` 를 더는 import 하지 않는다.
 //   prop 타입을 `describeAllergens` 의 시그니처에서 유도하므로 필요 없어졌고,
 //   남겨 두면 「이 카드는 바코드 결과 전용」이라는 잘못된 인상을 준다.
@@ -139,6 +139,18 @@ type AllergenCardInput = Parameters<typeof describeAllergens>[0]
   & Parameters<typeof describeIngredientAllergens>[0]
 
 /**
+ * ★ 세션77 v2 — 복합원재료(복합조미식품·스프·소스 등)가 있어 빠진 알레르기가 있을 가능성이 높을 때.
+ *   HACCP 실측: 이 신호가 있으면 원재료명 결과가 표시란 알레르기를 하나 이상 놓칠 확률 약 65%(없으면 33%).
+ */
+function MissingLikelyNotice() {
+  return (
+    <p data-testid="allergen-missing-likely" style={{ fontSize: 12, lineHeight: 1.6, color: '#8d6e00', background: '#fff8e1', borderRadius: 'var(--radius-sm, 6px)', padding: 'var(--space-2)', marginTop: 'var(--space-2)', marginBottom: 0 }}>
+      <strong>빠진 알레르기가 있을 가능성이 높아요.</strong> 원재료에 복합원재료(조미식품·스프·소스 등)가 들어 있어 그 안의 알레르기는 원재료명에 드러나지 않아요. 포장의 알레르기 표시를 꼭 확인해 주세요.
+    </p>
+  )
+}
+
+/**
  * ★ 먹선 서버 세션77 — DB 경로 원재료명 알레르기(제이 결정 2026-10-12).
  *   표시란이 미수집일 때만 그린다. «제조사 표시란이 아니다» · «전부가 아닐 수 있다»를 함께 말한다.
  *   OCR(사진 제보) 결과에는 이 필드가 없으므로 종전과 똑같이 그린다.
@@ -192,6 +204,7 @@ export default function AllergenCard({ result }: { result: AllergenCardInput }) 
         알레르기{view.kind !== 'uncollected' && prov.crowdAuto.length > 0 && <CrowdAutoBadge />}
       </h3>
       {fromIng.length > 0 ? <IngredientAllergens names={fromIng} /> : <Body view={view} />}
+      {view.kind === 'uncollected' && ingredientAllergensMissingLikely(result) && <MissingLikelyNotice />}
       {view.kind !== 'uncollected' && prov.mayUnconfirmed && <MayUnconfirmedNotice />}
       <IncompleteNotice />
     </div>

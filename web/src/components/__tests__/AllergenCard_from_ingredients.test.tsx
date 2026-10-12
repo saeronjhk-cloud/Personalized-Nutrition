@@ -8,10 +8,11 @@
 import { describe, it, expect } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import AllergenCard from '../AllergenCard'
-import { describeIngredientAllergens } from '../../domain/meokseon/allergens'
+import { describeIngredientAllergens, ingredientAllergensMissingLikely } from '../../domain/meokseon/allergens'
 
 const FROM = 'data-testid="allergen-from-ingredients"'
 const NOTICE = 'data-testid="allergen-incomplete-notice"'
+const LIKELY = 'data-testid="allergen-missing-likely"'
 type In = Parameters<typeof AllergenCard>[0]['result']
 const html = (r: In) => renderToStaticMarkup(<AllergenCard result={r} />)
 
@@ -39,6 +40,19 @@ describe('AllergenCard — 세션77 원재료명 알레르기(DB 경로)', () =>
   it('④ 필드 없는 입력(사진 제보·구버전 서버) → 종전과 같다', () => {
     const h = html({ allergens_available: false, allergens: null, allergens_v2: null })
     expect(h).not.toContain(FROM); expect(h).toContain('아직 수집되지 않았어요')
+  })
+  it('⑤ v2 missing_likely → «빠진 알레르기가 있을 가능성이 높아요» · 원재료 알레르기가 비어도 표시', () => {
+    const h1 = html({ allergens_available: false, allergens: null, allergens_v2: null,
+      allergens_from_ingredients: { names: ['밀'], composite: ['복합조미'], missing_likely: true } })
+    expect(h1).toContain(LIKELY); expect(h1).toContain('빠진 알레르기가 있을 가능성이 높아요'); expect(h1).toContain(FROM)
+    const h2 = html({ allergens_available: false, allergens: null, allergens_v2: null,
+      allergens_from_ingredients: { names: [], composite: ['스프'], missing_likely: true } })
+    expect(h2).toContain(LIKELY); expect(h2).toContain('아직 수집되지 않았어요')
+  })
+  it('⑥ missing_likely false·표시란 있음 → 고지 없음', () => {
+    expect(html({ allergens_available: false, allergens: null, allergens_v2: null, allergens_from_ingredients: { names: ['밀'], missing_likely: false } })).not.toContain(LIKELY)
+    expect(html({ allergens_available: true, allergens: ['밀'], allergens_v2: { contains: ['밀'], inferred: [], mayContain: [] }, allergens_from_ingredients: { names: ['밀'], missing_likely: true } })).not.toContain(LIKELY)
+    expect(ingredientAllergensMissingLikely(null)).toBe(false)
   })
   it('describeIngredientAllergens — 표시란 있으면 [] · 공백·중복 제거 · null 안전', () => {
     expect(describeIngredientAllergens({ allergens_available: true, allergens_from_ingredients: { names: ['밀'] } })).toEqual([])

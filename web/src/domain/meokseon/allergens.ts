@@ -167,3 +167,13 @@ export function describeIngredientAllergens(result: Partial<Pick<
   if (!Array.isArray(names)) return []
   return [...new Set(names.filter((n): n is string => typeof n === 'string' && n.trim().length > 0).map((n) => n.trim()))]
 }
+
+/**
+ * ★ 먹선 서버 세션77 v2 — 복합원재료 때문에 «빠졌을 가능성이 높음». 표시란이 있으면 false(표시란이 우선).
+ */
+export function ingredientAllergensMissingLikely(result: Partial<Pick<
+  MsProductResult, 'allergens_available' | 'allergens_from_ingredients'
+>> | null | undefined): boolean {
+  if (!result || result.allergens_available === true) return false
+  return result.allergens_from_ingredients?.missing_likely === true
+}
