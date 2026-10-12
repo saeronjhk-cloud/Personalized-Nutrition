@@ -153,3 +153,17 @@ export function reportMayUnconfirmed(c: {
 /* ★ 카드는 «항상» 띄운다. 세 상태 전부 사용자가 알아야 할 정보이고,
  *   특히 `uncollected` 에서 카드를 숨기면 «침묵»이 「알레르겐 없음」으로 읽힌다.
  *   그래서 shouldShow 류의 분기를 일부러 두지 않았다. */
+
+/**
+ * ★ 먹선 서버 세션77 — «DB 경로 전용» 원재료명 알레르기 이름(제이 결정 2026-10-12 · OCR 경로는 무관).
+ *   표시란 알레르기가 있으면(`allergens_available === true`) 쓰지 않는다 — 표시란이 우선이고, 둘을 섞지 않는다.
+ *   빈 배열 = 보여줄 것 없음. «알레르기 없음»이라는 뜻이 아니다.
+ */
+export function describeIngredientAllergens(result: Partial<Pick<
+  MsProductResult, 'allergens_available' | 'allergens_from_ingredients'
+>> | null | undefined): string[] {
+  if (!result || result.allergens_available === true) return []
+  const names = result.allergens_from_ingredients?.names
+  if (!Array.isArray(names)) return []
+  return [...new Set(names.filter((n): n is string => typeof n === 'string' && n.trim().length > 0).map((n) => n.trim()))]
+}

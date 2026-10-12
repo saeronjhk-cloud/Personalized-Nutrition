@@ -112,6 +112,17 @@ export interface MsProductResult {
   allergens_crowd_auto?: string[] | null
   /** ★ 세션72 — true = 혼입 정보 미확인(혼입 문장을 못 읽었을 수 있다). 「혼입 없음」이라고 말하면 안 된다. */
   allergens_may_unconfirmed?: boolean | null
+  /**
+   * ★ 먹선 서버 세션77 — «DB 경로 전용» 원재료명 알레르기(제이 결정 2026-10-12).
+   *   표시란 알레르기가 미수집이고 원재료가 공공 DB 출처일 때만 온다. 제조사 표시란이 아니다.
+   *   `names` 가 비어도 «알레르기 없음»이 아니다(원재료명에 안 보였을 뿐). `null`/없음 = 해당 없음·구버전 서버.
+   */
+  allergens_from_ingredients?: {
+    names: string[]
+    evidence?: { allergen: string; token: string }[]
+    rules_version?: string
+    ingredient_source?: string | null
+  } | null
   mfras?: unknown
   context?: unknown
   sources?: unknown

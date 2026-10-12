@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { ALLERGEN_PACKAGE_LINE } from '../domain/meokseon/readingNotice'
-import { describeAllergens, describeAllergenProvenance, type AllergenView } from '../domain/meokseon/allergens'
+import { describeAllergens, describeAllergenProvenance, describeIngredientAllergens, type AllergenView } from '../domain/meokseon/allergens'
 // ★ 세션61 U60-7 — `MsProductResult` 를 더는 import 하지 않는다.
 //   prop 타입을 `describeAllergens` 의 시그니처에서 유도하므로 필요 없어졌고,
 //   남겨 두면 「이 카드는 바코드 결과 전용」이라는 잘못된 인상을 준다.
@@ -136,6 +136,25 @@ function IncompleteNotice() {
 // ★ 세션72 — 출처 신호 2필드를 «선택»으로 더한다. 없는 입력(사진 제보·구버전 서버)은 종전과 똑같이 그린다.
 type AllergenCardInput = Parameters<typeof describeAllergens>[0]
   & Parameters<typeof describeAllergenProvenance>[0]
+  & Parameters<typeof describeIngredientAllergens>[0]
+
+/**
+ * ★ 먹선 서버 세션77 — DB 경로 원재료명 알레르기(제이 결정 2026-10-12).
+ *   표시란이 미수집일 때만 그린다. «제조사 표시란이 아니다» · «전부가 아닐 수 있다»를 함께 말한다.
+ *   OCR(사진 제보) 결과에는 이 필드가 없으므로 종전과 똑같이 그린다.
+ */
+function IngredientAllergens({ names }: { names: string[] }) {
+  return (
+    <div data-testid="allergen-from-ingredients">
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>원재료명에서 확인된 알레르기</div>
+      <div>{names.map((a) => <span key={a} style={STYLE.inferred}>{a}</span>)}</div>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-1)', lineHeight: 1.5 }}>
+        제조사 알레르기 표시란이 아니라 공공 원재료 정보에서 찾은 거예요.{' '}
+        <strong style={{ color: 'var(--text-secondary)' }}>원재료명에 드러나지 않는 알레르기(복합원재료·같은 시설 혼입)는 빠져 있을 수 있어요.</strong>
+      </p>
+    </div>
+  )
+}
 
 /** ★ 세션72 — 관리자 미검증 자동 반영 배지. 확정처럼 보이지 않게 «회색 테두리»로만. */
 function CrowdAutoBadge() {
@@ -166,12 +185,13 @@ function MayUnconfirmedNotice() {
 export default function AllergenCard({ result }: { result: AllergenCardInput }) {
   const view = describeAllergens(result)
   const prov = describeAllergenProvenance(result)
+  const fromIng = view.kind === 'uncollected' ? describeIngredientAllergens(result) : []
   return (
     <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
       <h3 className="survey-step-title" style={{ fontSize: 16 }}>
         알레르기{view.kind !== 'uncollected' && prov.crowdAuto.length > 0 && <CrowdAutoBadge />}
       </h3>
-      <Body view={view} />
+      {fromIng.length > 0 ? <IngredientAllergens names={fromIng} /> : <Body view={view} />}
       {view.kind !== 'uncollected' && prov.mayUnconfirmed && <MayUnconfirmedNotice />}
       <IncompleteNotice />
     </div>
