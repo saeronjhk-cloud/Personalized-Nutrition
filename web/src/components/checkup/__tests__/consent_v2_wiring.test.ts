@@ -18,11 +18,11 @@ describe("동의 v2 배선", () => {
     expect(b).toBeGreaterThan(s.indexOf("CHECKUP_COMBINE_PAUSED) return null"));
     expect(s.indexOf("const recs = await fetchCheckupRecords(userId)")).toBeGreaterThan(b);
   });
-  it("A04 Checkup: 서버 기록 성공 후에만 진입(로컬 캐시 기록 없음)", () => {
-    const s = read("../../../pages/Checkup.tsx");
+  it("A04 검진 게이트: 서버 기록 성공 후에만 진입(로컬 캐시 기록 없음) — 10-13 공용 래퍼로 이전", () => {
+    const s = read("../CheckupConsentRoute.tsx");
     expect(s).toContain("await giveCheckupConsent(core, age14, combine);");
     expect(s).not.toContain("markCheckupConsent");
-    expect(s).toContain("decideGateMode(");
+    expect(read("../../../lib/checkupGate.ts")).toContain("decideGateMode(");
   });
   it("A09·A10 계정 화면 철회 2개 + 확인 대화상자", () => {
     const s = read("../../../pages/Account.tsx");

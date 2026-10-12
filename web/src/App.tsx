@@ -33,6 +33,7 @@ import Checkup from './pages/Checkup'
 import CheckupManage from './pages/CheckupManage'
 import EditCheckup from './components/checkup/EditCheckup'
 import ViewCheckup from './components/checkup/ViewCheckup'
+import CheckupConsentRoute from './components/checkup/CheckupConsentRoute'
 import SurveyManage from './pages/SurveyManage'
 import SurveyResultView from './components/survey/SurveyResultView'
 import Dashboard from './pages/Dashboard'
@@ -299,10 +300,11 @@ export default function App() {
           {/* checkup routes gated by compliance flag (flags.ts / VITE_CHECKUP_ENABLED) */}
           {CHECKUP_ENABLED && (
             <>
-              <Route path="/checkup" element={<Checkup />} />
-              <Route path="/checkup/manage" element={<CheckupManage />} />
-              <Route path="/checkup/edit/:recordId" element={<EditCheckup />} />
-              <Route path="/checkup/view/:recordId" element={<ViewCheckup />} />
+              {/* 검진 동의 게이트 = 4개 라우트 공용(10-13, IP/integration/checkup_subroute_gate_eval_v1.md) */}
+              <Route path="/checkup" element={<CheckupConsentRoute><Checkup /></CheckupConsentRoute>} />
+              <Route path="/checkup/manage" element={<CheckupConsentRoute><CheckupManage /></CheckupConsentRoute>} />
+              <Route path="/checkup/edit/:recordId" element={<CheckupConsentRoute><EditCheckup /></CheckupConsentRoute>} />
+              <Route path="/checkup/view/:recordId" element={<CheckupConsentRoute><ViewCheckup /></CheckupConsentRoute>} />
             </>
           )}
           <Route path="/health-report" element={<HealthReport />} />
