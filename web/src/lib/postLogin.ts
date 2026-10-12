@@ -71,11 +71,9 @@ export async function runPostLogin(
 
   if (sessionId) {
     try {
-      const { error } = await supabase
-        .from('anon_sessions')
-        .update({ linked_user_id: userId })
-        .eq('session_id', sessionId)
-        .is('linked_user_id', null)
+      // 설문 동의 v2(SQL 163 D17): 직접 UPDATE·SELECT 회수 → 본인이 아는 세션 id 로 RPC 연결만 허용.
+      //   반환 = 연결된 행 수(0 이면 이미 연결됐거나 없음 — 실패 아님). userId 는 서버가 auth.uid() 로 판정.
+      const { error } = await supabase.rpc('link_anon_session', { p_session_id: sessionId })
       if (error) {
         result.linked = 'failed'
         result.linkError = error.message

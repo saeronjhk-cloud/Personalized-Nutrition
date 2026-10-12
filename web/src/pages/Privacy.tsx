@@ -1,5 +1,6 @@
 import { MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
 import { CHECKUP_POLICY_EFFECTIVE } from '../domain/checkup/consent_v2'
+import { SURVEY_POLICY_EFFECTIVE } from '../domain/survey/consent_v2'
 
 export default function Privacy() {
   return (
@@ -154,13 +155,14 @@ export default function Privacy() {
           <li><strong>설문 기반 건강 관련(민감) 정보:</strong> 생성일로부터 최대 730일(약 2년), 또는 회원 탈퇴·삭제요청 시까지 보관 후 파기합니다. (설문 시작 전 별도 동의를 받은 항목)</li>
           <li><strong>제품 스캔 이력(로그인 회원):</strong> 회원이 개별 이력을 삭제하면 데이터베이스에서 삭제되며, 회원 탈퇴 시 계정에 연결된 스캔 이력은 함께 영구 삭제됩니다. 비회원 스캔 이력은 서버에 저장되지 않고 이용자 기기에만 남습니다.</li>
           <li><strong>비회원 세션 기반 설문·추천 데이터:</strong> 생성일로부터 최대 730일(약 2년) 또는 삭제요청 시까지 보관 후 파기합니다.</li>
+          <li data-testid="privacy-anon-consent"><strong>비회원 설문 동의 기록:</strong> 비회원 설문 저장 시 동의 시각·동의한 문구 버전을 해당 설문 기록과 함께 저장하며, 그 설문 기록과 같은 기간(최대 730일) 보관 후 함께 파기합니다.</li>
           <li><strong>개인을 식별할 수 없도록 집계된 통계 데이터:</strong> 서비스 품질 개선 및 연구 목적으로 보관할 수 있으며, 서비스 종료 시 지체 없이 파기합니다.</li>
           <li><strong>백업 데이터:</strong> 데이터베이스는 일 단위로 자동 백업되며 현재 운영 플랜 기준 7일간 보관 후 순차적으로 파기됩니다. 데이터베이스 백업에는 저장소(Storage)에 보관된 사진 객체 자체가 포함되지 않으며, 저장사업자의 내부 복제·캐시 및 삭제 완료주기는 계약·운영 설정에 따라 확인·관리합니다.</li>
           {CHECKUP_ENABLED && (
             <li><strong>건강검진 정보:</strong> 입력일부터 730일, 또는 회원 탈퇴·기록 삭제 요청·필수 동의 철회 시 지체 없이 파기합니다.</li>
           )}
           {CHECKUP_ENABLED && (
-            <li><strong>식사 사진·건강검진 동의 증빙(최소 메타):</strong> 회원 탈퇴 또는 동의 철회 후에도 적법한 별도 동의·철회가 있었다는 사실을 증명하고 분쟁에 대응하기 위한 <strong>회사의 정당한 이익</strong>에 근거하여, 식별키·동의/철회 시각·동의한 문구 버전·동의문 해시·동의 항목(필수/선택) 등 최소 정보(<strong>건강정보·검진 수치·사진·음식/영양값 제외</strong>)를 탈퇴·철회일부터 <strong>3년</strong>간 분리 보관한 후 지체 없이 파기합니다. 다만 분쟁·조사·소송이 개시된 경우 해당 절차 종료 시까지 보관합니다.</li>
+            <li data-testid="privacy-consent-evidence"><strong>식사 사진·건강검진·설문 동의 증빙(최소 메타):</strong> 회원 탈퇴 또는 동의 철회 후에도 적법한 별도 동의·철회가 있었다는 사실을 증명하고 분쟁에 대응하기 위한 <strong>회사의 정당한 이익</strong>에 근거하여, 식별키·동의/철회 시각·동의한 문구 버전·동의문 해시·동의 항목(필수/선택) 등 최소 정보(<strong>건강정보·설문 응답값·검진 수치·사진·음식/영양값 제외</strong>)를 탈퇴·철회일부터 <strong>3년</strong>간 분리 보관한 후 지체 없이 파기합니다. 다만 분쟁·조사·소송이 개시된 경우 해당 절차 종료 시까지 보관합니다.</li>
           )}
           {MEAL_ENABLED && !CHECKUP_ENABLED && (
             <li><strong>식사 사진 분석 동의 증빙(최소 메타):</strong> 회원 탈퇴 또는 동의 철회 후에도 적법한 별도 동의·철회가 있었다는 사실을 증명하고 분쟁에 대응하기 위한 <strong>회사의 정당한 이익</strong>에 근거하여, 식별키·동의/철회 시각·동의한 정책 버전·동의문 해시 등 최소 정보(<strong>건강정보·사진·음식/영양값 제외</strong>)를 탈퇴·철회일부터 3년간 분리 보관한 후 지체 없이 파기합니다. 다만 분쟁·조사·소송이 개시된 경우 해당 절차 종료 시까지 보관합니다.</li>
@@ -284,7 +286,8 @@ export default function Privacy() {
           이용자는 「개인정보 보호법」에 따라 열람, 정정, 삭제, 처리 정지를 요청할 권리가 있습니다.
           데이터 수집을 원하지 않는 경우 수집이 시작되기 전(설문 제출 전)에 브라우저를 닫으면 어떤 정보도
           기록되지 않습니다. 이미 제출된 비회원 세션 데이터의 삭제가 필요하면 아래 이메일로 세션 ID와 함께
-          요청해 주시기 바랍니다.
+          요청해 주시기 바랍니다.{' '}
+          <span data-testid="privacy-survey-revoke">로그인 회원은 계정 화면의 ‘설문 동의 철회’로 설문 민감정보 동의를 언제든 철회할 수 있으며, 철회 즉시 계정에 저장된 설문 기록과 건강 목표가 삭제됩니다.</span>
         </p>
 
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>8. 개인정보 보호책임자 및 사업자 정보</h3>
@@ -316,7 +319,7 @@ export default function Privacy() {
         <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>11. 방침 변경</h3>
         <p style={{ marginBottom: 'var(--space-2)' }}>
           {CHECKUP_ENABLED
-            ? `본 개인정보처리방침(버전 13_v5.1)은 ${CHECKUP_POLICY_EFFECTIVE}부터 시행됩니다. (직전 개정: 2026년 7월 12일)`
+            ? `본 개인정보처리방침(버전 13_v5.2)은 ${SURVEY_POLICY_EFFECTIVE}부터 시행됩니다. (직전 개정: ${CHECKUP_POLICY_EFFECTIVE})`
             : MEAL_ENABLED
             ? '본 개인정보처리방침(버전 13_v5.0)은 2026년 7월 12일부터 시행됩니다. (직전 개정: 2026년 7월 9일)'
             : '본 개인정보처리방침은 2026년 7월 9일부터 시행됩니다. (직전 개정: 2026년 5월 30일)'}
@@ -327,6 +330,9 @@ export default function Privacy() {
           <>
             <p style={{ marginBottom: 'var(--space-1)', fontWeight: 600, color: 'var(--text)' }}>부칙 (개정 이력)</p>
             <ul style={{ marginBottom: 'var(--space-4)', paddingLeft: 'var(--space-5)' }}>
+              {CHECKUP_ENABLED && (
+                <li>13_v5.2 ({SURVEY_POLICY_EFFECTIVE} 시행): 설문 민감정보 동의를 서버에 기록하고 동의 증빙 보관 대상에 설문 동의 추가, 계정 화면 설문 동의 철회(설문 기록·건강 목표 즉시 삭제) 신설. 처리 항목·목적 변경 없음.</li>
+              )}
               {CHECKUP_ENABLED && (
                 <li>13_v5.1 ({CHECKUP_POLICY_EFFECTIVE} 시행): 건강검진 기능 처리 조항 신설(항목·필수/선택 목적·보유기간·거부 불이익·PDF 미전송), 위탁 항목에 건강검진 정보 추가, 동의 증빙 보관 대상에 건강검진 동의 추가, 만 14세 미만 검진 기능 제한. <strong>기존 이용자는 다음 검진 기능 이용 시 다시 동의를 받습니다.</strong></li>
               )}

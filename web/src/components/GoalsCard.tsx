@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { loadEffectiveGoals, saveUserGoals, fetchLatestBody } from "../lib/userGoals";
-import { hasConsentedCollection, hasConsentedSensitive, markConsentAcknowledged } from "../lib/analytics";
+import { fetchSurveyConsentStatus, giveSurveyConsent } from "../lib/surveyConsent";
+import { decideSurveyGateMode, SURVEY_CHANNEL_GOALS, GATE_BTN_ACCEPT_GOALS, GATE_STATUS_ERROR } from "../domain/survey/consent_v2";
 import {
   GOAL_OPTIONS,
   UNDERWEIGHT_BMI,
@@ -16,6 +17,7 @@ import { GOAL_COACHING_ENABLED } from "../lib/flags";
  * 식사 기록 «내 건강 목표» 카드 (웹앱트랙 Phase G · D1 13종 전부)
  * - 저장소 user_goals. 맞춤 영양제 추천(설문·/recommend)이 이 값을 참조한다.
  * - 건강 목표 = 민감정보 → 설문과 같은 민감정보 동의가 있어야 저장(동의 범위에 «건강 목표» 명시).
+ *   동의 v2(SQL 163): 서버 survey_consent 가 권위 — 편집 시작 때 서버 확인, 없으면 게이트(채널 web_goals_card).
  * - 섭식 안전장치(IP/155 §2 참고선): BMI<18.5 면 «체중관리» 비활성.
  * - D5: 목표 기반 식사 코칭 문구는 넣지 않는다(서박사 확정 영역).
  */
@@ -25,7 +27,7 @@ export default function GoalsCard() {
   const [draft, setDraft] = useState<string[]>([]);
   const [bmi, setBmi] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
-  const [needConsent, setNeedConsent] = useState(false);
+  const [needConsent, setNeedConsent] = useState<null | "first" | "reconsent">(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -45,11 +47,11 @@ export default function GoalsCard() {
 
   if (!userId || goals === null) return null;
 
-  const consented = hasConsentedCollection() && hasConsentedSensitive();
-
-  function startEdit() {
+  async function startEdit() {
     setMsg(null);
-    if (!consented) { setNeedConsent(true); return; }
+    const mode = decideSurveyGateMode({ loggedIn: true, status: await fetchSurveyConsentStatus() });
+    if (mode === "error") { setMsg(GATE_STATUS_ERROR); return; }
+    if (mode !== "pass") { setNeedConsent(mode === "reconsent" ? "reconsent" : "first"); return; }
     setDraft(goals ?? []);
     setEditing(true);
   }
@@ -69,9 +71,13 @@ export default function GoalsCard() {
   if (needConsent) {
     return (
       <ConsentGate
-        acceptLabel="동의하고 목표 설정"
-        onAccept={() => { markConsentAcknowledged(); setNeedConsent(false); setDraft(goals ?? []); setEditing(true); }}
-        onDecline={() => setNeedConsent(false)}
+        mode={needConsent}
+        acceptLabel={GATE_BTN_ACCEPT_GOALS}
+        onAccept={async (c) => {
+          await giveSurveyConsent(c.pi, c.sensitive, SURVEY_CHANNEL_GOALS); // 실패 throw → 게이트 오류 표시
+          setNeedConsent(null); setDraft(goals ?? []); setEditing(true);
+        }}
+        onDecline={() => setNeedConsent(null)}
       />
     );
   }

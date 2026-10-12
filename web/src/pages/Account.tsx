@@ -9,6 +9,8 @@ import {
   ACCOUNT_BTN_CORE, ACCOUNT_CONFIRM_CORE, ACCOUNT_DONE_CORE, ACCOUNT_NONE, ACCOUNT_REVOKE_ERROR,
   ACCOUNT_BTN_COMBINE_GRANT, ACCOUNT_DONE_COMBINE_GRANT, GATE_COMBINE_BULLETS, GATE_SUBMIT_ERROR,
 } from '../domain/checkup/consent_v2'
+import { fetchSurveyConsentStatus, revokeSurveyConsent } from '../lib/surveyConsent'
+import * as SC from '../domain/survey/consent_v2'
 import { adminWhoami } from '../lib/meokseonAdmin'   // 세션72d
 import { hasServerMealConsent, revokeMealConsentServer, revokeMealConsent } from '../lib/mealConsent'
 
@@ -27,6 +29,10 @@ export default function Account() {
   const [checkupMsg, setCheckupMsg] = useState<string | null>(null)
   const [checkupConfirmOpen, setCheckupConfirmOpen] = useState(false)
   const [checkupBusy, setCheckupBusy] = useState(false)
+  const [surveyStatus, setSurveyStatus] = useState<SC.SurveyConsentStatus | null>(null)   // 설문 동의 v2(SQL 163)
+  const [surveyMsg, setSurveyMsg] = useState<string | null>(null)
+  const [surveyConfirmOpen, setSurveyConfirmOpen] = useState(false)
+  const [surveyBusy, setSurveyBusy] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)   // 세션72d — 관리자에게만 /admin 링크(판정은 서버)
 
   useEffect(() => {
@@ -38,6 +44,10 @@ export default function Account() {
       if (user) adminWhoami().then((w) => { if (alive) setIsAdmin(w.admin) }).catch(() => { /* 일반 사용자: 403 → 링크 없음 */ })
       if (user && MEAL_ENABLED) {
         try { setMealConsented(await hasServerMealConsent()) } catch { /* noop */ }
+      }
+      if (user) {
+        const ss = await fetchSurveyConsentStatus()
+        if (alive) setSurveyStatus(ss)
       }
       if (user && CHECKUP_ENABLED) {
         const st = await fetchCheckupConsentStatus()
@@ -89,6 +99,18 @@ export default function Account() {
       setCheckupMsg(ACCOUNT_REVOKE_ERROR)
     }
     setCheckupBusy(false); setCheckupConfirmOpen(false)
+  }
+
+  async function handleRevokeSurvey() {
+    setSurveyBusy(true)
+    try {
+      const r = await revokeSurveyConsent()
+      setSurveyStatus(await fetchSurveyConsentStatus())
+      setSurveyMsg(SC.ACCOUNT_DONE_REVOKE(r.survey_responses))
+    } catch {
+      setSurveyMsg(SC.ACCOUNT_REVOKE_ERROR)
+    }
+    setSurveyBusy(false); setSurveyConfirmOpen(false)
   }
 
   async function handleLogout() {
@@ -159,6 +181,15 @@ export default function Account() {
               </div>
             )}
 
+            <div data-testid="account-survey-consent" style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-5)', marginBottom: 'var(--space-6)' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>{SC.ACCOUNT_BLOCK_TITLE}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 'var(--space-3)' }}>{SC.surveyAccountStatusText(surveyStatus)}</p>
+              {surveyMsg && <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{surveyMsg}</p>}
+              <button type="button" className="btn btn-secondary" data-testid="survey-revoke" disabled={!SC.surveyRevokeEnabled(surveyStatus)} onClick={() => setSurveyConfirmOpen(true)}>
+                {SC.ACCOUNT_BTN_REVOKE}
+              </button>
+            </div>
+
             {CHECKUP_ENABLED && (() => {
               const rs = accountRevokeState(checkupStatus)
               return (
@@ -213,6 +244,18 @@ export default function Account() {
           </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={surveyConfirmOpen}
+        danger
+        busy={surveyBusy}
+        title={SC.ACCOUNT_BTN_REVOKE}
+        description={SC.ACCOUNT_CONFIRM_REVOKE}
+        confirmLabel={SC.ACCOUNT_CONFIRM_OK}
+        cancelLabel="취소"
+        onConfirm={handleRevokeSurvey}
+        onCancel={() => setSurveyConfirmOpen(false)}
+      />
 
       <ConfirmDialog
         open={checkupConfirmOpen}

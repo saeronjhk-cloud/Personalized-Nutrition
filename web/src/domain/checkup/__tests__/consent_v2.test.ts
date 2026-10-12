@@ -64,8 +64,10 @@ describe("A01 문구 = 정본 v2 §1·§4·§5 (복사본 1:1)", () => {
     const first2 = C.GATE_SMALL_PRINT.split(". ").slice(0, 2).join(". ");
     expect(N).toContain(norm(first2));
   });
-  it("버전 상수 = SQL 161 싱글턴 초기값", () => {
+  it("버전 상수 = SQL 161 notice 초기값 + SQL 163 policy 갱신값(10-12)", () => {
     const sql = readFileSync(resolve(__dirname, "../../../../supabase/161_checkup_consent.sql"), "utf-8");
-    expect(sql).toContain(`'${C.CHECKUP_NOTICE_VERSION}', '${C.CHECKUP_POLICY_VERSION}'`);
+    expect(sql).toContain(`'${C.CHECKUP_NOTICE_VERSION}', '13_v5.1'`);
+    const s163 = readFileSync(resolve(__dirname, "../../../../supabase/163_survey_consent.sql"), "utf-8");
+    expect(s163).toContain(`update public.checkup_consent_policy set current_policy_version = '${C.CHECKUP_POLICY_VERSION}'`);
   });
 });

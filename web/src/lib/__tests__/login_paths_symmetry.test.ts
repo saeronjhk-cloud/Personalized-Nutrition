@@ -74,17 +74,20 @@ describe('두 로그인 경로가 같은 «로그인 직후» 작업을 한다',
   it('AuthCallback 이 세션 연결·스캔 승격을 «자기 안에서» 다시 구현하지 않는다', () => {
     // 여기에 다시 생기면 두 경로가 갈라진다. postLogin 만 이 두 가지를 안다.
     expect(CALLBACK).not.toContain('anon_sessions')
+    expect(CALLBACK).not.toContain('link_anon_session')
     expect(CALLBACK).not.toContain('promoteLocalScans')
   })
 
   it('LoginEmail 도 마찬가지로 다시 구현하지 않는다', () => {
     expect(LOGIN).not.toContain('anon_sessions')
+    expect(LOGIN).not.toContain('link_anon_session')
     expect(LOGIN).not.toContain('promoteLocalScans')
   })
 
   it('postLogin 이 그 두 가지를 «실제로» 한다 — 껍데기만 남지 않게', () => {
-    expect(POST).toContain('anon_sessions')
-    expect(POST).toContain('linked_user_id')
+    // 설문 동의 v2(SQL 163 D17, 10-12): 연결은 직접 UPDATE 대신 RPC link_anon_session(세션 id) — 서버가 auth.uid() 로 연결
+    expect(POST).toMatch(/rpc\(\s*['"]link_anon_session['"]/)
+    expect(POST).toContain('p_session_id')
     expect(POST).toContain('promoteLocalScans')
   })
 })

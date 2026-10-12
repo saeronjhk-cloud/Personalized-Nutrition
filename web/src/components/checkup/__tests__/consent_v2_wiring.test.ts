@@ -44,13 +44,14 @@ describe("동의 v2 배선", () => {
     expect(s).toContain("set combine_consented_at = now(), combine_revoked_at = null");
     expect(s).toContain("grant execute on function public.give_checkup_combine(text) to authenticated;");
   });
-  it("A12 처리방침 13_v5.1", () => {
+  it("A12 처리방침 13_v5.1 내용 유지 + 10-12 설문 동의 v2 로 13_v5.2", () => {
     const s = read("../../../pages/Privacy.tsx");
     expect(s).not.toContain("향후 도입 예정");
     expect(s).toContain("건강검진 정보(민감정보)의 별도 동의");
     expect(s).toContain("건강검진 수치·해석 결과(검진 기능 이용 시)");
-    expect(s).toContain("버전 13_v5.1");
-    expect(s).toContain("식사 사진·건강검진 동의 증빙(최소 메타)");
+    expect(s).toContain("버전 13_v5.2");
+    expect(s).toContain("13_v5.1 ({CHECKUP_POLICY_EFFECTIVE} 시행)");
+    expect(s).toContain("식사 사진·건강검진·설문 동의 증빙(최소 메타)");
   });
   it("A13 약관", () => {
     const s = read("../../../pages/Terms.tsx");

@@ -1,60 +1,79 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { markSensitiveConsent } from '../lib/analytics'
+import {
+  GATE_TITLE, GATE_BODY_BEFORE_LINKS, GATE_FAMILY_NOTE, GATE_CHECK_PI, GATE_CHECK_SENSITIVE,
+  GATE_BTN_ACCEPT, GATE_BTN_DECLINE, RECONSENT_TITLE, RECONSENT_BODY, GATE_SUBMIT_ERROR,
+  canSubmitSurveyConsent,
+} from '../domain/survey/consent_v2'
 
 interface Props {
-  onAccept: () => void
+  /** first = 처음 · reconsent = 동의문 버전 변경 · anon = 비로그인(메모리 동의, 저장 시 RPC 가 서버 기록) */
+  mode?: 'first' | 'reconsent' | 'anon'
+  /** 로그인: 서버 기록(give_survey_consent). 실패 시 throw → 오류 표시·진입 안 함(거짓 통과 금지). */
+  onAccept: (consent: { pi: boolean; sensitive: boolean }) => void | Promise<void>
   onDecline: () => void
-  /** 동의 버튼 라벨 (기본: 동의하고 설문 시작). 식사 기록 «내 건강 목표» 카드에서 재사용 — 동의 범위(건강 목표 포함)는 동일. */
+  /** 동의 버튼 라벨 (기본: 동의하고 설문 시작). 목표 카드는 «동의하고 목표 설정» — 동의 범위(건강 목표 포함)는 동일. */
   acceptLabel?: string
 }
 
 /**
- * 설문 기반 건강 관련(민감) 정보 수집·이용 opt-in 동의 게이트 (동의 항목 #2).
- * - 설문 시작 전 노출. 기본 미동의(체크박스 unchecked, 사전체크 금지).
- * - 동의해야만 설문 진행 및 저장(analytics opt-in). 거부 시 홈으로(회원가입/타 기능은 유지).
- * - 문구는 개인정보처리방침 v4.7 §3-2 / 이용약관 v4.5 제6조의2와 1:1 정합.
- *   ("각 동의는 하나로 묶지 않으며, 사전 선택 없이 이용자가 직접 선택" — 기능 이용 시 개별 동의)
+ * 설문 기반 건강 관련(민감) 정보 수집·이용 opt-in 동의 게이트 (동의 항목 #2) — v2 서버 기록.
+ * - 기본 미동의(사전 체크 금지). 필수 2개(일반 개인정보 + 민감정보) 분리.
+ * - 문구 = IP/설문동의_고지문안_정본_v1_20261012.md §1 (domain/survey/consent_v2.ts 복사본, notice survey_v1)
+ * - localStorage 동의 키 기록 0 — 서버(SQL 163)가 권위. 평가 IP/integration/survey_consent_v2_eval_v1.md A01~A04
  */
-export default function ConsentGate({ onAccept, onDecline, acceptLabel = '동의하고 설문 시작' }: Props) {
-  // 두 동의 분리: 일반 개인정보 + 건강 민감정보. 둘 다 필수(사전체크 금지).
+export default function ConsentGate({ mode = 'first', onAccept, onDecline, acceptLabel = GATE_BTN_ACCEPT }: Props) {
   const [agreePI, setAgreePI] = useState(false)
   const [agreeSensitive, setAgreeSensitive] = useState(false)
-  const canProceed = agreePI && agreeSensitive
-  function handleAccept() {
-    markSensitiveConsent() // 민감정보 동의 기록(일반 개인정보 동의는 onAccept에서 기록)
-    onAccept()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const canProceed = canSubmitSurveyConsent(agreePI, agreeSensitive) && !busy
+
+  async function handleAccept() {
+    if (!canSubmitSurveyConsent(agreePI, agreeSensitive) || busy) return
+    setBusy(true); setError(null)
+    try {
+      await onAccept({ pi: agreePI, sensitive: agreeSensitive })
+    } catch {
+      setError(GATE_SUBMIT_ERROR)
+      setBusy(false)
+    }
   }
+
+  const label = { display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, cursor: 'pointer' } as const
   return (
     <div className="survey-container fade-in">
       <div className="survey-card">
-        <h2 className="survey-step-title">설문 기반 건강 관련 정보 수집·이용 동의</h2>
+        {mode === 'reconsent' && (
+          <div data-testid="survey-reconsent" style={{ background: 'var(--surface-2, rgba(142,202,230,0.12))', borderRadius: 10, padding: 'var(--space-3) var(--space-4)', marginBottom: 'var(--space-4)' }}>
+            <p style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-1)' }}>{RECONSENT_TITLE}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.7 }}>{RECONSENT_BODY}</p>
+          </div>
+        )}
+        <h2 className="survey-step-title">{GATE_TITLE}</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, marginBottom: 'var(--space-4)' }}>
-          이 설문은 맞춤 영양(건강기능식품 등) 추천과 생활습관 가이드를 제공하고 본인 기록·변화 추적에 활용하기 위해,
-          증상·기저질환·가족력·생활습관·성별·연령·신장·체중·건강 목표 등 설문 입력 정보와 그로부터 산출된 추천 결과를{' '}
-          <strong>건강 관련 민감정보</strong>로 취급하여 수집·이용합니다. 로그인한 경우 회원 계정에 저장되어 변화 추적에 사용되며,
-          비로그인 시 비회원 임시 세션 식별자를 통해 처리됩니다. 이 정보는 생성일로부터 최대 730일 또는 탈퇴·삭제요청 시까지 보관됩니다.
-          자세한 내용은{' '}
+          {GATE_BODY_BEFORE_LINKS}{' '}
           <Link to="/privacy" style={{ color: '#2563eb', textDecoration: 'underline' }}>개인정보처리방침</Link> 및{' '}
           <Link to="/terms" style={{ color: '#2563eb', textDecoration: 'underline' }}>이용약관</Link>을 확인하세요.
         </p>
         <p style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.6, marginBottom: 'var(--space-4)' }}>
-          가족력은 본인의 건강관리 참고 범위에서만 입력해 주세요. 가족 구성원의 이름·연락처·생년월일 등 식별정보는 입력하지 마세요.
+          {GATE_FAMILY_NOTE}
         </p>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-3)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreePI} onChange={(e) => setAgreePI(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
-          <span>[필수] <strong>개인정보</strong> 수집·이용에 동의합니다. (성별·연령·신장·체중·생활습관 등 설문 입력 정보 및 추천 결과)</span>
+        <label style={{ ...label, marginBottom: 'var(--space-3)' }}>
+          <input type="checkbox" data-testid="survey-consent-pi" checked={agreePI} onChange={(e) => setAgreePI(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
+          <span>{GATE_CHECK_PI}</span>
         </label>
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', fontSize: 14, lineHeight: 1.6, marginBottom: 'var(--space-5)', cursor: 'pointer' }}>
-          <input type="checkbox" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
-          <span>[필수] <strong>민감정보(건강에 관한 정보)</strong> 수집·이용에 동의합니다. (증상·기저질환·가족력·건강 목표) 거부 시 설문 기능 이용이 제한되며, 회원가입 및 다른 기능은 이용할 수 있습니다.</span>
+        <label style={{ ...label, marginBottom: 'var(--space-5)' }}>
+          <input type="checkbox" data-testid="survey-consent-sensitive" checked={agreeSensitive} onChange={(e) => setAgreeSensitive(e.target.checked)} style={{ marginTop: 'var(--space-1)' }} />
+          <span>{GATE_CHECK_SENSITIVE}</span>
         </label>
+        {error && <p role="alert" data-testid="survey-consent-error" style={{ color: 'var(--danger, #b91c1c)', fontSize: 13, marginBottom: 'var(--space-3)' }}>{error}</p>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <button type="button" className="btn btn-primary" disabled={!canProceed} onClick={handleAccept}>
-            {acceptLabel}
+          <button type="button" className="btn btn-primary" data-testid="survey-consent-accept" disabled={!canProceed} onClick={handleAccept}>
+            {busy ? '저장 중…' : acceptLabel}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onDecline}>
-            동의하지 않음
+            {GATE_BTN_DECLINE}
           </button>
         </div>
       </div>

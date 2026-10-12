@@ -6,6 +6,7 @@
  */
 import { supabase } from "./supabase";
 import { resolveEffectiveGoals, sanitizeGoals, type GoalSource } from "../domain/goals/goals";
+import { isSurveyConsentActive } from "./surveyConsent";
 
 /** user_goals 행. 없으면 null (빈 배열과 구분 — 빈 배열은 «사용자가 비움»). 오류도 null. */
 export async function fetchUserGoalsRow(userId: string): Promise<string[] | null> {
@@ -54,7 +55,8 @@ export async function loadEffectiveGoals(userId: string): Promise<{ goals: strin
   const row = await fetchUserGoalsRow(userId);
   const fb = row === null ? await fetchLatestSurveyGoals(userId) : null;
   const r = resolveEffectiveGoals(row, fb);
-  if (r.needsSeed) {
+  // 시드는 설문 동의(서버 active)일 때만 — 미동의면 RLS 로 어차피 거부(D12, 평가 A08)
+  if (r.needsSeed && (await isSurveyConsentActive(userId))) {
     const s = await saveUserGoals(userId, r.goals);
     if (!s.ok) console.error("[userGoals] seed failed:", s.error);
   }

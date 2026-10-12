@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { App as CapApp } from '@capacitor/app'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
-import { submitSurveyAnalytics, hasConsentedCollection, markConsentAcknowledged } from './lib/analytics'
+import { submitSurveyAnalytics, type SurveySaveConsent } from './lib/analytics'
+import { fetchSurveyConsentStatus, giveSurveyConsent } from './lib/surveyConsent'
+import { decideSurveyGateMode, SURVEY_CHANNEL_GATE, GATE_STATUS_ERROR, type SurveyGateMode } from './domain/survey/consent_v2'
 import { CHECKUP_ENABLED, INSIGHTS_ENABLED, MEOKSEON_ENABLED, MEAL_ENABLED } from './lib/flags'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -65,7 +67,10 @@ function SurveyFlow() {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const isPopState = useRef(false)
-  const [consented, setConsented] = useState(hasConsentedCollection())
+  // 설문 동의 v2(SQL 163): 로그인 = 서버 상태가 권위, 비로그인 = 이 화면 메모리 동의(저장 시 RPC 가 서버 기록, J2).
+  //   localStorage 동의 키는 읽지도 쓰지도 않는다. 평가 IP/integration/survey_consent_v2_eval_v1.md A02·A05~A07
+  const [consent, setConsent] = useState<SurveySaveConsent | null>(null)
+  const [gateMode, setGateMode] = useState<SurveyGateMode | null>(null)
   // Phase G — 로그인 여부(null=확인 중). 로그인 + 식사 기록 ON 이면 목표 단계를 건너뛴다(D2).
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
   const [unified, setUnified] = useState<UnifiedResult | null>(null)
@@ -75,9 +80,24 @@ function SurveyFlow() {
 
   useEffect(() => {
     let alive = true
-    supabase.auth.getSession().then(({ data }) => { if (alive) setLoggedIn(!!data.session) })
+    supabase.auth.getSession().then(async ({ data }) => {
+      const li = !!data.session
+      if (!alive) return
+      setLoggedIn(li)
+      const status = li ? await fetchSurveyConsentStatus() : null
+      if (!alive) return
+      const mode = decideSurveyGateMode({ loggedIn: li, status })
+      setGateMode(mode)
+      if (mode === 'pass') setConsent({ pi: true, sensitive: true })
+    })
     return () => { alive = false }
   }, [])
+
+  const acceptConsent = useCallback(async (c: SurveySaveConsent) => {
+    // 로그인: 서버 기록 실패면 throw → 게이트가 오류 표시하고 진입하지 않음
+    if (loggedIn) await giveSurveyConsent(c.pi, c.sensitive, SURVEY_CHANNEL_GATE)
+    setConsent(c)
+  }, [loggedIn])
 
   // 브라우저 뒤로가기/앞으로가기 처리
   useEffect(() => {
@@ -140,7 +160,7 @@ function SurveyFlow() {
         setSavedAnswers(effective)
         setResult(res)
         setStep('results')
-        submitSurveyAnalytics(effective, res)
+        if (consent) submitSurveyAnalytics(effective, res, consent)
       } else {
         const data = await getRecommendation(answers)
         setUnified(null)
@@ -149,13 +169,13 @@ function SurveyFlow() {
         setResult(data)
         setStep('results')
         // 익명 분석 수집 (fire-and-forget, 실패해도 UI 영향 없음)
-        submitSurveyAnalytics(answers, data)
+        if (consent) submitSurveyAnalytics(answers, data, consent)
       }
     } catch (e: any) {
       setError(e.message || '추천 결과를 가져오는 데 실패했습니다.')
       setStep('results')
     }
-  }, [answers, loggedIn])
+  }, [answers, loggedIn, consent])
 
   const restart = useCallback(() => {
     setAnswers({ ...INITIAL_ANSWERS })
@@ -167,10 +187,19 @@ function SurveyFlow() {
     setStep('body')
   }, [])
 
-  if (!consented) {
+  if (gateMode === null) return <div className="survey-container fade-in" />
+  if (gateMode === 'error' && !consent) {
+    return (
+      <div className="survey-container fade-in">
+        <div className="survey-card" role="alert" data-testid="survey-consent-status-error">{GATE_STATUS_ERROR}</div>
+      </div>
+    )
+  }
+  if (!consent) {
     return (
       <ConsentGate
-        onAccept={() => { markConsentAcknowledged(); setConsented(true) }}
+        mode={gateMode === 'reconsent' ? 'reconsent' : gateMode === 'anon' ? 'anon' : 'first'}
+        onAccept={acceptConsent}
         onDecline={() => navigate('/')}
       />
     )

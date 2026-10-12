@@ -3,7 +3,7 @@
  *
  * - 설문 완료 후 단 한 번(opt-in 동의 시), Supabase에 설문 응답/익명 세션 저장
  * - 실패해도 UI는 영향 받지 않음 (catch 후 무시)
- * - opt-in 동의(sf_data_consent = accepted) 없으면 저장하지 않음
+ * - 게이트 동의(필수 2개)가 없으면 저장하지 않음 — 동의 기록은 서버(SQL 163)
  * - [컴플라이언스] 외부 Google Sheets 전송 경로는 제거됨(민감정보 이중보관·미고지 수탁자 P0). 통계는 Supabase 익명 집계로 대체(작업지시서 58).
  */
 
@@ -37,64 +37,15 @@ export function hasDeclinedCollection(): boolean {
   }
 }
 
-// opt-in: 명시적으로 'accepted'인 경우에만 수집/저장한다(기본 미수집).
-export function hasConsentedCollection(): boolean {
-  try {
-    return localStorage.getItem(CONSENT_KEY) === 'accepted'
-  } catch {
-    return false
-  }
-}
+// [설문 동의 v2 · 2026-10-12] 설문 동의는 서버가 권위(SQL 163 survey_consent · anon_sessions.consent_*).
+// 옛 localStorage 동의 키(sf_data_consent=accepted · sf_sensitive_consent · sf_checkup_consent)는 읽지도 쓰지도 않는다.
+// CONSENT_KEY 는 이벤트 옵트아웃('declined') 판정에만 남는다(events.ts · scanMiss.ts).
+// 평가: IP/integration/survey_consent_v2_eval_v1.md (A05~A07 · D14)
 
-export function markConsentAcknowledged(): void {
-  try {
-    localStorage.setItem(CONSENT_KEY, 'accepted')
-  } catch {
-    // 무시
-  }
-}
-
-// --- 설문 기반 민감정보(건강 관련) 수집·이용 별도 동의 ---
-// 일반 개인정보 동의(CONSENT_KEY)와 분리된 독립 동의. 설문은 건강 민감정보를 포함하므로,
-// 설문 진행 전 두 동의(개인정보 + 민감정보)를 각각 명시적으로 받는다(보호법상 별도 동의, 처리방침 §1 민감정보).
-const SENSITIVE_CONSENT_KEY = 'sf_sensitive_consent' // 'accepted' | null
-
-export function hasConsentedSensitive(): boolean {
-  try {
-    return localStorage.getItem(SENSITIVE_CONSENT_KEY) === 'accepted'
-  } catch {
-    return false
-  }
-}
-
-export function markSensitiveConsent(): void {
-  try {
-    localStorage.setItem(SENSITIVE_CONSENT_KEY, 'accepted')
-  } catch {
-    // 무시
-  }
-}
-
-// --- 검진(건강검진 해석) 민감정보 수집·이용 동의 (동의 항목 #3) ---
-// 설문 동의(#2)와 별개의 독립 동의. 처리방침 v4.7 §3-3 / 약관 §6조의2와 1:1.
-// CHECKUP_ENABLED 플래그가 켜졌을 때만 실제로 사용된다(검진 기능 진입 게이트).
-const CHECKUP_CONSENT_KEY = 'sf_checkup_consent'  // 'accepted' | null
-
-// opt-in: 명시적으로 'accepted'인 경우에만 검진 입력·저장 허용(기본 미동의).
-export function hasConsentedCheckup(): boolean {
-  try {
-    return localStorage.getItem(CHECKUP_CONSENT_KEY) === 'accepted'
-  } catch {
-    return false
-  }
-}
-
-export function markCheckupConsent(): void {
-  try {
-    localStorage.setItem(CHECKUP_CONSENT_KEY, 'accepted')
-  } catch {
-    // 무시
-  }
+/** 설문 게이트에서 받은 동의(필수 2개). 둘 다 true 일 때만 저장한다. */
+export interface SurveySaveConsent {
+  pi: boolean
+  sensitive: boolean
 }
 
 function detectDevice(): 'mobile' | 'tablet' | 'desktop' {
@@ -144,9 +95,12 @@ function buildLifestyle(answers: SurveyAnswers) {
 export async function submitSurveyAnalytics(
   answers: SurveyAnswers,
   result: RecommendationResult | null,
+  consent: SurveySaveConsent,
 ): Promise<void> {
   if (!result) return
-  if (!hasConsentedCollection()) return  // opt-in: 동의(accepted) 없으면 저장 안 함
+  // opt-in: 게이트에서 필수 2개 동의가 없으면 저장 안 함. 로그인 = 서버 RLS(survey_consent_active)가 다시 강제,
+  //         비로그인 = submit_anon_survey RPC 가 동의 플래그·나이를 검증하고 같은 행에 동의 시각·버전을 기록(J2).
+  if (consent?.pi !== true || consent?.sensitive !== true) return
 
   try {
     const recommendations = (result.recommendations || []).map((s: any) => ({
@@ -194,26 +148,30 @@ export async function submitSurveyAnalytics(
         })
         if (error) console.error('[supabase] survey_responses insert failed:', error)
       } else {
-        const { error } = await supabase.from('anon_sessions').insert({
-          session_id: sessionId,
-          device: payload.device ?? null,
-          age_group: ageGroup(answers.나이),
-          gender: answers.성별 ?? null,
-          height_cm: answers.신장 ?? null,
-          weight_kg: answers.체중 ?? null,
-          bmi: computeBmi(answers.신장, answers.체중),
-          symptoms: answers.증상 ?? [],
-          goals: answers.목표 ?? [],
-          lifestyle: buildLifestyle(answers),
-          current_supplements: answers.현재복용영양제 ?? [],
-          conditions: answers.기저질환 ?? [],
-          family_history: answers.가족력 ?? [],
-          recommendations: recommendations ?? null,
-          persona_id: payload.personaId || null,
-          ip_hash: null,
-          ua_hash: null,
+        // 비로그인: 직접 INSERT 는 회수됨(SQL 163) → RPC 로만. 서버가 동의·나이(≥14) 검증 후 consent_at·버전을 채운다.
+        const { error } = await supabase.rpc('submit_anon_survey', {
+          p_session_id: sessionId,
+          p_age: answers.나이 ?? null,
+          p_pi: consent.pi,
+          p_sensitive: consent.sensitive,
+          p_payload: {
+            device: payload.device ?? null,
+            age_group: ageGroup(answers.나이),
+            gender: answers.성별 ?? null,
+            height_cm: answers.신장 ?? null,
+            weight_kg: answers.체중 ?? null,
+            bmi: computeBmi(answers.신장, answers.체중),
+            symptoms: answers.증상 ?? [],
+            goals: answers.목표 ?? [],
+            lifestyle: buildLifestyle(answers),
+            current_supplements: answers.현재복용영양제 ?? [],
+            conditions: answers.기저질환 ?? [],
+            family_history: answers.가족력 ?? [],
+            recommendations: recommendations ?? null,
+            persona_id: payload.personaId || null,
+          },
         })
-        if (error) console.error('[supabase] anon_sessions insert failed:', error)
+        if (error) console.error('[supabase] submit_anon_survey failed:', error)
       }
     } catch (err) {
       console.error('[supabase] sync failed:', err)

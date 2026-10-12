@@ -5,7 +5,8 @@
  * 서버 버전(재동의 판정)은 SQL 161 checkup_consent_policy.current_notice_version 이 권위. 아래는 표시·테스트용.
  */
 export const CHECKUP_NOTICE_VERSION = "checkup_v2";
-export const CHECKUP_POLICY_VERSION = "13_v5.1";
+/** 10-12: 처리방침 13_v5.2(경미 변경)에 맞춰 SQL 163 이 checkup_consent_policy.current_policy_version 도 올림(재동의 없음, 규칙 78). */
+export const CHECKUP_POLICY_VERSION = "13_v5.2";
 export const CHECKUP_CONSENT_CHANNEL = "web_checkup_gate";
 /** 처리방침 13_v5.1 시행일(배포일). ⚠️ 배포일이 바뀌면 이 한 줄만 고칠 것. */
 export const CHECKUP_POLICY_EFFECTIVE = "2026년 10월 9일";
