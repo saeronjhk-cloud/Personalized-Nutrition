@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   GATE_TITLE, GATE_BODY_BEFORE_LINKS, GATE_FAMILY_NOTE, GATE_CHECK_PI, GATE_CHECK_SENSITIVE,
-  GATE_BTN_ACCEPT, GATE_BTN_DECLINE, RECONSENT_TITLE, RECONSENT_BODY, GATE_SUBMIT_ERROR,
+  GATE_BTN_ACCEPT, GATE_BTN_DECLINE, RECONSENT_TITLE, RECONSENT_BODY, MIGRATE_TITLE, MIGRATE_BODY, GATE_SUBMIT_ERROR,
   canSubmitSurveyConsent,
 } from '../domain/survey/consent_v2'
 
 interface Props {
-  /** first = 처음 · reconsent = 동의문 버전 변경 · anon = 비로그인(메모리 동의, 저장 시 RPC 가 서버 기록) */
-  mode?: 'first' | 'reconsent' | 'anon'
+  /** first = 처음 · migrate = 옛 브라우저 동의 이용자(기존 기록 있음, J4) · reconsent = 동의문 버전 변경 · anon = 비로그인 */
+  mode?: 'first' | 'migrate' | 'reconsent' | 'anon'
   /** 로그인: 서버 기록(give_survey_consent). 실패 시 throw → 오류 표시·진입 안 함(거짓 통과 금지). */
   onAccept: (consent: { pi: boolean; sensitive: boolean }) => void | Promise<void>
   onDecline: () => void
@@ -44,6 +44,12 @@ export default function ConsentGate({ mode = 'first', onAccept, onDecline, accep
   return (
     <div className="survey-container fade-in">
       <div className="survey-card">
+        {mode === 'migrate' && (
+          <div data-testid="survey-migrate" style={{ background: 'var(--surface-2, rgba(142,202,230,0.12))', borderRadius: 10, padding: 'var(--space-3) var(--space-4)', marginBottom: 'var(--space-4)' }}>
+            <p style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-1)' }}>{MIGRATE_TITLE}</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 13, lineHeight: 1.7 }}>{MIGRATE_BODY}</p>
+          </div>
+        )}
         {mode === 'reconsent' && (
           <div data-testid="survey-reconsent" style={{ background: 'var(--surface-2, rgba(142,202,230,0.12))', borderRadius: 10, padding: 'var(--space-3) var(--space-4)', marginBottom: 'var(--space-4)' }}>
             <p style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-1)' }}>{RECONSENT_TITLE}</p>

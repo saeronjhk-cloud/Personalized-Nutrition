@@ -21,14 +21,16 @@ export interface SurveyConsentStatus {
   consented_at: string | null;
 }
 
-/** anon = 비로그인(화면 안 메모리 동의 → 저장 시 RPC 가 서버 기록). error = 서버 확인 실패(진입 차단). */
-export type SurveyGateMode = "anon" | "first" | "reconsent" | "pass" | "error";
+/** anon = 비로그인(화면 안 메모리 동의 → 저장 시 RPC 가 서버 기록). error = 서버 확인 실패(진입 차단).
+ *  migrate = 서버 동의 행은 없는데 기존 설문·목표가 있음(옛 브라우저 동의 시절 이용자 — 베타 패널, 제이 결정 J4 10-12 13:5x). */
+export type SurveyGateMode = "anon" | "first" | "migrate" | "reconsent" | "pass" | "error";
 
 export function decideSurveyGateMode(args: { loggedIn: boolean; status: SurveyConsentStatus | null }): SurveyGateMode {
   if (!args.loggedIn) return "anon";
   if (!args.status) return "error";
   if (args.status.active) return "pass";
   if (args.status.needs_reconsent) return "reconsent";
+  if (!args.status.has_row && (args.status.survey_count > 0 || args.status.goals_exists)) return "migrate";
   return "first";
 }
 
@@ -77,6 +79,9 @@ export const GATE_BTN_DECLINE = "동의하지 않음";
 export const RECONSENT_TITLE = "설문 동의 내용이 바뀌었어요";
 export const RECONSENT_BODY =
   "설문 정보 이용 동의 내용이 바뀌어 다시 동의를 받고 있어요. 바뀐 내용을 확인하고 동의하시면 이전과 같이 이용하실 수 있어요.";
+export const MIGRATE_TITLE = "설문 동의 방식이 바뀌었어요";
+export const MIGRATE_BODY =
+  "동의 기록을 안전하게 서버에 남기도록 바뀌어 한 번 다시 동의를 받고 있어요. 동의하시면 이전 설문 기록과 목표를 그대로 이용할 수 있어요.";
 export const GATE_SUBMIT_ERROR = "동의를 저장하지 못했어요. 네트워크를 확인하고 다시 시도해 주세요.";
 export const GATE_STATUS_ERROR = "동의 상태를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.";
 

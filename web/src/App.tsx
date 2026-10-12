@@ -198,7 +198,7 @@ function SurveyFlow() {
   if (!consent) {
     return (
       <ConsentGate
-        mode={gateMode === 'reconsent' ? 'reconsent' : gateMode === 'anon' ? 'anon' : 'first'}
+        mode={gateMode === 'reconsent' || gateMode === 'migrate' || gateMode === 'anon' ? gateMode : 'first'}
         onAccept={acceptConsent}
         onDecline={() => navigate('/')}
       />

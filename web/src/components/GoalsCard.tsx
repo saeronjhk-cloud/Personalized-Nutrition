@@ -27,7 +27,7 @@ export default function GoalsCard() {
   const [draft, setDraft] = useState<string[]>([]);
   const [bmi, setBmi] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
-  const [needConsent, setNeedConsent] = useState<null | "first" | "reconsent">(null);
+  const [needConsent, setNeedConsent] = useState<null | "first" | "migrate" | "reconsent">(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
@@ -51,7 +51,7 @@ export default function GoalsCard() {
     setMsg(null);
     const mode = decideSurveyGateMode({ loggedIn: true, status: await fetchSurveyConsentStatus() });
     if (mode === "error") { setMsg(GATE_STATUS_ERROR); return; }
-    if (mode !== "pass") { setNeedConsent(mode === "reconsent" ? "reconsent" : "first"); return; }
+    if (mode !== "pass") { setNeedConsent(mode === "reconsent" || mode === "migrate" ? mode : "first"); return; }
     setDraft(goals ?? []);
     setEditing(true);
   }

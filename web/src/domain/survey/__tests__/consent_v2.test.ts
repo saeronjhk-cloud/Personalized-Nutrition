@@ -15,7 +15,9 @@ describe("A02 게이트 모드", () => {
   it("서버 확인 실패 → error(거짓 통과 금지)", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: null })).toBe("error"));
   it("active → pass", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ has_row: true, active: true }) })).toBe("pass"));
   it("needs_reconsent → reconsent", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ has_row: true, needs_reconsent: true }) })).toBe("reconsent"));
-  it("동의 없이 기존 설문만 → first (J3: 기존 사용자 제이 1명, 이관 없음)", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ survey_count: 3 }) })).toBe("first"));
+  it("J4 동의 행 없이 기존 설문 → migrate(안내 문구 + 재동의, 이관 없음)", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ survey_count: 3 }) })).toBe("migrate"));
+  it("J4 동의 행 없이 목표만 → migrate", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ goals_exists: true }) })).toBe("migrate"));
+  it("철회 후(has_row) 기록이 남아 있어도 migrate 아님 → first", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ has_row: true, survey_count: 1 }) })).toBe("first"));
   it("철회 후(has_row, 비활성, 재동의 아님) → first", () => expect(C.decideSurveyGateMode({ loggedIn: true, status: ST({ has_row: true }) })).toBe("first"));
 });
 
@@ -52,7 +54,7 @@ describe("A01 문구 = 정본 v1 (복사본 1:1) · 해시 = SQL 163", () => {
   const N = norm(ip);
   const strings = [
     C.GATE_TITLE, C.GATE_BODY_BEFORE_LINKS, C.GATE_FAMILY_NOTE, C.GATE_CHECK_PI, C.GATE_CHECK_SENSITIVE,
-    C.GATE_BTN_ACCEPT, C.GATE_BTN_ACCEPT_GOALS, C.GATE_BTN_DECLINE, C.RECONSENT_TITLE, C.RECONSENT_BODY,
+    C.GATE_BTN_ACCEPT, C.GATE_BTN_ACCEPT_GOALS, C.GATE_BTN_DECLINE, C.RECONSENT_TITLE, C.RECONSENT_BODY, C.MIGRATE_TITLE, C.MIGRATE_BODY,
     C.GATE_SUBMIT_ERROR, C.GATE_STATUS_ERROR, C.ACCOUNT_STATUS_NO_CONSENT, C.ACCOUNT_STATUS_NONE,
     C.ACCOUNT_BTN_REVOKE, C.ACCOUNT_CONFIRM_REVOKE, C.ACCOUNT_CONFIRM_OK, C.ACCOUNT_REVOKE_ERROR,
   ];

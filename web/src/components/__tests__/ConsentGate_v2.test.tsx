@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import ConsentGate from "../ConsentGate";
 import * as C from "../../domain/survey/consent_v2";
 
-const render = (mode: "first" | "reconsent" | "anon", acceptLabel?: string) =>
+const render = (mode: "first" | "migrate" | "reconsent" | "anon", acceptLabel?: string) =>
   renderToStaticMarkup(<MemoryRouter><ConsentGate mode={mode} acceptLabel={acceptLabel} onAccept={async () => {}} onDecline={() => {}} /></MemoryRouter>);
 
 describe("ConsentGate v2(설문)", () => {
@@ -28,6 +28,12 @@ describe("ConsentGate v2(설문)", () => {
     expect(html).not.toContain(C.RECONSENT_TITLE);
     expect(render("anon")).not.toContain(C.RECONSENT_TITLE);
     expect(render("reconsent")).toContain(C.RECONSENT_TITLE);
+  });
+  it("J4 migrate 안내는 migrate 에만", () => {
+    expect(html).not.toContain(C.MIGRATE_TITLE);
+    expect(render("migrate")).toContain(C.MIGRATE_TITLE);
+    expect(render("migrate")).toContain(C.MIGRATE_BODY);
+    expect(render("reconsent")).not.toContain(C.MIGRATE_TITLE);
   });
   it("A04 목표 카드 라벨", () => expect(render("first", C.GATE_BTN_ACCEPT_GOALS)).toContain(C.GATE_BTN_ACCEPT_GOALS));
 });
