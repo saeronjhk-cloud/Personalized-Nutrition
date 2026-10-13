@@ -29,6 +29,11 @@ export interface ResolvedFood {
   sugar_g: number
   sodium_mg: number
   fiber_g: number
+  /** 분량 조절 v1 — 엔진 기준 g · 선택 · 밥 분리 · 봉지 수 */
+  portion_base_g?: number | null
+  portion_choice?: '적게' | '보통' | '많게'
+  rice_separated?: boolean
+  package_count?: number
 }
 
 const NUTRIENTS = ['calories_kcal', 'protein_g', 'carbs_g', 'fat_g', 'sugar_g', 'sodium_mg', 'fiber_g'] as const
@@ -157,3 +162,43 @@ export function assignFoodItemIds<T>(foods: readonly T[]): T[] {
   return out
 }
 
+
+// ───────── 분량 조절 v1 (2026-10-13) — 저장 전 음식별 «적게·보통·많게» ─────────
+// 제이 결정: 사진 추정 양이 틀리면 ①단계에서 고친다. 배율·영양은 엔진(resolve portion_choice) 단일 소스.
+// 기준 g 는 엔진이 준 portion_base_g — 탭을 거듭해도 누적되지 않는다. 평가 P01~P06 (lib/__tests__/foodPortion.test.ts)
+
+export type PortionChoice = '적게' | '보통' | '많게'
+export const PORTION_CHOICES: readonly PortionChoice[] = ['적게', '보통', '많게']
+
+export function currentPortion(food: MealFood | null | undefined): PortionChoice {
+  const c = (food as { portion_choice?: unknown } | null | undefined)?.portion_choice
+  return c === '적게' || c === '많게' ? c : '보통'
+}
+
+/** 칩을 그릴 수 있는 음식이면 엔진 요청 재료, 아니면 null(가공식품 · 엔진이 못 맞춘 음식 · 기준 g 없음/범위 밖). */
+export function portionRequest(food: MealFood | null | undefined): { name: string; baseG: number; riceSeparated: boolean } | null {
+  if (!food) return null
+  const f = food as MealFood & { portion_base_g?: unknown; rice_separated?: unknown }
+  if (f.barcode || f.match_confidence === 'product_label') return null
+  const base = f.portion_base_g
+  if (typeof base !== 'number' || !Number.isFinite(base) || base <= 0 || base > SERVING_MAX_G) return null
+  const name = (typeof f.db_name === 'string' && f.db_name.trim()) || (f.name_ko || '').trim()
+  if (!name) return null
+  return { name, baseG: base, riceSeparated: f.rice_separated === true }
+}
+
+/** 엔진이 다시 계산한 양·영양만 덮는다(이름·정정 기록·밥 분리 표식 유지). resolved=null · 범위 밖 → 원본 그대로. */
+export function applyPortion(result: AnalyzeResult, index: number, resolved: ResolvedFood | null, choice: PortionChoice): AnalyzeResult {
+  const foods = result?.foods
+  if (!resolved || !Array.isArray(foods) || index < 0 || index >= foods.length) return result
+  const cur = foods[index] as MealFood & Record<string, unknown>
+  const next: Record<string, unknown> = { ...cur }
+  for (const k of NUTRIENTS) next[k] = typeof resolved[k] === 'number' && Number.isFinite(resolved[k]) ? resolved[k] : 0
+  next.estimated_serving_g = resolved.estimated_serving_g
+  next.portion_base_g = typeof resolved.portion_base_g === 'number' ? resolved.portion_base_g : cur.portion_base_g
+  next.portion_choice = choice
+  if (typeof resolved.package_count === 'number') next.package_count = resolved.package_count
+  const out = foods.slice()
+  out[index] = next as unknown as MealFood
+  return withFoods(result, out)
+}

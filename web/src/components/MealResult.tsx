@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import type { AnalyzeResult, MealFood } from '../lib/nutrilens'
 import { alternatesOf } from '../lib/foodCorrection'
-import { canSaveFoods, renameRequestServing, type ResolvedFood } from '../lib/foodEdit'
+import { canSaveFoods, renameRequestServing, PORTION_CHOICES, currentPortion, portionRequest, type ResolvedFood, type PortionChoice } from '../lib/foodEdit'
 import FoodEditPanel from './FoodEditPanel'
 import ProductAddPanel from './ProductAddPanel'
 import CoachAvatar from './CoachAvatar'
@@ -54,6 +54,8 @@ export default function MealResult(props: {
     onAdd: (food: ResolvedFood) => void
     /** 사진+가공식품 v1 (MEAL_PRODUCT_ENABLED) — 있으면 추가 영역에 «📦 가공식품» 탭 */
     onAddProduct?: (food: MealFood) => void
+    /** 분량 조절 v1 — 저장 전 음식별 «적게·보통·많게». 엔진이 다시 계산하면 true */
+    onPortion?: (index: number, choice: PortionChoice) => Promise<boolean>
   }
   /** 식사 흐름 v2 — ① 제목·설명. afterSave 가 있으면 저장 뒤 카드를 그것으로 바꾼다(② 얼마나 드셨나요?) */
   flowV2?: boolean
@@ -63,6 +65,16 @@ export default function MealResult(props: {
   // 편집 중인 행: 음식 index · 'add' · null
   const [editing, setEditing] = useState<number | 'add' | null>(null)
   const [addTab, setAddTab] = useState<'food' | 'product'>('food')
+  // 분량 조절 v1 — 지금 바꾸는 중인 음식 index · 실패한 음식 index
+  const [portionBusy, setPortionBusy] = useState<number | null>(null)
+  const [portionFail, setPortionFail] = useState<number | null>(null)
+  async function pickPortion(i: number, c: PortionChoice) {
+    if (!edit?.onPortion || portionBusy !== null) return
+    setPortionBusy(i); setPortionFail(null)
+    const ok = await edit.onPortion(i, c).catch(() => false)
+    setPortionBusy(null)
+    if (!ok) setPortionFail(i)
+  }
   const onAddProduct = edit?.onAddProduct
   const editable = !!edit && !saved
   const canSave = canSaveFoods(result)
@@ -119,6 +131,26 @@ export default function MealResult(props: {
                   <span key={key}>{label} {cellText(f, key, unit)}</span>
                 ))}
               </div>
+              {/* 분량 조절 v1(2026-10-13) — 사진 추정 양이 틀렸을 때. 누르면 엔진이 다시 계산(화면은 숫자를 만들지 않음) */}
+              {editable && edit?.onPortion && portionRequest(f) && editing !== i && (
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>양</span>
+                  {PORTION_CHOICES.map((c) => (
+                    <button key={c} type="button" aria-pressed={currentPortion(f) === c}
+                      aria-label={`${f.name_ko} 양 ${c}`}
+                      disabled={portionBusy !== null}
+                      onClick={() => { if (currentPortion(f) !== c) void pickPortion(i, c) }}
+                      style={{
+                        fontSize: 12, minHeight: 32, padding: 'var(--space-1) var(--space-3)', borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                        border: '1px solid var(--border-light)',
+                        background: currentPortion(f) === c ? 'var(--accent)' : 'transparent',
+                        color: currentPortion(f) === c ? '#fff' : 'var(--text-secondary)',
+                      }}>{c}</button>
+                  ))}
+                  {portionBusy === i && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>다시 계산 중…</span>}
+                  {portionFail === i && <span style={{ fontSize: 12, color: 'var(--warning)' }}>지금은 바꿀 수 없어요</span>}
+                </div>
+              )}
               {/* 세션52 — 사진만으로는 구별할 수 없는 쌍(설렁탕↔곰탕 · 꽃게탕↔해물탕).
                   엔진도 GPT 도 못 가리므로 하나를 골라 보여주되, 한 번에 고칠 수 있게 한다.
                   누르면 이름과 영양이 «함께» 바뀐다(applyAlternate). 다시 누르면 되돌아간다. */}

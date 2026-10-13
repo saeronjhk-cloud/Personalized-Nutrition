@@ -51,9 +51,16 @@ export async function searchFoods(q: string, limit = 10): Promise<{ ok: true; it
   return { ok: true, items: Array.isArray(r.data.items) ? (r.data.items as FoodCandidate[]) : [] }
 }
 
-/** matched=false → food=null (목록에 없는 음식) */
-export async function resolveFood(name: string, servingG: number | null): Promise<{ ok: true; food: ResolvedFood | null } | LookupFail> {
-  const r = await post({ action: 'resolve', name, serving_g: servingG })
+/** matched=false → food=null (목록에 없는 음식)
+ *  opts(분량 조절 v1): portionChoice 를 주면 servingG 는 «기준 g»(food.portion_base_g) — 배율은 엔진이 곱한다. */
+export async function resolveFood(
+  name: string, servingG: number | null,
+  opts?: { portionChoice?: '적게' | '보통' | '많게'; riceSeparated?: boolean },
+): Promise<{ ok: true; food: ResolvedFood | null } | LookupFail> {
+  const body: Record<string, unknown> = { action: 'resolve', name, serving_g: servingG }
+  if (opts?.portionChoice) body.portion_choice = opts.portionChoice
+  if (opts?.riceSeparated) body.rice_separated = true
+  const r = await post(body)
   if (!r.ok) return r
   return { ok: true, food: r.data.matched && r.data.food ? (r.data.food as ResolvedFood) : null }
 }

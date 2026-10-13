@@ -41,4 +41,13 @@ describe('음식 편집 v1 — 배선', () => {
     expect(lookup.match(/fetch\(/g)).toHaveLength(1)
     expect(panel).toContain("from '../lib/foodLookup'")
   })
+
+  it('W5 분량 조절 v1 — 칩은 저장 전·편집 가능할 때만, 숫자는 엔진(resolveFood portionChoice)·applyPortion 으로만', () => {
+    expect(mealResult).toContain('PORTION_CHOICES.map(')
+    expect(mealResult).toContain('editable && edit?.onPortion && portionRequest(f)')
+    expect(mealResult).toContain('aria-pressed={currentPortion(f) === c}')
+    expect(meal).toContain('onPortion: async (i: number, choice: PortionChoice)')
+    expect(meal).toContain('resolveFood(req.name, req.baseG, { portionChoice: choice, riceSeparated: req.riceSeparated })')
+    expect(meal).toContain('applyPortion(prev, i, r.food, choice)')
+  })
 })

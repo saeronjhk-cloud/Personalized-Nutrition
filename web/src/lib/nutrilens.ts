@@ -42,6 +42,12 @@ export interface MealFood {
   portion?: { kind?: string; qty?: number; basis?: string; approx?: boolean }
   /** 라벨 DB 에 없던 영양소 키(MealFood 필드명) — 합계엔 0, 화면엔 «정보 없음» */
   missing_nutrients?: string[]
+  /** 분량 조절 v1(2026-10-13) — 엔진이 지금 숫자를 만든 기준 g(적게·보통·많게의 기준, 탭해도 안 바뀜) */
+  portion_base_g?: number | null
+  /** 분량 조절 v1 — 사용자가 고른 양. 없으면 '보통'(사진 추정 그대로) */
+  portion_choice?: '적게' | '보통' | '많게'
+  /** 국밥 밥 이중계산 방지(엔진 v1.2) — 같은 끼니에 밥이 따로 있어 «국만» 값으로 계산됨 */
+  rice_separated?: boolean
 }
 export interface MealSummary {
   total_calories_kcal: number

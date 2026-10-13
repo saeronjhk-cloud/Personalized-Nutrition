@@ -8,7 +8,11 @@ import {
   type AnalyzeResult, type MealFood,
 } from '../lib/nutrilens'
 import { applyAlternate } from '../lib/foodCorrection'
-import { renameFood, removeFood, addFood, addProductFood, canSaveFoods, type ResolvedFood } from '../lib/foodEdit'
+import {
+  renameFood, removeFood, addFood, addProductFood, canSaveFoods, applyPortion, portionRequest,
+  type ResolvedFood, type PortionChoice,
+} from '../lib/foodEdit'
+import { resolveFood } from '../lib/foodLookup'
 import MealHistory from '../components/MealHistory'
 import MealResult from '../components/MealResult'
 import MealConsentGate from '../components/MealConsentGate'
@@ -137,6 +141,15 @@ export default function Meal() {
     onAdd: (food: ResolvedFood) => setResult((prev) => (prev ? addFood(prev, food) : prev)),
     // 사진+가공식품 v1 — 양은 «상에 있던 양», 드신 양·인원은 저장 뒤 ②에서(설계 meal_photo_product_mix D2)
     onAddProduct: MEAL_PRODUCT_ENABLED ? (food: MealFood) => setResult((prev) => (prev ? addProductFood(prev, food) : prev)) : undefined,
+    // 분량 조절 v1(2026-10-13) — 기준 g(엔진 portion_base_g) + 선택만 보내고, 엔진이 다시 계산한 값을 그대로 쓴다.
+    onPortion: async (i: number, choice: PortionChoice): Promise<boolean> => {
+      const req = portionRequest(result?.foods?.[i])
+      if (!req) return false
+      const r = await resolveFood(req.name, req.baseG, { portionChoice: choice, riceSeparated: req.riceSeparated })
+      if (!r.ok || !r.food) return false
+      setResult((prev) => (prev ? applyPortion(prev, i, r.food, choice) : prev))
+      return true
+    },
   } : undefined
 
   function onCorrect(index: number, altName: string) {
