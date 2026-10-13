@@ -52,3 +52,24 @@ export function useHomeData(): HomeData {
   }, [])
   return d
 }
+
+/**
+ * Supabase 기본 저장소(localStorage `sb-<ref>-auth-token`)에 세션 흔적이 있는지 — 동기 확인.
+ * 첫 렌더에서 «방문자 홈을 바로 그릴지 / 자리 표시로 기다릴지»만 정한다(로그인 판정 자체는 loadHomeData).
+ * 저장소 접근 예외 → false(기존 동작 = 방문자 홈). 평가 IP/integration/home_first_render_eval_v1.md P11
+ */
+export function hasStoredSession(storage: Pick<Storage, 'length' | 'key'> | null | undefined = typeof localStorage !== 'undefined' ? localStorage : undefined): boolean {
+  try {
+    if (!storage) return false
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i)
+      if (k && /^sb-.+-auth-token$/.test(k)) return true
+    }
+    return false
+  } catch {
+    return false
+  }
+}
+
+/** 첫 렌더 판정 대기 상한(ms). 넘으면 그 시점 정보로 판정(무한 자리 표시 금지). */
+export const HOME_PENDING_TIMEOUT_MS = 4000

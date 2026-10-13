@@ -2999,3 +2999,11 @@ input[type="range"]::-webkit-slider-thumb {
 @media (prefers-reduced-motion: reduce) {
   .meal-demo *, .meal-demo { transition: none !important; }
 }
+
+/* ── 홈 첫 렌더 자리 표시(10-13, IP/integration/home_first_render_eval_v1.md) ── */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.home-pending__bar { background: var(--border); border-radius: var(--radius); margin-bottom: var(--space-4); animation: homePendingPulse 1.2s ease-in-out infinite; }
+.home-pending__bar--title { height: 28px; width: 55%; }
+.home-pending__bar--card { height: 88px; width: 100%; }
+@keyframes homePendingPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .home-pending__bar { animation: none; } }

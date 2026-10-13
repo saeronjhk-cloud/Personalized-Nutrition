@@ -61,3 +61,29 @@ export function greeting(now: Date = new Date()): string {
   const h = now.getHours();
   return h < 5 ? "편안한 밤이에요" : h < 11 ? "좋은 아침이에요" : h < 17 ? "좋은 오후예요" : "좋은 저녁이에요";
 }
+
+/**
+ * 홈 첫 렌더 판정(깜빡임 제거) — 평가 IP/integration/home_first_render_eval_v1.md P01~P10.
+ * 판정 규칙(homeMode)은 그대로, «언제 판정하느냐»만 정한다. pending = 아직 모름(자리 표시).
+ * - 세션 흔적 없음 → 즉시 visitor(처음 온 방문자 지연 0)
+ * - 정보가 모자라면 pending, 시간 초과면 그 시점 정보로 homeMode
+ */
+export type HomeView = HomeMode | "pending";
+
+export function decideHomeView(i: {
+  storedSession: boolean;
+  homeLoading: boolean;
+  isLoggedIn: boolean;
+  hasMealOrCheckup: boolean;
+  surveyLoading: boolean;
+  surveyCount: number;
+  timedOut: boolean;
+}): HomeView {
+  if (!i.storedSession) return "visitor";
+  const settled = (): HomeMode => homeMode({ isLoggedIn: i.isLoggedIn, hasAnyRecord: i.hasMealOrCheckup || i.surveyCount > 0 });
+  if (i.homeLoading) return i.timedOut ? settled() : "pending";
+  if (!i.isLoggedIn) return "visitor";
+  if (i.hasMealOrCheckup || i.surveyCount > 0) return "returning";
+  if (i.surveyLoading) return i.timedOut ? settled() : "pending";
+  return "visitor";
+}

@@ -11,10 +11,10 @@ import StartChooser from '../components/home/StartChooser'
 import ReturningHome from '../components/home/ReturningHome'
 import MealDemo from '../components/home/MealDemo'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
-import { useHomeData } from '../lib/homeData'
+import { useHomeData, hasStoredSession, HOME_PENDING_TIMEOUT_MS } from '../lib/homeData'
 import { track } from '../lib/events'
 import { resurveyState } from '../domain/survey/history'
-import { homeMode, type HomeMode } from '../domain/home/home_mode'
+import { decideHomeView, type HomeMode } from '../domain/home/home_mode'
 import { MEOKSEON_ENABLED, MEAL_ENABLED, CHECKUP_ENABLED } from '../lib/flags'
 
 /* ── 스크롤 시 .visible 추가 훅 (개별 요소용) ── */
@@ -157,11 +157,36 @@ function VisitorHome({ mode }: { mode: HomeMode }) {
 
 export default function Home() {
   // 로그인 사용자는 서버 설문 기록 우선(다른 기기·주소에서도 보이게) — IP/integration/survey_history_server_eval_v1.md
-  const { history: surveyHistory } = useSurveyHistory()
+  const { history: surveyHistory, loading: surveyLoading } = useSurveyHistory()
   const resurvey = resurveyState(surveyHistory, new Date())
   const home = useHomeData()
-  const mode = homeMode({ isLoggedIn: home.isLoggedIn, hasAnyRecord: home.hasMealOrCheckup || surveyHistory.length > 0 })
+  // 첫 렌더 깜빡임 제거(10-13): 세션 흔적이 있으면 판정 전까지 자리 표시 — IP/integration/home_first_render_eval_v1.md
+  const [storedSession] = useState(() => hasStoredSession())
+  const [timedOut, setTimedOut] = useState(false)
+  useEffect(() => {
+    if (!storedSession) return
+    const t = setTimeout(() => setTimedOut(true), HOME_PENDING_TIMEOUT_MS)
+    return () => clearTimeout(t)
+  }, [storedSession])
+  const mode = decideHomeView({
+    storedSession,
+    homeLoading: home.loading,
+    isLoggedIn: home.isLoggedIn,
+    hasMealOrCheckup: home.hasMealOrCheckup,
+    surveyLoading,
+    surveyCount: surveyHistory.length,
+    timedOut,
+  })
   useScrollReveal(mode)
+
+  if (mode === 'pending') {
+    return (
+      <div className="page">
+        <PageMeta />
+        <HomePending />
+      </div>
+    )
+  }
 
   return (
     <div className="page fade-in">
@@ -198,6 +223,18 @@ export default function Home() {
         <VisitorHome mode={mode} />
       )}
     </div>
+  )
+}
+
+/* ── 첫 렌더 자리 표시(로그인 판정 중) — 재방문 홈 모양 · 문구는 스크린리더용만 ── */
+export function HomePending() {
+  return (
+    <section className="returning-home home-pending" aria-busy="true" data-testid="home-pending">
+      <span className="sr-only">불러오는 중</span>
+      <div className="home-pending__bar home-pending__bar--title" />
+      <div className="home-pending__bar home-pending__bar--card" />
+      <div className="home-pending__bar home-pending__bar--card" />
+    </section>
   )
 }
 
