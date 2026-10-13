@@ -49,6 +49,10 @@ function fromResolved(r: ResolvedFood): Record<string, unknown> {
     match_confidence: 'user_selected',
   }
   if (r.shape != null) out.shape = r.shape
+  // 분량 조절 v1 — 엔진 기준 g·밥 분리·봉지 수를 함께 옮긴다(안 옮기면 추가·이름 바꾼 음식에 양 칩이 안 뜬다 — 2026-10-13 N02)
+  if (typeof r.portion_base_g === 'number' && Number.isFinite(r.portion_base_g) && r.portion_base_g > 0) out.portion_base_g = r.portion_base_g
+  if (r.rice_separated === true) out.rice_separated = true
+  if (typeof r.package_count === 'number' && Number.isFinite(r.package_count) && r.package_count > 0) out.package_count = r.package_count
   for (const k of NUTRIENTS) out[k] = typeof r[k] === 'number' && Number.isFinite(r[k]) ? r[k] : 0
   return out
 }
@@ -63,7 +67,10 @@ export function renameFood(result: AnalyzeResult, index: number, resolved: Resol
   if (!resolved || !Array.isArray(foods) || index < 0 || index >= foods.length) return result
   const cur = foods[index] as MealFood & Record<string, unknown>
   const added = cur.user_edit === 'added'
-  const next: Record<string, unknown> = { ...cur, ...fromResolved(resolved) }
+  // 옛 음식의 양 표식(기준 g·선택·봉지 수·밥 분리)은 새 음식에 남기지 않는다 — 새 값은 fromResolved 가 채운다(N08)
+  const base: Record<string, unknown> = { ...cur }
+  for (const k of PORTION_KEYS) delete base[k]
+  const next: Record<string, unknown> = { ...base, ...fromResolved(resolved) }
   delete next.alternates
   delete next.alternates_reason
   delete next.db_candidate
@@ -101,6 +108,7 @@ export function addFood(result: AnalyzeResult, resolved: ResolvedFood | null): A
   return withFoods(result, [...result.foods, item])
 }
 
+const PORTION_KEYS = ['portion_base_g', 'portion_choice', 'package_count', 'rice_separated'] as const
 const PRODUCT_KEYS = ['barcode', 'product_id', 'brand', 'portion', 'missing_nutrients', 'amount'] as const
 
 /**

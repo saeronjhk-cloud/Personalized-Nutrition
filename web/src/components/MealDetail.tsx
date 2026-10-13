@@ -10,7 +10,7 @@ export default function MealDetail({ record }: { record: MealRecord }) {
         <img src={record.thumbUrl} alt="식사 사진" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)' }} />
       )}
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-        {v.when}{record.meal_session_id ? ' · 🍱 정찬' : ''}{record.source === 'barcode' ? ' · 📦 가공식품' : ''}
+        {v.when}{record.meal_session_id ? ' · 🍱 정찬' : ''}{record.source === 'barcode' ? ' · 📦 가공식품' : record.source === 'manual' ? ' · ✍️ 직접 기록' : ''}
       </div>
       {v.kcalBefore != null && (
         <div style={{ fontSize: 13, color: 'var(--text)', background: 'var(--border-light)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2) var(--space-3)' }}>

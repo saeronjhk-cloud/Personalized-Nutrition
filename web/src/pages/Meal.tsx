@@ -21,6 +21,7 @@ import GoalsCard from '../components/GoalsCard'
 import CoachCards from '../components/CoachCards'
 import { MEAL_EDIT_ENABLED, MEAL_FLOW_V2_ENABLED, MEAL_PRODUCT_ENABLED } from '../lib/flags'
 import ProductMealCard from '../components/ProductMealCard'
+import ManualMealCard from '../components/ManualMealCard'
 import CoachAvatar from '../components/CoachAvatar'
 import { ANALYZE_BUSY_MSG, ANALYZE_WAIT_MSG } from '../lib/mealDetail'
 import AfterSaveLeftover from '../components/AfterSaveLeftover'
@@ -357,6 +358,9 @@ export default function Meal() {
           )}
         </div>
       )}
+
+      {/* 사진 없이 기록 v1(2026-10-13) — 엔진 음식 DB 검색(food-lookup, MEAL_EDIT 와 같은 선행 배포) */}
+      {!result && MEAL_EDIT_ENABLED && <ManualMealCard onSaved={() => setHistoryKey((k) => k + 1)} />}
 
       {!result && MEAL_PRODUCT_ENABLED && <ProductMealCard onSaved={() => setHistoryKey((k) => k + 1)} />}
 
