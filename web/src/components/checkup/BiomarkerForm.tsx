@@ -31,6 +31,7 @@ import {
 import { withEgfrInput } from "../../domain/checkup/egfr_input";
 import { implausibleValues, implausibleMessage, sameDateRecord, sameDateMessage } from "../../domain/checkup/input_guard";
 import RecommendationList from "./RecommendationList";
+import { convertedNotice } from "../../domain/checkup/unit_convert";
 import TimeseriesChart from "./TimeseriesChart";
 import {
   extractPdfText,
@@ -151,7 +152,7 @@ export default function BiomarkerForm() {
       }
 
       const parsed = parseCheckupText(text);
-      const { matched, unmatchedLabels } = matchToRules(parsed, rules);
+      const { matched, unmatchedLabels, converted } = matchToRules(parsed, rules);
       const count = Object.keys(matched).length;
 
       if (count === 0) {
@@ -169,7 +170,9 @@ export default function BiomarkerForm() {
           ? ` (인식했지만 입력 항목이 없는 값 ${unmatchedLabels.length}개는 제외)`
           : "";
       setImportMessage(
-        `${count}개 항목을 불러왔어요${parsed.date ? ` · 검진일 ${parsed.date}` : ""}${extra}. 값을 확인한 뒤 '검진 결과 분석하기'를 눌러주세요.`,
+        `${count}개 항목을 불러왔어요${parsed.date ? ` · 검진일 ${parsed.date}` : ""}${extra}. 값을 확인한 뒤 '검진 결과 분석하기'를 눌러주세요.` +
+          // 단위 환산 안내(10-13, IP/integration/checkup_unit_convert_eval_v1.md U19)
+          (convertedNotice(converted) ? ` ${convertedNotice(converted)}` : ""),
       );
     } catch (err) {
       console.error("[BiomarkerForm] PDF import failed:", err);

@@ -12,6 +12,7 @@
 
 import type { BiomarkerRule } from "./checkup_api";
 import { parseUrineProtein } from "../domain/checkup/urine_protein";
+import { convertByUnitText, type UnitConversion } from "../domain/checkup/unit_convert";
 
 export interface ParsedItem {
   /** 결과지에 표기된 원본 라벨 (예: "공복혈당") */
@@ -19,6 +20,8 @@ export interface ParsedItem {
   value: number;
   /** 파싱 근거가 된 원문 조각 (디버그·검증용) */
   raw: string;
+  /** 값 뒤에 다른 단위가 명시돼 기준 단위로 환산한 경우(10-13, checkup_unit_convert_eval_v1.md U11·U12) */
+  conversion?: UnitConversion;
 }
 
 export interface ParsedCheckup {
@@ -32,6 +35,8 @@ export interface MatchResult {
   matched: Record<string, string>;
   /** 파싱은 됐지만 룰에 매칭되지 않은 라벨 (사용자 안내용) */
   unmatchedLabels: string[];
+  /** 단위를 환산해 넣은 항목(안내용) */
+  converted: { key: string; name: string; conversion: UnitConversion }[];
 }
 
 // ── 라벨 정규화: 공백·괄호·구두점 제거, 소문자, 전각→반각 ──
@@ -194,7 +199,9 @@ export function parseCheckupText(text: string): ParsedCheckup {
 
       const m = tail.match(NUMBER_RE);
       if (m) {
-        pushItem(items, seen, concept, line, m[1]);
+        // 값 바로 뒤 단위 글자(최대 16자) — 다른 단위가 명시된 경우에만 환산(U-B)
+        const after = tail.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 16);
+        pushItem(items, seen, concept, line, m[1], after);
       }
     }
   }
@@ -208,13 +215,16 @@ function pushItem(
   concept: string,
   raw: string,
   numStr: string,
+  after?: string,
 ) {
-  const value = parseFloat(numStr.replace(/,/g, ""));
-  if (Number.isNaN(value)) return;
+  const parsed = parseFloat(numStr.replace(/,/g, ""));
+  if (Number.isNaN(parsed)) return;
+  const conversion = convertByUnitText(concept, parsed, after) ?? undefined;
+  const value = conversion ? conversion.value : parsed;
   if (!isPlausible(concept, value)) return;
   if (seen.has(concept)) return;
   seen.add(concept);
-  items.push({ label: concept, value, raw: raw.trim() });
+  items.push(conversion ? { label: concept, value, raw: raw.trim(), conversion } : { label: concept, value, raw: raw.trim() });
 }
 
 // 정규화된 alias 가 원문에서 시작하는 대략적 위치를 찾는다.
@@ -248,17 +258,19 @@ export function matchToRules(
 ): MatchResult {
   const matched: Record<string, string> = {};
   const unmatchedLabels: string[] = [];
+  const converted: MatchResult["converted"] = [];
 
   for (const item of parsed.items) {
     const rule = findRule(item.label, rules);
     if (rule) {
       matched[rule.biomarker_key] = String(item.value);
+      if (item.conversion) converted.push({ key: rule.biomarker_key, name: rule.display_name_ko, conversion: item.conversion });
     } else {
       unmatchedLabels.push(item.label);
     }
   }
 
-  return { matched, unmatchedLabels };
+  return { matched, unmatchedLabels, converted };
 }
 
 function findRule(concept: string, rules: BiomarkerRule[]): BiomarkerRule | null {

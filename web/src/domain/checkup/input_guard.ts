@@ -2,6 +2,8 @@
  * 검진 입력 가드 (순수) — 사람에게 나올 수 없는 값 · 같은 날짜 중복
  * 판정 기준이 아니라 입력 실수 걸러내기(넓은 범위). 평가: IP/integration/checkup_input_guard_eval_v1.md
  */
+import { manualUnitHint } from "./unit_convert";
+
 export const PLAUSIBLE_BOUNDS: Record<string, readonly [number, number]> = {
   HbA1c: [3, 20],
   fasting_glucose: [20, 800],
@@ -41,7 +43,7 @@ export function implausibleValues(input: Record<string, number>): ImplausibleIte
     const b = PLAUSIBLE_BOUNDS[key];
     if (!b || typeof value !== "number" || Number.isNaN(value)) continue;
     const offCode = key === "urine_protein" && !URINE_CODES.has(value);
-    if (offCode || value < b[0] || value > b[1]) out.push({ key, value, min: b[0], max: b[1], hint: HINT[key]?.(value) ?? null });
+    if (offCode || value < b[0] || value > b[1]) out.push({ key, value, min: b[0], max: b[1], hint: HINT[key]?.(value) ?? manualUnitHint(key, value) });
   }
   return out;
 }
