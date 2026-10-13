@@ -104,6 +104,33 @@ describe('사진 없이 기록 — 담기·양·저장', () => {
   })
 })
 
+describe('백반·정식 구성 합산 v1 — 나눠 담기', () => {
+  // 엔진 실측(resolve_food('김치찌개백반') 10-13): 세트 542.8 · set_components 4개(각 «보통», 기준 g = 표의 g)
+  const part = (name_ko: string, g: number, kcal: number): ResolvedFood => ({
+    name_ko, db_name: name_ko, db_matched: true, source: 'GOLD_REF', estimated_serving_g: g, shape: null,
+    calories_kcal: kcal, protein_g: 1, carbs_g: 1, fat_g: 1, sugar_g: 0, sodium_mg: 10, fiber_g: 0, portion_base_g: g, portion_choice: '보통',
+  })
+  const set: ResolvedFood = {
+    ...kimchi, name_ko: '김치찌개백반', db_name: '김치찌개백반', estimated_serving_g: 710, portion_base_g: 710, calories_kcal: 542.8,
+    set_components: [part('흰밥', 210, 315), part('김치찌개', 400, 200), part('배추김치', 40, 6.8), part('콩나물무침', 60, 21)],
+  }
+  it('N09 세트를 담으면 구성 음식 4개로 나눠 담김 · 합계 = 세트 · 각자 양 칩', () => {
+    const m = addFood(emptyManualMeal(), set)
+    expect(m.foods.map((f) => f.name_ko)).toEqual(['흰밥', '김치찌개', '배추김치', '콩나물무침'])
+    expect(m.summary.total_calories_kcal).toBeCloseTo(542.8, 1)
+    expect(m.foods.every((f) => (f as any).user_edit === 'added')).toBe(true)
+    expect(m.foods.map((f) => portionRequest(f)?.baseG)).toEqual([210, 400, 40, 60])
+    expect(m.foods.every((f) => (f as any).set_components === undefined)).toBe(true)
+  })
+  it('N10 이름 바꾸기는 세트를 한 줄로 유지(구성 목록은 저장하지 않음)', () => {
+    const m = renameFood(addFood(emptyManualMeal(), kimchi), 0, set)
+    expect(m.foods).toHaveLength(1)
+    expect(m.foods[0].name_ko).toBe('김치찌개백반')
+    expect((m.foods[0] as any).set_components).toBeUndefined()
+    expect(m.summary.total_calories_kcal).toBeCloseTo(542.8, 1)
+  })
+})
+
 describe('사진 없이 기록 — 배선', () => {
   it('W1 Meal.tsx: 결과 없을 때 MEAL_EDIT_ENABLED 로 ManualMealCard 렌더 + 기록 목록 새로고침', () => {
     const s = read('../../pages/Meal.tsx')

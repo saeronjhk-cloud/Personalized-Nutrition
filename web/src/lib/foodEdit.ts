@@ -34,6 +34,8 @@ export interface ResolvedFood {
   portion_choice?: '적게' | '보통' | '많게'
   rice_separated?: boolean
   package_count?: number
+  /** 백반·정식 구성 합산 v1 — 이름만 확정했을 때 엔진이 주는 구성 음식(각 «보통»·기준 g). 담기만 나눠 담고, 저장하지 않는다 */
+  set_components?: ResolvedFood[]
 }
 
 const NUTRIENTS = ['calories_kcal', 'protein_g', 'carbs_g', 'fat_g', 'sugar_g', 'sodium_mg', 'fiber_g'] as const
@@ -104,8 +106,10 @@ export function removeFood(result: AnalyzeResult, index: number): AnalyzeResult 
 /** 엔진이 확정한 음식을 끝에 추가(1인분 = 엔진 현실 서빙). resolved=null → 원본 그대로. */
 export function addFood(result: AnalyzeResult, resolved: ResolvedFood | null): AnalyzeResult {
   if (!resolved || !Array.isArray(result?.foods)) return result
-  const item = { ...fromResolved(resolved), user_edit: 'added', name_source: 'user_added' } as unknown as MealFood
-  return withFoods(result, [...result.foods, item])
+  // 백반·정식(엔진 set_components) → 구성 음식으로 나눠 담는다 — 밥·찌개·반찬을 각자 양 칩으로 고칠 수 있게(N09)
+  const parts = Array.isArray(resolved.set_components) && resolved.set_components.length > 0 ? resolved.set_components : [resolved]
+  const items = parts.map((p) => ({ ...fromResolved(p), user_edit: 'added', name_source: 'user_added' }) as unknown as MealFood)
+  return withFoods(result, [...result.foods, ...items])
 }
 
 const PORTION_KEYS = ['portion_base_g', 'portion_choice', 'package_count', 'rice_separated'] as const
