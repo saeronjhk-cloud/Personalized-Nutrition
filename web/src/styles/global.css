@@ -3007,3 +3007,159 @@ input[type="range"]::-webkit-slider-thumb {
 .home-pending__bar--card { height: 88px; width: 100%; }
 @keyframes homePendingPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .home-pending__bar { animation: none; } }
+
+/* ══ 홈 v2 (10-13) — 방문자 홈 범위 토큰·히어로 장면 · IP/integration/home_redesign_v2_eval_v1.md ══
+   토큰은 .home-v2 안에서만(다른 화면 무변화, V02). 값 = 외부 자문 R1 ChatGPT 팔레트(대비 검증 통과). */
+.home-v2 {
+  --hv-ink: #1F2A24;
+  --hv-green: #24513B;
+  --hv-green-dark: #1A3D2C;
+  --hv-ivory: #F7F4EC;
+  --hv-sage: #DDE8DB;
+  --hv-sage-soft: #E8EFE6;
+  --hv-white: #FFFFFF;
+  --hv-line: #E3DED2;
+  --hv-stone: #6B6258;
+  --hv-brown: #9A5127;
+  --hv-font-title: 'Noto Serif KR', 'Noto Sans KR', serif;
+  --hv-font-body: 'Pretendard Variable', Pretendard, 'Noto Sans KR', -apple-system, sans-serif;
+  /* 공용 토큰을 홈 안에서만 재지정 → 기존 섹션도 같은 톤으로 */
+  --primary: var(--hv-green); --primary-dark: var(--hv-green-dark); --primary-rgb: 36, 81, 59;
+  --text: var(--hv-ink); --text-secondary: var(--hv-stone); --text-muted: var(--hv-stone);
+  --bg: var(--hv-ivory); --border: #E3DED2;
+  background: var(--hv-ivory); color: var(--hv-ink); font-family: var(--hv-font-body);
+}
+.home-v2 h1, .home-v2 h2 { font-family: var(--hv-font-title); font-weight: 700; word-break: keep-all; }
+.home-v2 .section-alt-bg { background: #EFEBE0; }
+.hero-v2 { max-width: 720px; margin: 0 auto; padding: var(--space-10) var(--space-5) var(--space-8); text-align: left; }
+.hero-v2__eyebrow { font-size: 14px; font-weight: 600; color: var(--hv-green); margin-bottom: var(--space-3); }
+.hero-v2__title { font-size: 34px; line-height: 1.24; letter-spacing: -0.025em; color: var(--hv-ink); margin: 0; }
+.hero-v2__sub { font-size: 16px; line-height: 1.65; color: var(--hv-stone); margin: var(--space-4) 0 var(--space-6); max-width: 34em; word-break: keep-all; }
+.hero-v2__cta { margin: var(--space-6) 0 var(--space-2); }
+.hero-v2__cta .hero-cta { margin: 0; max-width: none; width: 100%; border-radius: 10px; }
+.hero-v2__cta-note { font-size: 13px; color: var(--hv-stone); margin-top: var(--space-2); text-align: center; }
+.hero-v2 .hero-trust-line { margin-top: var(--space-4); color: var(--hv-stone); }
+.hero-v2__scan { text-align: center; margin: 0 0 var(--space-8); }
+.hero-scene { margin: 0; }
+.hero-scene__photo { position: relative; border-radius: 14px; overflow: hidden; background: #E9E2D3; }
+.hero-scene__photo img { display: block; width: 100%; height: auto; aspect-ratio: 1168 / 750; object-fit: cover; }
+.hero-scene__tag { position: absolute; top: 10px; left: 10px; font-size: 12px; font-weight: 600; color: var(--hv-ink); background: rgba(247, 244, 236, 0.92); border-radius: 999px; padding: 2px 10px; }
+.hero-scene__chips { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-wrap: wrap; gap: 6px; padding: 28px 10px 10px; margin: 0; list-style: none; background: linear-gradient(to top, rgba(31, 42, 36, 0.55), rgba(31, 42, 36, 0)); }
+.hero-scene__chip { display: inline-flex; align-items: baseline; gap: 5px; background: #FFFFFF; color: var(--hv-ink); border-radius: 999px; padding: 4px 10px; font-size: 13px; opacity: 0; transform: translateY(4px); animation: heroChipIn 0.4s ease-out forwards; }
+.hero-scene__chip-role { font-weight: 700; color: var(--hv-green); }
+.hero-scene__chip-name { color: var(--hv-ink); }
+@keyframes heroChipIn { to { opacity: 1; transform: none; } }
+.hero-scene__result { display: flex; flex-direction: column; gap: 2px; margin-top: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--hv-sage); border-radius: 10px; }
+.hero-scene__result-label { font-size: 13px; font-weight: 700; color: var(--hv-brown); }
+.hero-scene__result-text { font-size: 15px; line-height: 1.55; color: var(--hv-ink); word-break: keep-all; }
+@media (min-width: 769px) {
+  .hero-v2 { padding-top: var(--space-15); }
+  .hero-v2__title { font-size: 52px; line-height: 1.16; }
+  .hero-v2__sub { font-size: 18px; }
+  .hero-v2__cta .hero-cta { width: auto; min-width: 320px; }
+  .hero-v2__cta-note { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-scene__chip { animation: none; opacity: 1; transform: none; } }
+/* 홈 v2 보정(10-13 자체 점검): 배경 화면 끝까지 · 제목 구 단위 줄바꿈 · 데스크톱 2단 */
+.home-v2 { box-shadow: 0 0 0 100vmax var(--hv-ivory); clip-path: inset(0 -100vmax); }
+.hero-v2__nw { white-space: nowrap; }
+@media (min-width: 900px) {
+  .hero-v2 {
+    max-width: 1120px; display: grid; column-gap: var(--space-12);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas: "eyebrow scene" "title scene" "sub scene" "cta scene" "trust scene";
+    grid-template-rows: auto auto auto auto 1fr; align-items: start;
+  }
+  .hero-v2__eyebrow { grid-area: eyebrow; } .hero-v2__title { grid-area: title; font-size: 46px; }
+  .hero-v2__sub { grid-area: sub; } .hero-v2__cta { grid-area: cta; margin-top: 0; }
+  .hero-v2 .hero-trust-line { grid-area: trust; } .hero-v2 .hero-scene { grid-area: scene; align-self: center; }
+}
+/* 빈 칸 칩 — 점선·투명 바탕(채운 칸과 구분, 색만으로 구분하지 않도록 «비어 있음» 글자 병기) */
+.hero-scene__chip--empty { background: rgba(31, 42, 36, 0.72); border: 1.5px dashed #FFFFFF; color: #FFFFFF; }
+.hero-scene__chip--empty .hero-scene__chip-role, .hero-scene__chip--empty .hero-scene__chip-name { color: #FFFFFF; }
+
+/* ══ 홈 v2 2단계 (10-14) — 히어로 아래 섹션 · home_redesign_v2_eval_v1.md §5 V14~V25
+   원칙: 섹션마다 형식이 다름(사진 → 타임라인 → 인물 → 아코디언 → 사진 띠) · 같은 둥근 카드 반복 금지 · 새 움직임 없음
+   글자색은 --hv-* 토큰만(V23). Journey·Experts 는 재방문 홈 «서비스 소개»에서도 쓰므로 토큰에 폴백을 둔다. */
+.hv-after, .hv-flow, .hv-experts, .hv-faq, .hv-final { padding: var(--space-12) var(--space-5); }
+.hv-after { box-shadow: 0 0 0 100vmax var(--hv-white); clip-path: inset(0 -100vmax); background: var(--hv-white); }
+.hv-after__inner { max-width: 1120px; margin: 0 auto; display: grid; gap: var(--space-6); }
+.hv-after__title, .hv-flow__title, .hv-experts__title, .hv-faq__title, .hv-final__title { font-size: 28px; line-height: 1.3; letter-spacing: -0.025em; color: var(--hv-ink, var(--text)); margin: 0 0 var(--space-4); text-align: left; }
+.hv-after__lead { font-size: 16px; line-height: 1.7; color: var(--hv-stone, var(--text-secondary)); margin: 0 0 var(--space-4); max-width: 30em; word-break: keep-all; }
+.hv-after__checks { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); list-style: none; margin: 0; padding: 0; font-size: 15px; font-weight: 600; }
+.hv-after__checks .is-ok { color: var(--hv-green); }
+.hv-after__checks .is-missing { color: var(--hv-brown); }
+.hv-after__figure { margin: 0; }
+.hv-after__chip { animation: none; opacity: 1; transform: none; }
+.hv-after__chip--added { background: var(--hv-green); }
+.hv-after__chip--added .hero-scene__chip-role, .hv-after__chip--added .hero-scene__chip-name { color: var(--hv-white); }
+.hv-notice { max-width: 1120px; margin: var(--space-6) auto 0; font-size: 13px; line-height: 1.6; color: var(--hv-stone, var(--text-secondary)); word-break: keep-all; }
+
+.hv-flow { box-shadow: 0 0 0 100vmax var(--hv-sage-soft, transparent); clip-path: inset(0 -100vmax); background: var(--hv-sage-soft, transparent); }
+.hv-flow__inner { max-width: 1120px; margin: 0 auto; }
+.hv-timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+.hv-timeline::before { content: ""; position: absolute; left: 17px; top: 18px; bottom: 18px; width: 2px; background: var(--hv-green, var(--primary)); opacity: 0.25; }
+.hv-timeline__item { position: relative; display: grid; grid-template-columns: 36px 1fr; column-gap: var(--space-4); padding: var(--space-3) 0; }
+.hv-timeline__num { position: relative; z-index: 1; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 15px; color: var(--hv-green, var(--primary)); background: var(--hv-sage-soft, var(--bg)); border: 2px solid var(--hv-green, var(--primary)); }
+.hv-timeline__body { display: flex; flex-direction: column; gap: 2px; text-decoration: none; padding-top: 4px; }
+.hv-timeline__k { font-size: 13px; font-weight: 700; color: var(--hv-brown, var(--text-secondary)); }
+.hv-timeline__t { font-size: 18px; font-weight: 700; line-height: 1.4; color: var(--hv-ink, var(--text)); }
+.hv-timeline__d { font-size: 15px; line-height: 1.6; color: var(--hv-stone, var(--text-secondary)); word-break: keep-all; }
+.hv-timeline__body:hover .hv-timeline__t, .hv-timeline__body:focus-visible .hv-timeline__t { text-decoration: underline; text-underline-offset: 4px; }
+.hv-timeline__body:focus-visible { outline: 2px solid var(--hv-green, var(--primary)); outline-offset: 4px; border-radius: 4px; }
+
+.hv-experts { max-width: 1120px; margin: 0 auto; }
+.hv-experts__lead { display: grid; grid-template-columns: 112px 1fr; gap: var(--space-4); align-items: center; padding-bottom: var(--space-5); border-bottom: 1px solid var(--hv-line, var(--border)); }
+.hv-experts__photo { width: 112px; height: 136px; object-fit: cover; border-radius: 8px; }
+.hv-experts__name { font-size: 18px; font-weight: 700; color: var(--hv-ink, var(--text)); }
+.hv-experts__lead .hv-experts__name { font-size: 22px; }
+.hv-experts__role { font-size: 13px; font-weight: 600; color: var(--hv-green, var(--primary)); margin-left: 4px; }
+.hv-experts__cred { font-size: 15px; line-height: 1.6; color: var(--hv-stone, var(--text-secondary)); word-break: keep-all; }
+.hv-experts__list { list-style: none; margin: 0; padding: 0; }
+.hv-experts__list li { display: grid; grid-template-columns: 48px 1fr; column-gap: var(--space-3); align-items: center; padding: var(--space-4) 0; border-bottom: 1px solid var(--hv-line, var(--border)); }
+.hv-experts__list .hv-experts__cred { grid-column: 2; font-size: 14px; }
+.hv-experts__thumb { grid-row: span 2; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.hv-experts__more { display: inline-block; margin-top: var(--space-4); }
+
+.hv-faq { box-shadow: 0 0 0 100vmax var(--hv-white); clip-path: inset(0 -100vmax); background: var(--hv-white); }
+.hv-faq > * { max-width: 760px; margin-left: auto; margin-right: auto; }
+
+.hv-final { max-width: 1120px; margin: 0 auto; display: grid; gap: var(--space-6); }
+.hv-final__img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 7; object-fit: cover; border-radius: 14px; }
+.hv-final__sub { font-size: 16px; line-height: 1.65; color: var(--hv-stone); margin: 0 0 var(--space-5); }
+.hv-final .hero-cta { margin: 0; width: 100%; max-width: none; border-radius: 10px; }
+.hv-final .hv-notice { margin-top: var(--space-4); }
+
+@media (min-width: 900px) {
+  .hv-after, .hv-flow, .hv-experts, .hv-faq, .hv-final { padding-top: var(--space-16, 64px); padding-bottom: var(--space-16, 64px); }
+  .hv-after__title, .hv-flow__title, .hv-experts__title, .hv-faq__title, .hv-final__title { font-size: 40px; line-height: 1.22; }
+  .hv-after__inner { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); column-gap: var(--space-12); align-items: center; }
+  .hv-after__figure { grid-row: 1; grid-column: 1; }
+  .hv-after__text { grid-column: 2; }
+  .hv-flow__inner { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: var(--space-12); align-items: start; }
+  .hv-experts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-12); align-items: start; }
+  .hv-experts__title { grid-column: 1 / -1; }
+  .hv-experts__lead { border-bottom: 0; grid-template-columns: 160px 1fr; }
+  .hv-experts__photo { width: 160px; height: 196px; }
+  .hv-experts__list li:first-child { padding-top: 0; }
+  .hv-experts__more { grid-column: 2; }
+  .hv-final { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); column-gap: var(--space-12); align-items: center; }
+  .hv-final__img { aspect-ratio: 4 / 3; }
+  .hv-final .hero-cta { width: auto; min-width: 320px; }
+}
+/* 2단계 FAQ — 카드 대신 구분선(같은 둥근 상자 반복 금지, A7) */
+.hv-faq .faq-list { border-top: 1px solid var(--hv-line); }
+.hv-faq .faq-item { background: transparent; border: 0; border-bottom: 1px solid var(--hv-line); border-radius: 0; box-shadow: none; margin: 0; padding: 0; }
+.hv-faq .faq-question { padding: var(--space-5) 0; font-size: 17px; font-weight: 600; color: var(--hv-ink); }
+.hv-faq .faq-answer { padding: 0 0 var(--space-5); font-size: 15px; line-height: 1.7; color: var(--hv-stone); }
+.hv-faq .faq-toggle { color: var(--hv-green); }
+/* 모바일: 표식 2줄이 그릇을 가리므로 사진 바로 아래 붙은 띠로(사진과 한 몸, 10-14 실측) */
+@media (max-width: 599px) {
+  .hero-scene__chips { position: static; background: var(--hv-ink); padding: 10px; }
+  .hero-v2 { padding-top: var(--space-6); }
+  .hero-v2__eyebrow { margin-bottom: var(--space-2); }
+  .hero-v2__sub { margin: var(--space-3) 0 var(--space-4); }
+  .hero-scene__result { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); }
+  .hero-v2__cta { margin-top: var(--space-4); }
+  .hv-after__chip--added { box-shadow: 0 0 0 1.5px var(--hv-white); }
+}

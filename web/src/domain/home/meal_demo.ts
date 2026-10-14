@@ -46,3 +46,43 @@ export function mealDemo(): MealDemo {
   });
   return { foods, checks, card: res.active ? { rule: res.active.rule, text: res.active.text } : null };
 }
+
+/**
+ * 홈 v2 2단계 — «후» 장면(히어로 밥상 + 한 가지 더함). 같은 엔진으로 다시 판정한다(하드코딩 0).
+ * 평가 IP/integration/home_redesign_v2_eval_v1.md §5 V15
+ */
+export const DEMO_ADD_FOOD: DemoFood = { name: "계란말이", emoji: "🍳" };
+
+export interface MealDemoAfter extends MealDemo {
+  /** 이번에 더한 음식 이름(전 장면에 없던 것) */
+  added: string[];
+  /** 전 장면에서 비어 있다가 이번에 채워진 칸 */
+  filled: string[];
+}
+
+function judgeChecks(names: string[]): { label: string; ok: boolean }[] {
+  const judged = judgeMeal({ day: "demo", slot: "lunch", names });
+  return [
+    { label: "주식", ok: judged.staple === true },
+    { label: "채소 반찬", ok: judged.veg === true },
+    { label: "단백질 반찬", ok: judged.protein === true },
+  ];
+}
+
+export function mealDemoAfter(): MealDemoAfter {
+  const before = mealDemo();
+  const list = [...DEMO_FOODS, DEMO_ADD_FOOD];
+  const names = list.map((f) => f.name);
+  const foods = list.map((f) => ({ ...f, roleLabel: ROLE_LABEL[resolveRoles(f.name)[0]] ?? "기타" }));
+  const checks = judgeChecks(names);
+  const beforeNames = new Set(before.foods.map((f) => f.name));
+  const added = names.filter((n) => !beforeNames.has(n));
+  const filled = checks.filter((c) => c.ok && before.checks.some((b) => b.label === c.label && !b.ok)).map((c) => c.label);
+  const now = new Date(2026, 0, 1, 13, 0, 0);
+  const eaten = new Date(2026, 0, 1, 12, 0, 0).toISOString();
+  const res = mealGrammarCoaching({
+    mealEnabled: true, loggedIn: true, now, conditions: [], egfr: null, v1CardVisible: false,
+    rows: [{ eaten_at: eaten, meal_slot: "lunch", foods: names.map((n) => ({ name_ko: n })) }],
+  });
+  return { foods, checks, card: res.active ? { rule: res.active.rule, text: res.active.text } : null, added, filled };
+}

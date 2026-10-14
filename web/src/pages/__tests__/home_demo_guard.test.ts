@@ -21,16 +21,8 @@ describe('홈 밥상 데모 가드', () => {
   it('D08 reduced-motion', () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.meal-demo/)
   })
-  it('D09·D11 위치: 방문자 홈 Hero 다음·Journey 앞 1회, 게이트, StartChooser 2개 유지', () => {
-    expect(home.match(/<MealDemo \/>/g)?.length).toBe(1)
-    const v = home.slice(home.indexOf('function VisitorHome'))
-    const iHero = v.indexOf('</section>')
-    const iDemo = v.indexOf('{MEAL_ENABLED && <MealDemo />}')
-    const iJourney = v.indexOf('<Journey />')
-    expect(iDemo).toBeGreaterThan(iHero)
-    expect(iDemo).toBeLessThan(iJourney)
-    const r = home.slice(home.indexOf("mode === 'returning'"), home.indexOf('<VisitorHome mode'))
-    expect(r).not.toContain('MealDemo')
+  it('D09·D11 (10-14 의도적 변경 → V14) 방문자 홈은 «후» 장면으로 대체 · MealDemo 미사용 · StartChooser 2개 유지', () => {
+    expect(home).not.toContain('<MealDemo')
     expect(home.match(/<StartChooser /g)?.length).toBe(2)
   })
 })
