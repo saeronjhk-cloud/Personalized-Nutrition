@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { popupGate, popupDelayMs } from '../domain/home/popup_gate'
 import { Link } from 'react-router-dom'
 
 interface BlogEntry {
@@ -17,7 +18,7 @@ interface BlogEntry {
  * - 새 글이 올라오면 자동으로 다시 표시
  * - 3초 뒤 슬라이드업 애니메이션으로 등장
  */
-export default function NewBlogPopup() {
+export default function NewBlogPopup({ deferUntilPast }: { deferUntilPast?: string } = {}) {
   const [post, setPost] = useState<BlogEntry | null>(null)
   const [visible, setVisible] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
@@ -39,16 +40,32 @@ export default function NewBlogPopup() {
 
         setPost(latest)
         setVisible(true)
-
-        // 3초 뒤 슬라이드업 등장
-        setTimeout(() => {
-          if (!cancelled) setAnimateIn(true)
-        }, 3000)
       })
       .catch(() => { /* 조용히 실패 */ })
 
     return () => { cancelled = true }
   }, [])
+
+  // 등장 시점: 방문자 홈은 히어로 버튼을 지나 스크롤한 뒤(popupGate · V27), 그 외 3초 뒤(현행)
+  useEffect(() => {
+    if (!visible || !post) return
+    let timer: number | undefined
+    const anchorBottom = () => {
+      if (!deferUntilPast) return null
+      const el = document.querySelector(deferUntilPast)
+      return el ? el.getBoundingClientRect().bottom : null
+    }
+    const open = () => { timer = window.setTimeout(() => setAnimateIn(true), popupDelayMs(!!deferUntilPast)) }
+    if (popupGate({ deferUntilPast, anchorBottom: anchorBottom() }) === 'show') { open(); return () => clearTimeout(timer) }
+    const onScroll = () => {
+      if (popupGate({ deferUntilPast, anchorBottom: anchorBottom() }) === 'show') {
+        window.removeEventListener('scroll', onScroll)
+        open()
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(timer) }
+  }, [visible, post, deferUntilPast])
 
   function handleDismiss() {
     setAnimateIn(false)

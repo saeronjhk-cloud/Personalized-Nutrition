@@ -10,7 +10,7 @@ import NewBlogPopup from '../components/NewBlogPopup'
 import StartChooser from '../components/home/StartChooser'
 import ReturningHome from '../components/home/ReturningHome'
 import MealAfterScene, { MEDICAL_NOTICE } from '../components/home/MealAfterScene'
-import HeroScene, { HERO_MEAL_AFTER_IMG } from '../components/home/HeroScene'
+import HeroScene, { HERO_MEAL_SNAP_IMG } from '../components/home/HeroScene'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { useHomeData, hasStoredSession, HOME_PENDING_TIMEOUT_MS } from '../lib/homeData'
 import { track } from '../lib/events'
@@ -141,9 +141,9 @@ function VisitorHome({ mode }: { mode: HomeMode }) {
       {/* ━━ 최종 CTA (대표 CTA 와 같은 동작) ━━ */}
       <section className="hv-final">
         <img
-          src={HERO_MEAL_AFTER_IMG.src}
-          width={HERO_MEAL_AFTER_IMG.width}
-          height={HERO_MEAL_AFTER_IMG.height}
+          src={HERO_MEAL_SNAP_IMG.src}
+          width={HERO_MEAL_SNAP_IMG.width}
+          height={HERO_MEAL_SNAP_IMG.height}
           alt=""
           aria-hidden="true"
           loading="lazy"
@@ -196,7 +196,7 @@ export default function Home() {
   return (
     <div className={`page fade-in${mode === 'visitor' ? ' home-v2' : ''}`}>
       <PageMeta />
-      <NewBlogPopup />
+      <NewBlogPopup deferUntilPast={mode === 'visitor' ? '.hero-v2__cta' : undefined} />
 
       {/* ━━ 재설문 유도 배너 (30일 이상 경과 시) ━━ */}
       {resurvey.prompt && (

@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { renderToStaticMarkup } from 'react-dom/server'
 import MealAfterScene, { MEDICAL_NOTICE } from '../../components/home/MealAfterScene'
-import { HERO_MEAL_AFTER_IMG } from '../../components/home/HeroScene'
+import { HERO_MEAL_IMG, HERO_MEAL_AFTER_IMG, HERO_MEAL_SNAP_IMG } from '../../components/home/HeroScene'
+import { popupGate, popupDelayMs } from '../../domain/home/popup_gate'
 import { mealDemo, mealDemoAfter, DEMO_ADD_FOOD } from '../../domain/home/meal_demo'
 
 const read = (p: string) => readFileSync(resolve(__dirname, p), 'utf-8')
@@ -67,7 +68,7 @@ describe('홈 v2 2단계', () => {
   it('V21 알약 스톡 없음 · 마지막 CTA = «후» 사진', () => {
     expect(visitor).not.toContain('/supp-')
     const fin = visitor.slice(visitor.indexOf('className="hv-final"'))
-    expect(fin).toContain('HERO_MEAL_AFTER_IMG.src')
+    expect(fin).toContain('HERO_MEAL_SNAP_IMG.src')
     expect(fin).toContain('<StartChooser mode={mode} cta="final" />')
   })
   it('V22 방문자 홈에 섹션 머리 작은 라벨 없음', () => {
@@ -79,5 +80,27 @@ describe('홈 v2 2단계', () => {
     expect(colors.length).toBeGreaterThan(5)
     for (const c of colors) expect(c).toMatch(/^var\(--hv-/)
     expect(block).not.toMatch(/@keyframes|animation:(?!\s*none)/)
+  })
+})
+
+describe('홈 v2.1 보정', () => {
+  it('V26 방문자 홈 사진 3장은 서로 다르고 각 1회', () => {
+    const srcs = [HERO_MEAL_IMG.src, HERO_MEAL_AFTER_IMG.src, HERO_MEAL_SNAP_IMG.src]
+    expect(new Set(srcs).size).toBe(3)
+    expect(visitor.match(/HERO_MEAL_SNAP_IMG\.src/g)?.length).toBe(1)
+    expect(visitor).not.toContain('HERO_MEAL_AFTER_IMG')
+    expect(after.match(/HERO_MEAL_AFTER_IMG\.src/g)?.length).toBe(1)
+  })
+  it('V27 새 글 팝업 — 방문자 홈은 히어로 버튼을 지난 뒤에만', () => {
+    expect(popupGate({ deferUntilPast: undefined, anchorBottom: null })).toBe('show')
+    expect(popupGate({ deferUntilPast: '.hero-v2__cta', anchorBottom: 803 })).toBe('wait')
+    expect(popupGate({ deferUntilPast: '.hero-v2__cta', anchorBottom: 0 })).toBe('wait')
+    expect(popupGate({ deferUntilPast: '.hero-v2__cta', anchorBottom: -1 })).toBe('show')
+    expect(popupGate({ deferUntilPast: '.hero-v2__cta', anchorBottom: null })).toBe('show')
+    expect(popupDelayMs(false)).toBe(3000)
+    expect(home).toContain(`<NewBlogPopup deferUntilPast={mode === 'visitor' ? '.hero-v2__cta' : undefined} />`)
+    const popup = read('../../components/NewBlogPopup.tsx')
+    expect(popup).toContain('popupGate(')
+    expect(popup).not.toMatch(/setTimeout\(\(\) => \{\s*if \(!cancelled\) setAnimateIn\(true\)/)
   })
 })
