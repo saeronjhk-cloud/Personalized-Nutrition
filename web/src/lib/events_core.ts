@@ -16,7 +16,7 @@
  *   초과분은 CHECK 에 걸려 INSERT 가 조용히 거부됐고 `track` 이 실패를 삼켜 아무도 몰랐다.
  *   배열로 두면 `events_db_sync.test.ts` 가 마이그레이션 SQL 과 직접 대조할 수 있다.
  *
- * 추가할 때: 이 배열 + 최신 전체 재동기화 SQL(현재 `supabase/155_app_event_home_v1.sql`)을 «함께» 고칠 것.
+ * 추가할 때: 이 배열 + 최신 전체 재동기화 SQL(현재 `supabase/167_app_event_measure_v1.sql`)을 «함께» 고칠 것.
  *   한쪽만 고치면 위 테스트가 빨갛게 잡는다.
  */
 export const ALL_APP_EVENTS = [
@@ -62,6 +62,12 @@ export const ALL_APP_EVENTS = [
   // ── home(홈 개편 v1) — 155 · IP/integration/home_redesign_v1_design.md ──
   'home_cta_click',          // 홈 대표 CTA·보조 링크 클릭
   'home_start_choice',       // 시작 선택 시트에서 고른 시작점
+  // ── 효과 측정(167) — IP/integration/home_measure_v1/00_측정설계_평가셋_v1.md · props 신규 키 0 ──
+  'home_view',                    // 홈이 방문자/재방문 모드로 그려짐(퍼널 분모) — props home_mode
+  'survey_completed',             // 설문 결과가 화면에 나옴(첫 입력 완료)
+  'checkup_saved',                // 검진 저장 성공(첫 입력 완료)
+  'checkup_goal_suggest_shown',   // 검진 BMI → 체중관리 목표 제안 노출
+  'checkup_goal_suggest_click',   // 제안에서 목표 켜기 저장 성공
 ] as const
 
 export type AppEvent = typeof ALL_APP_EVENTS[number]
@@ -112,6 +118,8 @@ export function surfaceOf(event: AppEvent): string {
   if (event.startsWith('weekly_report')) return 'report'
   if (event.startsWith('coach_')) return 'coach'
   if (event.startsWith('home_')) return 'home'
+  if (event.startsWith('survey_')) return 'survey'
+  if (event.startsWith('checkup_')) return 'checkup'
   return 'scan'
 }
 

@@ -3,7 +3,8 @@
  * 판정 shouldSuggestWeightGoal()(순수) · 저장은 GoalsCard 와 같은 경로(validateGoalsForSave → saveUserGoals)
  * 평가 IP/integration/checkup_coaching_link_eval_v1.md K12~K15
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { track } from '../../lib/events'
 import { supabase } from '../../lib/supabase'
 import { loadEffectiveGoals, saveUserGoals, fetchLatestBody } from '../../lib/userGoals'
 import { validateGoalsForSave, bmiFromAnswers } from '../../domain/goals/goals'
@@ -32,6 +33,13 @@ export default function WeightGoalSuggest({ results }: { results: CategoryResult
     return () => { alive = false }
   }, [])
 
+  const visible = MEAL_ENABLED && !!userId && state !== 'done' && shouldSuggestWeightGoal(results, goals)
+  // 효과 측정 M07 — 제안이 실제로 그려질 때 1회
+  const shownSent = useRef(false)
+  useEffect(() => {
+    if (visible && !shownSent.current) { shownSent.current = true; track('checkup_goal_suggest_shown') }
+  }, [visible])
+
   if (!MEAL_ENABLED || !userId) return null
   if (state === 'done') {
     return <p className="checkup-weight-suggest checkup-weight-suggest--done" data-testid="weight-goal-suggest-done">{WEIGHT_GOAL_SUGGEST_DONE}</p>
@@ -43,7 +51,9 @@ export default function WeightGoalSuggest({ results }: { results: CategoryResult
     setState('saving')
     const v = validateGoalsForSave([...goals, '체중관리'], bmi)
     const r = await saveUserGoals(userId, v.goals)
-    setState(r.ok && v.goals.includes('체중관리') ? 'done' : 'error')
+    const ok = r.ok && v.goals.includes('체중관리')
+    if (ok) track('checkup_goal_suggest_click') // M07 — 저장 성공만
+    setState(ok ? 'done' : 'error')
   }
 
   return (

@@ -4,6 +4,7 @@ import { App as CapApp } from '@capacitor/app'
 import type { Step, SurveyAnswers, RecommendationResult } from './types'
 import { getRecommendation } from './api/client'
 import { submitSurveyAnalytics, type SurveySaveConsent } from './lib/analytics'
+import { track } from './lib/events'
 import { fetchSurveyConsentStatus, giveSurveyConsent } from './lib/surveyConsent'
 import { decideSurveyGateMode, SURVEY_CHANNEL_GATE, GATE_STATUS_ERROR, type SurveyGateMode } from './domain/survey/consent_v2'
 import { CHECKUP_ENABLED, INSIGHTS_ENABLED, MEOKSEON_ENABLED, MEAL_ENABLED } from './lib/flags'
@@ -161,6 +162,7 @@ function SurveyFlow() {
         setSavedAnswers(effective)
         setResult(res)
         setStep('results')
+        track('survey_completed') // 효과 측정 M05
         if (consent) submitSurveyAnalytics(effective, res, consent)
       } else {
         const data = await getRecommendation(answers)
@@ -169,6 +171,7 @@ function SurveyFlow() {
         setSavedAnswers(answers)
         setResult(data)
         setStep('results')
+        track('survey_completed') // 효과 측정 M05
         // 익명 분석 수집 (fire-and-forget, 실패해도 UI 영향 없음)
         if (consent) submitSurveyAnalytics(answers, data, consent)
       }

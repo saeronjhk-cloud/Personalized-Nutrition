@@ -183,6 +183,10 @@ export default function Home() {
     timedOut,
   })
   useScrollReveal(mode)
+  // 효과 측정 — 홈 방문(퍼널 분모), 모드가 정해진 뒤 모드별 1회 · IP/integration/home_measure_v1 M04
+  useEffect(() => {
+    if (mode !== 'pending') track('home_view', { home_mode: mode })
+  }, [mode])
 
   if (mode === 'pending') {
     return (

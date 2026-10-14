@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { track } from "../../lib/events";
 import { INVERTED_BADGE, inputHint } from "../../domain/checkup/input_hint";
 import BiomarkerValueInput from "./BiomarkerValueInput";
 import { Link, useNavigate } from "react-router-dom";
@@ -298,6 +299,7 @@ export default function BiomarkerForm() {
     }
 
     setSaved(true);
+    track("checkup_saved"); // 효과 측정 M06 — 성공 경로만
     setSaveMessage("검진 결과가 저장되었습니다 (3개월 후 재검진 시 비교 가능)");
   }
 
