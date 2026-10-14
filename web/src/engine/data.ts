@@ -1873,7 +1873,7 @@ export const PERSONAS: PersonaData[] = [
   {
     "id": "general_wellness",
     "name": "전반적 건강 관리형",
-    "tagline": "지금 당장 큰 문제는 없지만, 예방이 최고의 치료예요",
+    "tagline": "지금 당장 큰 문제는 없어요. 기본을 꾸준히 챙기는 게 가장 좋은 관리예요",
     "max_recommendations": 3,
     "category_boosts": {},
     "emoji": "🌱",
