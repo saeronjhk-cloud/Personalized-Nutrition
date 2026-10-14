@@ -3167,3 +3167,30 @@ input[type="range"]::-webkit-slider-thumb {
 .hv-after .hero-scene__photo img { aspect-ratio: 4 / 3; }
 .hv-after .hero-scene__chips { position: static; background: var(--hv-ink); padding: 10px; }
 .hv-after__chip--added { box-shadow: 0 0 0 1.5px var(--hv-white); }
+
+/* ══ 재방문 홈 v2 (10-14) — 외형만(CSS) · home_redesign_v2_eval_v1.md §7 R01~R06
+   ReturningHome·CoachCards·MealGrammarCard·GoalCoachingCard·home_mode 무변경 → 판정·문구·계측·링크 그대로.
+   글자·배경색은 --hv-* 토큰만(R03). 같은 카드 반복 대신: 오늘 칸 3개 · 코칭 면 · 구분선 목록 */
+.home-v2 .returning-home { max-width: 680px; padding: var(--space-10) var(--space-5) var(--space-6); }
+.home-v2 .returning-home__hello { margin-bottom: var(--space-5); }
+.home-v2 .returning-home__hello h1 { font-size: 30px; line-height: 1.25; letter-spacing: -0.025em; font-weight: 700; color: var(--hv-ink); }
+.home-v2 .returning-home__date { font-size: 14px; color: var(--hv-stone); }
+.home-v2 .returning-home__today { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-4); padding: var(--space-5); background: var(--hv-white); border: 1px solid var(--hv-line); border-radius: 14px; margin-bottom: var(--space-4); }
+.home-v2 .returning-home__slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); font-size: 15px; color: var(--hv-stone); }
+.home-v2 .returning-home__slot { text-align: center; padding: 10px 4px; border: 1.5px solid var(--hv-line); border-radius: 10px; background: var(--hv-ivory); color: var(--hv-stone); }
+.home-v2 .returning-home__slot.is-done { background: var(--hv-sage); border-color: var(--hv-sage); color: var(--hv-green); font-weight: 700; }
+.home-v2 .returning-home__today .btn { width: 100%; border-radius: 10px; padding: 14px; font-size: 16px; }
+.home-v2 .returning-home__one .survey-card { background: var(--hv-sage-soft); border: 0; box-shadow: none; border-radius: 14px; padding: var(--space-5); }
+.home-v2 .returning-home__one { margin-bottom: var(--space-6); }
+.home-v2 .returning-home__links { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--hv-line); }
+.home-v2 .returning-home__link { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4) var(--space-1); background: transparent; border: 0; border-bottom: 1px solid var(--hv-line); border-radius: 0; color: var(--hv-ink); font-size: 16px; font-weight: 600; }
+.home-v2 .returning-home__link::after { content: "›"; font-size: 20px; color: var(--hv-stone); }
+.home-v2 .returning-home__link:hover, .home-v2 .returning-home__link:focus-visible { color: var(--hv-green); }
+.home-v2 .returning-home__link:focus-visible { outline: 2px solid var(--hv-green); outline-offset: 2px; }
+.home-v2 .returning-home__about > summary { color: var(--hv-stone); }
+@media (min-width: 769px) {
+  .home-v2 .returning-home { padding-top: var(--space-15); }
+  .home-v2 .returning-home__hello h1 { font-size: 38px; }
+  .home-v2 .returning-home__links { grid-template-columns: 1fr 1fr; column-gap: var(--space-8); border-top: 0; }
+  .home-v2 .returning-home__link:nth-child(-n+2) { border-top: 1px solid var(--hv-line); }
+}

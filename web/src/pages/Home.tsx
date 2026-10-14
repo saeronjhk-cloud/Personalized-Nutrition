@@ -194,7 +194,7 @@ export default function Home() {
   }
 
   return (
-    <div className={`page fade-in${mode === 'visitor' ? ' home-v2' : ''}`}>
+    <div className={`page fade-in${mode === 'visitor' || mode === 'returning' ? ' home-v2' : ''}`}>
       <PageMeta />
       <NewBlogPopup deferUntilPast={mode === 'visitor' ? '.hero-v2__cta' : undefined} />
 

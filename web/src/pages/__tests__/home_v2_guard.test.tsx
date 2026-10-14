@@ -32,7 +32,7 @@ describe('홈 v2 1단계', () => {
     const root = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')))
     expect(root).not.toContain('--hv-')
     expect(css).toMatch(/\.home-v2 \{\s*--hv-ink/)
-    expect(home).toContain("mode === 'visitor' ? ' home-v2' : ''")
+    expect(home).toContain("mode === 'visitor' || mode === 'returning' ? ' home-v2' : ''")
   })
   it('V03 히어로 문구(제이 결정 ChatGPT안) · 금지어 없음', () => {
     expect(home).toContain('먹은 것부터 살피고,<br /><span className="hero-v2__nw">내 몸에 맞는</span> <span className="hero-v2__nw">다음 한 가지까지</span>')
