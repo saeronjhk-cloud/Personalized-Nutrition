@@ -25,7 +25,7 @@ import {
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
   getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
-  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName,
+  analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis,
 } from '../lib/meokseon'
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
@@ -672,10 +672,7 @@ export default function Scan() {
           <div style={{ marginTop: 'var(--space-3)' }} data-testid="report-ingredients">
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 'var(--space-2)' }}>원재료</div>
             <p style={{ fontSize: 'var(--font-body-sm)', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-              {analysis.ingredients.map((it) => (
-                [it.name, it.origin, it.percentage !== null ? `${it.percentage}%` : null]
-                  .filter(Boolean).join(' ')
-              )).join(', ')}
+              {analysis.ingredients.map(ingredientLabel).join(', ')}
             </p>
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)', lineHeight: 1.55 }}>
               사진에서 읽어낸 그대로예요. 라벨과 다르면 라벨이 맞아요.

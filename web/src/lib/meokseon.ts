@@ -439,6 +439,19 @@ export interface MsPhotoIngredient {
   origin: string | null
   /** 「12%」의 12. 없으면 null. */
   percentage: number | null
+  /** 괄호 안(「감미료(자일리톨)」의 자일리톨). 없으면 null. 세션79 — 서버가 이제 싣는다. */
+  detail?: string | null
+}
+
+/** 원재료 한 항목 → 화면 문자열. 괄호 안이 있으면 「이름(괄호 안)」(원산지는 괄호 안에 이미 있다), 없으면 이름·원산지·함량.
+ *  세션79 — 「감미료(자일리톨)」이 「감미료」로만 보이던 문제(롯데자일리톨 제보). */
+export function ingredientLabel(it: MsPhotoIngredient): string {
+  const pct = it.percentage !== null ? `${it.percentage}%` : null
+  if (it.detail) {
+    const withPct = pct && !it.detail.includes(pct) && !it.detail.includes(`${it.percentage} %`) ? ` ${pct}` : ''
+    return `${it.name}(${it.detail})${withPct}`
+  }
+  return [it.name, it.origin, pct].filter(Boolean).join(' ')
 }
 
 /** `analysis.ingredients` → 표시용. 이름이 없는 항목은 버린다(빈 줄을 그리지 않는다). */
@@ -461,10 +474,13 @@ function parseIngredients(raw: unknown): MsPhotoIngredient[] {
       name,
       origin: (typeof row.origin === 'string' && row.origin.trim()) ? row.origin.trim() : null,
       percentage: pct,
+      detail: (typeof row.detail === 'string' && row.detail.trim()) ? row.detail.trim() : null,
     })
   }
   return out
 }
+
+export { parseIngredients as _parsePhotoIngredients }   // 테스트 전용
 
 /** 응답 `data` → 화면이 읽을 수 있는 이름 붙은 필드. 1단계 응답 파싱은 여기 «한 곳»이다. */
 function parsePhotoAnalysis(data: any): MsPhotoAnalysis {
