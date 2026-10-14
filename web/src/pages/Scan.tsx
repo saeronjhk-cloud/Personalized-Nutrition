@@ -28,7 +28,7 @@ import {
   analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem,
 } from '../lib/meokseon'
-import { webLabelNotice, supplementView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
+import { webLabelNotice, supplementView, labelNutritionView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
@@ -1312,8 +1312,18 @@ export default function Scan() {
               )}
               {sv.nutrition && (
                 <div style={{ fontSize: 13, lineHeight: 1.7, marginTop: sv.allergens ? 'var(--space-2)' : 0 }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>영양성분{sv.nutrition.basisLabel ? ` (${sv.nutrition.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
-                  {sv.nutrition.rows.map((r) => <div key={r.label}>{r.label} {r.value}{r.unit}</div>)}
+                  {sv.nutrition.label ? (
+                    <>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>영양성분 · 포장지 표시 ({sv.nutrition.label.header}) · 신호등 판정에는 쓰지 않아요</div>
+                      {sv.nutrition.label.rows.map((r) => <div key={r}>{r}</div>)}
+                      {sv.nutrition.label.secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>비교용 {sv.nutrition.label.secondary}</div>}
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>영양성분{sv.nutrition.basisLabel ? ` (${sv.nutrition.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
+                      {sv.nutrition.rows.map((r) => <div key={r.label}>{r.label} {r.value}{r.unit}</div>)}
+                    </>
+                  )}
                   {sv.nutrition.collectedLabel && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sv.nutrition.collectedLabel}</div>}
                 </div>
               )}
@@ -1396,6 +1406,18 @@ export default function Scan() {
               각 줄은 숫자가 아니면 건너뛰므로 **머리글만 있는 빈 표**가 남았다.
               그 상태에서 아래 「영양정보가 아직 없어요」까지 뜨면 화면이 스스로 모순된다.
               판정은 domain/meokseon/productCompleteness.ts (⚠ 0mg 은 «있음»이다). */}
+          {/* ★ 세션79(제이 23:05) — 판매처 라벨 품목은 «포장지에 인쇄된 그대로»(기준·숫자)를 먼저. 아래 표는 100 기준(비교·신호등용). */}
+          {result.web_label && labelNutritionView(result.web_label.label_nutrition ?? null, result.nutrition as unknown as Record<string, number | null>) && (() => {
+            const lv = labelNutritionView(result.web_label!.label_nutrition ?? null, result.nutrition as unknown as Record<string, number | null>)!
+            return (
+              <div className="survey-card" data-testid="label-nutrition" style={{ marginBottom: 'var(--space-4)' }}>
+                <h3 className="survey-step-title" style={{ fontSize: 16 }}>영양정보 · 포장지 표시 ({lv.header})</h3>
+                <div style={{ fontSize: 13, lineHeight: 1.8 }}>{lv.rows.map((r) => <div key={r}>{r}</div>)}</div>
+                {lv.secondary && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-2) 0 0' }}>비교용 {lv.secondary} · 아래 표는 100 기준이에요</p>}
+              </div>
+            )
+          })()}
+
           {result.nutrition && completeness?.nutrition.state === 'present' && (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>영양성분</h3>

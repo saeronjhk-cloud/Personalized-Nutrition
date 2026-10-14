@@ -31,3 +31,23 @@ describe('supplementView', () => {
     expect(supplementView({ web_label_supplements: { badge: 'b', warning: 'w', allergens: { contains: [], may_contain: [], collected_label: null }, nutrition: { basis: null, collected_label: null } } })).toBeNull()
   })
 })
+
+// ★ 세션79(제이 23:05) «포장지 그대로» — 정답 backends/먹선/IP/eval_label_basis_v1/cases_v1.json 의 display D01~D05
+import { labelHeader, labelNutritionView } from '../webLabel'
+describe('포장지 기준 표시', () => {
+  it('D01 1회분 → «190ml당»', () => { expect(labelHeader({ basis: 'per_serving', amount: 190, unit: 'ml' })).toBe('190ml당') })
+  it('D02 총 내용량 → «총 내용량 500ml당»', () => { expect(labelHeader({ basis: 'per_total', amount: 500, unit: 'ml' })).toBe('총 내용량 500ml당') })
+  it('D03 100g → «100g당»', () => { expect(labelHeader({ basis: 'per_100g', amount: 100, unit: 'g' })).toBe('100g당') })
+  it('D04 라벨 숫자 그대로 · 상한값은 «이하»', () => {
+    const v = labelNutritionView({ basis: 'per_serving', amount: 190, unit: 'ml', values: { calories: 75, trans_fat: 0.5 }, upper_bound: ['trans_fat'] })!
+    expect(v.rows).toEqual(['열량 75kcal', '트랜스지방 0.5g 이하'])
+  })
+  it('D05 100 기준이 아니면 비교용 100 기준 한 줄(소수 1자리) · 100 기준 라벨이면 없음', () => {
+    expect(labelNutritionView({ basis: 'per_serving', amount: 190, unit: 'ml', values: { calories: 75 } }, { calories: 39.47 })!.secondary).toBe('100ml당 39.5kcal')
+    expect(labelNutritionView({ basis: 'per_100g', amount: 100, unit: 'g', values: { calories: 216 } }, { calories: 216 })!.secondary).toBeNull()
+  })
+  it('보충 카드: 라벨이 있으면 label 뷰 · 상한값 키는 100 기준 행에도 «이하»', () => {
+    const v = supplementView({ web_label_supplements: { badge: 'b', warning: 'w', allergens: null, nutrition: { calories: 216, trans_fat: 0.5, basis: 'per_100g', collected_label: null, upper_bound: ['trans_fat'], label: { basis: 'per_100g', amount: 100, unit: 'g', values: { calories: 216, trans_fat: 0.5 }, upper_bound: ['trans_fat'] } } } })!
+    expect(v.nutrition!.label!.header).toBe('100g당'); expect(v.nutrition!.rows.find((r) => r.label === '트랜스지방')!.unit).toBe('g 이하')
+  })
+})

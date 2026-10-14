@@ -157,13 +157,25 @@ export interface MsWebLabelBlock {
   is_stale: boolean
   nutrition_ok: boolean | null
   barcode_linked: boolean
+  /** ★ 세션79(제이 23:05) — 포장지에 인쇄된 기준·숫자. 없으면 null(구버전 서버는 키 없음). */
+  label_nutrition?: MsLabelNutrition | null
+}
+
+/** 포장지 표시 그대로의 영양 기준 — basis per_serving(1회분)·per_total(총 내용량)·per_100g·per_100ml */
+export interface MsLabelNutrition {
+  basis: 'per_serving' | 'per_total' | 'per_100g' | 'per_100ml'
+  amount: number
+  unit: 'g' | 'ml'
+  values: Partial<Record<string, number>>
+  /** «0.5g 이하»처럼 상한값으로 표시된 키 */
+  upper_bound?: string[]
 }
 
 export interface MsWebLabelSupplements {
   badge: string
   warning: string
   allergens: { contains: string[]; may_contain: string[]; collected_label: string | null } | null
-  nutrition: (Partial<Record<'calories' | 'total_fat' | 'saturated_fat' | 'trans_fat' | 'cholesterol' | 'sodium' | 'total_carbs' | 'total_sugars' | 'dietary_fiber' | 'protein', number | null>> & { basis: string | null; collected_label: string | null }) | null
+  nutrition: (Partial<Record<'calories' | 'total_fat' | 'saturated_fat' | 'trans_fat' | 'cholesterol' | 'sodium' | 'total_carbs' | 'total_sugars' | 'dietary_fiber' | 'protein', number | null>> & { basis: string | null; collected_label: string | null; label?: MsLabelNutrition | null; upper_bound?: string[] }) | null
 }
 
 /** ★ 세션79 U78-3 — 이름 검색의 판매처 라벨 기반 결과(바코드 없음 · web_id 로 상세를 연다). */
