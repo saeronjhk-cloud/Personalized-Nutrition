@@ -61,6 +61,11 @@ describe('사진 없이 기록 — 담기·양·저장', () => {
     expect(manualAmountText({ ...(m.foods[1] as any), package_count: 1.5 })).toBe('1.5봉')
     expect(manualAmountText({ name_ko: 'x' } as any)).toBeNull()
   })
+  it('N11 양 표시도 계산에 쓴 무게(가중이면 기준 g, 선택이면 그 양)', () => {
+    expect(manualAmountText({ name_ko: '고사리나물', estimated_serving_g: 100, portion_base_g: 92 } as any)).toBe('92g')
+    expect(manualAmountText({ name_ko: '고사리나물', estimated_serving_g: 70, portion_base_g: 50, portion_choice: '많게' } as any)).toBe('70g')
+    expect(manualAmountText({ name_ko: '김치찌개', estimated_serving_g: 400 } as any)).toBe('400g')
+  })
   it('N04 저장: source manual · 사진 없음 · food_item_id · 끼니 · 합계', async () => {
     const m = addFood(addFood(emptyManualMeal(), kimchi), ramen)
     const r = await saveManualMeal({ result: m, mealSlot: 'lunch' })

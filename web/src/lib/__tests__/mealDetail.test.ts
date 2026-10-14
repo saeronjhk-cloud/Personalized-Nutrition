@@ -103,4 +103,16 @@ describe('D. 상세 뷰 모델', () => {
     const hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0')
     expect(mealDetailView(rec()).when).toBe(`점심 · ${d.getMonth() + 1}월 ${d.getDate()}일 ${hh}:${mm}`)
   })
+  it('D06 표시 무게 = 계산에 쓴 무게(2026-10-14): 양 가중(C3c)이면 portion_base_g, 양 선택이면 estimated_serving_g', () => {
+    // 운영 10-13 실기록: 맥주 GPT 200g → 가중 245g 로 105.4kcal · 잡채 60g → 74g
+    const v = mealDetailView(rec({ foods: [
+      food('맥주', 105.4, { estimated_serving_g: 200, portion_base_g: 245 }),
+      food('잡채', 88.8, { estimated_serving_g: 60, portion_base_g: 74 }),
+      food('회', 80, { estimated_serving_g: 80, portion_base_g: 50, portion_choice: '많게' }),   // 선택: 기준 50 × 1.4 ≈ 70→ 저장 80 은 엔진값
+      food('김치', 5.1, { estimated_serving_g: 30, portion_base_g: 30 }),
+      food('옛기록', 300, { estimated_serving_g: 400 }),                                      // portion_base_g 없는 10-13 이전 기록
+    ] }))
+    expect(v.foods.map((f) => f.amountText)).toEqual(['245g', '74g', '80g', '30g', '400g'])
+    expect(v.foods.map((f) => f.grams)).toEqual([245, 74, 80, 30, 400])
+  })
 })

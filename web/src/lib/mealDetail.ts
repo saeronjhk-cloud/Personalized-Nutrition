@@ -3,6 +3,7 @@
  * 설계 IP/integration/meal_flow_v2_design_v1.md · 평가 L·D (lib/__tests__/mealDetail.test.ts)
  * 숫자는 저장값(엔진·Edge 결과)을 «보여주기만» 한다 — 반올림 외 산식 없음.
  */
+import { shownServingG } from './foodGrams'
 import { actualSummary, isAdjusted, slotLabel, type MealRecord } from './mealHistory'
 
 export const ANALYZE_BUSY_MSG = '사진을 분석하고 있어요…'
@@ -61,13 +62,13 @@ export function mealDetailView(r: MealRecord): MealDetailView {
   const act = actualSummary(r) as unknown as Record<string, unknown>
   const adjusted = isAdjusted(r) && leftoverStatusLabel(r) !== null
   const foods = (Array.isArray(r.foods) ? r.foods : []).map((f, i): DetailFoodRow => {
-    const g = (f as { estimated_serving_g?: unknown }).estimated_serving_g
+    const g = shownServingG(f)   // 계산에 쓴 무게(양 가중 반영) — lib/foodGrams.ts
     return {
       key: (f as { food_item_id?: string }).food_item_id ?? String(i),
       name: f?.name_ko || `음식 ${i + 1}`,
-      grams: typeof g === 'number' && Number.isFinite(g) && g > 0 ? Math.round(g) : null,
+      grams: g,
       amountText: (f as { barcode?: string }).barcode && f?.amount ? String(f.amount)
-        : (typeof g === 'number' && Number.isFinite(g) && g > 0 ? `${Math.round(g)}g` : null),
+        : (g != null ? `${g}g` : null),
       kcal: Math.round(n(f?.calories_kcal)),
       protein: r1(f?.protein_g), carbs: r1(f?.carbs_g), fat: r1(f?.fat_g),
       mark: f?.user_edit === 'renamed' ? '직접 수정' : f?.user_edit === 'added' ? '직접 추가' : null,

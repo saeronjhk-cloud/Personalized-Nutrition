@@ -8,6 +8,7 @@
  * ★ 저장은 meal_log 1행(source 'manual', 사진 없음). 합계는 저장 직전 목록에서 다시 더한다.
  *   주간 리포트·남김 보정(slider)은 source·사진으로 거르지 않는다(Edge weekly-report v7 · meal-leftover v10 확인).
  */
+import { shownServingG } from './foodGrams'
 import { supabase } from './supabase'
 import { genMealId, type AnalyzeResult, type MealFood, type MealSummary } from './nutrilens'
 import { recomputeSummary } from './foodCorrection'
@@ -31,8 +32,8 @@ export function manualAmountText(food: MealFood | null | undefined): string | nu
   if (typeof f.package_count === 'number' && Number.isFinite(f.package_count) && f.package_count > 0) {
     return `${Math.round(f.package_count * 10) / 10}봉`
   }
-  const g = f.estimated_serving_g
-  return typeof g === 'number' && Number.isFinite(g) && g > 0 ? `${Math.round(g)}g` : null
+  const g = shownServingG(food)
+  return g != null ? `${g}g` : null
 }
 
 /** 사진 없는 식사 저장 — meal_log 1행(source 'manual'). 0개·상한 초과면 저장 안 함. */
