@@ -9,7 +9,7 @@
  */
 import { resolveRoles, type Role } from "./meal_role";
 import { DEFAULT_MEAL_GRAMMAR_PARAMS, type GrammarRuleId, type MealGrammarParams } from "./meal_grammar_params";
-import { DEFAULT_GOAL_COACHING_PARAMS } from "./goal_coaching_params";
+import { DEFAULT_GOAL_COACHING_PARAMS, kidneyBlockReason, type KidneyBlockReason } from "./goal_coaching_params";
 
 export type MealSlot = "breakfast" | "lunch" | "dinner" | "snack";
 const MAIN_SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner"];
@@ -45,6 +45,8 @@ export interface MealGrammarInput {
   now: Date;
   conditions: readonly string[];
   egfr: number | null;
+  /** 최신 검진 요단백 저장 코드(없으면 null) — 안전 차단 L02 */
+  urineProtein?: number | null;
   /** v1 단백질 카드(근육증가 g 기반)가 오늘 보이면 true → G-PRO·G-AM 중복 금지(설계 §5-4) */
   v1CardVisible: boolean;
   params?: MealGrammarParams;
@@ -64,7 +66,7 @@ export interface GrammarCard {
 
 export interface MaintenanceLine { rule: GrammarRuleId; success: number; opps: number; text: string }
 
-export type GrammarBlockedReason = "kidney_condition" | "egfr_low";
+export type GrammarBlockedReason = KidneyBlockReason;
 
 export interface MealGrammarResult {
   active: GrammarCard | null;
@@ -189,9 +191,7 @@ export function mealGrammarCoaching(input: MealGrammarInput): MealGrammarResult 
   if (!input.mealEnabled || !input.loggedIn) return { active: null, maintenance: null, blocked_reason: null, stats: emptyStats() };
 
   // 안전 게이트 — 단백질 더하기만 차단(채소는 허용)
-  let blocked_reason: GrammarBlockedReason | null = null;
-  if (input.conditions.some((c) => safety.EXCLUDE_CONDITIONS.includes(c))) blocked_reason = "kidney_condition";
-  else if (input.egfr != null && Number.isFinite(input.egfr) && input.egfr < safety.EGFR_BLOCK) blocked_reason = "egfr_low";
+  const blocked_reason: GrammarBlockedReason | null = kidneyBlockReason(input, safety);
 
   const meals = mealsFromRows(input.rows, input.now, p.VERIFY_WINDOW_DAYS).map(judgeMeal);
   const today = localDayKey(input.now);
@@ -262,8 +262,7 @@ export function todayCoachNotice(input: MealGrammarInput): CoachNotice | null {
   if (!input.mealEnabled || !input.loggedIn || input.v1CardVisible) return null;
   const p = input.params ?? DEFAULT_MEAL_GRAMMAR_PARAMS;
   const safety = DEFAULT_GOAL_COACHING_PARAMS;
-  const blocked = input.conditions.some((c) => safety.EXCLUDE_CONDITIONS.includes(c))
-    || (input.egfr != null && Number.isFinite(input.egfr) && input.egfr < safety.EGFR_BLOCK);
+  const blocked = kidneyBlockReason(input, safety) !== null;
   const rules = RULE_IDS.filter((r) => !(blocked && PROTEIN_RULES.includes(r)));
 
   const today = localDayKey(input.now);

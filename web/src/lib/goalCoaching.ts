@@ -81,6 +81,8 @@ export async function loadGoalCoachingInput(): Promise<CoachingInput | null> {
     age: body.age,
     conditions: Array.isArray(a?.기저질환) ? a!.기저질환 : [],
     egfr,
+    // 요단백(저장 코드) — 안전 차단만(IP/integration/checkup_coaching_link_eval_v1.md L02)
+    urineProtein: checkup?.values?.urine_protein?.value ?? null,
     meals: mealRowsToCoachMeals(rows),
     // 단백질 주 판정 = 반찬 있음/없음(D-SIM1) — 사진 g 과소추정 오경보 제거
     proteinRoleBySlot: proteinRoleBySlot(rows.map((r) => ({ eaten_at: r.eaten_at, meal_slot: r.meal_slot, foods: r.foods ?? null })), new Date()),

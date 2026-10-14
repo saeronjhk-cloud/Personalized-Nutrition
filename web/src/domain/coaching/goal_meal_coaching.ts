@@ -8,7 +8,7 @@
  * 계산은 끼니 단위, 노출은 하루 카드 1장(IP/155 Q1). 값은 goal_coaching_params.ts 한 곳.
  * ⚠ 이 파일은 IO 를 import 하지 않는다(C20).
  */
-import { DEFAULT_GOAL_COACHING_PARAMS, type GoalCoachingParams } from "./goal_coaching_params";
+import { DEFAULT_GOAL_COACHING_PARAMS, kidneyBlockReason, type GoalCoachingParams, type KidneyBlockReason } from "./goal_coaching_params";
 
 // ── 대응표 (설계 §1 v1 복사본 — C21 이 표와 대조) ─────────────────────────────
 export type P0Goal = "weight" | "glucose" | "muscle" | "cardio" | "hypertension" | "recovery";
@@ -64,6 +64,8 @@ export interface CoachingInput {
   conditions: readonly string[];
   /** 최신 검진 eGFR (없으면 null) */
   egfr: number | null;
+  /** 최신 검진 요단백 저장 코드(없으면 null) — 안전 차단 L14 */
+  urineProtein?: number | null;
   meals: CoachMeal[];
   /** 오늘 끼니별 «단백질 반찬» 판정(true 있음 / false 없음 / null 미상) — 주어지면 false 끼니만 g 부족 판정(D-SIM1, 평가 v2 C23~C29).
    *  사진 g 과소추정 오경보 제거. 없으면 종전 동작. 출처 meal_grammar.ts proteinRoleBySlot */
@@ -75,7 +77,7 @@ export interface CoachingInput {
 
 // ── 출력 ────────────────────────────────────────────────────────────────────
 export type ShortLevel = "normal" | "strong";
-export type BlockedReason = "kidney_condition" | "egfr_low" | "underweight" | "no_weight";
+export type BlockedReason = KidneyBlockReason | "underweight" | "no_weight";
 
 export interface MealShortfall {
   slot: MealSlot;
@@ -166,8 +168,8 @@ export function goalMealCoaching(input: CoachingInput): CoachingResult {
   if (!goal) return none();
 
   // 2) 제외 게이트 (고단백 제안이 부적절할 수 있는 집단 — 서박사 E4·G4)
-  if (input.conditions.some((c) => p.EXCLUDE_CONDITIONS.includes(c))) return none("kidney_condition");
-  if (input.egfr != null && Number.isFinite(input.egfr) && input.egfr < p.EGFR_BLOCK) return none("egfr_low");
+  const kidney = kidneyBlockReason(input, p)
+  if (kidney) return none(kidney);
 
   // 3) 체중 없으면 목표 산출 불가 — 지어내지 않는다
   if (input.weightKg == null || !(input.weightKg > 0)) return none("no_weight");

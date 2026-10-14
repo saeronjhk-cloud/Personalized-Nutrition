@@ -35,6 +35,7 @@ export async function loadMealGrammarInput(now: Date = new Date()): Promise<Meal
     now,
     conditions: v1.conditions,
     egfr: v1.egfr,
+    urineProtein: v1.urineProtein ?? null,
     v1CardVisible: GOAL_COACHING_ENABLED && goalMealCoaching(v1).cards.length > 0,
   }
 }
