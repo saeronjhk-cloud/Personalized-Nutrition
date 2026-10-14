@@ -5,7 +5,7 @@
 import { mealDemo } from '../../domain/home/meal_demo'
 
 export const HERO_MEAL_IMG = { src: '/home/hero_meal_before.webp', width: 1168, height: 750 } as const
-export const HERO_MEAL_AFTER_IMG = { src: '/home/hero_meal_after.webp', width: 1168, height: 750 } as const
+export const HERO_MEAL_AFTER_IMG = { src: '/home/hero_meal_after.webp', width: 1168, height: 880 } as const
 /** 마지막 CTA — 밥상을 휴대폰으로 찍는 장면(CTA 행동과 일치, 같은 사진 반복 방지 · V26) */
 export const HERO_MEAL_SNAP_IMG = { src: '/home/hero_meal_snap.webp', width: 1168, height: 880 } as const
 

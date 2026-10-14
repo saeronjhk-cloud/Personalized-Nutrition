@@ -3163,3 +3163,7 @@ input[type="range"]::-webkit-slider-thumb {
   .hero-v2__cta { margin-top: var(--space-4); }
   .hv-after__chip--added { box-shadow: 0 0 0 1.5px var(--hv-white); }
 }
+/* «후» 장면 = 탑뷰(히어로와 다른 구도, 10-14 제이 «여전히 같아») — 음식이 화면을 채우므로 표식은 항상 사진 아래 띠 */
+.hv-after .hero-scene__photo img { aspect-ratio: 4 / 3; }
+.hv-after .hero-scene__chips { position: static; background: var(--hv-ink); padding: 10px; }
+.hv-after__chip--added { box-shadow: 0 0 0 1.5px var(--hv-white); }
