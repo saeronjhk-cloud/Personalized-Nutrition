@@ -36,6 +36,8 @@ export async function loadMealGrammarInput(now: Date = new Date()): Promise<Meal
     conditions: v1.conditions,
     egfr: v1.egfr,
     urineProtein: v1.urineProtein ?? null,
+    // 체중관리(근육증가 아님) → «바꾸기»형 문구(서박사 회신 v2 ③ · IP/integration/checkup_coaching_link_eval_v1.md K10)
+    weightSwap: v1.goals.includes('체중관리') && !v1.goals.includes('근육증가'),
     v1CardVisible: GOAL_COACHING_ENABLED && goalMealCoaching(v1).cards.length > 0,
   }
 }

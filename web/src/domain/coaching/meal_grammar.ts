@@ -47,6 +47,8 @@ export interface MealGrammarInput {
   egfr: number | null;
   /** 최신 검진 요단백 저장 코드(없으면 null) — 안전 차단 L02 */
   urineProtein?: number | null;
+  /** 체중관리 목표(근육증가 아님) 사용자 → 단백질 카드 문구를 «바꾸기»형으로(서박사 회신 v2 ③). 판정은 같음 */
+  weightSwap?: boolean;
   /** v1 단백질 카드(근육증가 g 기반)가 오늘 보이면 true → G-PRO·G-AM 중복 금지(설계 §5-4) */
   v1CardVisible: boolean;
   params?: MealGrammarParams;
@@ -81,6 +83,11 @@ export const GRAMMAR_TEMPLATES: Record<GrammarRuleId, string> = {
   "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었습니다. 다음 끼니에 달걀이나 두부 한 가지를 더합니다.",
   "G-VEG": "오늘 {slots}에는 김치 말고 채소 반찬이 없었습니다. 다음 끼니에 나물이나 쌈 한 가지를 더합니다.",
   "G-AM": "오늘 아침에는 단백질 반찬이 없었습니다. 내일 아침은 우유나 달걀 하나부터 시작합니다.",
+};
+
+/** «바꾸기»형 — 체중관리 사용자(서박사 회신 v2 ③ · 문구 사후 확인 40_문구확인표.md). 없는 규칙은 GRAMMAR_TEMPLATES 그대로 */
+export const GRAMMAR_SWAP_TEMPLATES: Partial<Record<GrammarRuleId, string>> = {
+  "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었습니다. 다음 끼니에는 반찬 하나를 달걀이나 두부 반찬으로 바꿉니다.",
 };
 
 export const GRAMMAR_WHY: Record<GrammarRuleId, string> = {
@@ -176,8 +183,9 @@ export function evidenceText(rule: GrammarRuleId, success: number, opps: number,
   return `최근 ${days}일 ${EVIDENCE_LABEL[rule]} ${success}/${opps}`;
 }
 
-function fill(rule: GrammarRuleId, slots: MealSlot[]): string {
-  return GRAMMAR_TEMPLATES[rule].replace("{slots}", slots.map((s) => SLOT_LABEL[s]).join("·"));
+function fill(rule: GrammarRuleId, slots: MealSlot[], swap = false): string {
+  const t = (swap && GRAMMAR_SWAP_TEMPLATES[rule]) || GRAMMAR_TEMPLATES[rule];
+  return t.replace("{slots}", slots.map((s) => SLOT_LABEL[s]).join("·"));
 }
 
 const RULE_IDS: GrammarRuleId[] = ["G-PRO", "G-VEG", "G-AM"];
@@ -224,7 +232,7 @@ export function mealGrammarCoaching(input: MealGrammarInput): MealGrammarResult 
     ? {
         rule: activeRule,
         slots: fired[activeRule],
-        text: fill(activeRule, fired[activeRule]),
+        text: fill(activeRule, fired[activeRule], input.weightSwap === true),
         why: GRAMMAR_WHY[activeRule],
         evidence: { success: stats[activeRule].success, opps: stats[activeRule].opps },
         evidence_text: evidenceText(activeRule, stats[activeRule].success, stats[activeRule].opps, p.VERIFY_WINDOW_DAYS),

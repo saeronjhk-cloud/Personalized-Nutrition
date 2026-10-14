@@ -3008,6 +3008,10 @@ input[type="range"]::-webkit-slider-thumb {
 @keyframes homePendingPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .home-pending__bar { animation: none; } }
 
+/* 검진 결과 → 체중관리 목표 제안(서박사 회신 v2 ④) */
+.checkup-weight-suggest { padding: var(--space-4) var(--space-5); border-radius: 12px; background: rgba(36, 81, 59, 0.06); border: 1px solid rgba(36, 81, 59, 0.18); }
+.checkup-weight-suggest--done { font-size: 14px; color: var(--primary); font-weight: 600; margin: 0; }
+
 /* ══ 홈 v2 (10-13) — 방문자 홈 범위 토큰·히어로 장면 · IP/integration/home_redesign_v2_eval_v1.md ══
    토큰은 .home-v2 안에서만(다른 화면 무변화, V02). 값 = 외부 자문 R1 ChatGPT 팔레트(대비 검증 통과). */
 .home-v2 {

@@ -108,6 +108,13 @@ export const CARD_TEMPLATES: Record<ShortLevel, string> = {
   strong: "오늘 {slots} 단백질이 목표보다 많이 적었습니다. 다음 끼니에 살코기·생선·두부 중 한 가지를 손바닥 크기로 더합니다.",
 };
 
+/** 체중관리 목표 카드 = «바꾸기»형(서박사 회신 v2 ③, 2026-10-14 — 더하기는 잉여 열량 우려). 판정은 같고 문구만 다름.
+ *  세부 문구 사후 확인: IP/integration/checkup_coaching_link_v1/40_문구확인표.md */
+export const WEIGHT_CARD_TEMPLATES: Record<ShortLevel, string> = {
+  normal: "오늘 {slots} 단백질이 목표보다 조금 적었습니다. 다음 끼니에는 반찬 하나를 달걀이나 두부 반찬으로 바꿉니다.",
+  strong: "오늘 {slots} 단백질이 목표보다 많이 적었습니다. 다음 끼니에는 반찬 하나를 살코기·생선·두부 중 한 가지로 바꿉니다.",
+};
+
 export const SLOT_LABEL: Record<MealSlot, string> = { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" };
 
 // ── 계산 ────────────────────────────────────────────────────────────────────
@@ -145,8 +152,9 @@ export function mergeBySlot(meals: readonly CoachMeal[]): { slot: MealSlot; prot
   });
 }
 
-function fillText(level: ShortLevel, slots: MealSlot[]): string {
-  return CARD_TEMPLATES[level].replace("{slots}", slots.map((s) => SLOT_LABEL[s]).join("·"));
+function fillText(level: ShortLevel, slots: MealSlot[], goal: ProteinCard["goal"] = "근육증가"): string {
+  const t = goal === "체중관리" ? WEIGHT_CARD_TEMPLATES : CARD_TEMPLATES;
+  return t[level].replace("{slots}", slots.map((s) => SLOT_LABEL[s]).join("·"));
 }
 
 export function goalMealCoaching(input: CoachingInput): CoachingResult {
@@ -193,7 +201,7 @@ export function goalMealCoaching(input: CoachingInput): CoachingResult {
       goal,
       level,
       meals: shortfalls,
-      text: fillText(level, shortfalls.map((s) => s.slot)),
+      text: fillText(level, shortfalls.map((s) => s.slot), goal),
     }],
     blocked_reason: null,
   };

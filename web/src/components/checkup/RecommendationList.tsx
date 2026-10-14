@@ -10,6 +10,8 @@ import {
 } from "../../domain/checkup/result_view";
 import { urgentChecks, URGENT_FOOTER } from "../../domain/checkup/urgent_check";
 import { formatBiomarkerValue } from "../../domain/checkup/urine_protein";
+import { observeKeysFor, CHECKUP_OBSERVE_NOTE } from "../../domain/checkup/coaching_hints";
+import WeightGoalSuggest from "./WeightGoalSuggest";
 
 /**
  * 검진 결과 화면 (BiomarkerForm·ViewCheckup 공용)
@@ -44,6 +46,7 @@ export default function RecommendationList({ results, rules }: Props) {
   const view = useMemo(() => buildResultView(results, rules), [results, rules]);
   const urgent = useMemo(() => urgentChecks(results), [results]);
   const nameOf = useMemo(() => new Map(rules.map((r) => [r.biomarker_key, r])), [rules]);
+  const observe = useMemo(() => observeKeysFor(results), [results]);
 
   if (results.length === 0) {
     return (
@@ -95,8 +98,14 @@ export default function RecommendationList({ results, rules }: Props) {
           {sec.toneBody && (
             <p style={{ margin: "var(--space-3) 0 0", fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }}>{sec.toneBody}</p>
           )}
+          {/* 관찰 안내(서박사 회신 v2 ②) — watch 항목이 있는 영역에 1회 · K01~K06 */}
+          {sec.items.some((it) => observe.has(it.key)) && (
+            <p style={{ margin: "var(--space-2) 0 0", fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7 }} data-testid="checkup-observe-note">{CHECKUP_OBSERVE_NOTE}</p>
+          )}
         </article>
       ))}
+
+      <WeightGoalSuggest results={results} />
 
       {view.inRange.length > 0 && (
         <details className="card" style={{ padding: "var(--space-3) var(--space-5)", borderLeft: `4px solid ${COLOR.in}` }} open={view.sections.length === 0}>
