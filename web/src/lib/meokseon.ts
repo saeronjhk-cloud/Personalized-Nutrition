@@ -138,6 +138,48 @@ export interface MsProductResult {
   ingredients_text?: string | null
   /** 'own' = 이 바코드 자신의 원재료 · 'sibling' = 같은 품목제조번호의 다른 바코드에서 가져온 것 */
   ingredients_source?: 'own' | 'sibling' | null
+  /**
+   * ★ 세션79 U78-3 — 판매처 라벨 기반 품목(GET /api/products/web/:id)일 때만 온다. 바코드 조회 응답에는 없다.
+   *   badge·warning 문구는 서버 정본(productService.WEB_LABEL_BADGE/WARNING). nutrition_ok=false 면 서버가 신호등을 껐다.
+   */
+  web_label?: MsWebLabelBlock | null
+  /** ★ 세션79 U78-3 — 바코드 조회에서 «빈 축»만 판매처 라벨로 보충(없으면 null · 구버전 서버는 키 없음). allergens·traffic_light 키는 건드리지 않는다. */
+  web_label_supplements?: MsWebLabelSupplements | null
+}
+
+export interface MsWebLabelBlock {
+  source: 'web_label'
+  web_id: number
+  badge: string
+  warning: string
+  collected_at: string | null
+  collected_label: string | null
+  is_stale: boolean
+  nutrition_ok: boolean | null
+  barcode_linked: boolean
+}
+
+export interface MsWebLabelSupplements {
+  badge: string
+  warning: string
+  allergens: { contains: string[]; may_contain: string[]; collected_label: string | null } | null
+  nutrition: (Partial<Record<'calories' | 'total_fat' | 'saturated_fat' | 'trans_fat' | 'cholesterol' | 'sodium' | 'total_carbs' | 'total_sugars' | 'dietary_fiber' | 'protein', number | null>> & { basis: string | null; collected_label: string | null }) | null
+}
+
+/** ★ 세션79 U78-3 — 이름 검색의 판매처 라벨 기반 결과(바코드 없음 · web_id 로 상세를 연다). */
+export interface MsWebLabelItem {
+  web_id: number
+  barcode: null
+  source: 'web_label'
+  badge: string
+  product_name: string
+  brand?: string | null
+  manufacturer?: string | null
+  food_type?: string | null
+  total_content?: number | null
+  content_unit?: string | null
+  collected_label?: string | null
+  nutrition_ok?: boolean | null
 }
 
 export interface MsAdditiveSummary {
@@ -293,6 +335,20 @@ export async function getAdditiveSummary(barcode: string): Promise<MsAdditiveSum
 export async function searchProducts(q: string, limit = 20): Promise<MsSearchItem[]> {
   const data = await getJson(`/api/products/search?q=${encodeURIComponent(q)}&limit=${limit}`)
   return (data && data.products) || []
+}
+
+/** ★ 세션79 U78-3 — 같은 검색 1회로 public 결과와 판매처 라벨 기반 결과(별도 키)를 함께 받는다. 구버전 서버면 web 은 []. */
+export async function searchProductsWithWeb(q: string, limit = 20): Promise<{ products: MsSearchItem[]; web: MsWebLabelItem[] }> {
+  const data = await getJson(`/api/products/search?q=${encodeURIComponent(q)}&limit=${limit}`)
+  const web = data && Array.isArray(data.web_label_products) ? (data.web_label_products as MsWebLabelItem[]) : []
+  return { products: (data && data.products) || [], web }
+}
+
+/** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 상세(바코드 조회와 같은 모양 + web_label). 숨김·검토 대기 품목은 404 → MeokseonNotFound. */
+export async function getWebLabelProduct(webId: number): Promise<MsProductResult> {
+  const data = (await getJson(`/api/products/web/${encodeURIComponent(String(webId))}`)) as MsProductResult
+  if (data) data.nutrition = normalizeNutrition(data.nutrition)
+  return data
 }
 
 /* ──────────────────────────────────────────────────────────────────────────

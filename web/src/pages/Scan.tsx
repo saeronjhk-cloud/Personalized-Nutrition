@@ -24,10 +24,11 @@ import {
 } from '../domain/meokseon/additives'
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
-  getProduct, getAdditiveSummary, searchProducts, meokseonConfigured, MeokseonNotFound,
+  getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, meokseonConfigured, MeokseonNotFound,
   analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
-  type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis,
+  type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem,
 } from '../lib/meokseon'
+import { webLabelNotice, supplementView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
@@ -138,6 +139,8 @@ export default function Scan() {
   const [result, setResult] = useState<MsProductResult | null>(null)
   const [additives, setAdditives] = useState<MsAdditiveSummary | null>(null)
   const [searchResults, setSearchResults] = useState<MsSearchItem[] | null>(null)
+  // ★ 세션79 U78-3 — 판매처 라벨 기반 검색 결과(바코드 없음 · public 결과 «뒤»에 따로 보인다)
+  const [webResults, setWebResults] = useState<MsWebLabelItem[] | null>(null)
   // 사진 제보 — ★ 세션64: **두 단계**다(읽어보기 → 제품명 확인 → 보내기).
   //   1단계는 저장하지 않는다. 저장은 사용자가 제품명을 확정한 뒤에만 일어난다.
   //   근거·문구·판정은 전부 domain/meokseon/photoReport.ts. 여기서 다시 판단하지 않는다.
@@ -287,7 +290,7 @@ export default function Scan() {
   }, [result])
 
   function reset() {
-    setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null)
+    setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null); setWebResults(null)
     setReportOpen(false); setLabelImage(null); setNutritionImage(null)
     setReportBusy(null); setReportError(null)
     setAnalysis(null); setProductName(''); setConfirmed(null); setNotifyResult(false)   // 세션75f — 다음 제보는 다시 «꺼짐»에서
@@ -570,12 +573,29 @@ export default function Scan() {
   async function doSearch(q: string) {
     reset(); setLoading(true)
     try {
-      const res = await searchProducts(q)
+      const { products: res, web } = await searchProductsWithWeb(q)
       setSearchResults(res)
-      track('scan_search_submit', { result_count: res.length })
+      setWebResults(web)
+      track('scan_search_submit', { result_count: res.length })   // web 결과 수는 계측 키 화이트리스트에 없어 싣지 않는다(세션79)
     } catch {
       setError('검색에 실패했어요. 잠시 후 다시 시도해 주세요.')
       track('scan_lookup_error', { error_kind: 'search' })
+    } finally { setLoading(false) }
+  }
+
+  /** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 열기. 바코드가 없으므로 첨가물 조회·스캔 이력 저장·제보는 하지 않는다. */
+  async function lookupWebLabel(webId: number) {
+    reset(); setLoading(true)
+    try {
+      const prod = await getWebLabelProduct(webId)
+      setResult(prod)
+      // 새 이벤트 이름은 DB enum(supabase 167) 동기화가 필요해 기존 이벤트 + source='web_label' 로 센다(세션79).
+      track('scan_lookup_success', { source: 'web_label', has_nutrition: !!prod.nutrition, has_additives: false, food_category: prod.product.food_category ?? null })
+    } catch (e) {
+      setError(e instanceof MeokseonNotFound
+        ? '이 품목 정보는 지금 볼 수 없어요(검토 중이거나 공식 자료로 바뀌었어요). 이름으로 다시 검색해 주세요.'
+        : '제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+      track('scan_lookup_error', { error_kind: 'weblabel' })
     } finally { setLoading(false) }
   }
 
@@ -1193,8 +1213,8 @@ export default function Scan() {
 
       {searchResults && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-          <h3 className="survey-step-title" style={{ fontSize: 16 }}>검색 결과 {searchResults.length}건</h3>
-          {searchResults.length === 0 ? (
+          <h3 className="survey-step-title" style={{ fontSize: 16 }}>검색 결과 {searchResults.length + (webResults?.length ?? 0)}건</h3>
+          {searchResults.length === 0 && !(webResults && webResults.length) ? (
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>일치하는 제품이 없어요. 바코드 스캔으로 시도해 보세요.</p>
           ) : (
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
@@ -1217,6 +1237,30 @@ export default function Scan() {
               ))}
             </ul>
           )}
+          {/* ★ 세션79 U78-3 — 판매처 라벨 기반 결과는 public 결과 «뒤», 품목마다 배지(설계 v2 §2-2 A). 누르면 web_id 로 상세. */}
+          {webResults && webResults.length > 0 && (
+            <div data-testid="web-label-results" style={{ marginTop: 'var(--space-3)' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-2)' }}>판매처 라벨에서 모은 품목 · 바코드는 아직 확인되지 않았어요</p>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                {webResults.map((it) => (
+                  <li key={`w${it.web_id}`}>
+                    <button type="button" className="btn btn-secondary"
+                      style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
+                      onClick={() => lookupWebLabel(it.web_id)}>
+                      <span style={{ width: 32, height: 32, borderRadius: 6, background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🏷️</span>
+                      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.product_name}</span>
+                        <span style={{ fontSize: 11, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-pill)', padding: '0 var(--space-2)', alignSelf: 'flex-start', marginTop: 2 }}>{it.badge}</span>
+                        {subtitleOf(it.manufacturer, it.brand, it.food_type) && (
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitleOf(it.manufacturer, it.brand, it.food_type)}</span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -1238,14 +1282,42 @@ export default function Scan() {
 
           {/* ★ 세션75d (제이 결정 10-04) — 판독 불완전 고지를 «한 곳»에. 알레르기 카드의 「검증 중」 상자를 대신한다.
               문구 정본: domain/meokseon/readingNotice.ts (제보 제품 / 공공 자료 제품 두 갈래). */}
+          {/* ★ 세션79 U78-3 — 판매처 라벨 기반 품목은 상단 고정 고지(배지·수집월·경고)가 판독 고지를 «대신»한다. */}
+          {webLabelNotice(result) ? (() => { const wn = webLabelNotice(result)!; return (
+            <div data-testid="web-label-notice" style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
+              <strong>{wn.badgeLine}</strong><br />{wn.warning}
+              {wn.nutritionOff && <><br />{WEB_NUTRITION_OFF_NOTE}</>}
+              {wn.stale && <><br />{WEB_STALE_NOTE}</>}
+            </div>) })() : (
           <p data-testid="reading-notice" data-kind={readingNotice(result.product).kind}
              style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
             {readingNotice(result.product).text}
-          </p>
+          </p>)}
 
           {/* ★ 알레르기는 안전 항목이라 첨가물·영양보다 «먼저» 온다.
               미수집일 때도 카드를 띄운다 — 침묵은 「없음」으로 읽힌다. */}
           <AllergenCard result={result} />
+
+          {/* ★ 세션79 U78-3 — 바코드 제품의 «빈 축»만 판매처 라벨로 보충(참고). 알레르기 카드의 «미수집» 판정은 그대로 둔다 — 보충으로 «없음»을 말하지 않는다. */}
+          {supplementView(result) && (() => { const sv = supplementView(result)!; return (
+            <div className="survey-card" data-testid="web-label-supplement" style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="survey-step-title" style={{ fontSize: 16 }}>{sv.title}</h3>
+              <p style={{ fontSize: 12, color: '#8a5a00', margin: 'var(--space-1) 0 var(--space-2)', lineHeight: 1.6 }}>{sv.warning}</p>
+              {sv.allergens && (
+                <div style={{ fontSize: 13, lineHeight: 1.7 }}>
+                  {sv.allergens.contains.length > 0 && <div>함유: <strong>{sv.allergens.contains.join(', ')}</strong></div>}
+                  {sv.allergens.mayContain.length > 0 && <div>혼입 가능: {sv.allergens.mayContain.join(', ')}</div>}
+                  {sv.allergens.collectedLabel && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sv.allergens.collectedLabel}</div>}
+                </div>
+              )}
+              {sv.nutrition && (
+                <div style={{ fontSize: 13, lineHeight: 1.7, marginTop: sv.allergens ? 'var(--space-2)' : 0 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>영양성분{sv.nutrition.basisLabel ? ` (${sv.nutrition.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
+                  {sv.nutrition.rows.map((r) => <div key={r.label}>{r.label} {r.value}{r.unit}</div>)}
+                  {sv.nutrition.collectedLabel && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{sv.nutrition.collectedLabel}</div>}
+                </div>
+              )}
+            </div>) })()}
 
           {/* ★ 세션75j — 원재료 원문(서버가 실어 줄 때만). 형제 바코드에서 온 것이면 출처를 «반드시» 말한다. */}
           {typeof result.ingredients_text === 'string' && result.ingredients_text.trim() && (
@@ -1381,7 +1453,8 @@ export default function Scan() {
                 (검토자 표현: 「낮은 품질의 첫 제보가 미래의 고품질 제보를 차단한다.」)
               ⚠ 새 플로우를 만들지 않았다 — `renderReportForm` 은 미등록 경로와 «같은 함수»다.
               ⚠ 결손 판정은 여기서 하지 않는다. domain/meokseon/productCompleteness.ts 의 순수 함수다. */}
-          {completeness && (completeness.gaps.length > 0 || reportOpen || confirmed) && (
+          {/* 세션79 — 판매처 라벨 기반 품목(바코드 없음)은 제보 경로가 없다(제보는 바코드에 붙는다). */}
+          {!result.web_label && completeness && (completeness.gaps.length > 0 || reportOpen || confirmed) && (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               {reportOpen || confirmed ? (
                 <>
@@ -1478,7 +1551,7 @@ export default function Scan() {
               멀쩡한 제품에 카드·버튼을 크게 띄우면 「이 제품에 문제가 있다」로 읽힌다.
               그래도 경로 자체는 있어야 한다: 우리가 아는 결손이 없다는 것이
               「정보가 정확하다」는 뜻은 아니기 때문이다(잘못된 값은 결손이 아니다). */}
-          {completeness && completeness.complete && !reportOpen && !confirmed && (
+          {!result.web_label && completeness && completeness.complete && !reportOpen && !confirmed && (
             <>
               <button
                 type="button"
