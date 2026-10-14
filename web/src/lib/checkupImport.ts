@@ -156,25 +156,79 @@ function toISO(y: string, mo: string, d: string): string | null {
 // pdf.js 텍스트는 표가 "공복혈당 95 mg/dL 정상A" 처럼 평탄화되어 나온다.
 const NUMBER_RE = /(\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?)/;
 
+// ── 2026-10-14 병원 결과지·인쇄 PDF 대응 (평가 케이스14~17) ──
+const URL_RE = /https?:\/\/\S+/gi;
+const ASCII_ALIAS_RE = /^[a-z]/;
+
+/** 정규화 alias 가 원문에서 끝나는 위치(값은 그 뒤에서 찾는다 — findOriginalPos 와 같은 반환).
+ *  영문으로 시작하는 alias 는 시작 글자 앞이 영문이면(health 의 alt · salt · castle) 건너뛰고 다음 후보를 찾는다. */
+function findBoundedPos(line: string, normAlias: string): number {
+  const lower = line.toLowerCase();
+  const ascii = ASCII_ALIAS_RE.test(normAlias);
+  for (let start = 0; start < lower.length; start++) {
+    if (normalizeLabel(lower[start]) === "") continue;
+    if (ascii && start > 0 && /[A-Za-z]/.test(line[start - 1])) continue;
+    let li = start;
+    let ai = 0;
+    while (li < lower.length && ai < normAlias.length) {
+      const ch = normalizeLabel(lower[li]);
+      if (ch === "") { li++; continue; }
+      if (ch !== normAlias[ai]) break;
+      li++;
+      ai++;
+    }
+    if (ai === normAlias.length) return li;
+  }
+  return -1;
+}
+
+/** 라벨 뒤 첫 «결과값» 숫자. 참고치 표기(≤40 · <100 · ≥40 · 0.9~8.5 · 40-120)는 건너뛴다. */
+function firstValueMatch(tail: string): { index: number; text: string } | null {
+  const re = new RegExp(NUMBER_RE.source, "g");
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(tail)) !== null) {
+    const before = tail.slice(0, m.index).replace(/\s+$/, "");
+    const after = tail.slice(m.index + m[0].length);
+    const prev = before.slice(-1);
+    if (/[<>≤≥＜＞〈〉]/.test(prev)) continue;                  // ≤40 · <100
+    if (/[~∼～]$/.test(before) || /^\s*[~∼～]\s*\d/.test(after)) continue;   // 0.9~8.5
+    if (/^\s*-\s*\d/.test(after) || (/-$/.test(before) && /\d\s*-$/.test(before))) continue; // 40-120
+    return { index: m.index, text: m[1] };
+  }
+  return null;
+}
+
+/** 글자 층이 인쇄 머리글(날짜·시각·제목·주소·쪽 번호)뿐인 «그림 PDF» 인가. 주소·쪽 번호·여러 쪽에 반복되는 줄을 빼고 30자 미만이면 그림으로 본다. */
+export function isImageOnlyPdfText(text: string): boolean {
+  const lines = text.split(/\r?\n/).map((l) => l.replace(URL_RE, "").trim()).filter(Boolean);
+  const count = new Map<string, number>();
+  for (const l of lines) count.set(l, (count.get(l) ?? 0) + 1);
+  const body = lines.filter((l) => (count.get(l) ?? 0) < 2 && !/^\d+\s*\/\s*\d+$/.test(l));
+  return body.join("").replace(/\s/g, "").length < 30;
+}
+
 export function parseCheckupText(text: string): ParsedCheckup {
   const date = parseCheckupDate(text);
   const items: ParsedItem[] = [];
   const seen = new Set<string>();
 
   const lines = text.split(/\r?\n/);
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    // 2026-10-14: 인쇄 머리글의 주소(https://health…?inno=125)에서 «alt»·숫자를 잡던 결함 — 주소는 지운다
+    const line = rawLine.replace(URL_RE, " ");
     const norm = normalizeLabel(line);
     if (!norm) continue;
 
     for (const { alias, concept } of ALIAS_INDEX) {
       if (seen.has(concept)) continue;
-      const idx = norm.indexOf(alias);
-      if (idx === -1) continue;
+      if (norm.indexOf(alias) === -1) continue;
       if (NEGATIVE_CONTEXT[concept]?.test(line)) continue;
 
       // 라벨 위치 이후의 원문에서 값 추출 (정규화 전 원문 기준으로 다시 탐색)
-      const labelPos = findOriginalPos(line, alias);
-      const tail = labelPos === -1 ? line : line.slice(labelPos);
+      // 영문 별칭(ALT·AST·eGFR…)은 다른 영단어 속(health·salt·castle)이면 건너뛴다(앞 글자 경계)
+      const labelPos = findBoundedPos(line, alias);
+      if (labelPos === -1) continue;
+      const tail = line.slice(labelPos);
 
       // 혈압: "120/80" 형태 → 수축기·이완기 분리
       if (concept === "blood_pressure") {
@@ -197,11 +251,11 @@ export function parseCheckupText(text: string): ParsedCheckup {
         continue;
       }
 
-      const m = tail.match(NUMBER_RE);
+      const m = firstValueMatch(tail);
       if (m) {
         // 값 바로 뒤 단위 글자(최대 16자) — 다른 단위가 명시된 경우에만 환산(U-B)
-        const after = tail.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 16);
-        pushItem(items, seen, concept, line, m[1], after);
+        const after = tail.slice(m.index + m.text.length, m.index + m.text.length + 16);
+        pushItem(items, seen, concept, line, m.text, after);
       }
     }
   }

@@ -36,6 +36,7 @@ import { convertedNotice } from "../../domain/checkup/unit_convert";
 import TimeseriesChart from "./TimeseriesChart";
 import {
   extractPdfText,
+  isImageOnlyPdfText,
   parseCheckupText,
   matchToRules,
 } from "../../lib/checkupImport";
@@ -145,9 +146,10 @@ export default function BiomarkerForm() {
 
     try {
       const text = await extractPdfText(file);
-      if (text.replace(/\s/g, "").length < 30) {
+      // 2026-10-14: 병원 결과 화면을 «인쇄»한 PDF 는 본문이 그림이고 글자는 인쇄 머리글뿐 — 그 머리글을 빼고 판정
+      if (isImageOnlyPdfText(text)) {
         setImportError(
-          "이 PDF에서 글자를 읽을 수 없어요 (사진 스캔본으로 보입니다). 아래에 수기로 입력해 주세요.",
+          "이 PDF는 결과가 그림으로 저장돼 있어 글자를 읽을 수 없어요. 병원 홈페이지 화면을 «인쇄»해 만든 PDF나 스캔본이 이렇습니다. 국민건강보험공단(The건강보험 앱)에서 내려받은 결과통보서 PDF를 쓰시거나, 아래에 직접 입력해 주세요.",
         );
         return;
       }

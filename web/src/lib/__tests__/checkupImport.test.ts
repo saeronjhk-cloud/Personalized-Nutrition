@@ -9,6 +9,7 @@ import {
   parseCheckupDate,
   parseCheckupText,
   matchToRules,
+  isImageOnlyPdfText,
 } from "../checkupImport";
 import type { BiomarkerRule } from "../checkup_api";
 
@@ -142,5 +143,51 @@ describe("matchToRules", () => {
     const parsed = parseCheckupText("트리글리세라이드 150 mg/dL");
     const { matched } = matchToRules(parsed, rules);
     expect(matched.tg).toBe("150");
+  });
+});
+
+// ── 2026-10-14 실기 결함: 병원 결과 화면을 브라우저로 «인쇄»한 PDF ──
+// 본문은 그림이고 글자는 인쇄 머리글(날짜·제목·주소·쪽 번호)뿐인데,
+// 주소 «he(alt)h…?inno=125» 의 alt 를 ALT 로 잡아 ALT 125 를 채웠다.
+const PRINT_HEADER_PAGE = (p: number, n: number) => [
+  "26. 10. 14.",
+  "오후 2:26",
+  "○○병원 건강증진센터 | 마이페이지 | 건강검진결과조회",
+  "https://health.example.kr/health/mypage/result/newView.do?inno=125&fileNo=4",
+  `${p}/${n}`,
+].join("\n");
+const PRINT_ONLY_TEXT = Array.from({ length: 11 }, (_, i) => PRINT_HEADER_PAGE(i + 1, 11)).join("\n");
+
+describe("인쇄 PDF(본문 그림) — 2026-10-14", () => {
+  it("케이스14: 인쇄 머리글만 있으면 항목 0개(주소 속 health 의 alt 를 ALT 로 잡지 않음)", () => {
+    const { items } = parseCheckupText(PRINT_ONLY_TEXT);
+    expect(items).toEqual([]);
+  });
+  it("케이스15: 영문 별칭은 다른 영단어 속에서 잡지 않음(salt·health·castle) · 진짜 ALT 는 같은 줄 뒤에 있어도 잡음", () => {
+    expect(parseCheckupText("salt 3 g").items).toEqual([]);
+    expect(parseCheckupText("castle 77").items).toEqual([]);
+    const { items } = parseCheckupText("health check  ALT(GPT) 34 IU/L");
+    expect(items.find((i) => i.label === "alt")?.value).toBe(34);
+  });
+  it("케이스16: 병원 서식 AST(GOT)·ALT(GPT) 는 그대로 읽힘", () => {
+    const { items } = parseCheckupText(["AST(GOT) IU/L ≤40 29 33", "ALT(GPT) IU/L ≤40 34 40"].join("\n"));
+    expect(items.find((i) => i.label === "ast")?.value).toBe(29);
+    expect(items.find((i) => i.label === "alt")?.value).toBe(34);
+  });
+  it("케이스17: 글자 층이 인쇄 머리글뿐이면 «그림 PDF» 로 판정 · 정상 결과지는 아님", () => {
+    expect(isImageOnlyPdfText(PRINT_ONLY_TEXT)).toBe(true);
+    expect(isImageOnlyPdfText("")).toBe(true);
+    expect(isImageOnlyPdfText(["검진일 2025-11-03", "공복혈당 95 mg/dL", "총콜레스테롤 180 mg/dL", "혈압 128/84 mmHg"].join("\n"))).toBe(false);
+  });
+});
+
+describe("배선 — 2026-10-14", () => {
+  it("W1 BiomarkerForm 은 «그림 PDF» 판정을 isImageOnlyPdfText 로 하고 인쇄 PDF 안내를 보인다", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const src = readFileSync(resolve(__dirname, "../../components/checkup/BiomarkerForm.tsx"), "utf-8");
+    expect(src).toMatch(/if \(isImageOnlyPdfText\(text\)\)/);
+    expect(src).toContain("«인쇄»해 만든 PDF");
+    expect(src).not.toMatch(/text\.replace\(\/\\s\/g, ""\)\.length < 30/);
   });
 });
