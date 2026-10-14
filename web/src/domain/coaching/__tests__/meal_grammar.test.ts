@@ -35,7 +35,7 @@ describe("G 규칙·카드", () => {
     const r = mealGrammarCoaching(IN([row("lunch", ["쌀밥", "김치찌개", "배추김치"])]));
     expect(r.active?.rule).toBe("G-PRO");
     expect(r.active?.slots).toEqual(["lunch"]);
-    expect(r.active?.text).toBe("오늘 점심에는 단백질 반찬이 없었습니다. 다음 끼니에 달걀이나 두부 한 가지를 더합니다.");
+    expect(r.active?.text).toBe("오늘 점심에는 단백질 반찬이 없었어요. 다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.");
   });
   it("G02 둘 다 충족 → 없음", () => {
     const r = mealGrammarCoaching(IN([row("lunch", ["쌀밥", "제육볶음", "상추"])]));
@@ -112,11 +112,11 @@ describe("G 규칙·카드", () => {
     expect(mealGrammarCoaching({ ...i, mealEnabled: false }).active).toBeNull();
     expect(mealGrammarCoaching({ ...i, loggedIn: false }).active).toBeNull();
   });
-  it("G18 문구 금지어 0 · 존대 평서형", () => {
+  it("G18 문구 금지어 0 · 권유형(10-14 말투 개정 W02)", () => {
     const banned = ["줄이", "덜 ", "빼", "금지", "kg", "체중", "칼로리", "kcal", "질환", "위험", "진단", "감량", "요요"];
     const all = [...Object.values(GRAMMAR_TEMPLATES), ...Object.values(GRAMMAR_WHY), ...Object.values(EVIDENCE_LABEL)];
     for (const t of all) for (const w of banned) expect(t).not.toContain(w);
-    for (const t of Object.values(GRAMMAR_TEMPLATES)) expect(t).toMatch(/(습니다|합니다)\.$/);
+    for (const t of Object.values(GRAMMAR_TEMPLATES)) { expect(t).toMatch(/보세요\.$/); expect(t).not.toMatch(/습니다\.|합니다\.|하세요\.|하십시오/) }
   });
 });
 
@@ -174,8 +174,9 @@ describe("V 검증 루프", () => {
 
 describe("E-SYNC 승인요청서 E 원문 일치 (IP/integration/meal_grammar_p1_eval_v1.md v3)", () => {
   it("G-PRO⊃E1 행동 · G-AM⊃E3 · G-VEG⊃E4", () => {
-    expect(GRAMMAR_TEMPLATES["G-PRO"]).toContain("다음 끼니에 달걀이나 두부 한 가지를 더합니다.");
-    expect(GRAMMAR_TEMPLATES["G-AM"]).toContain("내일 아침은 우유나 달걀 하나부터 시작합니다.");
-    expect(GRAMMAR_TEMPLATES["G-VEG"]).toContain("다음 끼니에 나물이나 쌈 한 가지를 더합니다.");
+    // 행동·식품·양은 E 승인본과 같고 말투만 권유형(10-14 W03)
+    expect(GRAMMAR_TEMPLATES["G-PRO"]).toContain("다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.");
+    expect(GRAMMAR_TEMPLATES["G-AM"]).toContain("내일 아침은 우유나 달걀 하나부터 시작해 보세요.");
+    expect(GRAMMAR_TEMPLATES["G-VEG"]).toContain("다음 끼니에 나물이나 쌈 한 가지를 더해 보세요.");
   });
 });

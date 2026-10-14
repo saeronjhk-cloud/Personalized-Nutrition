@@ -10,7 +10,7 @@ const css = readFileSync(resolve(__dirname, '../../styles/global.css'), 'utf-8')
 describe('홈 밥상 데모 가드', () => {
   it('D05 컴포넌트는 mealDemo() 결과만', () => {
     expect(demo).toContain('mealDemo()')
-    expect(demo).not.toMatch(/resolveRoles|GRAMMAR_TEMPLATES|mealGrammarCoaching|단백질 반찬이 없었습니다/)
+    expect(demo).not.toMatch(/resolveRoles|GRAMMAR_TEMPLATES|mealGrammarCoaching|단백질 반찬이 없었습니다|단백질 반찬이 없었어요/)
   })
   it('D06 금지어 없음(컴포넌트)', () => {
     expect(demo).not.toMatch(/kcal|칼로리|점수|감량|GLP-1|보장|최초|유일/)

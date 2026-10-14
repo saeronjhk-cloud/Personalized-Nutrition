@@ -205,7 +205,7 @@ describe("목표 식사 코칭 v1 — 평가셋 C01~C22", () => {
     expect(p0GoalsFor(["수면개선", "피로회복"], [])).toEqual(["recovery"]);
   });
 
-  it("C22 카드 문구 — 금지어 0 · 존대 평서형", () => {
+  it("C22 카드 문구 — 금지어 0 · 권유형(10-14 말투 개정 W02)", () => {
     const FORBIDDEN = ["덜 드세요", "줄이", "금지", "kg", "체중", "질환", "위험"];
     const texts: string[] = [...Object.values(CARD_TEMPLATES)];
     for (const meals of [[B(20)], [B(10)], [B(10), L(20)], LOW3]) {
@@ -214,7 +214,7 @@ describe("목표 식사 코칭 v1 — 평가셋 C01~C22", () => {
     }
     for (const t of texts) {
       for (const w of FORBIDDEN) expect(t, `«${w}» in «${t}»`).not.toContain(w);
-      expect(t.trim()).toMatch(/(습니다|합니다)\.?$/);
+      expect(t.trim()).toMatch(/보세요\.$/);
     }
   });
 });

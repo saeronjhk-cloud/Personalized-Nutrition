@@ -103,16 +103,17 @@ export interface CoachingResult {
 
 // ── 문구 (IP/151 페르소나: 존대 평서형 · 더하기형. 줄이기·체중·진단 표현 금지 — C22) ─────
 // 서박사 G5 확인 대상. {slots} = «아침·점심» 식.
+/** 말투 = 권유형 «~해 보세요»(2026-10-14 제이 결정 · IP/151 §3-2 개정 · checkup_coaching_link_v1/50_문구확인_회신_및_말투결정.md) */
 export const CARD_TEMPLATES: Record<ShortLevel, string> = {
-  normal: "오늘 {slots} 단백질이 목표보다 조금 적었습니다. 다음 끼니에 달걀이나 두부 한 가지를 더합니다.",
-  strong: "오늘 {slots} 단백질이 목표보다 많이 적었습니다. 다음 끼니에 살코기·생선·두부 중 한 가지를 손바닥 크기로 더합니다.",
+  normal: "오늘 {slots} 단백질이 목표보다 조금 적었어요. 다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.",
+  strong: "오늘 {slots} 단백질이 목표보다 많이 적었어요. 다음 끼니에 살코기·생선·두부 중 한 가지를 손바닥 크기로 더해 보세요.",
 };
 
 /** 체중관리 목표 카드 = «바꾸기»형(서박사 회신 v2 ③, 2026-10-14 — 더하기는 잉여 열량 우려). 판정은 같고 문구만 다름.
  *  세부 문구 사후 확인: IP/integration/checkup_coaching_link_v1/40_문구확인표.md */
 export const WEIGHT_CARD_TEMPLATES: Record<ShortLevel, string> = {
-  normal: "오늘 {slots} 단백질이 목표보다 조금 적었습니다. 다음 끼니에는 반찬 하나를 달걀이나 두부 반찬으로 바꿉니다.",
-  strong: "오늘 {slots} 단백질이 목표보다 많이 적었습니다. 다음 끼니에는 반찬 하나를 살코기·생선·두부 중 한 가지로 바꿉니다.",
+  normal: "오늘 {slots} 단백질이 목표보다 조금 적었어요. 다음 끼니에는 반찬 하나를 달걀이나 두부로 바꿔 보세요.",
+  strong: "오늘 {slots} 단백질이 목표보다 많이 적었어요. 다음 끼니에는 반찬 하나를 살코기·생선·두부 중 한 가지로 바꿔 보세요.",
 };
 
 export const SLOT_LABEL: Record<MealSlot, string> = { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" };

@@ -79,15 +79,16 @@ export interface MealGrammarResult {
 
 // ── 문구 (IP/151 페르소나 · 더하기형 · 존대 평서형 — 서박사 승인요청서 E 대기) ─────────
 /** 행동 문장 = 서박사 승인요청서 E1(G-PRO)·E3(G-AM)·E4(G-VEG) 원문 — E-SYNC 테스트로 고정(IP/integration/meal_grammar_p1_eval_v1.md v3) */
+/** 말투 = 권유형 «~해 보세요»(2026-10-14 제이 결정 · IP/151 §3-2 개정) — 행동·식품·양은 E 승인본과 같음 */
 export const GRAMMAR_TEMPLATES: Record<GrammarRuleId, string> = {
-  "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었습니다. 다음 끼니에 달걀이나 두부 한 가지를 더합니다.",
-  "G-VEG": "오늘 {slots}에는 김치 말고 채소 반찬이 없었습니다. 다음 끼니에 나물이나 쌈 한 가지를 더합니다.",
-  "G-AM": "오늘 아침에는 단백질 반찬이 없었습니다. 내일 아침은 우유나 달걀 하나부터 시작합니다.",
+  "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었어요. 다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.",
+  "G-VEG": "오늘 {slots}에는 김치 말고 채소 반찬이 없었어요. 다음 끼니에 나물이나 쌈 한 가지를 더해 보세요.",
+  "G-AM": "오늘 아침에는 단백질 반찬이 없었어요. 내일 아침은 우유나 달걀 하나부터 시작해 보세요.",
 };
 
 /** «바꾸기»형 — 체중관리 사용자(서박사 회신 v2 ③ · 문구 사후 확인 40_문구확인표.md). 없는 규칙은 GRAMMAR_TEMPLATES 그대로 */
 export const GRAMMAR_SWAP_TEMPLATES: Partial<Record<GrammarRuleId, string>> = {
-  "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었습니다. 다음 끼니에는 반찬 하나를 달걀이나 두부 반찬으로 바꿉니다.",
+  "G-PRO": "오늘 {slots}에는 단백질 반찬이 없었어요. 다음 끼니에는 반찬 하나를 달걀이나 두부로 바꿔 보세요.",
 };
 
 export const GRAMMAR_WHY: Record<GrammarRuleId, string> = {

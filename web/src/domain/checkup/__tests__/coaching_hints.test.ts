@@ -46,8 +46,8 @@ describe("③ 바꾸기형", () => {
     const c = goalMealCoaching(U()).cards[0];
     expect(c.goal).toBe("체중관리");
     expect(c.text).toBe(WEIGHT_CARD_TEMPLATES[c.level].replace("{slots}", "점심"));
-    expect(c.text).toContain("바꿉니다");
-    expect(c.text).not.toContain("더합니다");
+    expect(c.text).toContain("바꿔 보세요");
+    expect(c.text).not.toContain("더해 보세요");
   });
   it("K09 근육증가+체중관리 → 근육증가 더하기형(현행)", () => {
     const c = goalMealCoaching(U({ goals: ["체중관리", "근육증가"] })).cards[0];
@@ -61,7 +61,7 @@ describe("③ 바꾸기형", () => {
     expect(b.active?.text).toBe(GRAMMAR_SWAP_TEMPLATES["G-PRO"]!.replace("{slots}", "점심"));
   });
   it("K11 목표 없음 → 더하기형(현행)", () => {
-    expect(mealGrammarCoaching(GI({ weightSwap: false })).active?.text).toContain("더합니다");
+    expect(mealGrammarCoaching(GI({ weightSwap: false })).active?.text).toContain("더해 보세요");
   });
 });
 
@@ -81,5 +81,29 @@ describe("K16 문구 금지어", () => {
   it("진단·치료·효능·감량·kcal 없음", () => {
     const all = [CHECKUP_OBSERVE_NOTE, WEIGHT_GOAL_SUGGEST_TEXT, ...Object.values(WEIGHT_CARD_TEMPLATES), GRAMMAR_SWAP_TEMPLATES["G-PRO"]!].join("\n");
     expect(all).not.toMatch(/진단|치료|효능|효과|감량|kcal|칼로리|빠집|개선/);
+  });
+});
+
+describe("W01~W04 코칭 문구 v2 (말투 권유형 통일 · 50_문구확인_회신_및_말투결정.md)", () => {
+  it("W01 9종 글자 일치", async () => {
+    const { CARD_TEMPLATES: C, WEIGHT_CARD_TEMPLATES: W } = await import("../../coaching/goal_meal_coaching");
+    const { GRAMMAR_TEMPLATES: G, GRAMMAR_SWAP_TEMPLATES: S } = await import("../../coaching/meal_grammar");
+    expect(C.normal).toBe("오늘 {slots} 단백질이 목표보다 조금 적었어요. 다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.");
+    expect(C.strong).toBe("오늘 {slots} 단백질이 목표보다 많이 적었어요. 다음 끼니에 살코기·생선·두부 중 한 가지를 손바닥 크기로 더해 보세요.");
+    expect(W.normal).toBe("오늘 {slots} 단백질이 목표보다 조금 적었어요. 다음 끼니에는 반찬 하나를 달걀이나 두부로 바꿔 보세요.");
+    expect(W.strong).toBe("오늘 {slots} 단백질이 목표보다 많이 적었어요. 다음 끼니에는 반찬 하나를 살코기·생선·두부 중 한 가지로 바꿔 보세요.");
+    expect(G["G-PRO"]).toBe("오늘 {slots}에는 단백질 반찬이 없었어요. 다음 끼니에 달걀이나 두부 한 가지를 더해 보세요.");
+    expect(S["G-PRO"]).toBe("오늘 {slots}에는 단백질 반찬이 없었어요. 다음 끼니에는 반찬 하나를 달걀이나 두부로 바꿔 보세요.");
+    expect(G["G-VEG"]).toBe("오늘 {slots}에는 김치 말고 채소 반찬이 없었어요. 다음 끼니에 나물이나 쌈 한 가지를 더해 보세요.");
+    expect(G["G-AM"]).toBe("오늘 아침에는 단백질 반찬이 없었어요. 내일 아침은 우유나 달걀 하나부터 시작해 보세요.");
+    expect(WEIGHT_GOAL_SUGGEST_TEXT).toBe("체중관리 목표를 켜면 식사 기록에 맞춰 반찬 하나를 단백질 반찬으로 바꾸는 방법을 제안해 드려요.");
+  });
+  it("W02 카드 문구 끝 = «보세요.» · 평서형·명령형 0", async () => {
+    const { CARD_TEMPLATES: C, WEIGHT_CARD_TEMPLATES: W } = await import("../../coaching/goal_meal_coaching");
+    const { GRAMMAR_TEMPLATES: G, GRAMMAR_SWAP_TEMPLATES: S } = await import("../../coaching/meal_grammar");
+    for (const t of [...Object.values(C), ...Object.values(W), ...Object.values(G), ...Object.values(S) as string[]]) {
+      expect(t).toMatch(/보세요\.$/);
+      expect(t).not.toMatch(/습니다\.|합니다\.|하세요\.|하십시오|해야 합니다/);
+    }
   });
 });

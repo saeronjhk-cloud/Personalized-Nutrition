@@ -16,8 +16,8 @@ export const OBSERVE_KEYS: ReadonlySet<string> = new Set([
 /** ② 서박사 승인 문구(2026-10-14 회신 v2) — 글자 바꾸지 말 것(K07) */
 export const CHECKUP_OBSERVE_NOTE = "식사 기록을 이어 가면 다음 검진 때 식습관 흐름을 함께 살펴볼 수 있어요. 재검 시기는 의료진과 상의해 주세요.";
 
-/** ④ 체중관리 목표 제안 문구 — 서박사 승인 «방식» 안의 초안(사후 확인 40_문구확인표.md) */
-export const WEIGHT_GOAL_SUGGEST_TEXT = "체중관리 목표를 켜면, 식사 기록에 맞춰 반찬 하나를 단백질 반찬으로 바꾸는 방법을 알려 드려요.";
+/** ④ 체중관리 목표 제안 문구 — 문구 확인 회신 반영(50_문구확인_회신_및_말투결정.md C1) */
+export const WEIGHT_GOAL_SUGGEST_TEXT = "체중관리 목표를 켜면 식사 기록에 맞춰 반찬 하나를 단백질 반찬으로 바꾸는 방법을 제안해 드려요.";
 export const WEIGHT_GOAL_SUGGEST_BUTTON = "체중관리 목표 켜기";
 export const WEIGHT_GOAL_SUGGEST_DONE = "체중관리 목표를 켰어요.";
 
