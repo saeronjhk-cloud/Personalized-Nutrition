@@ -42,6 +42,21 @@ if not exist "%WEB%\src\lib\foodCorrection.ts" (
   set MISSING=1
 ) else ( echo   [O] foodCorrection.ts )
 
+REM  2026-10-14 재빌드(1.1.3) — 10-04(1.1.2) 이후 웹 변경분이 «워킹트리에 있는가»
+if not exist "%WEB%\src\components\ManualMealCard.tsx" (
+  echo   [X] ManualMealCard.tsx 없음 — 사진 없이 기록 미반영
+  set MISSING=1
+) else ( echo   [O] ManualMealCard.tsx ^(사진 없이 기록^) )
+if not exist "%WEB%\src\lib\foodGrams.ts" (
+  echo   [X] foodGrams.ts 없음 — 표시 무게 수정 미반영
+  set MISSING=1
+) else ( echo   [O] foodGrams.ts ^(표시 무게^) )
+findstr /C:"versionCode 9" "%WEB%\android\app\build.gradle" > nul
+if errorlevel 1 (
+  echo   [X] versionCode 9 아님 — 1.1.2 위에 설치가 안 될 수 있다
+  set MISSING=1
+) else ( echo   [O] versionCode 9 / 1.1.3 )
+
 findstr /C:"android.permission.CAMERA" "%WEB%\android\app\src\main\AndroidManifest.xml" > nul
 if errorlevel 1 (
   echo   [X] AndroidManifest 에 CAMERA 권한 없음 — 바코드 스캔이 또 안 된다
