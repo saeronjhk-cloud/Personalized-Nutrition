@@ -169,6 +169,8 @@ export interface MsLabelNutrition {
   values: Partial<Record<string, number>>
   /** «0.5g 이하»처럼 상한값으로 표시된 키 */
   upper_bound?: string[]
+  /** ★ 세션79 v1.1 — 상한 표기 종류 {키: '미만'|'이하'} (없으면 '이하'로 표시) */
+  bound?: Partial<Record<string, '미만' | '이하'>>
 }
 
 export interface MsWebLabelSupplements {

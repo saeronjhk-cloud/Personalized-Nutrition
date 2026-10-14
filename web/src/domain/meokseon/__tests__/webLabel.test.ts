@@ -51,3 +51,11 @@ describe('포장지 기준 표시', () => {
     expect(v.nutrition!.label!.header).toBe('100g당'); expect(v.nutrition!.rows.find((r) => r.label === '트랜스지방')!.unit).toBe('g 이하')
   })
 })
+
+// ★ 세션79 v1.1 — 정답 D06: 포장지의 «미만»/«이하»를 그대로
+describe('상한 표기 종류', () => {
+  it('D06 «0.5g 미만» · «1g 이하»', () => {
+    const v = labelNutritionView({ basis: 'per_serving', amount: 80, unit: 'g', values: { trans_fat: 0.5, protein: 1 }, upper_bound: ['trans_fat', 'protein'], bound: { trans_fat: '미만', protein: '이하' } })!
+    expect(v.rows).toEqual(['트랜스지방 0.5g 미만', '단백질 1g 이하'])
+  })
+})

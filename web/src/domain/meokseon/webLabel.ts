@@ -56,7 +56,8 @@ export function labelNutritionView(l: MsLabelNutrition | null | undefined, per10
   const ub = new Set(l.upper_bound ?? [])
   const rows = NUT_ROWS.flatMap(([k]) => {
     const v = l.values[k as string]
-    return typeof v === 'number' && Number.isFinite(v) ? [`${NAME[k as string]} ${fmt(v)}${UNIT[k as string]}${ub.has(k as string) ? ' 이하' : ''}`] : []
+    const kind = l.bound?.[k as string] ?? '이하'   // 포장지 표기 그대로(«미만»/«이하») — 세션79 v1.1
+    return typeof v === 'number' && Number.isFinite(v) ? [`${NAME[k as string]} ${fmt(v)}${UNIT[k as string]}${ub.has(k as string) ? ` ${kind}` : ''}`] : []
   })
   if (!rows.length) return null
   const is100 = l.basis === 'per_100g' || l.basis === 'per_100ml'
