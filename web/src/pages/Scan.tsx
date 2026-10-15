@@ -24,7 +24,7 @@ import {
 } from '../domain/meokseon/additives'
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
-  getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, meokseonConfigured, MeokseonNotFound,
+  getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, getWebLabelAdditiveSummary, meokseonConfigured, MeokseonNotFound,
   analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem,
 } from '../lib/meokseon'
@@ -583,14 +583,18 @@ export default function Scan() {
     } finally { setLoading(false) }
   }
 
-  /** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 열기. 바코드가 없으므로 첨가물 조회·스캔 이력 저장·제보는 하지 않는다. */
+  /** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 열기. 바코드가 없으므로 스캔 이력 저장·제보는 하지 않는다(첨가물은 E9 부터 web id 로 조회). */
   async function lookupWebLabel(webId: number) {
     reset(); setLoading(true)
     try {
-      const prod = await getWebLabelProduct(webId)
+      // ★ 세션79 E9 — 첨가물(원재료 검출)도 함께. 첨가물 실패는 화면을 막지 않는다(바코드 경로와 같은 allSettled).
+      const [p, a] = await Promise.allSettled([getWebLabelProduct(webId), getWebLabelAdditiveSummary(webId)])
+      if (p.status === 'rejected') throw p.reason
+      const prod = p.value
       setResult(prod)
+      setAdditives(a.status === 'fulfilled' ? a.value : null)
       // 새 이벤트 이름은 DB enum(supabase 167) 동기화가 필요해 기존 이벤트 + source='web_label' 로 센다(세션79).
-      track('scan_lookup_success', { source: 'web_label', has_nutrition: !!prod.nutrition, has_additives: false, food_category: prod.product.food_category ?? null })
+      track('scan_lookup_success', { source: 'web_label', has_nutrition: !!prod.nutrition, has_additives: a.status === 'fulfilled', food_category: prod.product.food_category ?? null })
     } catch (e) {
       setError(e instanceof MeokseonNotFound
         ? '이 품목 정보는 지금 볼 수 없어요(검토 중이거나 공식 자료로 바뀌었어요). 이름으로 다시 검색해 주세요.'

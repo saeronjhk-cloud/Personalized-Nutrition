@@ -359,6 +359,11 @@ export async function searchProductsWithWeb(q: string, limit = 20): Promise<{ pr
 }
 
 /** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 상세(바코드 조회와 같은 모양 + web_label). 숨김·검토 대기 품목은 404 → MeokseonNotFound. */
+/** ★ 세션79 E9 — 판매처 품목 첨가물(원재료 검출 · 바코드 /additives 와 같은 모양). */
+export async function getWebLabelAdditiveSummary(webId: number): Promise<MsAdditiveSummary> {
+  return await getJson(`/api/products/web/${encodeURIComponent(String(webId))}/additives`)
+}
+
 export async function getWebLabelProduct(webId: number): Promise<MsProductResult> {
   const data = (await getJson(`/api/products/web/${encodeURIComponent(String(webId))}`)) as MsProductResult
   if (data) data.nutrition = normalizeNutrition(data.nutrition)
