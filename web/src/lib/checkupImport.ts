@@ -69,7 +69,7 @@ const CONCEPT_ALIASES: Record<string, string[]> = {
   hemoglobin: ["혈색소", "헤모글로빈"],
   ast: ["AST", "SGOT", "AST(SGOT)"],
   alt: ["ALT", "SGPT", "ALT(SGPT)"],
-  gamma_gtp: ["감마지티피", "감마GTP", "γ-GTP", "r-GTP", "감마글루타밀전이효소"],
+  gamma_gtp: ["감마지티피", "감마GTP", "γ-GTP", "r-GTP", "감마글루타밀전이효소", "T-GTP", "Y-GTP"], // T·Y-GTP = OCR 이 γ 를 잘못 읽은 꼴(10-15 O06)
   creatinine: ["혈청크레아티닌", "크레아티닌"],
   egfr: ["신사구체여과율", "eGFR", "사구체여과율"],
   ferritin: ["페리틴", "혈청페리틴"],
@@ -218,16 +218,20 @@ export function parseCheckupText(text: string): ParsedCheckup {
     const line = rawLine.replace(URL_RE, " ");
     const norm = normalizeLabel(line);
     if (!norm) continue;
+    // 2026-10-15 OCR 평가 O05: 한 줄에서 이미 잡힌 긴 라벨 속의 짧은 라벨은 다른 항목이 아니다(«당화혈색소» 속 «혈색소»)
+    const usedAliases: string[] = [];
 
     for (const { alias, concept } of ALIAS_INDEX) {
-      if (seen.has(concept)) continue;
       if (norm.indexOf(alias) === -1) continue;
+      if (usedAliases.some((u) => u !== alias && u.includes(alias))) continue;
+      if (seen.has(concept)) { usedAliases.push(alias); continue; }
       if (NEGATIVE_CONTEXT[concept]?.test(line)) continue;
 
       // 라벨 위치 이후의 원문에서 값 추출 (정규화 전 원문 기준으로 다시 탐색)
       // 영문 별칭(ALT·AST·eGFR…)은 다른 영단어 속(health·salt·castle)이면 건너뛴다(앞 글자 경계)
       const labelPos = findBoundedPos(line, alias);
       if (labelPos === -1) continue;
+      usedAliases.push(alias);
       const tail = line.slice(labelPos);
 
       // 혈압: "120/80" 형태 → 수축기·이완기 분리

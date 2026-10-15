@@ -40,6 +40,9 @@ import {
   parseCheckupText,
   matchToRules,
 } from "../../lib/checkupImport";
+import { CHECKUP_OCR_ENABLED } from "../../lib/flags";
+import { ocrPagesToCheckupText } from "../../lib/checkupOcr";
+import { OCR_NOTICE, OCR_FAIL_MSG, OcrError, renderPdfPagesToJpeg, ocrPages } from "../../lib/checkupOcrClient";
 import { CHECKUP_SAVE_PAUSED, PAUSE_NOTICE } from "../../domain/checkup/interim_pause";
 
 /** 오늘(로컬) YYYY-MM-DD — toISOString()(UTC)은 한국 오전 9시 전엔 어제 날짜가 됨(input_guard 평가 W3) */
@@ -76,6 +79,8 @@ export default function BiomarkerForm() {
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  // 그림 PDF 글자 인식(OCR) — 사용자가 국외 전송 고지를 보고 누를 때만(플래그 CHECKUP_OCR_ENABLED)
+  const [ocrOffer, setOcrOffer] = useState<File | null>(null);
   // 입력 가드 — IP/integration/checkup_input_guard_eval_v1.md
   const [inputWarnings, setInputWarnings] = useState<string[]>([]);
   const [dupDate, setDupDate] = useState<string | null>(null);
@@ -143,46 +148,74 @@ export default function BiomarkerForm() {
     setImporting(true);
     setImportMessage(null);
     setImportError(null);
+    setOcrOffer(null);
 
     try {
       const text = await extractPdfText(file);
       // 2026-10-14: 병원 결과 화면을 «인쇄»한 PDF 는 본문이 그림이고 글자는 인쇄 머리글뿐 — 그 머리글을 빼고 판정
       if (isImageOnlyPdfText(text)) {
+        if (CHECKUP_OCR_ENABLED) {
+          setOcrOffer(file);
+          return;
+        }
         setImportError(
           "이 PDF는 결과가 그림으로 저장돼 있어 글자를 읽을 수 없어요. 병원 홈페이지 화면을 «인쇄»해 만든 PDF나 스캔본이 이렇습니다. 국민건강보험공단(The건강보험 앱)에서 내려받은 결과통보서 PDF를 쓰시거나, 아래에 직접 입력해 주세요.",
         );
         return;
       }
 
-      const parsed = parseCheckupText(text);
-      const { matched, unmatchedLabels, converted } = matchToRules(parsed, rules);
-      const count = Object.keys(matched).length;
-
-      if (count === 0) {
-        setImportError(
-          "검진 수치를 찾지 못했어요. 건강검진 결과통보서 PDF가 맞는지 확인하시고, 아니면 수기로 입력해 주세요.",
-        );
-        return;
-      }
-
-      setValues((prev) => ({ ...prev, ...matched }));
-      if (parsed.date) setRecordedDate(parsed.date);
-
-      const extra =
-        unmatchedLabels.length > 0
-          ? ` (인식했지만 입력 항목이 없는 값 ${unmatchedLabels.length}개는 제외)`
-          : "";
-      setImportMessage(
-        `${count}개 항목을 불러왔어요${parsed.date ? ` · 검진일 ${parsed.date}` : ""}${extra}. 값을 확인한 뒤 '검진 결과 분석하기'를 눌러주세요.` +
-          // 단위 환산 안내(10-13, IP/integration/checkup_unit_convert_eval_v1.md U19)
-          (convertedNotice(converted) ? ` ${convertedNotice(converted)}` : ""),
-      );
+      applyParsedText(text);
     } catch (err) {
       console.error("[BiomarkerForm] PDF import failed:", err);
       setImportError("PDF를 여는 데 실패했어요. 파일이 손상되지 않았는지 확인해 주세요.");
     } finally {
       setImporting(false);
     }
+  }
+
+  // 그림 PDF → 쪽 이미지 → Edge checkup-ocr → 같은 파서(applyParsedText). 저장은 사용자가 확인 후.
+  async function handleOcrImport() {
+    const file = ocrOffer;
+    if (!file) return;
+    setOcrOffer(null);
+    setImporting(true);
+    setImportMessage(null);
+    setImportError(null);
+    try {
+      const pages = await ocrPages(await renderPdfPagesToJpeg(file));
+      applyParsedText(ocrPagesToCheckupText(pages), " (글자 인식 결과라 틀린 값이 있을 수 있어요 — 결과지와 꼭 대조해 주세요)");
+    } catch (err) {
+      console.error("[BiomarkerForm] OCR import failed:", err instanceof Error ? err.message : "");
+      setImportError(err instanceof OcrError ? err.message : OCR_FAIL_MSG);
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function applyParsedText(text: string, note = "") {
+    const parsed = parseCheckupText(text);
+    const { matched, unmatchedLabels, converted } = matchToRules(parsed, rules);
+    const count = Object.keys(matched).length;
+
+    if (count === 0) {
+      setImportError(
+        "검진 수치를 찾지 못했어요. 건강검진 결과통보서 PDF가 맞는지 확인하시고, 아니면 수기로 입력해 주세요.",
+      );
+      return;
+    }
+
+    setValues((prev) => ({ ...prev, ...matched }));
+    if (parsed.date) setRecordedDate(parsed.date);
+
+    const extra =
+      unmatchedLabels.length > 0
+        ? ` (인식했지만 입력 항목이 없는 값 ${unmatchedLabels.length}개는 제외)`
+        : "";
+    setImportMessage(
+      `${count}개 항목을 불러왔어요${parsed.date ? ` · 검진일 ${parsed.date}` : ""}${extra}${note}. 값을 확인한 뒤 '검진 결과 분석하기'를 눌러주세요.` +
+        // 단위 환산 안내(10-13, IP/integration/checkup_unit_convert_eval_v1.md U19)
+        (convertedNotice(converted) ? ` ${convertedNotice(converted)}` : ""),
+    );
   }
 
   function buildBiomarkerInput(): BiomarkerInput {
@@ -476,6 +509,21 @@ export default function BiomarkerForm() {
           <p style={{ color: "var(--danger)", fontSize: 13, marginTop: 'var(--space-2)', lineHeight: 1.5 }}>
             {importError}
           </p>
+        )}
+        {ocrOffer && (
+          <div data-testid="ocr-offer" style={{ marginTop: 'var(--space-2)', padding: 'var(--space-3)', border: '1px solid var(--border)', borderRadius: 8 }}>
+            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+              이 PDF는 결과가 그림으로 저장돼 있어요. {OCR_NOTICE}
+            </p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 'var(--space-2)' }}>
+              <button type="button" className="btn btn-primary" onClick={handleOcrImport} disabled={importing}>
+                글자 인식으로 불러오기
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setOcrOffer(null)} disabled={importing}>
+                직접 입력할게요
+              </button>
+            </div>
+          </div>
         )}
       </section>
 

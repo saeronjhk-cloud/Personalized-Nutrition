@@ -82,3 +82,11 @@ export const MEAL_FLOW_V2_ENABLED = import.meta.env.VITE_MEAL_FLOW_V2 === 'true'
  *   설계 IP/integration/meal_product_log_design_v1.md · 활성화: VITE_MEAL_PRODUCT_ENABLED=true
  */
 export const MEAL_PRODUCT_ENABLED = import.meta.env.VITE_MEAL_PRODUCT_ENABLED === 'true'
+
+/**
+ * CHECKUP_OCR_ENABLED: 검진 «그림 PDF»(병원 화면 인쇄본·스캔본) 글자 인식 불러오기. 기본 false.
+ *   - 흐름: 그림 PDF 판정 → 사용자 확인(국외 전송 고지) → 쪽 이미지 → Edge checkup-ocr(Google Vision) → 기존 파서 → 사용자 확인 후 저장.
+ *   - ⛔ 운영 ON 금지 조건: 검진 동의문·처리방침 개정(현 v2 = «PDF 미전송» 고지) + 변호사 확인 + Edge 배포·GOOGLE_VISION_API_KEY secret.
+ *   - 설계·평가 IP/integration/checkup_ocr_v1/00_설계·평가셋_v1.md · 활성화: VITE_CHECKUP_OCR=true
+ */
+export const CHECKUP_OCR_ENABLED = import.meta.env.VITE_CHECKUP_OCR === 'true'
