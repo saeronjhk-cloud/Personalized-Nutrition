@@ -60,20 +60,20 @@ const CONCEPT_ALIASES: Record<string, string[]> = {
   blood_pressure: ["혈압", "수축기/이완기"],
   blood_pressure_systolic: ["수축기혈압", "최고혈압"],
   blood_pressure_diastolic: ["이완기혈압", "최저혈압"],
-  fasting_glucose: ["공복혈당", "식전혈당", "공복시혈당", "혈당"],
+  fasting_glucose: ["공복혈당", "식전혈당", "공복시혈당", "혈당", "Glucose", "FBS"],
   hba1c: ["당화혈색소", "HbA1c"],
-  total_cholesterol: ["총콜레스테롤", "총콜레스테롤(TC)"],
-  hdl_cholesterol: ["HDL콜레스테롤", "HDL-콜레스테롤", "고밀도콜레스테롤", "고밀도지단백"],
-  ldl_cholesterol: ["LDL콜레스테롤", "LDL-콜레스테롤", "저밀도콜레스테롤", "저밀도지단백"],
-  triglyceride: ["중성지방", "트리글리세라이드", "트리글리세리드"],
-  hemoglobin: ["혈색소", "헤모글로빈"],
+  total_cholesterol: ["총콜레스테롤", "총콜레스테롤(TC)", "T.Chol", "Total Cholesterol"],
+  hdl_cholesterol: ["HDL콜레스테롤", "HDL-콜레스테롤", "고밀도콜레스테롤", "고밀도지단백", "HDL-C"],
+  ldl_cholesterol: ["LDL콜레스테롤", "LDL-콜레스테롤", "저밀도콜레스테롤", "저밀도지단백", "LDL-C"],
+  triglyceride: ["중성지방", "트리글리세라이드", "트리글리세리드", "Triglyceride", "TG"],
+  hemoglobin: ["혈색소", "헤모글로빈", "Hemoglobin", "Hb"],
   ast: ["AST", "SGOT", "AST(SGOT)"],
   alt: ["ALT", "SGPT", "ALT(SGPT)"],
   gamma_gtp: ["감마지티피", "감마GTP", "γ-GTP", "r-GTP", "감마글루타밀전이효소", "T-GTP", "Y-GTP"], // T·Y-GTP = OCR 이 γ 를 잘못 읽은 꼴(10-15 O06)
-  creatinine: ["혈청크레아티닌", "크레아티닌"],
+  creatinine: ["혈청크레아티닌", "크레아티닌", "Creatinine"], // «Cr» 단독은 CRP 와 겹쳐 넣지 않음
   egfr: ["신사구체여과율", "eGFR", "사구체여과율"],
   ferritin: ["페리틴", "혈청페리틴"],
-  urine_protein: ["요단백", "요 단백", "뇨단백"],
+  urine_protein: ["요단백", "요 단백", "뇨단백", "Protein(U)", "U-Protein", "Urine Protein"],
 };
 
 // 정규화된 alias → 개념 id 역인덱스 (긴 alias 우선 매칭을 위해 길이 내림차순)
@@ -89,8 +89,8 @@ const ALIAS_INDEX: { alias: string; concept: string }[] = Object.entries(
 // 부정 문맥: 해당 개념 alias 가 있어도 이 단어가 같은 줄에 있으면 무시.
 // 예: "신장(키)" vs "신사구체여과율·만성신장질환" 의 신장.
 const NEGATIVE_CONTEXT: Record<string, RegExp> = {
-  height: /여과율|사구체|질환|기능|이식/,
-  fasting_glucose: /식후|요당/,
+  height: /여과율|사구체|신장\s*질환|기능|이식/, // 10-15: «질환의심»(판정 칸)이 같은 줄에 있어도 키는 키
+  fasting_glucose: /식후|요당|\(U\)|urine|소변/i,
 };
 
 // 생리학적 타당 범위 — 벗어나면 잘못 집힌 숫자로 보고 버린다.
@@ -182,6 +182,37 @@ function findBoundedPos(line: string, normAlias: string): number {
   return -1;
 }
 
+/** labelPos 뒤에서 시작하는 다른 항목 라벨 중 가장 가까운 시작 위치(없으면 줄 끝). 현재 라벨의 부분 문자열인 별칭은 제외. */
+function nextLabelStart(line: string, norm: string, labelPos: number, current: string): number {
+  let best = line.length;
+  for (const { alias } of ALIAS_INDEX) {
+    if (alias.length < 2 || current.includes(alias) || norm.indexOf(alias) === -1) continue;
+    let from = labelPos;
+    while (from < line.length) {
+      const end = findBoundedPos(line.slice(from), alias);
+      if (end === -1) break;
+      const start = from + startOfMatch(line.slice(from), alias, end);
+      // 괄호 안(«신사구체여과율(신장기능)»)의 라벨은 다음 항목이 아니다
+      const between = line.slice(labelPos, start);
+      const inParen = (between.match(/[(（]/g)?.length ?? 0) > (between.match(/[)）]/g)?.length ?? 0);
+      if (start >= labelPos && !inParen) { if (start < best) best = start; break; }
+      from += end;
+    }
+  }
+  return best;
+}
+
+/** findBoundedPos 가 돌려준 끝 위치로부터 시작 위치 역산(정규화로 빠지는 글자 포함) */
+function startOfMatch(s: string, normAlias: string, end: number): number {
+  let n = 0;
+  let i = end;
+  while (i > 0 && n < normAlias.length) {
+    i--;
+    if (normalizeLabel(s[i].toLowerCase()) !== "") n++;
+  }
+  return i;
+}
+
 /** 라벨 뒤 첫 «결과값» 숫자. 참고치 표기(≤40 · <100 · ≥40 · 0.9~8.5 · 40-120)는 건너뛴다. */
 function firstValueMatch(tail: string): { index: number; text: string } | null {
   const re = new RegExp(NUMBER_RE.source, "g");
@@ -232,7 +263,8 @@ export function parseCheckupText(text: string): ParsedCheckup {
       const labelPos = findBoundedPos(line, alias);
       if (labelPos === -1) continue;
       usedAliases.push(alias);
-      const tail = line.slice(labelPos);
+      // 10-15 합성 평가: 한 줄에 항목이 여럿(표 2단 배치)이면 값은 «다음 항목 라벨 앞»까지만 찾는다 — 빈 칸일 때 옆 항목 값을 가져오지 않게
+      const tail = line.slice(labelPos, nextLabelStart(line, norm, labelPos, alias));
 
       // 혈압: "120/80" 형태 → 수축기·이완기 분리
       if (concept === "blood_pressure") {

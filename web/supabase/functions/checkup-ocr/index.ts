@@ -13,7 +13,7 @@ const MAX_B64 = 6_000_000; // 쪽 이미지 1장 약 4.5MB 까지
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
-type Word = { t: string; x0: number; x1: number; y0: number; y1: number };
+type Word = { t: string; x0: number; x1: number; y0: number; y1: number; p: number[] };
 
 function toWords(resp: any): Word[] {
   const out: Word[] = [];
@@ -26,7 +26,9 @@ function toWords(resp: any): Word[] {
           const ys = v.map((q: any) => q.y ?? 0);
           const t = (w.symbols ?? []).map((s: any) => s.text ?? "").join("");
           if (!t || xs.length === 0) continue;
-          out.push({ t, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) });
+          // p = 꼭짓점 4개(사진 기울기 바로잡기용, 웹 lib/checkupOcr.ts deskew)
+          const p = v.length === 4 ? v.flatMap((q: any) => [q.x ?? 0, q.y ?? 0]) : [];
+          out.push({ t, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), p });
         }
   return out;
 }

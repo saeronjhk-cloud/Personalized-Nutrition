@@ -12,32 +12,89 @@
  * 날짜 머리글이 없는 쪽: 문장이 아닌 짧은 줄만 그대로 넘긴다(공단 결과통보서처럼 «항목 값 단위» 한 줄 서식).
  */
 
-export type OcrWord = { t: string; x0: number; x1: number; y0: number; y1: number };
+/** p = 원래 사각형 꼭짓점 4개(x0,y0,…x3,y3 — 왼위·오위·오아래·왼아래). 있으면 기울기 바로잡기에 쓴다(사진 촬영본). */
+export type OcrWord = { t: string; x0: number; x1: number; y0: number; y1: number; p?: number[] };
 
 type Row = { cy: number; h: number; w: OcrWord[] };
 
 const FULL_DATE = /^(19|20)\d{2}[-.](0[1-9]|1[0-2])[-.](0[1-9]|[12]\d|3[01])\.?$/;
 const PART_DATE = /^(19|20)\d{2}[-.]?$/;
-const REF_HEAD = /^참고(치|범위)?$|^참$|^기준(치|범위)?$/;
+const REF_HEAD = /^(참고|기준|reference|ref\b|normal)/i;
+const TABLE_HEAD = /^(검사\s*항목|검사명|항목|test|item)$/i;
 const VALUE_CELL = /^(?:[<>≤≥]?\s*\d+(?:[.,]\d+)?|음성|양성|약양성|±|\+-|\+[1-4]|[1-4]\+|\+{1,4}|TR|trace|negative|positive)/i;
 const UNIT_WORD = /(?:^|[^A-Za-z])(?:mg|g|ng|pg|μ|µ|u|iu|meq|mmol|ml|mm|fl|sec|cm|kg)?\/(?:dl|l|ml|ul|μl|hpf|min|hr)|^%$|^(?:fl|pg|sec|mm\/hr)$/i;
 const UNIT_PIECE = /^[A-Za-zμµ°/%·.0-9]+$/;
 const SENTENCE = /(니다|하다|어요|에요|세요|됩니다|입니다)[.,]?$|[.。]$/;
 const SECTION_URINE = /소변|요\s*검사|뇨\s*검사/;
 
-/** 단어 상자 → 같은 높이끼리 묶은 줄(왼→오) */
+/** 사진 촬영본 기울기 바로잡기 — 낱말 윗변 기울기의 중앙값만큼 모든 꼭짓점을 되돌려 돌린다(10-15 합성 평가 S-photo).
+ *  꼭짓점(p)이 없거나 기울기가 0.3° 미만이면 그대로. */
+export function deskew(words: OcrWord[]): OcrWord[] {
+  const angs = words
+    .filter((w) => w.p && w.p.length === 8 && w.t.length >= 2)
+    .map((w) => Math.atan2(w.p![3] - w.p![1], w.p![2] - w.p![0]))
+    .sort((a, b) => a - b);
+  if (angs.length < 5) return words;
+  const a = angs[Math.floor(angs.length / 2)];
+  if (Math.abs(a) < (0.3 * Math.PI) / 180) return words;
+  const c = Math.cos(-a), sn = Math.sin(-a);
+  return words.map((w) => {
+    if (!w.p || w.p.length !== 8) return w;
+    const xs: number[] = [], ys: number[] = [];
+    for (let i = 0; i < 8; i += 2) { xs.push(w.p[i] * c - w.p[i + 1] * sn); ys.push(w.p[i] * sn + w.p[i + 1] * c); }
+    return { t: w.t, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+  });
+}
+
+/** 단어 상자 → 줄(왼→오). 왼쪽부터 «바로 왼쪽 이웃»과 높이를 비교해 이어 붙인다 —
+ *  사진의 남은 기울기·원근으로 줄이 비스듬해도 이웃끼리는 높이가 비슷하다(10-15 합성 평가 photo).
+ *  같은 자리에 겹친 서로 다른 숫자(흐린 사진에서 «69»·«59» 이중 인식)는 «?» 로 바꿔 값으로 쓰지 않는다. */
 export function groupRows(words: OcrWord[]): Row[] {
-  const ws = [...words].sort((a, b) => a.y0 + a.y1 - (b.y0 + b.y1));
-  const rows: Row[] = [];
+  const ws = [...words].sort((a, b) => a.x0 - b.x0);
+  const hs = ws.map((w) => w.y1 - w.y0).sort((a, b) => a - b);
+  const medH = hs.length ? hs[Math.floor(hs.length / 2)] : 20;
+  type Chain = { w: OcrWord[]; lastCy: number; lastX1: number; h: number };
+  const chains: Chain[] = [];
   for (const w of ws) {
     const cy = (w.y0 + w.y1) / 2;
     const h = w.y1 - w.y0;
-    const last = rows[rows.length - 1];
-    if (last && Math.abs(cy - last.cy) < Math.max(h, last.h) * 0.5) last.w.push(w);
-    else rows.push({ cy, h, w: [w] });
+    let best: Chain | null = null;
+    let bestD = Infinity;
+    for (const c of chains) {
+      if (c.lastX1 > w.x1) continue; // 이미 더 오른쪽까지 간 줄
+      const gap = Math.max(0, w.x0 - c.lastX1);
+      // 멀리 떨어진 칸일수록 허용 높이차를 조금 넓힌다(원근 기울기 ~2°)
+      const tol = Math.max(h, c.h, medH) * 0.55 + gap * 0.035;
+      const d = Math.abs(cy - c.lastCy);
+      if (d < tol && d < bestD) { best = c; bestD = d; }
+    }
+    if (best) { best.w.push(w); best.lastCy = cy; best.lastX1 = Math.max(best.lastX1, w.x1); best.h = Math.max(best.h, h) * 0.5 + h * 0.5; }
+    else chains.push({ w: [w], lastCy: cy, lastX1: w.x1, h });
   }
-  for (const r of rows) r.w.sort((a, b) => a.x0 - b.x0);
+  const rows: Row[] = chains.map((c) => {
+    const w = markConflicts(c.w);
+    const cy = w.reduce((s, x) => s + (x.y0 + x.y1) / 2, 0) / w.length;
+    return { cy, h: c.h, w };
+  });
+  rows.sort((a, b) => a.cy - b.cy);
   return rows;
+}
+
+const NUMERIC = /^[<>≤≥]?\d[\d.,]*$/;
+function markConflicts(ws: OcrWord[]): OcrWord[] {
+  const out = [...ws];
+  for (let i = 0; i < out.length; i++)
+    for (let j = i + 1; j < out.length; j++) {
+      const a = out[i], b = out[j];
+      const ov = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
+      const minW = Math.min(a.x1 - a.x0, b.x1 - b.x0);
+      if (ov > minW * 0.5 && NUMERIC.test(a.t) && NUMERIC.test(b.t)) {
+        if (a.t === b.t) { out[j] = { ...b, t: "" }; continue; } // 같은 글자 이중 인식 → 하나만
+        out[i] = { ...a, t: "?" };
+        out[j] = { ...b, t: "?" };
+      }
+    }
+  return out.filter((w) => w.t !== "").filter((w, k) => !(w.t === "?" && out.findIndex((x) => x.t === "?" && Math.min(x.x1, w.x1) - Math.max(x.x0, w.x0) > 0) !== k));
 }
 
 /** 줄 글자 — 가까운 상자는 붙이고 떨어진 상자는 띄운다(«공복시혈당» 같은 낱말이 끊기지 않게) */
@@ -60,14 +117,18 @@ function headerCols(r: Row): Cols | null {
   const dates = r.w.filter((w) => FULL_DATE.test(w.t) || PART_DATE.test(w.t));
   const full = dates.filter((w) => FULL_DATE.test(w.t));
   if (full.length === 0) return null;
+  // 표 머리글만(«검진일자 2026.03.12» 같은 문서 머리 줄은 아님): 날짜 2개 이상, 또는 날짜 + 참고치/검사항목 머리글
+  const hasHead = r.w.some((w) => REF_HEAD.test(w.t.replace(/\s/g, "")) || TABLE_HEAD.test(w.t.replace(/\s/g, "")));
+  if (dates.length < 2 && !hasHead) return null;
   const norm = (t: string) => t.replace(/\./g, "-").replace(/-$/, "");
   const cur = full.reduce((a, b) => (norm(b.t) > norm(a.t) ? b : a));
   const xs = [...dates].sort((a, b) => a.x0 - b.x0);
   const i = xs.indexOf(cur);
   const ref = r.w.find((w) => REF_HEAD.test(w.t.replace(/\s/g, "")));
   const firstDate = xs[0];
-  const labelRight = ref ? ref.x0 : firstDate.x0;
-  const prevEdge = i > 0 ? xs[i - 1].x1 : ref ? ref.x1 : cur.x0 - (cur.x1 - cur.x0);
+  // 참고치가 날짜 열 오른쪽에 있는 서식(«검사항목 | 최근 | 이전 | 참고치»)이면 라벨 칸 = 첫 날짜 열 왼쪽까지
+  const labelRight = ref && ref.x0 < firstDate.x0 ? ref.x0 : firstDate.x0 - (firstDate.x1 - firstDate.x0) * 0.25;
+  const prevEdge = i > 0 ? xs[i - 1].x1 : ref && ref.x1 < cur.x0 ? ref.x1 : cur.x0 - (cur.x1 - cur.x0);
   const left = (prevEdge + cur.x0) / 2;
   const right = i + 1 < xs.length ? (cur.x1 + xs[i + 1].x0) / 2 : cur.x1 + (cur.x1 - cur.x0) * 0.5;
   return { left, right, labelRight, date: norm(cur.t) };
@@ -78,7 +139,7 @@ export function ocrPageToLines(words: OcrWord[], carry: { cols: Cols | null; sec
   const out: string[] = [];
   let cols: Cols | null = carry.cols;
   let section = carry.section;
-  for (const r of groupRows(words)) {
+  for (const r of groupRows(deskew(words))) {
     const h = headerCols(r);
     if (h) {
       cols = h;
