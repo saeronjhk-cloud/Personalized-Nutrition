@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import type { RecommendationResult, SurveyAnswers, Supplement, ScoreBreakdown } from '../types'
 import { saveSurveyRecord } from '../lib/surveyHistory'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
+import { SUPPLEMENT_CHECK_ENABLED } from '../lib/flags'
+import { reduceCheck } from '../domain/supplement/reduce_check'
 
 interface Props {
   result: RecommendationResult | null
@@ -159,6 +161,20 @@ export default function Results({
             </div>
           ))}
       </div>
+
+      {/* 지금 드시는 영양제 점검(감축형 v1 · 플래그 OFF 기본) — 판정·문구는 reduceCheck 한 곳 */}
+      {(() => {
+        const lines = SUPPLEMENT_CHECK_ENABLED ? reduceCheck(answers) : []
+        if (lines.length === 0) return null
+        return (
+          <div className="survey-card" data-testid="supplement-check" style={{ marginBottom: 'var(--space-4)' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🔎 지금 드시는 영양제 점검</div>
+            <ul style={{ margin: 'var(--space-2) 0 0', paddingLeft: '1.1em', fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+              {lines.map((l) => <li key={l.id}>{l.text}</li>)}
+            </ul>
+          </div>
+        )
+      })()}
 
       {/* 추천 영양제 */}
       <div className="results-section-title">

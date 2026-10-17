@@ -90,3 +90,10 @@ export const MEAL_PRODUCT_ENABLED = import.meta.env.VITE_MEAL_PRODUCT_ENABLED ==
  *   - 설계·평가 IP/integration/checkup_ocr_v1/00_설계·평가셋_v1.md · 활성화: VITE_CHECKUP_OCR=true
  */
 export const CHECKUP_OCR_ENABLED = import.meta.env.VITE_CHECKUP_OCR === 'true'
+
+/**
+ * SUPPLEMENT_CHECK_ENABLED: 영양제 추천 결과 «지금 드시는 영양제 점검»(감축형 v1) 상자. 기본 false.
+ *   - 판정 domain/supplement/reduce_check.ts · 확정 문구 IP/integration/supplement_reduce_v1/10_… (제이 결정 10-17)
+ *   - 활성화: VITE_SUPPLEMENT_CHECK=true
+ */
+export const SUPPLEMENT_CHECK_ENABLED = import.meta.env.VITE_SUPPLEMENT_CHECK === 'true'
