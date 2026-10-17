@@ -293,3 +293,22 @@ export function todayCoachNotice(input: MealGrammarInput): CoachNotice | null {
   }
   return { reason: "NO_STAPLE", text: NOTICE_TEXT.NO_STAPLE, unknown_names: [] };
 }
+
+// ── 국물 카드 (서박사 D6·E5 · IP/integration/broth_card_v1/00_설계·평가셋_v1.md B01~B12) ──────────
+// ⚠ 섭식 안전 «빼기형 없음»의 유일한 예외(서박사 D6 별도 허용). 이 카드 외 빼기형 추가 금지.
+export const BROTH_MIN_MEALS_PER_DAY = 2;
+export const BROTH_TEMPLATE = "오늘 국물·면 요리를 {n}번 드셨어요. 국은 건더기 위주로 드시고, 국물은 반쯤 남겨 보세요.";
+export const BROTH_WHY = "국물·면 요리가 하루 2번 이상이면 보여 드려요. 국 나트륨의 약 3분의 2는 국물에 있어요.";
+
+export interface BrothCard { count: number; slots: MealSlot[]; text: string; why: string }
+
+/** 오늘 국물(BROTH)·면(NOODLE) 음식이 있는 끼니 수 ≥ 2 → 카드. P1 활성 카드가 있으면 호출부에서 숨긴다(하루 1장). */
+export function brothCard(input: MealGrammarInput): BrothCard | null {
+  if (!input.mealEnabled || !input.loggedIn) return null;
+  const today = localDayKey(input.now);
+  const hit = mealsFromRows(input.rows, input.now, 1)
+    .filter((m) => m.day === today)
+    .filter((m) => m.names.some((n) => resolveRoles(n).some((r) => r === "BROTH" || r === "NOODLE")));
+  if (hit.length < BROTH_MIN_MEALS_PER_DAY) return null;
+  return { count: hit.length, slots: hit.map((m) => m.slot), text: BROTH_TEMPLATE.replace("{n}", String(hit.length)), why: BROTH_WHY };
+}
