@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { loadMealGrammarInput } from '../lib/mealGrammar'
 import { mealGrammarCoaching, todayCoachNotice, type CoachNotice, type MealGrammarResult } from '../domain/coaching/meal_grammar'
+import { threeDayReview, type ThreeDayReview } from '../domain/coaching/three_day_review'
 import { coachCardId, grammarShownProps } from '../domain/coaching/coach_telemetry'
 import { trackCoachShown, trackCoachWhyOpen } from '../lib/coachTelemetry'
 import { grammarPose } from '../domain/coaching/coach_pose'
@@ -11,12 +12,14 @@ import CoachAvatar from './CoachAvatar'
  * - 판정·문구는 mealGrammarCoaching() 한 곳. 여기서 음식 이름을 해석하거나 문구를 만들지 않는다(W2).
  * - 활성 카드 1장 + «유지 중» 1줄. 둘 다 없으면 «판정 대상 없음» 안내 1줄(todayCoachNotice, 오늘 판정 가능 끼니 0일 때만) — 그것도 없으면 아무것도 안 보인다.
  *   안내 평가 IP/integration/coach_notice_eval_v1.md N01~N16·W1
+ * - «3일 돌아보기» 한 줄(threeDayReview — 제안 뒤 실제 기록으로 사실 확인, 평가 IP/integration/three_day_review_v1 T01~T15). 카드가 없어도 단독으로 보인다.
  * - 노출은 MEAL_GRAMMAR_ENABLED(기본 OFF) — Meal.tsx 에서 게이트.
  * 설계 IP/integration/meal_grammar_p1_design_v1.md §7
  */
 export default function MealGrammarCard() {
   const [res, setRes] = useState<MealGrammarResult | null>(null)
   const [notice, setNotice] = useState<CoachNotice | null>(null)
+  const [review, setReview] = useState<ThreeDayReview | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -24,8 +27,10 @@ export default function MealGrammarCard() {
       try {
         const input = await loadMealGrammarInput()
         if (!alive || !input) return
-        setRes(mealGrammarCoaching(input))
+        const r = mealGrammarCoaching(input)
+        setRes(r)
         setNotice(todayCoachNotice(input))
+        setReview(threeDayReview(input, r.active?.rule ?? null))
       } catch (e) {
         console.error('[MealGrammarCard] load failed:', (e as Error).message)
       }
@@ -40,12 +45,18 @@ export default function MealGrammarCard() {
   }, [activeRule])
 
   if (!res) return null
+  const reviewLine = review && (
+    <p data-testid="three-day-review" style={{ margin: 'var(--space-2) 0 0', fontSize: 13, color: 'var(--text)', lineHeight: 1.7 }}>
+      ✨ {review.text}
+    </p>
+  )
   if (!res.active && !res.maintenance) {
-    if (!notice) return null
+    if (!notice && !review) return null
     return (
-      <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }} data-testid="coach-notice">
+      <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }} data-testid="coach-standalone">
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🍚 오늘의 밥상 코칭</div>
-        <p style={{ margin: 'var(--space-2) 0 0', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{notice.text}</p>
+        {reviewLine}
+        {notice && <p data-testid="coach-notice" style={{ margin: 'var(--space-2) 0 0', fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>{notice.text}</p>}
       </div>
     )
   }
@@ -70,6 +81,7 @@ export default function MealGrammarCard() {
           </details>
         </>
       )}
+      {reviewLine}
       {res.maintenance && (
         <div style={{ marginTop: 'var(--space-2)', fontSize: 13, color: 'var(--text-secondary)' }}>✓ {res.maintenance.text}</div>
       )}
