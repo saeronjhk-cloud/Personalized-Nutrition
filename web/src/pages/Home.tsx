@@ -221,7 +221,7 @@ export default function Home() {
 
       {mode === 'returning' ? (
         <>
-          <ReturningHome todayRows={home.todayRows} />
+          <ReturningHome todayRows={home.todayRows} latestCheckupDate={home.latestCheckupDate} />
           <details className="returning-home__about">
             <summary>서비스 소개 보기</summary>
             <Journey />

@@ -2946,6 +2946,9 @@ input[type="range"]::-webkit-slider-thumb {
 .returning-home__slot.is-done { color: var(--primary); font-weight: 700; }
 .returning-home__one { margin-bottom: var(--space-4); }
 .returning-home__links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+/* 재검진 입력 안내(10-17 · IP/integration/recheck_prompt_v1) — 홈 v2 블록 앞(규칙 113) */
+.returning-home__recheck { margin: 0 0 var(--space-4); font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+.returning-home__recheck a { white-space: nowrap; font-weight: 600; }
 .returning-home__link {
   padding: 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
   text-decoration: none; color: var(--text); font-size: 14px; font-weight: 600;

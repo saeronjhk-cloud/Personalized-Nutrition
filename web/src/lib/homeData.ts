@@ -13,9 +13,11 @@ export interface HomeData {
   /** 식사·검진 기록 존재(설문은 페이지가 useSurveyHistory 로 합산) */
   hasMealOrCheckup: boolean
   todayRows: { eaten_at: string; meal_slot: string | null }[]
+  /** 가장 최근 검진일 YYYY-MM-DD(없으면 null) — 재검진 입력 안내(domain/checkup/recheck_prompt) */
+  latestCheckupDate: string | null
 }
 
-const EMPTY: HomeData = { loading: false, isLoggedIn: false, hasMealOrCheckup: false, todayRows: [] }
+const EMPTY: HomeData = { loading: false, isLoggedIn: false, hasMealOrCheckup: false, todayRows: [], latestCheckupDate: null }
 
 export async function loadHomeData(): Promise<HomeData> {
   try {
@@ -28,7 +30,7 @@ export async function loadHomeData(): Promise<HomeData> {
         ? supabase.from('meal_log').select('eaten_at, meal_slot').eq('user_id', uid).gte('eaten_at', startOfLocalDay().toISOString()).limit(50)
         : Promise.resolve({ data: [], error: null }),
       CHECKUP_ENABLED
-        ? supabase.from('checkup_records').select('id').eq('user_id', uid).is('deleted_at', null).limit(1)
+        ? supabase.from('checkup_records').select('recorded_date').eq('user_id', uid).is('deleted_at', null).order('recorded_date', { ascending: false }).limit(1)
         : Promise.resolve({ data: [], error: null }),
     ])
     const n = (r: { data: unknown[] | null; error: unknown }) => (r.error || !r.data ? 0 : r.data.length)
@@ -37,6 +39,7 @@ export async function loadHomeData(): Promise<HomeData> {
       isLoggedIn: true,
       hasMealOrCheckup: n(anyMeal) + n(anyCheckup) > 0,
       todayRows: today.error || !today.data ? [] : (today.data as HomeData['todayRows']),
+      latestCheckupDate: anyCheckup.error || !anyCheckup.data?.length ? null : String((anyCheckup.data[0] as { recorded_date?: unknown }).recorded_date ?? '') || null,
     }
   } catch {
     return EMPTY

@@ -41,6 +41,7 @@ import {
   matchToRules,
 } from "../../lib/checkupImport";
 import { CHECKUP_OCR_ENABLED } from "../../lib/flags";
+import { RECHECK_SAVE_MESSAGE } from "../../domain/checkup/recheck_prompt";
 import { ocrPagesToCheckupText } from "../../lib/checkupOcr";
 import { OCR_NOTICE, OCR_FAIL_MSG, OcrError, renderPdfPagesToJpeg, ocrPages } from "../../lib/checkupOcrClient";
 import { CHECKUP_SAVE_PAUSED, PAUSE_NOTICE } from "../../domain/checkup/interim_pause";
@@ -335,7 +336,7 @@ export default function BiomarkerForm() {
 
     setSaved(true);
     track("checkup_saved"); // 효과 측정 M06 — 성공 경로만
-    setSaveMessage("검진 결과가 저장되었습니다 (3개월 후 재검진 시 비교 가능)");
+    setSaveMessage(RECHECK_SAVE_MESSAGE);
   }
 
   async function handleShowTimeseries() {

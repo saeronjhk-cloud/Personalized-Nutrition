@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { MEAL_ENABLED, MEAL_GRAMMAR_ENABLED, GOAL_COACHING_ENABLED, CHECKUP_ENABLED } from '../../lib/flags'
 import { todaySlots, todayCards, greeting } from '../../domain/home/home_mode'
 import CoachCards from '../CoachCards'
+import { recheckPrompt } from '../../domain/checkup/recheck_prompt'
 
 const SLOT_NAMES = ['아침', '점심', '저녁'] as const
 
@@ -13,8 +14,9 @@ function fmtToday(d: Date): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
-export default function ReturningHome({ todayRows }: { todayRows: { eaten_at: string; meal_slot: string | null }[] }) {
+export default function ReturningHome({ todayRows, latestCheckupDate = null }: { todayRows: { eaten_at: string; meal_slot: string | null }[]; latestCheckupDate?: string | null }) {
   const now = new Date()
+  const recheck = recheckPrompt(latestCheckupDate, now, CHECKUP_ENABLED)
   const slots = todaySlots(todayRows, now)
   const cards = todayCards({ meal: MEAL_ENABLED, mealGrammar: MEAL_GRAMMAR_ENABLED, goalCoaching: GOAL_COACHING_ENABLED })
   const links = [
@@ -49,6 +51,12 @@ export default function ReturningHome({ todayRows }: { todayRows: { eaten_at: st
         <div className="returning-home__one" aria-label="오늘의 한 가지">
           <CoachCards />
         </div>
+      )}
+
+      {recheck && (
+        <p className="returning-home__recheck" data-testid="recheck-prompt">
+          🩺 {recheck.text} <Link to="/checkup">검진 결과 입력 →</Link>
+        </p>
       )}
 
       <div className="returning-home__links">
