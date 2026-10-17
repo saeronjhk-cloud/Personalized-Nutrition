@@ -19,16 +19,17 @@ import CoachAvatar from '../components/CoachAvatar'
 import AdditiveList from '../components/AdditiveList'
 import { SIGNAL_V3_NOTICE, INGREDIENTS_TITLE, SIBLING_INGREDIENT_NOTE, SIBLING_NUTRITION_NOTE } from '../domain/meokseon/additiveSignal'
 import {
-  buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, GRADE_HIDDEN_NOTICE,
+  buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, describeAdditiveHeader, GRADE_HIDDEN_NOTICE,
   type AdditiveColor,
 } from '../domain/meokseon/additives'
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
 import {
-  getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, getWebLabelAdditiveSummary, meokseonConfigured, MeokseonNotFound,
+  getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, getWebLabelAdditiveSummary, getKfindProduct, meokseonConfigured, MeokseonNotFound,
   analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
-  type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem,
+  type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem, type MsKfindItem,
 } from '../lib/meokseon'
 import { webLabelNotice, supplementView, labelNutritionView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
+import { kfindNotice, kfindSupplementView, isNoBarcodeItem, KFIND_NUTRITION_OFF_NOTE, KFIND_RESULTS_TITLE } from '../domain/meokseon/kfind'   // 세션80 결정 80-1
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
@@ -141,6 +142,7 @@ export default function Scan() {
   const [searchResults, setSearchResults] = useState<MsSearchItem[] | null>(null)
   // ★ 세션79 U78-3 — 판매처 라벨 기반 검색 결과(바코드 없음 · public 결과 «뒤»에 따로 보인다)
   const [webResults, setWebResults] = useState<MsWebLabelItem[] | null>(null)
+  const [kfindResults, setKfindResults] = useState<MsKfindItem[] | null>(null)   // ★ 세션80
   // 사진 제보 — ★ 세션64: **두 단계**다(읽어보기 → 제품명 확인 → 보내기).
   //   1단계는 저장하지 않는다. 저장은 사용자가 제품명을 확정한 뒤에만 일어난다.
   //   근거·문구·판정은 전부 domain/meokseon/photoReport.ts. 여기서 다시 판단하지 않는다.
@@ -290,7 +292,7 @@ export default function Scan() {
   }, [result])
 
   function reset() {
-    setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null); setWebResults(null)
+    setError(null); setNotFound(null); setResult(null); setAdditives(null); setSearchResults(null); setWebResults(null); setKfindResults(null)
     setReportOpen(false); setLabelImage(null); setNutritionImage(null)
     setReportBusy(null); setReportError(null)
     setAnalysis(null); setProductName(''); setConfirmed(null); setNotifyResult(false)   // 세션75f — 다음 제보는 다시 «꺼짐»에서
@@ -573,9 +575,10 @@ export default function Scan() {
   async function doSearch(q: string) {
     reset(); setLoading(true)
     try {
-      const { products: res, web } = await searchProductsWithWeb(q)
+      const { products: res, web, kfind } = await searchProductsWithWeb(q)
       setSearchResults(res)
       setWebResults(web)
+      setKfindResults(kfind)
       track('scan_search_submit', { result_count: res.length })   // web 결과 수는 계측 키 화이트리스트에 없어 싣지 않는다(세션79)
     } catch {
       setError('검색에 실패했어요. 잠시 후 다시 시도해 주세요.')
@@ -600,6 +603,21 @@ export default function Scan() {
         ? '이 품목 정보는 지금 볼 수 없어요(검토 중이거나 공식 자료로 바뀌었어요). 이름으로 다시 검색해 주세요.'
         : '제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
       track('scan_lookup_error', { error_kind: 'weblabel' })
+    } finally { setLoading(false) }
+  }
+
+  /** ★ 세션80 결정 80-1 — K-FIND 품목 열기. 바코드·원재료가 없으므로 첨가물 조회·스캔 이력·제보는 하지 않는다. */
+  async function lookupKfind(foodCd: string) {
+    reset(); setLoading(true)
+    try {
+      const prod = await getKfindProduct(foodCd)
+      setResult(prod)
+      track('scan_lookup_success', { source: 'kfind', has_nutrition: !!prod.nutrition, has_additives: false, food_category: prod.product.food_category ?? null })
+    } catch (e) {
+      setError(e instanceof MeokseonNotFound
+        ? '이 품목 정보는 지금 볼 수 없어요(더 자세한 자료로 바뀌었을 수 있어요). 이름으로 다시 검색해 주세요.'
+        : '제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+      track('scan_lookup_error', { error_kind: 'kfind' })
     } finally { setLoading(false) }
   }
 
@@ -1217,8 +1235,8 @@ export default function Scan() {
 
       {searchResults && (
         <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
-          <h3 className="survey-step-title" style={{ fontSize: 16 }}>검색 결과 {searchResults.length + (webResults?.length ?? 0)}건</h3>
-          {searchResults.length === 0 && !(webResults && webResults.length) ? (
+          <h3 className="survey-step-title" style={{ fontSize: 16 }}>검색 결과 {searchResults.length + (webResults?.length ?? 0) + (kfindResults?.length ?? 0)}건</h3>
+          {searchResults.length === 0 && !(webResults && webResults.length) && !(kfindResults && kfindResults.length) ? (
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>일치하는 제품이 없어요. 바코드 스캔으로 시도해 보세요.</p>
           ) : (
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
@@ -1265,6 +1283,30 @@ export default function Scan() {
               </ul>
             </div>
           )}
+          {/* ★ 세션80 결정 80-1 — 식약처 K-FIND 품목은 판매처 결과 «뒤», 품목마다 배지. 누르면 food_cd 로 상세. */}
+          {kfindResults && kfindResults.length > 0 && (
+            <div data-testid="kfind-results" style={{ marginTop: 'var(--space-3)' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 var(--space-2)' }}>{KFIND_RESULTS_TITLE}</p>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                {kfindResults.map((it) => (
+                  <li key={`k${it.food_cd}`}>
+                    <button type="button" className="btn btn-secondary"
+                      style={{ width: '100%', justifyContent: 'flex-start', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}
+                      onClick={() => lookupKfind(it.food_cd)}>
+                      <span style={{ width: 32, height: 32, borderRadius: 6, background: 'var(--border-light)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>📊</span>
+                      <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.product_name}</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border-light)', borderRadius: 'var(--radius-pill)', padding: '0 var(--space-2)', alignSelf: 'flex-start', marginTop: 2 }}>{it.badge}</span>
+                        {subtitleOf(it.manufacturer, it.is_imported ? [it.origin_country, '수입'].filter(Boolean).join(' ') : null, it.food_type) && (
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{subtitleOf(it.manufacturer, it.is_imported ? [it.origin_country, '수입'].filter(Boolean).join(' ') : null, it.food_type)}</span>
+                        )}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -1292,6 +1334,12 @@ export default function Scan() {
               <strong>{wn.badgeLine}</strong><br />{wn.warning}
               {wn.nutritionOff && <><br />{WEB_NUTRITION_OFF_NOTE}</>}
               {wn.stale && <><br />{WEB_STALE_NOTE}</>}
+            </div>) })() : kfindNotice(result) ? (() => { const kn = kfindNotice(result)!; return (
+            <div data-testid="kfind-notice" style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text)', background: 'var(--border-light)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
+              <strong>{kn.badgeLine}</strong><br />{kn.warning}
+              {kn.originLine && <><br />{kn.originLine}</>}
+              {kn.nutritionOff && <><br />{KFIND_NUTRITION_OFF_NOTE}</>}
+              <br /><span style={{ color: 'var(--text-muted)' }}>{kn.sourceLine}</span>
             </div>) })() : (
           <p data-testid="reading-notice" data-kind={readingNotice(result.product).kind}
              style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
@@ -1333,6 +1381,15 @@ export default function Scan() {
               )}
             </div>) })()}
 
+          {/* ★ 세션80 R8 — 판매처 품목 영양이 비었을 때 식약처 K-FIND 값(참고 · 신호등에 쓰지 않음) */}
+          {kfindSupplementView(result) && (() => { const kv = kfindSupplementView(result)!; return (
+            <div className="survey-card" data-testid="kfind-supplement" style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="survey-step-title" style={{ fontSize: 16 }}>{kv.title}</h3>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-2)' }}>영양성분{kv.basisLabel ? ` (${kv.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
+              <div style={{ fontSize: 13, lineHeight: 1.7 }}>{kv.rows.map((r) => <div key={r.label}>{r.label} {r.value}{r.unit}</div>)}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>{kv.sourceLine}</div>
+            </div>) })()}
+
           {/* ★ 세션75j — 원재료 원문(서버가 실어 줄 때만). 형제 바코드에서 온 것이면 출처를 «반드시» 말한다. */}
           {typeof result.ingredients_text === 'string' && result.ingredients_text.trim() && (
             <div className="survey-card" data-testid="ingredients-card" data-source={result.ingredients_source ?? ''} style={{ marginBottom: 'var(--space-4)' }}>
@@ -1353,7 +1410,7 @@ export default function Scan() {
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>
                 {/* ⚠ 「첨가물 7종」은 사실보다 강한 주장이다(33.3% 미매칭). 문구 정본은 additives.ts. */}
-                {SHOW_RISK_GRADE ? `첨가물 ${additiveView.total}종` : describeAdditiveCount(additiveView.total)}
+                {SHOW_RISK_GRADE ? `첨가물 ${additiveView.total}종` : describeAdditiveHeader(additiveView)}
               </h3>
               {/* ★★★ `U65-2` — 조건에 `unlisted === 0` 을 «더했다».
                   종전 조건(`total === 0`)만으로는 「저장 0개 · 라벨에서 검출 11개」인 제품에서
@@ -1480,7 +1537,7 @@ export default function Scan() {
               ⚠ 새 플로우를 만들지 않았다 — `renderReportForm` 은 미등록 경로와 «같은 함수»다.
               ⚠ 결손 판정은 여기서 하지 않는다. domain/meokseon/productCompleteness.ts 의 순수 함수다. */}
           {/* 세션79 — 판매처 라벨 기반 품목(바코드 없음)은 제보 경로가 없다(제보는 바코드에 붙는다). */}
-          {!result.web_label && completeness && (completeness.gaps.length > 0 || reportOpen || confirmed) && (
+          {!isNoBarcodeItem(result) && completeness && (completeness.gaps.length > 0 || reportOpen || confirmed) && (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               {reportOpen || confirmed ? (
                 <>
@@ -1577,7 +1634,7 @@ export default function Scan() {
               멀쩡한 제품에 카드·버튼을 크게 띄우면 「이 제품에 문제가 있다」로 읽힌다.
               그래도 경로 자체는 있어야 한다: 우리가 아는 결손이 없다는 것이
               「정보가 정확하다」는 뜻은 아니기 때문이다(잘못된 값은 결손이 아니다). */}
-          {!result.web_label && completeness && completeness.complete && !reportOpen && !confirmed && (
+          {!isNoBarcodeItem(result) && completeness && completeness.complete && !reportOpen && !confirmed && (
             <>
               <button
                 type="button"

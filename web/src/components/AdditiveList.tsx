@@ -5,10 +5,10 @@ import {
   SHOW_RISK_GRADE, UNKNOWN_COLOR_NOTE,
   FUNCTION_LABEL, FUNCTION_CAVEAT, FUNCTION_MISSING_CAVEAT,
   EVIDENCE_TOGGLE_LABEL, EVIDENCE_SOURCE_NOTE, ADDITIVE_COUNT_CAVEAT,
-  describeUnlistedAdditives,
+  describeUnlistedAdditives, describeDerivedAdditiveCount, derivedInHeader,
 } from '../domain/meokseon/additives'
 import type { SignalView } from '../domain/meokseon/additiveSignal'
-import { SIGNAL_SECTION_NOTE, DERIVED_TITLE, DERIVED_NOTE, SIBLING_INGREDIENT_NOTE } from '../domain/meokseon/additiveSignal'
+import { SIGNAL_SECTION_NOTE, DERIVED_NOTE, SIBLING_INGREDIENT_NOTE } from '../domain/meokseon/additiveSignal'
 
 /**
  * 첨가물 개별 목록.
@@ -258,8 +258,11 @@ export default function AdditiveList({ view }: { view: AdditiveListView }) {
       {/* ★ 세션75j — 저장된 첨가물이 없을 때만 서버가 원재료에서 찾은 목록을 «따로» 보여준다 */}
       {view.derived && (
         <div data-testid="derived-additives" style={{ marginTop: view.items.length ? 'var(--space-3)' : 0 }}>
-          <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text)' }}>{DERIVED_TITLE} {view.derived.items.length}종</div>
-          <p style={{ ...NOTE, marginTop: 4 }}>{DERIVED_NOTE}</p>
+          {/* ★ 세션80 — 머리 문구가 이미 «원재료에서 찾은 첨가물 N개»면 소제목을 다시 내지 않는다(eval_additive_header_v1 R2) */}
+          {!derivedInHeader(view) && (
+            <div data-testid="derived-subtitle" style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text)' }}>{describeDerivedAdditiveCount(view.derived.items.length)}</div>
+          )}
+          <p style={{ ...NOTE, marginTop: derivedInHeader(view) ? 0 : 4 }}>{DERIVED_NOTE}</p>
           {view.derived.source === 'sibling' && <p style={{ ...NOTE, marginTop: 2 }}>{SIBLING_INGREDIENT_NOTE}</p>}
           <ul style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', listStyle: 'none', margin: 'var(--space-2) 0 0', padding: 0 }}>
             {view.derived.items.map((it) => <PlainItem key={it.key} item={it} />)}

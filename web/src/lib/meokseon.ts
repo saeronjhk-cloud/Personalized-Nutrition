@@ -145,6 +145,55 @@ export interface MsProductResult {
   web_label?: MsWebLabelBlock | null
   /** ★ 세션79 U78-3 — 바코드 조회에서 «빈 축»만 판매처 라벨로 보충(없으면 null · 구버전 서버는 키 없음). allergens·traffic_light 키는 건드리지 않는다. */
   web_label_supplements?: MsWebLabelSupplements | null
+  /** ★ 세션80 결정 80-1 — 식약처 K-FIND 품목(GET /api/products/kfind/:foodCd)일 때만 온다. 문구 정본 = 서버 productService.KFIND_*. */
+  kfind?: MsKfindBlock | null
+}
+
+/** ★ 세션80 — K-FIND(식약처 식품영양성분 DB) 품목 블록. 바코드·원재료·알레르기 없음. */
+export interface MsKfindBlock {
+  source: 'kfind'
+  food_cd: string
+  badge: string
+  warning: string
+  source_label: string
+  release_label: string | null
+  is_imported: boolean
+  origin_country: string | null
+  importer: string | null
+  maker: string | null
+  report_no: string | null
+  basis: 'per_100g' | 'per_100ml' | null
+  food_weight: string | null
+  serving_ref: string | null
+  nutrition_ok: boolean | null
+}
+
+/** ★ 세션80 R8 — 판매처 품목 영양이 비었을 때 같은 품목보고번호 K-FIND 값(후보 정확히 1개일 때만 · 신호등 미사용). */
+export interface MsKfindSupplement {
+  badge: string
+  source_label: string
+  release_label: string | null
+  food_cd: string
+  nutrition: Partial<Record<'calories' | 'total_fat' | 'saturated_fat' | 'trans_fat' | 'cholesterol' | 'sodium' | 'total_carbs' | 'total_sugars' | 'dietary_fiber' | 'protein', number | null>> & { basis: string | null }
+}
+
+/** ★ 세션80 — 이름 검색의 K-FIND 결과(바코드 없음 · food_cd 로 상세를 연다). */
+export interface MsKfindItem {
+  food_cd: string
+  barcode: null
+  source: 'kfind'
+  badge: string
+  product_name: string
+  manufacturer?: string | null
+  importer?: string | null
+  is_imported?: boolean
+  origin_country?: string | null
+  food_type?: string | null
+  basis?: string | null
+  food_weight?: string | null
+  calories?: number | null
+  nutrition_ok?: boolean | null
+  release_label?: string | null
 }
 
 export interface MsWebLabelBlock {
@@ -159,6 +208,8 @@ export interface MsWebLabelBlock {
   barcode_linked: boolean
   /** ★ 세션79(제이 23:05) — 포장지에 인쇄된 기준·숫자. 없으면 null(구버전 서버는 키 없음). */
   label_nutrition?: MsLabelNutrition | null
+  /** ★ 세션80 R8 — 영양이 비었을 때 K-FIND 보충(없으면 null · 구버전 서버는 키 없음) */
+  kfind_supplement?: MsKfindSupplement | null
 }
 
 /** 포장지 표시 그대로의 영양 기준 — basis per_serving(1회분)·per_total(총 내용량)·per_100g·per_100ml */
@@ -352,10 +403,19 @@ export async function searchProducts(q: string, limit = 20): Promise<MsSearchIte
 }
 
 /** ★ 세션79 U78-3 — 같은 검색 1회로 public 결과와 판매처 라벨 기반 결과(별도 키)를 함께 받는다. 구버전 서버면 web 은 []. */
-export async function searchProductsWithWeb(q: string, limit = 20): Promise<{ products: MsSearchItem[]; web: MsWebLabelItem[] }> {
+export async function searchProductsWithWeb(q: string, limit = 20): Promise<{ products: MsSearchItem[]; web: MsWebLabelItem[]; kfind: MsKfindItem[] }> {
   const data = await getJson(`/api/products/search?q=${encodeURIComponent(q)}&limit=${limit}`)
   const web = data && Array.isArray(data.web_label_products) ? (data.web_label_products as MsWebLabelItem[]) : []
-  return { products: (data && data.products) || [], web }
+  // ★ 세션80 — K-FIND 결과(별도 키 · 구버전 서버면 [])
+  const kfind = data && Array.isArray(data.kfind_products) ? (data.kfind_products as MsKfindItem[]) : []
+  return { products: (data && data.products) || [], web, kfind }
+}
+
+/** ★ 세션80 결정 80-1 — K-FIND 품목 상세(바코드 조회와 같은 모양 + kfind). 숨김·철회 품목은 404 → MeokseonNotFound. */
+export async function getKfindProduct(foodCd: string): Promise<MsProductResult> {
+  const data = (await getJson(`/api/products/kfind/${encodeURIComponent(foodCd)}`)) as MsProductResult
+  if (data) data.nutrition = normalizeNutrition(data.nutrition)
+  return data
 }
 
 /** ★ 세션79 U78-3 — 판매처 라벨 기반 품목 상세(바코드 조회와 같은 모양 + web_label). 숨김·검토 대기 품목은 404 → MeokseonNotFound. */

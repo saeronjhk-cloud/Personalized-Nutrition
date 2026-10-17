@@ -1,0 +1,26 @@
+{
+  "name": "eval_additive_header_v1 (H)",
+  "fixed_at": "2026-10-15 16:2x (세션80 · 구현 전 고정)",
+  "problem": "운영 «고기듬뿍일본식카레 150g»(web 306944): 카드 머리 «제품 표시사항에서 현재 인식한 첨가물 0개» 아래에 «원재료에서 찾은 첨가물 3종»이 함께 떠 모순처럼 읽힘. 바코드 제품 derived 경로도 같은 종전 동작(190 §10-1).",
+  "rule": [
+    "R1 저장된 첨가물(total)>0 → 머리 = describeAdditiveCount(total) 종전 그대로(안전 계약 A2 문구 무변경).",
+    "R2 total=0 이고 derived 목록 N(>0) → 머리 = «원재료에서 찾은 첨가물 N개». «현재 인식한 …0개»를 내지 않는다. 카드 안 소제목(DERIVED_TITLE) 중복 표시 안 함(DERIVED_NOTE·형제 출처 문구는 그대로).",
+    "R3 total=0 이고 derived 없음 → 종전 그대로(unlisted 경고·«등록된 첨가물 정보가 없어요» 경로 무변경).",
+    "R4 total>0 인데 derived 도 있음(방어) → 머리 R1 · 소제목은 보임.",
+    "R5 개수 단위는 «개»(A2·U65-2 단위 통일) — derived 소제목의 «종»도 «개»로."
+  ],
+  "cases": [
+    {"id":"H01","summary":{"additives":[{"name_ko":"아스파탐"}],"risk_summary":{"total":1}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 1개","derived_subtitle":null}},
+    {"id":"H02","summary":{"additives":[{"name_ko":"a"},{"name_ko":"b"},{"name_ko":"c"},{"name_ko":"d"},{"name_ko":"e"},{"name_ko":"f"},{"name_ko":"g"}],"risk_summary":{"total":7}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 7개","derived_subtitle":null}},
+    {"id":"H03","note":"운영 306944 재현","summary":{"additives":[],"risk_summary":{"total":0},"derived_additives":{"source":"own","items":[{"name_ko":"변성전분"},{"name_ko":"분말셀룰로스"},{"name_ko":"L-글루탐산나트륨"}]}},"expect":{"header":"원재료에서 찾은 첨가물 3개","header_not_contains":["현재 인식한","0개"],"derived_subtitle":null}},
+    {"id":"H04","note":"형제 바코드 원재료","summary":{"additives":[],"risk_summary":{"total":0},"derived_additives":{"source":"sibling","items":[{"name_ko":"소르빈산칼륨"}]}},"expect":{"header":"원재료에서 찾은 첨가물 1개","derived_subtitle":null,"sibling_note":true}},
+    {"id":"H05","note":"derived + unlisted 공존","summary":{"additives":[],"risk_summary":{"total":0,"detected_total":2,"unlisted":2},"derived_additives":{"source":"own","items":[{"name_ko":"변성전분"},{"name_ko":"구연산"},{"name_ko":"카라기난"}]}},"expect":{"header":"원재료에서 찾은 첨가물 3개","derived_subtitle":null,"unlisted":2}},
+    {"id":"H06","note":"100% 소실 · derived 없음 → 종전","summary":{"additives":[],"risk_summary":{"total":0,"detected_total":11,"unlisted":11}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 0개","derived_subtitle":null,"unlisted":11}},
+    {"id":"H07","note":"아무것도 없음 → 종전","summary":{"additives":[],"risk_summary":{"total":0}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 0개","derived_subtitle":null}},
+    {"id":"H08","note":"derived 빈 목록 = 없음(readDerived null)","summary":{"additives":[],"risk_summary":{"total":0},"derived_additives":{"source":"own","items":[]}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 0개","derived_subtitle":null}},
+    {"id":"H09","note":"방어 R4","summary":{"additives":[{"name_ko":"아스파탐"},{"name_ko":"구연산"}],"risk_summary":{"total":2},"derived_additives":{"source":"own","items":[{"name_ko":"변성전분"},{"name_ko":"카라기난"},{"name_ko":"구연산나트륨"}]}},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 2개","derived_subtitle":"원재료에서 찾은 첨가물 3개"}},
+    {"id":"H10","note":"derived 모양 깨짐 → 없음","summary":{"additives":[],"risk_summary":{"total":0},"derived_additives":"oops"},"expect":{"header":"제품 표시사항에서 현재 인식한 첨가물 0개","derived_subtitle":null}},
+    {"id":"H11","note":"risk_summary 없음(옛 응답) · derived 2","summary":{"additives":[],"derived_additives":{"source":null,"items":[{"name_ko":"변성전분"},{"name_ko":"구연산"}]}},"expect":{"header":"원재료에서 찾은 첨가물 2개","derived_subtitle":null}},
+    {"id":"H12","note":"단위 «종» 금지(모든 케이스 공통)","check":"header·derived_subtitle 어디에도 «종» 없음"}
+  ]
+}

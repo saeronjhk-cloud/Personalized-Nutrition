@@ -255,6 +255,32 @@ export function describeAdditiveCount(n: number): string {
   return `제품 표시사항에서 현재 인식한 첨가물 ${n}개`
 }
 
+/**
+ * ★ 세션80(190 §10-1) — 원재료 원문에서 찾은 첨가물 개수 문구. 단위는 A2·U65-2 와 같은 «개».
+ *   정답: backends/먹선/IP/eval_additive_header_v1/cases_v1.json (R5)
+ */
+export function describeDerivedAdditiveCount(n: number): string {
+  return `원재료에서 찾은 첨가물 ${n}개`
+}
+
+/**
+ * ★ 세션80 — 머리 문구가 이미 «원재료에서 찾은 첨가물 N개»를 말하는가.
+ *   (저장된 첨가물 0개 + 원재료 검출 있음) 이면 true → 카드 안 소제목을 다시 내지 않는다(R2).
+ */
+export function derivedInHeader(view: Pick<AdditiveListView, 'total' | 'derived'>): boolean {
+  return view.total === 0 && !!view.derived && view.derived.items.length > 0
+}
+
+/**
+ * ★ 세션80(190 §10-1) — 첨가물 카드 머리 문구(등급 표시 OFF 화면).
+ *   종전에는 저장 0개 + 원재료 검출 3개인 제품이 «…현재 인식한 첨가물 0개» 아래에
+ *   «원재료에서 찾은 첨가물 3종»을 함께 띄워 스스로 모순처럼 읽혔다(운영 web 306944).
+ *   R1 저장 >0 → describeAdditiveCount 그대로(A2 문구 무변경) · R2 저장 0 + 검출 N → 검출 문구 · R3 그 밖 → 종전.
+ */
+export function describeAdditiveHeader(view: Pick<AdditiveListView, 'total' | 'derived'>): string {
+  return derivedInHeader(view) ? describeDerivedAdditiveCount(view.derived!.items.length) : describeAdditiveCount(view.total)
+}
+
 /** A2 각주 — 왜 「N개」가 전부가 아닌가. 위 33.3% 실측이 근거다. */
 export const ADDITIVE_COUNT_CAVEAT =
   '라벨에 적혀 있어도 아직 대조표에 없는 첨가물은 이 목록에 나오지 않아요. 여기 보이는 것이 전부가 아닐 수 있어요.'
