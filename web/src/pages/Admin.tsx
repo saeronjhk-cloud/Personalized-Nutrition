@@ -15,7 +15,9 @@ import {
   listPhotos, fetchPhotoUrl, overrideReview, initialEdit, buildOverrideValues,
   ALLERGENS_19, NUTRIENT_KEYS, type AdminPhoto, type AllergenMark,
   BASIS_OPTIONS, BASIS_UNITS, EMPTY_BASIS_FORM, buildBasisBody, submitBasis, isHeld, type BasisForm,
+  KFB_TAB,
 } from '../lib/meokseonAdmin'
+import KfindBarcodeQueue from '../components/KfindBarcodeQueue'   // ★ 세션81c
 
 const NUT_LABEL: Record<string, string> = {
   calories: '열량(kcal)', sodium: '나트륨(mg)', total_carbs: '탄수화물(g)', total_sugars: '당류(g)', total_fat: '지방(g)',
@@ -199,8 +201,8 @@ function BasisEditor({ a, busy, onSave }: {
   )
 }
 
-type Tab = 'pending' | 'auto'
-const TAB_STATUS: Record<Tab, string[]> = { pending: ['candidate', 'approved'], auto: ['auto_applied'] }
+type Tab = 'pending' | 'auto' | 'barcode'   // ★ 세션81c — barcode = 바코드 연결 확인(제보 목록을 쓰지 않는다)
+const TAB_STATUS: Record<Tab, string[]> = { pending: ['candidate', 'approved'], auto: ['auto_applied'], barcode: [] }
 
 export default function Admin() {
   const navigate = useNavigate()
@@ -226,7 +228,7 @@ export default function Admin() {
     setMsg(null)
     try { setData(await listReviewQueue(TAB_STATUS[t])) } catch (e: any) { setMsg(e?.message || '목록을 불러오지 못했어요.') }
   }
-  useEffect(() => { if (gate === 'ok') { setOpen(null); setDetail(null); load(tab) } }, [gate, tab]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (gate === 'ok' && tab !== 'barcode') { setOpen(null); setDetail(null); load(tab) } }, [gate, tab]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function toggle(pid: number) {
     if (open === pid) { setOpen(null); setDetail(null); return }
@@ -286,10 +288,10 @@ export default function Admin() {
         <h2 className="survey-step-title">관리자 · 제보 검토</h2>
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{email} · 대기 {totals.candidate ?? '-'} · 보류 {totals.held ?? '-'} · 자동반영 {totals.auto_applied ?? '-'}</p>
         <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
-          {(['pending', 'auto'] as Tab[]).map((t) => (
+          {(['pending', 'auto', 'barcode'] as Tab[]).map((t) => (
             <button key={t} type="button" className={tab === t ? 'btn btn-primary' : 'btn btn-secondary'}
               style={{ width: 'auto', padding: 'var(--space-2) var(--space-4)', whiteSpace: 'nowrap' }}
-              onClick={() => setTab(t)}>{t === 'pending' ? '검토 대기' : '알레르기 자동반영'}</button>
+              onClick={() => setTab(t)}>{t === 'pending' ? '검토 대기' : t === 'auto' ? '알레르기 자동반영' : KFB_TAB}</button>
           ))}
         </div>
         {msg && <p style={{ fontSize: 13, marginTop: 'var(--space-2)' }} data-testid="admin-msg">{msg}</p>}
@@ -299,8 +301,9 @@ export default function Admin() {
         </a>
       </div>
 
-      {items.length === 0 && <div className="survey-card"><p style={{ fontSize: 14 }}>비어 있어요.</p></div>}
-      {items.map((it) => (
+      {tab === 'barcode' && <KfindBarcodeQueue />}
+      {tab !== 'barcode' && items.length === 0 && <div className="survey-card"><p style={{ fontSize: 14 }}>비어 있어요.</p></div>}
+      {tab !== 'barcode' && items.map((it) => (
         <div key={it.product_id} className="survey-card" style={{ marginBottom: 'var(--space-2)' }}>
           <button type="button" onClick={() => toggle(it.product_id)}
             style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', width: '100%', cursor: 'pointer' }}>

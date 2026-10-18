@@ -242,3 +242,39 @@ export function describeProposed(axis: string, p: any): string[] {
   }
   return [JSON.stringify(p)]
 }
+
+/* ── ★ 세션81c — 바코드 연결 확인 큐(kfind.product_barcodes needs_review · HACCP + 사용자 연결)
+ *   정답 backends/먹선/IP/eval_kfind_barcode_review_v1/cases_v1.json «wording» = __tests__/fixtures/kfind_barcode_review_v1.json */
+export const KFB_TAB = '바코드 연결 확인'
+export const KFB_APPROVE = '이 연결 승인'
+export const KFB_REJECT = '반려'
+export const KFB_REOPEN = '되돌리기'
+const KFB_REASON_KO: Record<string, string> = {
+  conflict_public: '공공 제품에 이미 있는 바코드', conflict_linked: '다른 품목에 이미 연결된 바코드', conflict_user: '사용자마다 다른 제품으로 연결',
+  user_pair_unverified: '사용자 2명 · 업체 바코드 대역 확인 안 됨', maker_only: '제조사만 같음(이름 다름)', identity: '이름·제조사 모두 다름',
+  multi_kfind: '같은 품목보고번호에 품목 여러 개', multi: '후보 여러 개', size_mismatch: '용량 다름', sibling_approved: '같은 바코드의 다른 품목을 승인함',
+}
+const KFB_SOURCE_KO: Record<string, string> = { haccp: 'HACCP 공공자료', user: '사용자 연결' }
+export const kfbReasonKo = (r: string | null | undefined) => (r ? KFB_REASON_KO[r] ?? r : '-')
+export const kfbSourceKo = (s: string) => KFB_SOURCE_KO[s] ?? s
+/** 서버 409 코드 → 관리자에게 보일 문장(그 밖은 null → 서버 메시지). */
+export function kfbBlockedText(code: string | null | undefined): string | null {
+  if (code === 'PUBLIC_EXISTS') return '공공 제품에 이미 있는 바코드라 승인할 수 없어요(스캔하면 공공 제품이 먼저 나와요).'
+  if (code === 'LINKED_ELSEWHERE') return '판매처 품목에 이미 연결된 바코드라 승인할 수 없어요.'
+  return null
+}
+export interface KfbItem {
+  barcode: string; food_cd: string; status: string; reason: string | null; batch_id: string | null; source: 'haccp' | 'user'
+  kfind: { name: string; maker: string | null; importer: string | null; report_no: string | null; calories: number | null; basis: string | null }
+  evidence: any; public_product: { product_id: number; product_name: string } | null
+  siblings: Array<{ food_cd: string; name: string; status: string }>; users: number; decided_by: string | null; decided_at: string | null
+}
+export async function listKfindBarcodes(status: 'needs_review' | 'approved' | 'rejected' = 'needs_review', reason?: string | null): Promise<{ total: number; by_reason: Record<string, number>; items: KfbItem[] }> {
+  const q = new URLSearchParams({ status, limit: '100' }); if (reason) q.set('reason', reason)
+  const b = await adminFetch(`/review/kfind-barcodes?${q}`)
+  return b?.data ?? b
+}
+export async function decideKfindBarcode(barcode: string, foodCd: string, action: 'approve' | 'reject' | 'reopen'): Promise<{ changed: boolean; status: string; siblings_changed: number }> {
+  const b = await adminFetch('/review/kfind-barcodes', { method: 'POST', body: JSON.stringify({ barcode, food_cd: foodCd, action }) })
+  return b?.data ?? b
+}
