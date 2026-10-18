@@ -32,3 +32,25 @@ export function linkOutcome(r: { verdict: LinkVerdict | string; reason?: string 
       return { tone: 'error', text: LINK_ERROR_NETWORK }
   }
 }
+
+/* ── ★ 세션81b — K-FIND 상세에서 «바코드 찍어서 연결» (정답 web_rules WS · WP) ── */
+export const SCAN_LINK_BUTTON = '이 제품 바코드를 찍어 연결하기'
+export const SCAN_LINK_HINT = '포장 뒷면 바코드를 찍으면, 다음부터 그 바코드로 이 제품이 바로 나와요.'
+export const MANUAL_LABEL = '카메라를 쓸 수 없으면 바코드 숫자를 입력해 주세요'
+export const MANUAL_BUTTON = '이 숫자로 연결 준비'
+export const BAD_BARCODE = '바코드 숫자가 올바르지 않아요. 다시 찍어 주세요.'
+
+/** 버튼을 보일지 — K-FIND 품목이고, 바코드로 연 것도·본인 연결도 아니고, 연결 대기 중도 아닐 때. */
+export function canOfferScanLink(s: { kfind: boolean; barcode_linked: boolean; linkFor: string | null; myLinked: boolean }): boolean {
+  return s.kfind && !s.barcode_linked && !s.linkFor && !s.myLinked
+}
+
+/** 서버 userBarcodeGate.normalizeBarcode + 체크섬과 같은 규칙: 숫자만 · 12자리(UPC-A)는 앞에 0 · 8/13자리 + 체크숫자 OK 만. */
+export function parseLinkBarcode(raw: string): string | null {
+  let s = String(raw ?? '').replace(/\D/g, '')
+  if (s.length === 12) s = '0' + s
+  if (!/^(\d{8}|\d{13})$/.test(s)) return null
+  const d = s.split('').map(Number); const n = d.length; let t = 0
+  for (let i = 0; i < n - 1; i++) t += d[i] * (((n - 1 - i) % 2 === 1) ? 3 : 1)
+  return (10 - (t % 10)) % 10 === d[n - 1] ? s : null
+}

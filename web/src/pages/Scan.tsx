@@ -32,7 +32,7 @@ import {
 import { webLabelNotice, supplementView, labelNutritionView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
 import { kfindNotice, kfindSupplementView, isNoBarcodeItem, KFIND_NUTRITION_OFF_NOTE, KFIND_RESULTS_TITLE } from '../domain/meokseon/kfind'   // 세션80 결정 80-1
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
-import { linkOutcome, linkConfirmTitle, LINK_OFFER_BUTTON, LINK_OFFER_HINT, LINK_CONFIRM_BODY, LINK_CONFIRM_BUTTON, LINK_CANCEL_BUTTON, MY_LINK_NOTE, LINK_ERROR_LIMIT, LINK_ERROR_NETWORK, type LinkOutcome } from '../domain/meokseon/barcodeLink'   // ★ 세션81 결정 80-9
+import { canOfferScanLink, parseLinkBarcode, SCAN_LINK_BUTTON, SCAN_LINK_HINT, MANUAL_LABEL, MANUAL_BUTTON, BAD_BARCODE, linkOutcome, linkConfirmTitle, LINK_OFFER_BUTTON, LINK_OFFER_HINT, LINK_CONFIRM_BODY, LINK_CONFIRM_BUTTON, LINK_CANCEL_BUTTON, MY_LINK_NOTE, LINK_ERROR_LIMIT, LINK_ERROR_NETWORK, type LinkOutcome } from '../domain/meokseon/barcodeLink'   // ★ 세션81 결정 80-9
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
   seedProductNameForExisting, canSubmitReport, checkProductName, classifyConfirmFailure, describeReadback,
@@ -150,6 +150,10 @@ export default function Scan() {
   const [linkBusy, setLinkBusy] = useState(false)
   const [linkMsg, setLinkMsg] = useState<LinkOutcome | null>(null)
   const [myLinked, setMyLinked] = useState(false)   // 결과가 «회원님이 연결한 제품»(본인 연결 조회로 나온 것)인가
+  // ★ 세션81b — 카메라를 «연결 모드»로 열었는가(감지한 바코드를 조회하지 않고 linkFor 로). ref 인 이유: 감지 루프가 마지막 렌더 값을 본다.
+  const scanModeRef = useRef<'lookup' | 'link'>('lookup')
+  const [manualOpen, setManualOpen] = useState(false)
+  const [manualBarcode, setManualBarcode] = useState('')
   // 사진 제보 — ★ 세션64: **두 단계**다(읽어보기 → 제품명 확인 → 보내기).
   //   1단계는 저장하지 않는다. 저장은 사용자가 제품명을 확정한 뒤에만 일어난다.
   //   근거·문구·판정은 전부 domain/meokseon/photoReport.ts. 여기서 다시 판단하지 않는다.
@@ -304,7 +308,7 @@ export default function Scan() {
     setReportBusy(null); setReportError(null)
     setAnalysis(null); setProductName(''); setConfirmed(null); setNotifyResult(false)   // 세션75f — 다음 제보는 다시 «꺼짐»에서
     setLoginGateOpen(false); setAuthBlocked(false)
-    setLinkMsg(null); setMyLinked(false)   // ★ 세션81 — linkFor 는 지우지 않는다(검색 → 품목 열기 동안 이어져야 한다)
+    setLinkMsg(null); setMyLinked(false); setManualOpen(false); setManualBarcode('')   // ★ 세션81 — linkFor 는 지우지 않는다(검색 → 품목 열기 동안 이어져야 한다)
   }
 
   /* ────────────────────────────────────────────────────────────────────────
@@ -519,6 +523,12 @@ export default function Scan() {
         if (codes && codes.length && codes[0]?.rawValue) {
           const val = String(codes[0].rawValue).replace(/\D/g, '')
           stopScan()
+          if (scanModeRef.current === 'link') {   // ★ 세션81b — 열어 둔 K-FIND 품목과 이을 바코드(조회하지 않는다)
+            scanModeRef.current = 'lookup'
+            const bc = parseLinkBarcode(val)
+            if (bc) { setLinkFor(bc); setLinkMsg(null) } else setLinkMsg({ tone: 'error', text: BAD_BARCODE })
+            return
+          }
           if (/^\d{8,14}$/.test(val)) { track('scan_barcode_detected'); lookupBarcode(val) }
           else setError('바코드를 읽지 못했어요. 다시 시도하거나 이름으로 검색해 주세요.')
           return
@@ -531,7 +541,22 @@ export default function Scan() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanning])
 
+  /** ★ 세션81b — 열린 K-FIND 품목을 유지한 채 카메라만 연다(reset 안 함). 카메라가 없으면 숫자 입력 칸. */
+  async function startLinkScan() {
+    setLinkMsg(null)
+    if (!scanSupported()) { setManualOpen(true); return }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      scanModeRef.current = 'link'
+      setScanning(true)
+    } catch {
+      stopScan(); scanModeRef.current = 'lookup'; setManualOpen(true)
+    }
+  }
+
   async function startScan() {
+    scanModeRef.current = 'lookup'
     reset()
     track('scan_camera_start')
     if (!scanSupported()) {
@@ -1391,6 +1416,22 @@ export default function Scan() {
               <button type="button" className="btn btn-primary" disabled={linkBusy} onClick={confirmLink}>{LINK_CONFIRM_BUTTON}</button>
               <button type="button" className="btn btn-secondary" style={{ marginLeft: 'var(--space-2)' }} disabled={linkBusy} onClick={() => { setLinkFor(null); setLinkMsg(null) }}>{LINK_CANCEL_BUTTON}</button>
               {loginGateOpen && renderLoginGate()}
+            </div>
+          )}
+          {/* ★ 세션81b — K-FIND 상세에서 바로 «바코드 찍어서 연결» (카메라 없으면 숫자 입력) */}
+          {canOfferScanLink({ kfind: !!result.kfind, barcode_linked: !!result.kfind?.barcode_linked, linkFor, myLinked }) && (
+            <div className="survey-card" data-testid="scan-link" style={{ marginBottom: 'var(--space-4)' }}>
+              <button type="button" className="btn btn-secondary" style={{ width: '100%' }} onClick={startLinkScan}>📷 {SCAN_LINK_BUTTON}</button>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 'var(--space-2) 0 0' }}>{SCAN_LINK_HINT}</p>
+              {manualOpen && (
+                <form data-testid="scan-link-manual" style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}
+                  onSubmit={(e) => { e.preventDefault(); const bc = parseLinkBarcode(manualBarcode); if (bc) { setLinkFor(bc); setLinkMsg(null); setManualOpen(false); setManualBarcode('') } else setLinkMsg({ tone: 'error', text: BAD_BARCODE }) }}>
+                  <label style={{ fontSize: 12, color: 'var(--text-secondary)', width: '100%' }}>{MANUAL_LABEL}</label>
+                  <input inputMode="numeric" value={manualBarcode} onChange={(e) => setManualBarcode(e.target.value)} placeholder="8801234567890"
+                    style={{ flex: 1, minWidth: 0, padding: 'var(--space-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                  <button type="submit" className="btn btn-primary">{MANUAL_BUTTON}</button>
+                </form>
+              )}
             </div>
           )}
           {linkMsg && (
