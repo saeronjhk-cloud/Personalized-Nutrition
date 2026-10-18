@@ -21,6 +21,10 @@ export interface SurveyAnswers {
   현재복용영양제: string[];
   기저질환: string[];
   복용약물?: string;
+  /** 약 복용 유무(영양제 점검 v1.2 · 서박사 P2) */
+  복용약있음?: "있음" | "없음";
+  /** 철분을 진단·의사·약사 권고로 복용하는지(철분 선택 시만 · 서박사 P3) */
+  철분권고?: "예" | "아니오";
   가족력: string[];
   음식상세?: Record<string, string>;
   혈액검사?: Record<string, number>;

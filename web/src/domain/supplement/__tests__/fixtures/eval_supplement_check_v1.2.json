@@ -1,0 +1,36 @@
+{
+  "name": "supplement_check",
+  "version": "1.2",
+  "date": "2026-10-17",
+  "status": "확정 — 서박사 P1~P4 전부 «예»(2026-10-17 23:00)",
+  "source_spec": "IP/웹앱트랙_서박사_최종확인_영양제점검_v1.2_20261017.md",
+  "id_map": { "R3": "IRON", "R7": "MEDS", "R2": "GAP", "R1": "MULTI", "R5": "MANY" },
+  "notes": [
+    "입력은 실제 SurveyAnswers 필드명. 폐경 = 기존 월경상태 «폐경»(P1 문항은 기존 월경 상태 문항으로 갈음 — 중복 문항 신설 안 함).",
+    "채식·과다월경·위장관 질환·잦은 헌혈 제외는 설문에 문항이 없어 v1.2 범위 밖(승인 조건 «설문에 있을 때»).",
+    "v1(472d7fc) 대비 뒤집힌 기대: 여성 월경 미응답 55세 IRON → 없음(E12)."
+  ],
+  "base": { "성별": "female", "나이": 30, "신장": 160, "체중": 55, "체중변화": "", "증상": [], "목표": [], "현재복용영양제": [], "기저질환": [], "가족력": [] },
+  "cases": [
+    {"id": "E01", "note": "MULTI 단일 · 조사 «가»", "input": {"성별": "male", "나이": 45, "현재복용영양제": ["multivitamin", "vitamin_d"]}, "candidates": ["MULTI"], "shown": ["MULTI"], "text": {"MULTI": "종합비타민에도 비타민D가 들어 있을 수 있어요. 제품 라벨에서 해당 성분의 1일 섭취량을 더해 확인해 보세요."}},
+    {"id": "E02", "note": "MULTI 대상 3종 — 비타민C·마그네슘만이면 없음", "input": {"월경상태": "정상", "현재복용영양제": ["multivitamin", "vitamin_c", "magnesium"]}, "candidates": [], "shown": []},
+    {"id": "E03", "note": "GAP · 폐경 전 여성 IRON 미적용", "input": {"나이": 35, "월경상태": "정상", "현재복용영양제": ["iron", "calcium"]}, "candidates": ["GAP"], "shown": ["GAP"], "text": {"GAP": "철분과 칼슘은 함께 드시면 철분 흡수에 영향을 줄 수 있어요. 두 제품은 서로 다른 시간대에 드세요."}},
+    {"id": "E04", "note": "IRON 기본(남성)", "input": {"성별": "male", "나이": 50, "현재복용영양제": ["iron"]}, "candidates": ["IRON"], "shown": ["IRON"], "text": {"IRON": "철분은 필요한 경우가 정해져 있어요. 드시는 이유를 의사·약사와 한번 확인해 보세요."}},
+    {"id": "E05", "note": "IRON 제외: 진단·권고 복용(P3 «예»)", "input": {"성별": "male", "나이": 50, "현재복용영양제": ["iron"], "철분권고": "예"}, "candidates": [], "shown": []},
+    {"id": "E06", "note": "IRON 미적용: 월경 불규칙 58세", "input": {"나이": 58, "월경상태": "불규칙", "현재복용영양제": ["iron"]}, "candidates": [], "shown": []},
+    {"id": "E07", "note": "IRON 제외: 철분 연결 증상", "input": {"성별": "male", "나이": 60, "현재복용영양제": ["iron"], "증상": ["chronic_fatigue"]}, "candidates": [], "shown": []},
+    {"id": "E08", "note": "임산부·수유부: IRON 없음, MULTI «철분이»", "input": {"나이": 32, "월경상태": "정상", "기저질환": ["임산부_수유부"], "현재복용영양제": ["multivitamin", "iron"]}, "candidates": ["MULTI"], "shown": ["MULTI"], "text": {"MULTI": "종합비타민에도 철분이 들어 있을 수 있어요. 제품 라벨에서 해당 성분의 1일 섭취량을 더해 확인해 보세요."}},
+    {"id": "E09", "note": "IRON: P3 «아니오»면 그대로 표시", "input": {"성별": "male", "나이": 50, "현재복용영양제": ["iron"], "철분권고": "아니오"}, "candidates": ["IRON"], "shown": ["IRON"]},
+    {"id": "E10", "note": "IRON 폐경 여성", "input": {"나이": 58, "월경상태": "폐경", "현재복용영양제": ["iron"]}, "candidates": ["IRON"], "shown": ["IRON"]},
+    {"id": "E11", "note": "IRON 미적용: 58세여도 월경 정상", "input": {"나이": 58, "월경상태": "정상", "현재복용영양제": ["iron"]}, "candidates": [], "shown": []},
+    {"id": "E12", "note": "IRON 미적용: 월경 미응답 55세(나이 대리 기준 삭제 — v1 S11 뒤집힘)", "input": {"나이": 55, "현재복용영양제": ["iron"]}, "candidates": [], "shown": []},
+    {"id": "E13", "note": "IRON: 폐경 48세(나이 문턱 없음)", "input": {"나이": 48, "월경상태": "폐경", "현재복용영양제": ["iron"]}, "candidates": ["IRON"], "shown": ["IRON"]},
+    {"id": "E14", "note": "MEDS 단독 — 3종 한정 아님(루테인)", "input": {"성별": "male", "나이": 50, "복용약있음": "있음", "현재복용영양제": ["lutein"]}, "candidates": ["MEDS"], "shown": ["MEDS"], "text": {"MEDS": "드시는 약이 있으면 현재 복용 중인 영양제와 함께 드셔도 되는지 의사·약사에게 확인해 보세요."}},
+    {"id": "E15", "note": "MEDS 미발동: 약 있음 + 영양제 0개", "input": {"성별": "male", "나이": 50, "복용약있음": "있음"}, "candidates": [], "shown": []},
+    {"id": "E16", "note": "2줄 상한·순서: IRON,MEDS,GAP,MULTI 중 앞 2개", "input": {"성별": "male", "나이": 60, "복용약있음": "있음", "현재복용영양제": ["multivitamin", "iron", "calcium"]}, "candidates": ["IRON", "MEDS", "GAP", "MULTI"], "shown": ["IRON", "MEDS"], "text": {"MULTI": "종합비타민에도 칼슘·철분이 들어 있을 수 있어요. 제품 라벨에서 해당 성분의 1일 섭취량을 더해 확인해 보세요."}},
+    {"id": "E17", "note": "MULTI 복수 성분 + MANY(5)", "input": {"나이": 40, "월경상태": "정상", "현재복용영양제": ["multivitamin", "vitamin_d", "calcium", "omega3", "probiotics"]}, "candidates": ["MULTI", "MANY"], "shown": ["MULTI", "MANY"], "text": {"MULTI": "종합비타민에도 비타민D·칼슘이 들어 있을 수 있어요. 제품 라벨에서 해당 성분의 1일 섭취량을 더해 확인해 보세요.", "MANY": "지금 드시는 영양제가 5가지예요. 겹치는 성분이 없는지 한 번에 점검해 보세요."}},
+    {"id": "E18", "note": "MEDS: 유무 미응답 예전 기록 + 약 이름 있음", "input": {"성별": "male", "나이": 45, "복용약물": "혈압약", "현재복용영양제": ["omega3"]}, "candidates": ["MEDS"], "shown": ["MEDS"]},
+    {"id": "E19", "note": "MEDS + MANY(6가지 숫자 반영)", "input": {"성별": "male", "나이": 30, "복용약있음": "있음", "현재복용영양제": ["omega3", "probiotics", "lutein", "collagen", "vitamin_c", "coq10"]}, "candidates": ["MEDS", "MANY"], "shown": ["MEDS", "MANY"], "text": {"MANY": "지금 드시는 영양제가 6가지예요. 겹치는 성분이 없는지 한 번에 점검해 보세요."}},
+    {"id": "E20", "note": "철분+마그네슘은 GAP 아님 · 폐경 IRON", "input": {"나이": 62, "월경상태": "폐경", "현재복용영양제": ["iron", "magnesium"]}, "candidates": ["IRON"], "shown": ["IRON"]}
+  ]
+}

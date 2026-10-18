@@ -475,7 +475,8 @@ function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers
     setNoneSelected(false)
     const prev = new Set(answers.현재복용영양제)
     ids.forEach(id => prev.has(id) ? prev.delete(id) : prev.add(id))
-    onUpdate({ 현재복용영양제: [...prev] })
+    // 철분을 빼면 철분 복용 사유 응답도 지운다(영양제 점검 v1.2 P3)
+    onUpdate(prev.has('iron') ? { 현재복용영양제: [...prev] } : { 현재복용영양제: [...prev], 철분권고: undefined })
   }
 
   return (
@@ -497,8 +498,23 @@ function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers
         ))}
       </div>
 
+      {answers.현재복용영양제.includes('iron') && (
+        <div className="input-group" data-testid="iron-reason" style={{ marginTop: 'var(--space-4)' }}>
+          <label>철분은 진단이나 의사·약사 권고로 드시나요?</label>
+          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            {(['예', '아니오'] as const).map(v => (
+              <div key={v} className={`radio-card ${answers.철분권고 === v ? 'selected' : ''}`}
+                onClick={() => onUpdate({ 철분권고: v })} style={{ flex: 1 }}>
+                <div className="radio-dot" />
+                <span style={{ fontSize: 14 }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className={`check-card ${noneSelected ? 'selected' : ''}`}
-        onClick={() => { setNoneSelected(!noneSelected); onUpdate({ 현재복용영양제: [] }) }}
+        onClick={() => { setNoneSelected(!noneSelected); onUpdate({ 현재복용영양제: [], 철분권고: undefined }) }}
         style={{ marginTop: 'var(--space-3)' }}>
         <div className="check-icon">✓</div>
         <span className="check-text">❌ 현재 복용 중인 영양제 없음</span>
@@ -549,12 +565,27 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
         ))}
       </div>
 
-      <div className="input-group">
-        <label>현재 복용 약물 (선택사항)</label>
-        <input type="text" className="input-field" placeholder="예: 혈압약, 당뇨약, 갑상선약..."
-          value={answers.복용약물 || ''}
-          onChange={e => onUpdate({ 복용약물: e.target.value || undefined })} />
+      <div className="input-group" data-testid="meds-yn">
+        <label>지금 드시는 약(처방약·일반의약품)이 있나요?</label>
+        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+          {([['있음', '있어요'], ['없음', '없어요']] as const).map(([v, label]) => (
+            <div key={v} className={`radio-card ${answers.복용약있음 === v ? 'selected' : ''}`}
+              onClick={() => onUpdate(v === '없음' ? { 복용약있음: v, 복용약물: undefined } : { 복용약있음: v })} style={{ flex: 1 }}>
+              <div className="radio-dot" />
+              <span style={{ fontSize: 14 }}>{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {answers.복용약있음 === '있음' && (
+        <div className="input-group">
+          <label>드시는 약 이름 (선택사항)</label>
+          <input type="text" className="input-field" placeholder="예: 혈압약, 당뇨약, 갑상선약..."
+            value={answers.복용약물 || ''}
+            onChange={e => onUpdate({ 복용약물: e.target.value || undefined })} />
+        </div>
+      )}
 
       <button className="btn btn-accent" onClick={onSubmit} style={{ marginTop: 'var(--space-4)', fontSize: 18 }}>
         🔬 맞춤 분석 시작
