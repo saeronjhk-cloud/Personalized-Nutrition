@@ -6,6 +6,7 @@ import { GOAL_OPTIONS, surveySteps } from '../domain/goals/goals'
 import { SYMPTOM_GROUPS } from '../domain/survey/symptoms'
 import { BODY_LIMITS, bodyIssueText, bodyStepIssues } from '../domain/survey/body_input'
 import { SUPPLEMENT_CHECK_ENABLED } from '../lib/flags'
+import { CURRENT_SUPPLEMENT_OPTIONS } from '../domain/survey/supplement_options'
 
 interface Props {
   step: Step
@@ -457,20 +458,7 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
 /* ── Q9: 현재 영양제 ── */
 function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpdate: (p: Partial<SurveyAnswers>) => void; onNext: () => void }) {
   const [noneSelected, setNoneSelected] = useState(false)
-  const suppOptions = [
-    { label: '종합비타민', ids: ['multivitamin'] },
-    { label: '비타민D', ids: ['vitamin_d'] },
-    { label: '오메가3', ids: ['omega3'] },
-    { label: '유산균', ids: ['probiotics'] },
-    { label: '마그네슘', ids: ['magnesium'] },
-    { label: '비타민C', ids: ['vitamin_c'] },
-    { label: '칼슘', ids: ['calcium'] },
-    { label: '철분', ids: ['iron'] },
-    { label: '콜라겐', ids: ['collagen'] },
-    { label: '루테인', ids: ['lutein'] },
-    { label: '밀크시슬', ids: ['milk_thistle'] },
-    { label: '코엔자임Q10', ids: ['coq10'] },
-  ]
+  const suppOptions = CURRENT_SUPPLEMENT_OPTIONS
 
   const toggle = (ids: string[]) => {
     setNoneSelected(false)

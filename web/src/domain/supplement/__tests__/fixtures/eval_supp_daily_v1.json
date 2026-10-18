@@ -1,0 +1,222 @@
+{
+ "name": "supp_daily",
+ "version": "1.0",
+ "date": "2026-10-18",
+ "spec": "IP/integration/supplement_daily_v1/00_설계·평가셋_v1.md",
+ "items_cases": [
+  {
+   "id": "D01",
+   "answers": null,
+   "items": []
+  },
+  {
+   "id": "D02",
+   "answers": {
+    "현재복용영양제": []
+   },
+   "items": []
+  },
+  {
+   "id": "D03",
+   "answers": {
+    "현재복용영양제": [
+     "omega3",
+     "vitamin_d"
+    ]
+   },
+   "items": [
+    "vitamin_d",
+    "omega3"
+   ],
+   "labels": [
+    "비타민D",
+    "오메가3"
+   ]
+  },
+  {
+   "id": "D04",
+   "answers": {
+    "현재복용영양제": [
+     "lutein",
+     "unknown_x"
+    ]
+   },
+   "items": [
+    "lutein"
+   ]
+  }
+ ],
+ "store_cases": [
+  {
+   "id": "D05",
+   "items": [
+    "omega3"
+   ],
+   "store": {},
+   "today": "2026-10-18",
+   "toggle": [
+    "omega3"
+   ],
+   "checked": [
+    "omega3"
+   ]
+  },
+  {
+   "id": "D06",
+   "items": [
+    "omega3"
+   ],
+   "store": {},
+   "today": "2026-10-18",
+   "toggle": [
+    "omega3",
+    "omega3"
+   ],
+   "checked": []
+  },
+  {
+   "id": "D07",
+   "items": [
+    "omega3",
+    "lutein"
+   ],
+   "store": {
+    "2026-10-18": [
+     "omega3"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": false,
+   "streak": 0,
+   "text": null
+  },
+  {
+   "id": "D08",
+   "items": [
+    "omega3",
+    "lutein"
+   ],
+   "store": {
+    "2026-10-18": [
+     "omega3",
+     "lutein"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": true,
+   "streak": 1,
+   "text": "오늘 영양제를 모두 챙기셨어요."
+  },
+  {
+   "id": "D09",
+   "items": [
+    "omega3"
+   ],
+   "store": {
+    "2026-10-16": [
+     "omega3"
+    ],
+    "2026-10-17": [
+     "omega3"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": false,
+   "streak": 2,
+   "streakText": "2일째 모두 챙기는 중"
+  },
+  {
+   "id": "D10",
+   "items": [
+    "omega3"
+   ],
+   "store": {
+    "2026-10-16": [
+     "omega3"
+    ],
+    "2026-10-17": [
+     "omega3"
+    ],
+    "2026-10-18": [
+     "omega3"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": true,
+   "streak": 3,
+   "streakText": "3일째 모두 챙기는 중"
+  },
+  {
+   "id": "D11",
+   "items": [
+    "omega3"
+   ],
+   "store": {
+    "2026-10-16": [
+     "omega3"
+    ],
+    "2026-10-18": [
+     "omega3"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": true,
+   "streak": 1,
+   "streakText": null
+  },
+  {
+   "id": "D12",
+   "items": [
+    "omega3",
+    "lutein"
+   ],
+   "store": {
+    "2026-10-17": [
+     "omega3"
+    ],
+    "2026-10-18": [
+     "omega3",
+     "lutein"
+    ]
+   },
+   "today": "2026-10-18",
+   "done": true,
+   "streak": 1,
+   "streakText": null
+  },
+  {
+   "id": "D14",
+   "items": [
+    "omega3"
+   ],
+   "store": {
+    "2026-08-18": [
+     "omega3"
+    ],
+    "2026-08-19": [
+     "omega3"
+    ],
+    "2026-10-18": [
+     "omega3"
+    ]
+   },
+   "today": "2026-10-18",
+   "afterPrune": [
+    "2026-08-19",
+    "2026-10-18"
+   ]
+  }
+ ],
+ "date_cases": [
+  {
+   "id": "D13a",
+   "utc": "2026-10-18T14:59:00Z",
+   "kst": "2026-10-18"
+  },
+  {
+   "id": "D13b",
+   "utc": "2026-10-18T15:00:00Z",
+   "kst": "2026-10-19"
+  }
+ ]
+}

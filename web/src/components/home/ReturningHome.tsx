@@ -3,7 +3,8 @@
  * 판정: domain/home/home_mode.ts (todaySlots·todayCard·greeting) · 평가 IP/integration/home_redesign_v1_design.md §2-3·H07~H09·H14
  */
 import { Link } from 'react-router-dom'
-import { MEAL_ENABLED, MEAL_GRAMMAR_ENABLED, GOAL_COACHING_ENABLED, CHECKUP_ENABLED } from '../../lib/flags'
+import SuppDaily from './SuppDaily'
+import { MEAL_ENABLED, MEAL_GRAMMAR_ENABLED, GOAL_COACHING_ENABLED, CHECKUP_ENABLED, SUPP_DAILY_ENABLED } from '../../lib/flags'
 import { todaySlots, todayCards, greeting } from '../../domain/home/home_mode'
 import CoachCards from '../CoachCards'
 import { recheckPrompt } from '../../domain/checkup/recheck_prompt'
@@ -46,6 +47,8 @@ export default function ReturningHome({ todayRows, latestCheckupDate = null }: {
           </Link>
         </div>
       )}
+
+      {SUPP_DAILY_ENABLED && <SuppDaily />}
 
       {cards.length > 0 && (
         <div className="returning-home__one" aria-label="오늘의 한 가지">

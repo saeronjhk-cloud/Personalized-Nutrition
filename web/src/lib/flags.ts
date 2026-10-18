@@ -97,3 +97,10 @@ export const CHECKUP_OCR_ENABLED = import.meta.env.VITE_CHECKUP_OCR === 'true'
  *   - 활성화: VITE_SUPPLEMENT_CHECK=true
  */
 export const SUPPLEMENT_CHECK_ENABLED = import.meta.env.VITE_SUPPLEMENT_CHECK === 'true'
+
+/**
+ * SUPP_DAILY_ENABLED: 재방문 홈 «💊 오늘 영양제» 챙기기 + (Android) 하루 1회 알림. 기본 false.
+ *   - 설계·평가 IP/integration/supplement_daily_v1/00_설계·평가셋_v1.md · 기록은 기기 안에만
+ *   - 활성화: VITE_SUPP_DAILY=true
+ */
+export const SUPP_DAILY_ENABLED = import.meta.env.VITE_SUPP_DAILY === 'true'
