@@ -5,6 +5,7 @@ import ProgressBar from '../components/ProgressBar'
 import { GOAL_OPTIONS, surveySteps } from '../domain/goals/goals'
 import { SYMPTOM_GROUPS } from '../domain/survey/symptoms'
 import { BODY_LIMITS, bodyIssueText, bodyStepIssues } from '../domain/survey/body_input'
+import { SUPPLEMENT_CHECK_ENABLED } from '../lib/flags'
 
 interface Props {
   step: Step
@@ -498,7 +499,7 @@ function StepSupplements({ answers, onUpdate, onNext }: { answers: SurveyAnswers
         ))}
       </div>
 
-      {answers.현재복용영양제.includes('iron') && (
+      {SUPPLEMENT_CHECK_ENABLED && answers.현재복용영양제.includes('iron') && (
         <div className="input-group" data-testid="iron-reason" style={{ marginTop: 'var(--space-4)' }}>
           <label>철분은 진단이나 의사·약사 권고로 드시나요?</label>
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -565,6 +566,8 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
         ))}
       </div>
 
+      {/* 영양제 점검 v1.2 문항은 플래그와 함께 켜진다 — OFF 면 예전 약 이름 칸 그대로 */}
+      {SUPPLEMENT_CHECK_ENABLED && (
       <div className="input-group" data-testid="meds-yn">
         <label>지금 드시는 약(처방약·일반의약품)이 있나요?</label>
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -577,8 +580,9 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
           ))}
         </div>
       </div>
+      )}
 
-      {answers.복용약있음 === '있음' && (
+      {(!SUPPLEMENT_CHECK_ENABLED || answers.복용약있음 === '있음') && (
         <div className="input-group">
           <label>드시는 약 이름 (선택사항)</label>
           <input type="text" className="input-field" placeholder="예: 혈압약, 당뇨약, 갑상선약..."

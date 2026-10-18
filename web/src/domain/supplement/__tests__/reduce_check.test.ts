@@ -44,5 +44,7 @@ describe("영양제 점검 v1.2 규칙·화면", () => {
     const q = readFileSync(resolve(__dirname, "../../../pages/Questions.tsx"), "utf-8");
     expect(q).toContain("지금 드시는 약(처방약·일반의약품)이 있나요?");
     expect(q).toContain("철분은 진단이나 의사·약사 권고로 드시나요?");
+    expect(q).toContain("SUPPLEMENT_CHECK_ENABLED && answers.현재복용영양제.includes('iron')");
+    expect(q).toContain("(!SUPPLEMENT_CHECK_ENABLED || answers.복용약있음 === '있음')");
   });
 });
