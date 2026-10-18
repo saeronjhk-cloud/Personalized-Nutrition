@@ -29,7 +29,7 @@ import {
   linkBarcode, getMyBarcodeLink, MeokseonLinkError,   // ★ 세션81 사용자 바코드 연결
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem, type MsKfindItem,
 } from '../lib/meokseon'
-import { webLabelNotice, supplementView, labelNutritionView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
+import { webLabelNotice, supplementView, labelNutritionView, webNutritionOffNote, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
 import { kfindNotice, kfindSupplementView, isNoBarcodeItem, KFIND_NUTRITION_OFF_NOTE, KFIND_RESULTS_TITLE } from '../domain/meokseon/kfind'   // 세션80 결정 80-1
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
 import { canOfferScanLink, parseLinkBarcode, SCAN_LINK_BUTTON, SCAN_LINK_HINT, MANUAL_LABEL, MANUAL_BUTTON, BAD_BARCODE, linkOutcome, linkConfirmTitle, LINK_OFFER_BUTTON, LINK_OFFER_HINT, LINK_CONFIRM_BODY, LINK_CONFIRM_BUTTON, LINK_CANCEL_BUTTON, MY_LINK_NOTE, LINK_ERROR_LIMIT, LINK_ERROR_NETWORK, type LinkOutcome } from '../domain/meokseon/barcodeLink'   // ★ 세션81 결정 80-9
@@ -1391,7 +1391,7 @@ export default function Scan() {
           {webLabelNotice(result) ? (() => { const wn = webLabelNotice(result)!; return (
             <div data-testid="web-label-notice" style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
               <strong>{wn.badgeLine}</strong><br />{wn.warning}
-              {wn.nutritionOff && <><br />{WEB_NUTRITION_OFF_NOTE}</>}
+              {wn.nutritionOff && <><br />{webNutritionOffNote(result)}</>}   {/* ★ 세션81g — 사유별 문구 */}
               {wn.stale && <><br />{WEB_STALE_NOTE}</>}
             </div>) })() : kfindNotice(result) ? (() => { const kn = kfindNotice(result)!; return (
             <div data-testid="kfind-notice" style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text)', background: 'var(--border-light)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>

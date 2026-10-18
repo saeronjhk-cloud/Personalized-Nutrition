@@ -177,6 +177,8 @@ export interface MsKfindSupplement {
   release_label: string | null
   food_cd: string
   nutrition: Partial<Record<'calories' | 'total_fat' | 'saturated_fat' | 'trans_fat' | 'cholesterol' | 'sodium' | 'total_carbs' | 'total_sugars' | 'dietary_fiber' | 'protein', number | null>> & { basis: string | null }
+  /** ★ 세션81g — 'compare' = 판매처 영양이 있는데 크게 달라 비교로 함께 보여 줌(없으면 보충) */
+  role?: 'compare'
 }
 
 /** ★ 세션80 — 이름 검색의 K-FIND 결과(바코드 없음 · food_cd 로 상세를 연다). */
@@ -212,6 +214,9 @@ export interface MsWebLabelBlock {
   label_nutrition?: MsLabelNutrition | null
   /** ★ 세션80 R8 — 영양이 비었을 때 K-FIND 보충(없으면 null · 구버전 서버는 키 없음) */
   kfind_supplement?: MsKfindSupplement | null
+  /** ★ 세션81g — 신호등을 끈 사유('calc' 4·4·9 실패 | 'kfind' 식약처와 다름) · 열량이 크게 다른가(구버전 서버는 키 없음) */
+  nutrition_off_reason?: 'calc' | 'kfind' | null
+  kfind_gross?: boolean
 }
 
 /** 포장지 표시 그대로의 영양 기준 — basis per_serving(1회분)·per_total(총 내용량)·per_100g·per_100ml */

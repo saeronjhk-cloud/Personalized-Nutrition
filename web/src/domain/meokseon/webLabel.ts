@@ -9,6 +9,16 @@ import type { MsProductResult, MsWebLabelSupplements, MsLabelNutrition } from '.
 export const WEB_LABEL_BADGE = '판매처 라벨 기반 · 바코드 미확인'
 export const WEB_LABEL_WARNING = '포장 리뉴얼로 실제와 다를 수 있어요. 알레르기는 반드시 실물 포장을 확인하세요.'
 export const WEB_NUTRITION_OFF_NOTE = '판매처 라벨의 영양 수치가 열량 계산과 맞지 않아 신호등을 표시하지 않아요. 수치는 참고만 해 주세요.'
+// ★ 세션81g — 신호등을 끈 사유별 문구(정답 backends/먹선/IP/eval_kfind_compare_v1 wording)
+export const WEB_NUTRITION_OFF_KFIND_NOTE = '판매처 라벨 값이 식약처 영양성분 DB와 달라 신호등을 표시하지 않아요. 수치는 참고만 해 주세요.'
+export const WEB_NUTRITION_GROSS_NOTE = '판매처 라벨 값과 식약처 영양성분 DB 값이 크게 달라요. 아래 두 값을 비교하고, 실물 포장을 꼭 확인하세요.'
+/** 신호등을 끈 판매처 품목의 안내 문구(꺼지지 않았으면 null). 구버전 서버(사유 없음)는 종전 문구. */
+export function webNutritionOffNote(result: Pick<MsProductResult, 'web_label'> | null | undefined): string | null {
+  const w = result?.web_label
+  if (!w || w.nutrition_ok !== false) return null
+  if (w.nutrition_off_reason === 'kfind') return w.kfind_gross ? WEB_NUTRITION_GROSS_NOTE : WEB_NUTRITION_OFF_KFIND_NOTE
+  return WEB_NUTRITION_OFF_NOTE
+}
 export const WEB_STALE_NOTE = '수집한 지 1년이 지난 정보예요. 지금 포장과 다를 가능성이 더 커요.'
 export const WEB_SUPPLEMENT_TITLE = '판매처 라벨 기반 보충 정보'
 
