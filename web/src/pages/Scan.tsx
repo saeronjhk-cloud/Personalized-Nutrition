@@ -26,11 +26,13 @@ import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productComplete
 import {
   getProduct, getAdditiveSummary, searchProductsWithWeb, getWebLabelProduct, getWebLabelAdditiveSummary, getKfindProduct, meokseonConfigured, MeokseonNotFound,
   analyzePhotoReport, confirmPhotoReport, MeokseonConfirmError, MeokseonAuthError, suggestProductName, ingredientLabel,
+  linkBarcode, getMyBarcodeLink, MeokseonLinkError,   // ★ 세션81 사용자 바코드 연결
   type MsProductResult, type MsAdditiveSummary, type MsSearchItem, type MsPhotoAnalysis, type MsWebLabelItem, type MsKfindItem,
 } from '../lib/meokseon'
 import { webLabelNotice, supplementView, labelNutritionView, WEB_NUTRITION_OFF_NOTE, WEB_STALE_NOTE } from '../domain/meokseon/webLabel'   // 세션79 U78-3
 import { kfindNotice, kfindSupplementView, isNoBarcodeItem, KFIND_NUTRITION_OFF_NOTE, KFIND_RESULTS_TITLE } from '../domain/meokseon/kfind'   // 세션80 결정 80-1
 import { getMeokseonAccessToken } from '../lib/meokseonAuth'
+import { linkOutcome, linkConfirmTitle, LINK_OFFER_BUTTON, LINK_OFFER_HINT, LINK_CONFIRM_BODY, LINK_CONFIRM_BUTTON, LINK_CANCEL_BUTTON, MY_LINK_NOTE, LINK_ERROR_LIMIT, LINK_ERROR_NETWORK, type LinkOutcome } from '../domain/meokseon/barcodeLink'   // ★ 세션81 결정 80-9
 import { loginPathWithReturn } from '../lib/returnTo'
 import {
   seedProductNameForExisting, canSubmitReport, checkProductName, classifyConfirmFailure, describeReadback,
@@ -143,6 +145,11 @@ export default function Scan() {
   // ★ 세션79 U78-3 — 판매처 라벨 기반 검색 결과(바코드 없음 · public 결과 «뒤»에 따로 보인다)
   const [webResults, setWebResults] = useState<MsWebLabelItem[] | null>(null)
   const [kfindResults, setKfindResults] = useState<MsKfindItem[] | null>(null)   // ★ 세션80
+  // ★ 세션81 결정 80-9 — 사용자 바코드 연결. linkFor = 연결을 기다리는 바코드(검색·품목 열기 사이 reset() 에도 «유지»)
+  const [linkFor, setLinkFor] = useState<string | null>(null)
+  const [linkBusy, setLinkBusy] = useState(false)
+  const [linkMsg, setLinkMsg] = useState<LinkOutcome | null>(null)
+  const [myLinked, setMyLinked] = useState(false)   // 결과가 «회원님이 연결한 제품»(본인 연결 조회로 나온 것)인가
   // 사진 제보 — ★ 세션64: **두 단계**다(읽어보기 → 제품명 확인 → 보내기).
   //   1단계는 저장하지 않는다. 저장은 사용자가 제품명을 확정한 뒤에만 일어난다.
   //   근거·문구·판정은 전부 domain/meokseon/photoReport.ts. 여기서 다시 판단하지 않는다.
@@ -297,6 +304,7 @@ export default function Scan() {
     setReportBusy(null); setReportError(null)
     setAnalysis(null); setProductName(''); setConfirmed(null); setNotifyResult(false)   // 세션75f — 다음 제보는 다시 «꺼짐»에서
     setLoginGateOpen(false); setAuthBlocked(false)
+    setLinkMsg(null); setMyLinked(false)   // ★ 세션81 — linkFor 는 지우지 않는다(검색 → 품목 열기 동안 이어져야 한다)
   }
 
   /* ────────────────────────────────────────────────────────────────────────
@@ -542,7 +550,7 @@ export default function Scan() {
   }
 
   async function lookupBarcode(barcode: string, source: 'barcode' | 'search' = 'barcode') {
-    reset(); setLoading(true)
+    reset(); setLinkFor(null); setLoading(true)
     try {
       const [p, a] = await Promise.allSettled([getProduct(barcode), getAdditiveSummary(barcode)])
       if (p.status === 'fulfilled') {
@@ -561,10 +569,17 @@ export default function Scan() {
         track('scan_saved', { saved_to: target })
         refreshHistory()
       } else if (p.reason instanceof MeokseonNotFound) {
+        // A-1 미스 큐: 보강 파이프라인 입력 (익명, 바코드만 — scanMiss.ts 참조) — 본인 연결이 있어도 «전체 기준 미스»는 그대로 보낸다
+        if (source === 'barcode') reportScanMiss(barcode)
+        // ★ 세션81 — 로그인 사용자가 예전에 «이 바코드 = 이 품목»으로 연결해 둔 것이 있으면 그 품목을 보여 준다(본인에게만).
+        const mine = await getMyBarcodeLink(barcode)
+        if (mine) {
+          setResult(mine); setMyLinked(true)
+          track('scan_lookup_success', { source: 'kfind', has_nutrition: !!mine.nutrition, has_additives: false, food_category: mine.product.food_category ?? null })
+          return
+        }
         setNotFound(barcode)
         track('scan_lookup_not_found')
-        // A-1 미스 큐: 보강 파이프라인 입력 (익명, 바코드만 — scanMiss.ts 참조)
-        if (source === 'barcode') reportScanMiss(barcode)
       } else {
         setError('제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
         track('scan_lookup_error', { error_kind: 'fetch' })
@@ -619,6 +634,21 @@ export default function Scan() {
         : '제품 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
       track('scan_lookup_error', { error_kind: 'kfind' })
     } finally { setLoading(false) }
+  }
+
+  /** ★ 세션81 — 열려 있는 K-FIND 품목과 linkFor 바코드를 잇는다. 판정은 서버, 말은 domain/meokseon/barcodeLink. */
+  async function confirmLink() {
+    const fc = result?.kfind?.food_cd
+    if (!linkFor || !fc) return
+    setLinkBusy(true); setLinkMsg(null)
+    try {
+      const r = await linkBarcode(linkFor, fc)
+      setLinkMsg(linkOutcome(r))
+      if (r.verdict !== 'reject') { setLinkFor(null); if (r.personal || r.verdict === 'auto') setMyLinked(true) }
+    } catch (e) {
+      if (e instanceof MeokseonAuthError) { setLoginGateOpen(true); return }
+      setLinkMsg({ tone: 'error', text: e instanceof MeokseonLinkError && e.code === 'CLAIM_LIMIT' ? LINK_ERROR_LIMIT : LINK_ERROR_NETWORK })
+    } finally { setLinkBusy(false) }
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -1226,6 +1256,10 @@ export default function Scan() {
                 type="button" className="btn btn-secondary"
                 onClick={() => openReportForm('not_found')}
               >이 제품 제보하기</button>
+              {/* ★ 세션81 결정 80-9 — 사진 없이도: 이름으로 찾은 식약처 영양성분 DB 품목과 이 바코드를 잇는다 */}
+              <button type="button" className="btn btn-secondary" data-testid="link-offer" style={{ marginLeft: 'var(--space-2)' }}
+                onClick={() => setLinkFor(notFound)}>{LINK_OFFER_BUTTON}</button>
+              {linkFor === notFound && <p data-testid="link-offer-hint" style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>{LINK_OFFER_HINT}</p>}
               {/* 로그인 게이트는 제보 버튼 «자리»에 뜬다. 사진 입력은 아직 열지 않는다. */}
               {loginGateOpen && renderLoginGate()}
             </>
@@ -1340,6 +1374,7 @@ export default function Scan() {
               {kn.originLine && <><br />{kn.originLine}</>}
               {kn.nutritionOff && <><br />{KFIND_NUTRITION_OFF_NOTE}</>}
               <br /><span style={{ color: 'var(--text-muted)' }}>{kn.sourceLine}</span>
+              {myLinked && <><br /><span data-testid="my-link-note">{MY_LINK_NOTE}</span></>}
             </div>) })() : (
           <p data-testid="reading-notice" data-kind={readingNotice(result.product).kind}
              style={{ fontSize: 12, lineHeight: 1.6, color: '#8a5a00', background: '#fff8e1', border: '1px solid #ffe0a3', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>
@@ -1348,6 +1383,20 @@ export default function Scan() {
 
           {/* ★ 알레르기는 안전 항목이라 첨가물·영양보다 «먼저» 온다.
               미수집일 때도 카드를 띄운다 — 침묵은 「없음」으로 읽힌다. */}
+          {/* ★ 세션81 결정 80-9 — 연결 대기 바코드 + K-FIND 품목 → 사용자가 «같은 제품»임을 확인하고 잇는다 */}
+          {result.kfind && linkFor && !myLinked && (
+            <div className="survey-card" data-testid="link-confirm" style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="survey-step-title" style={{ fontSize: 15 }}>{linkConfirmTitle(linkFor)}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 'var(--space-2) 0 var(--space-3)' }}>{LINK_CONFIRM_BODY}</p>
+              <button type="button" className="btn btn-primary" disabled={linkBusy} onClick={confirmLink}>{LINK_CONFIRM_BUTTON}</button>
+              <button type="button" className="btn btn-secondary" style={{ marginLeft: 'var(--space-2)' }} disabled={linkBusy} onClick={() => { setLinkFor(null); setLinkMsg(null) }}>{LINK_CANCEL_BUTTON}</button>
+              {loginGateOpen && renderLoginGate()}
+            </div>
+          )}
+          {linkMsg && (
+            <p data-testid="link-outcome" data-tone={linkMsg.tone} style={{ fontSize: 13, lineHeight: 1.6, color: linkMsg.tone === 'error' ? 'var(--danger)' : 'var(--text)', background: 'var(--border-light)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 'var(--space-2)', margin: '0 0 var(--space-4)' }}>{linkMsg.text}</p>
+          )}
+
           <AllergenCard result={result} />
 
           {/* ★ 세션79 U78-3 — 바코드 제품의 «빈 축»만 판매처 라벨로 보충(참고). 알레르기 카드의 «미수집» 판정은 그대로 둔다 — 보충으로 «없음»을 말하지 않는다. */}

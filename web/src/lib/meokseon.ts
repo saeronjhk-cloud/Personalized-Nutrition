@@ -166,6 +166,8 @@ export interface MsKfindBlock {
   food_weight: string | null
   serving_ref: string | null
   nutrition_ok: boolean | null
+  /** ★ 세션80d — 바코드가 이 품목에 연결돼 있으면 true(서버가 badge 문구도 바꿔 보낸다). 세션81 타입 추가. */
+  barcode_linked?: boolean
 }
 
 /** ★ 세션80 R8 — 판매처 품목 영양이 비었을 때 같은 품목보고번호 K-FIND 값(후보 정확히 1개일 때만 · 신호등 미사용). */
@@ -1012,4 +1014,54 @@ export async function getMyContribution(id: number): Promise<ContributionDetail 
     throw new MeokseonContributionsError(res.status, typeof msg === 'string' ? msg : undefined)
   }
   return normalizeContributionDetail(json.data)
+}
+
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * ★ 세션81 결정 80-9 — 사용자 바코드 연결 (/api/barcode-links · 로그인 필수)
+ *   판정은 서버 엔진(userBarcodeGate)이 한다. 화면 문구는 domain/meokseon/barcodeLink.ts.
+ *   정답 backends/먹선/IP/eval_user_barcode_v1/cases_v1.json
+ * ────────────────────────────────────────────────────────────────────────── */
+export interface MsBarcodeLinkResult {
+  verdict: 'auto' | 'personal' | 'needs_review' | 'reject' | 'keep'
+  reason: string
+  personal: boolean
+  prefix: 'match' | 'mismatch' | 'unknown' | null
+  barcode: string
+  food_cd: string
+  product: MsProductResult | null
+}
+export class MeokseonLinkError extends Error {
+  code: string
+  constructor(code: string) { super(code); this.name = 'MeokseonLinkError'; this.code = code }
+}
+
+/** POST /api/barcode-links — 토큰 없으면 MeokseonAuthError(요청 안 보냄) · 401 도 같은 오류 · 429 등은 MeokseonLinkError(code). */
+export async function linkBarcode(barcode: string, foodCd: string): Promise<MsBarcodeLinkResult> {
+  if (!BASE) throw new Error('먹선 API URL 미설정(VITE_MEOKSEON_API_URL)')
+  const headers = { ...(await authHeaders()), 'Content-Type': 'application/json' }
+  const res = await fetch(`${BASE}/api/barcode-links`, { method: 'POST', headers, body: JSON.stringify({ barcode, food_cd: foodCd }) })
+  let json: any = null
+  try { json = await res.json() } catch { /* 비-JSON */ }
+  throwIfUnauthorized(res, json)
+  if (!res.ok || !json || json.success !== true) throw new MeokseonLinkError(json?.error?.code || `HTTP_${res.status}`)
+  const d = json.data as MsBarcodeLinkResult
+  if (d.product) d.product.nutrition = normalizeNutrition(d.product.nutrition)
+  return d
+}
+
+/** GET /api/barcode-links/mine/:barcode — 로그인 안 했으면 «묻지 않고» null(스캔은 로그인 없이 된다) · 404 → null · 그 밖 실패 → null(스캔 화면을 막지 않는다). */
+export async function getMyBarcodeLink(barcode: string): Promise<MsProductResult | null> {
+  if (!BASE) return null
+  const token = await getMeokseonAccessToken().catch(() => null)
+  if (!token) return null
+  try {
+    const res = await fetch(`${BASE}/api/barcode-links/mine/${encodeURIComponent(barcode)}`, { headers: { Authorization: `Bearer ${token}` } })
+    if (!res.ok) return null
+    const json = await res.json()
+    const prod = json?.data?.product as MsProductResult | undefined
+    if (!prod) return null
+    prod.nutrition = normalizeNutrition(prod.nutrition)
+    return prod
+  } catch { return null }
 }
