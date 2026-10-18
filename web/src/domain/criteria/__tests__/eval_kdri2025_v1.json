@@ -1,0 +1,28 @@
+{
+ "name": "kdri2025", "version": "1.0", "date": "2026-10-18", "criteria_version": "KDRI-2025",
+ "source": "IP/integration/kdri2025_v1/00_KDRI2025_상한섭취량_확인표_20261018.md",
+ "sodium": [
+  {"id": "K01", "age": 30, "cdrr": 2300}, {"id": "K02", "age": 64, "cdrr": 2300},
+  {"id": "K03", "age": 65, "cdrr": 1900}, {"id": "K04", "age": 74, "cdrr": 1900},
+  {"id": "K05", "age": 75, "cdrr": 1800}, {"id": "K06", "age": 16, "cdrr": 2300}, {"id": "K07", "age": null, "cdrr": 2300}
+ ],
+ "fiber": [
+  {"id": "K08", "sex": "male", "age": 40, "ai": 30}, {"id": "K09", "sex": "female", "age": 40, "ai": 20},
+  {"id": "K10", "sex": "female", "age": 55, "ai": 25}, {"id": "K11", "sex": "male", "age": 70, "ai": null}
+ ],
+ "ul": [
+  {"id": "K12", "nutrient": "calcium", "sex": "male", "age": 25, "ul": 3000},
+  {"id": "K13", "nutrient": "calcium", "sex": "male", "age": 55, "ul": 2500},
+  {"id": "K14", "nutrient": "calcium", "sex": "female", "age": 25, "ul": 2500},
+  {"id": "K15", "nutrient": "calcium", "sex": "female", "age": 40, "ul": 2000},
+  {"id": "K16", "nutrient": "vitamin_b6", "sex": "male", "age": 40, "ul": 50},
+  {"id": "K17", "nutrient": "magnesium", "sex": "female", "age": 40, "ul": 350, "scope": "non_food_only"},
+  {"id": "K18", "nutrient": "folic_acid", "sex": "female", "age": 30, "ul": 1000, "scope": "synthetic_only"},
+  {"id": "K19", "nutrient": "iron", "sex": "female", "age": 30, "ul": 45, "scope": "total"}
+ ],
+ "diet_signal": [
+  {"id": "K20", "note": "70세 나트륨 2,000mg → 심혈관 신호(2020 기준 2,100 미만이라 안 떴음)", "age": 70, "sodium_mg": 2000, "cardio": true},
+  {"id": "K21", "note": "40세 나트륨 2,000mg → 신호 없음", "age": 40, "sodium_mg": 2000, "cardio": false},
+  {"id": "K22", "note": "80세 나트륨 1,850mg → 신호(75+ 1,800)", "age": 80, "sodium_mg": 1850, "cardio": true}
+ ]
+}

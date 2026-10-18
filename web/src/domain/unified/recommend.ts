@@ -79,7 +79,7 @@ export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
   // Step 4: 나트륨·당류 재가동(enableMicroSignals). 실제 발화는 dietSummary의 데이터 가드
   // (sodium_known/sugar_known)도 통과해야 함. 식이섬유는 커버리지 낮아 계속 OFF.
   const dietSig = input.dietSummary
-    ? dietToScores(input.dietSummary, { sex: gender, weightKg: weight, kcalTarget: tdee, enableMicroSignals: true })
+    ? dietToScores(input.dietSummary, { sex: gender, age, weightKg: weight, kcalTarget: tdee, enableMicroSignals: true })
     : { scores: {} as Record<string, number>, lowConfidence: false };
 
   // 설문 + 검진 + 식이 병합

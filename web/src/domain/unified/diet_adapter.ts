@@ -1,11 +1,13 @@
 /**
  * 식이 신호 어댑터 (Phase F)
  * 최근 7일 식이 일평균 → 설문/검진과 같은 14개 카테고리 점수로 변환.
- * 참조: D:\헬스픽\IP\integration\phase_f_diet_design_v1.md (KDRIs 2020 확정 상수)
+ * 참조: D:\헬스픽\IP\integration\phase_f_diet_design_v1.md · 기준 수치 = domain/criteria/kdri.ts (KDRI-2025, H134)
  *
  * 핵심: 추천은 외부 호출이 아니라 우리 meal_records 집계를 규칙 엔진이 읽어 계산(엔진 우선).
  * 점수 스케일·상한은 checkup adapter와 동일 → mergeScores로 그대로 합산.
  */
+
+import { KDRI_VERSION, SUGAR_MAX_ENERGY_RATIO, fiberAiG, sodiumCdrrMg } from "../criteria/kdri";
 
 /** SCORE_PER_SIGNAL/CATEGORY_CAP는 adapter.ts와 동일 스케일 유지 */
 const SCORE_PER_SIGNAL = 8;
@@ -17,17 +19,13 @@ const MIN_DAYS = 2;
 /** 외부(UI 상태 판정 등)에서 같은 기준을 쓰기 위한 공개 이름 — 값 복제 금지 (Phase H) */
 export const DIET_MIN_DAYS = MIN_DAYS;
 
-/** KDRIs 2020 확정 임계 (검증: 2026-06-22, 한국영양학회/보건복지부) */
+/** 판정 임계 — 영양 기준 수치는 criteria/kdri.ts 에서(나이별 나트륨·식이섬유). 아래는 엔진 정책 배수 */
+export const DIET_CRITERIA_VERSION = KDRI_VERSION;
 export const DIET_THRESHOLDS = {
-  /** 나트륨 만성질환위험감소섭취량(CDRR) mg/일 */
-  SODIUM_CDRR_MG: 2300,
   /** 단백질: RNI 0.91 g/kg 대비 저단백 판정 배수 */
   PROTEIN_LOW_PER_KG: 0.7,
-  /** 총당류: 적정 10~20% 상단 초과 비율 */
-  SUGAR_HIGH_ENERGY_RATIO: 0.20,
-  /** 식이섬유 충분섭취량(AI) g/일 */
-  FIBER_AI_MALE_G: 30,
-  FIBER_AI_FEMALE_G: 20,
+  /** 총당류: 총 에너지 20% 초과 */
+  SUGAR_HIGH_ENERGY_RATIO: SUGAR_MAX_ENERGY_RATIO,
   /** 열량 과잉/부족 배수 (추정필요량 대비) */
   KCAL_OVER_RATIO: 1.15,
   KCAL_UNDER_RATIO: 0.7,
@@ -54,6 +52,8 @@ export interface DietDailyAvg {
 
 export interface DietContext {
   sex?: string | null; // 'male' | 'female'
+  /** 나이 — 나트륨 CDRR(65-74 1,900 · 75+ 1,800)·식이섬유 AI 구간. 없으면 성인 기본 */
+  age?: number | null;
   weightKg?: number | null;
   /** 추정필요열량(TDEE) — 없으면 열량 과잉/부족 신호 생략 */
   kcalTarget?: number | null;
@@ -93,7 +93,8 @@ export function dietToScores(avg: DietDailyAvg, ctx: DietContext = {}): DietSign
   }
 
   const scores: Record<string, number> = {};
-  const { SODIUM_CDRR_MG, PROTEIN_LOW_PER_KG, SUGAR_HIGH_ENERGY_RATIO, FIBER_AI_MALE_G, FIBER_AI_FEMALE_G, KCAL_OVER_RATIO, KCAL_UNDER_RATIO } = DIET_THRESHOLDS;
+  const { PROTEIN_LOW_PER_KG, SUGAR_HIGH_ENERGY_RATIO, KCAL_OVER_RATIO, KCAL_UNDER_RATIO } = DIET_THRESHOLDS;
+  const SODIUM_CDRR_MG = sodiumCdrrMg(ctx.age);
 
   // ── 나트륨·당류 신호(Step 4 재가동): 정책 스위치 + 데이터 신뢰 가드 둘 다 통과해야 발화 ──
   if (ctx.enableMicroSignals) {
@@ -109,8 +110,8 @@ export function dietToScores(avg: DietDailyAvg, ctx: DietContext = {}): DietSign
 
   // ── 식이섬유 → 장건강: 별도 스위치(기본 OFF, 커버리지 낮음) + 데이터 가드 ──
   if (ctx.enableFiberSignal && avg.fiber_known !== false) {
-    const fiberAI = ctx.sex === "female" ? FIBER_AI_FEMALE_G : FIBER_AI_MALE_G;
-    if (avg.fiber_g < fiberAI) add(scores, "장건강", SCORE_PER_SIGNAL);
+    const fiberAI = fiberAiG(ctx.sex, ctx.age);
+    if (fiberAI !== null && avg.fiber_g < fiberAI) add(scores, "장건강", SCORE_PER_SIGNAL);
   }
 
   // ── 칼로리·단백질 신호: 상대적으로 신뢰 가능 → 항상 가동 ──
