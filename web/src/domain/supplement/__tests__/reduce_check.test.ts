@@ -25,6 +25,13 @@ describe("영양제 점검 v1.2 평가셋", () => {
 });
 
 describe("영양제 점검 v1.2 규칙·화면", () => {
+  it("결과 화면 3경로 모두 설문 답을 넘긴다(answers={null} 금지 — 10-18 점검 상자 미표시 원인)", () => {
+    for (const f of ["../../../pages/Recommend.tsx", "../../../components/survey/SurveyResultView.tsx", "../../../App.tsx"]) {
+      const src = readFileSync(resolve(__dirname, f), "utf-8");
+      expect(src).toMatch(/<Results[\s\S]*?answers=/);
+      expect(src).not.toMatch(/<Results[^>]*answers=\{null\}/);
+    }
+  });
   it("철분 연결 증상 단일 출처(data.ts)", () => expect(ironSymptomIds()).toContain("chronic_fatigue"));
   it("약 복용 «없음»이면 약 이름이 남아 있어도 MEDS 아님", () =>
     expect(onMedication(A({ 복용약있음: "없음", 복용약물: "혈압약" }))).toBe(false));

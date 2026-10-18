@@ -138,7 +138,7 @@ export default function SurveyResultView() {
 
       <Results
         result={result}
-        answers={null}
+        answers={answers}
         error={null}
         persistHistory={false}
         onRestart={() => navigate("/survey/manage")}

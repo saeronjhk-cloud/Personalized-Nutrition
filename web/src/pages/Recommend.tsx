@@ -6,6 +6,7 @@ import { composeUnifiedInput } from "../domain/unified/compose";
 import { runUnifiedRecommendation, type UnifiedResult } from "../domain/unified/recommend";
 import RecommendSources from "../components/RecommendSources";
 import Results from "./Results";
+import type { SurveyAnswers } from "../types";
 
 export default function Recommend() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function Recommend() {
   const [error] = useState<string | null>(null);
   const [result, setResult] = useState<UnifiedResult | null>(null);
   const [goals, setGoals] = useState<string[] | null>(null);
+  // 영양제 점검(Results)용 — 최근 저장 설문 답(현재 복용 영양제·약 복용 등). 저장·카운트는 persistHistory=false 로 막혀 있음
+  const [latestAnswers, setLatestAnswers] = useState<SurveyAnswers | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +39,7 @@ export default function Recommend() {
         return;
       }
       setGoals(r.inputs.goals);
+      setLatestAnswers(r.inputs.latestSurvey);
       setResult(runUnifiedRecommendation(composeUnifiedInput({ loaded: r.inputs })));
       setLoading(false);
     }
@@ -98,7 +102,7 @@ export default function Recommend() {
 
       <Results
         result={result}
-        answers={null}
+        answers={latestAnswers}
         error={null}
         persistHistory={false}
         onRestart={() => navigate("/dashboard")}
