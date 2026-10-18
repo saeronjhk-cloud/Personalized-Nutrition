@@ -35,7 +35,7 @@ describe('홈 v2 1단계', () => {
     expect(home).toContain("mode === 'visitor' || mode === 'returning' ? ' home-v2' : ''")
   })
   it('V03 히어로 문구(제이 결정 ChatGPT안) · 금지어 없음', () => {
-    expect(home).toContain('먹은 것부터 살피고,<br /><span className="hero-v2__nw">내 몸에 맞는</span> <span className="hero-v2__nw">다음 한 가지까지</span>')
+    expect(home).toContain('오늘 먹은 밥상과 영양제,<br /><span className="hero-v2__nw">겹치고 넘치는 성분을</span> <span className="hero-v2__nw">한눈에.</span>') // 대표 문구 J2(제이 10-18)
     expect(home).toContain('식사에서 놓친 점과 오늘 실천할 한 가지를 알려드려요.')
     const visible = (home + scene).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
     expect(visible).not.toMatch(/kcal|칼로리|점수|감량|GLP-1|보장|최초|유일/)

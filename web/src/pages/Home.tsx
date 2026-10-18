@@ -102,7 +102,7 @@ function VisitorHome({ mode }: { mode: HomeMode }) {
       {/* ━━ Hero v2 — 실제 밥상 장면 + 대표 CTA 1개 (H10 · home_redesign_v2_eval_v1 S1~S5) ━━ */}
       <section className="hero-v2">
         <div className="hero-v2__eyebrow">서박사의 영양공식</div>
-        <h1 className="hero-v2__title">먹은 것부터 살피고,<br /><span className="hero-v2__nw">내 몸에 맞는</span> <span className="hero-v2__nw">다음 한 가지까지</span></h1>
+        <h1 className="hero-v2__title">오늘 먹은 밥상과 영양제,<br /><span className="hero-v2__nw">겹치고 넘치는 성분을</span> <span className="hero-v2__nw">한눈에.</span></h1>
         <p className="hero-v2__sub">
           밥상 사진·3분 설문·건강검진 중 편한 것부터 시작하면,
           식사에서 놓친 점과 오늘 실천할 한 가지를 알려드려요.
