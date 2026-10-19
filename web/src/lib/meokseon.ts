@@ -145,6 +145,8 @@ export interface MsProductResult {
   web_label?: MsWebLabelBlock | null
   /** ★ 세션79 U78-3 — 바코드 조회에서 «빈 축»만 판매처 라벨로 보충(없으면 null · 구버전 서버는 키 없음). allergens·traffic_light 키는 건드리지 않는다. */
   web_label_supplements?: MsWebLabelSupplements | null
+  /** ★ 세션82 결정 ⑧ — 사진 제보 제품(영양 없음) ← 서버 OCR 품목보고번호 + 이름 일치 K-FIND 보충(바코드 응답 전용 · 신호등 미사용). 정답 backends/먹선/IP/eval_photo_kfind_supplement_v1 */
+  kfind_supplement?: (MsKfindSupplement & { match?: 'ocr_report_no' }) | null
   /** ★ 세션80 결정 80-1 — 식약처 K-FIND 품목(GET /api/products/kfind/:foodCd)일 때만 온다. 문구 정본 = 서버 productService.KFIND_*. */
   kfind?: MsKfindBlock | null
 }

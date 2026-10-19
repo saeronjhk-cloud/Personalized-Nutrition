@@ -43,8 +43,9 @@ const BASIS: Record<string, string> = { per_100g: '100g당', per_100ml: '100ml�
 export interface KfindSupplementView { title: string; sourceLine: string; basisLabel: string | null; rows: Array<{ label: string; value: number; unit: string }> }
 
 /** 판매처 품목의 K-FIND 보충(R8) → 화면 모델. 값 없는 행은 만들지 않는다(0 은 «있음»). 보여줄 것이 없으면 null. */
-export function kfindSupplementView(result: Pick<MsProductResult, 'web_label'> | null | undefined): KfindSupplementView | null {
-  const s = result?.web_label?.kfind_supplement
+export function kfindSupplementView(result: (Pick<MsProductResult, 'web_label'> & Partial<Pick<MsProductResult, 'kfind_supplement'>>) | null | undefined): KfindSupplementView | null {
+  // ★ 세션82 결정 ⑧ — 판매처 품목(web_label.kfind_supplement)이 우선, 없으면 바코드 응답의 사진 제보 보충(최상위 kfind_supplement).
+  const s = result?.web_label?.kfind_supplement ?? result?.kfind_supplement
   if (!s || !s.nutrition) return null
   const rows = ROWS.flatMap(([k, label, unit]) => {
     const v = (s.nutrition as Record<string, unknown>)[k]

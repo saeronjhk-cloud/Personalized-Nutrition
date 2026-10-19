@@ -1691,7 +1691,7 @@ export default function Scan() {
           {(() => {
             const tc = trafficCardView(result.traffic_light ?? null)
             if (!tc) return null
-            const dot: Record<string, string> = { red: 'var(--danger)', yellow: 'var(--warning)', green: 'var(--success)', gray: 'var(--border-light)', none: 'var(--border-light)' }
+            const dot: Record<string, string> = { red: 'var(--danger)', yellow: 'var(--warning)', green: 'var(--success)', gray: 'var(--text-muted)', none: 'var(--text-muted)' }   /* ★ 세션82 — ○ 가 --border-light 라 안 보였다 */
             return (
               <div className="survey-card" data-testid="traffic-card" data-mode={tc.mode} style={{ marginBottom: 'var(--space-4)' }}>
                 <h3 className="survey-step-title" style={{ fontSize: 16 }}>{TC_TITLE}</h3>
