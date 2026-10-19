@@ -208,6 +208,11 @@ export interface AdditiveListView {
    *   `total`·`items` 와 «섞지 않는다»(저장된 것과 출처가 다르다). 없으면 null.
    */
   derived: { source: 'own' | 'sibling' | null; items: AdditiveView[] } | null
+  /**
+   * ★ 세션82(H v1.1 R3b) — 서버가 원재료 원문을 «대조했는가»(derived_additives 가 items 배열로 옴 · 빈 배열 포함).
+   *   derived(빈 목록이면 null)만으로는 «원재료 없음»과 «대조했고 0건»이 구분되지 않았다(라온현미유 실측).
+   */
+  derivedChecked: boolean
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -277,8 +282,22 @@ export function derivedInHeader(view: Pick<AdditiveListView, 'total' | 'derived'
  *   «원재료에서 찾은 첨가물 3종»을 함께 띄워 스스로 모순처럼 읽혔다(운영 web 306944).
  *   R1 저장 >0 → describeAdditiveCount 그대로(A2 문구 무변경) · R2 저장 0 + 검출 N → 검출 문구 · R3 그 밖 → 종전.
  */
-export function describeAdditiveHeader(view: Pick<AdditiveListView, 'total' | 'derived'>): string {
-  return derivedInHeader(view) ? describeDerivedAdditiveCount(view.derived!.items.length) : describeAdditiveCount(view.total)
+export function describeAdditiveHeader(view: Pick<AdditiveListView, 'total' | 'derived'> & Partial<Pick<AdditiveListView, 'unlisted' | 'derivedChecked'>>): string {
+  if (derivedInHeader(view)) return describeDerivedAdditiveCount(view.derived!.items.length)
+  // ★ 세션82(H v1.1 R3a·R3b) — 저장 0 · 목록 밖 0 · 원재료 검출 0 일 때 «…0개» 머리와 «정보 없음» 본문을 함께 내지 않는다.
+  if (view.total === 0 && !(view.unlisted ?? 0)) return view.derivedChecked ? describeDerivedAdditiveCount(0) : ADDITIVE_HEADER_NONE
+  return describeAdditiveCount(view.total)
+}
+
+/** ★ 세션82(H v1.1) — 빈 상태 문구. 정답 backends/먹선/IP/eval_additive_header_v1 wording. */
+export const ADDITIVE_HEADER_NONE = '첨가물'
+export const ADDITIVE_EMPTY_NONE = '등록된 첨가물 정보가 없어요.'
+export const ADDITIVE_EMPTY_CHECKED = '원재료 표시에서 식품첨가물공전 품목명과 일치하는 이름을 찾지 못했어요. 대조표에 없는 첨가물은 여기에 나오지 않아요.'
+
+/** ★ 세션82(H v1.1 R6) — 첨가물 카드 본문(빈 상태일 때만 문자열 · 그 밖 null). */
+export function additiveEmptyNote(view: Pick<AdditiveListView, 'total' | 'unlisted' | 'derived' | 'derivedChecked'>): string | null {
+  if (view.total !== 0 || view.unlisted !== 0 || view.derived) return null
+  return view.derivedChecked ? ADDITIVE_EMPTY_CHECKED : ADDITIVE_EMPTY_NONE
 }
 
 /** A2 각주 — 왜 「N개」가 전부가 아닌가. 위 33.3% 실측이 근거다. */
@@ -737,7 +756,14 @@ export function buildAdditiveList(summary: AdditiveSummaryLike | null | undefine
      */
     unlisted: readUnlisted(summary),
     derived: readDerived(summary),
+    derivedChecked: readDerivedChecked(summary),
   }
+}
+
+/** ★ 세션82 — derived_additives 가 «items 배열을 가진 객체»로 왔는가(빈 배열 포함 = 서버가 원재료를 대조함). */
+export function readDerivedChecked(summary: AdditiveSummaryLike | null | undefined): boolean {
+  const d = summary?.derived_additives
+  return !!d && typeof d === 'object' && Array.isArray((d as Record<string, unknown>)['items'])
 }
 
 /**

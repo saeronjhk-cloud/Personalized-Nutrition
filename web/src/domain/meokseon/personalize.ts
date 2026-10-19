@@ -159,6 +159,62 @@ export function personalizeProduct(
   return { applicable, items, warnings, judgedCount, hasUnknown }
 }
 
+// ── ★ 세션82 F1 — «내 기준으로 보기» 요약(순수 함수 · 문구 정본). 정답 IP/meokseon/eval_personal_summary_v1.
+//   종전: 설문 목표 영양소만 보고 주의 0 이면 «먹선 신호등 기준 양호합니다» — 목표 밖 빨강(예: 나트륨 2950mg)을 숨겼다.
+//   판정은 여전히 먹선 traffic_light 색 소비(R1). «양호합니다» 문구 금지(R2).
+export const PS_WORDING = {
+  head_warn: '내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)',
+  head_ok: '내 설문 기준으로 본 {items}: 먹선 신호등으로 주의 수준이 아니에요.',
+  head_unknown: '이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)',
+  red_outside: '설문 항목 밖이지만 {labels}{iga} 먹선 신호등 빨강이에요.',
+  red_plain: '이 제품은 {labels}{iga} 먹선 신호등 빨강이에요.',
+} as const
+
+const LIMIT_ORDER: NutrientKey[] = ['sodium', 'total_sugars', 'saturated_fat', 'trans_fat', 'cholesterol']
+
+function iga(word: string): '이' | '가' {
+  const c = word.charCodeAt(word.length - 1)
+  if (c < 0xac00 || c > 0xd7a3) return '이'
+  return (c - 0xac00) % 28 === 0 ? '가' : '이'
+}
+
+export interface PersonalSummary {
+  mode: 'warn' | 'ok' | 'unknown' | 'not_applicable' | 'no_survey'
+  headline: string | null
+  otherRedKeys: NutrientKey[]
+  otherRedLine: string | null
+  thumbs: boolean
+  personal: PersonalizeResult | null
+}
+
+export function personalSummary(
+  nutrition: MsNutrition | null,
+  trafficLight: MsTrafficLight | null,
+  answers: SurveyAnswers | null,
+): PersonalSummary {
+  const personal = answers ? personalizeProduct(nutrition, trafficLight, answers) : null
+  const chosen = new Set((personal?.applicable ? personal.items : []).filter((i) => i.intent === 'limit').map((i) => i.key))
+  const lights = (trafficLight && trafficLight.nutrients) || {}
+  const otherRedKeys = LIMIT_ORDER.filter((k) => !chosen.has(k) && normColor(lights[NUTRIENT[k].lightKey as string]?.color) === 'red')
+  let otherRedLine: string | null = null
+  if (otherRedKeys.length) {
+    const labels = otherRedKeys.map((k) => NUTRIENT[k].label)
+    const tpl = personal?.applicable ? PS_WORDING.red_outside : PS_WORDING.red_plain
+    otherRedLine = tpl.replace('{labels}', labels.join('·')).replace('{iga}', iga(labels[labels.length - 1]))
+  }
+  let mode: PersonalSummary['mode']
+  let headline: string | null = null
+  if (!personal) mode = 'no_survey'
+  else if (!personal.applicable) mode = 'not_applicable'
+  else if (personal.warnings.length > 0) { mode = 'warn'; headline = PS_WORDING.head_warn }
+  else if (personal.judgedCount > 0 && !personal.hasUnknown) {
+    mode = 'ok'
+    const items = LIMIT_ORDER.filter((k) => chosen.has(k)).map((k) => NUTRIENT[k].label).join('·')
+    headline = PS_WORDING.head_ok.replace('{items}', items)
+  } else { mode = 'unknown'; headline = PS_WORDING.head_unknown }
+  return { mode, headline, otherRedKeys, otherRedLine, thumbs: mode === 'ok' && otherRedKeys.length === 0, personal }
+}
+
 // ── Eval(원칙 4: 색+basis+null 중심). runEval()로 자체 확인. IP 정본: 64_먹선개인화_Eval셋_v2.jsonl ──
 export interface EvalCase {
   name: string

@@ -78,12 +78,14 @@ describe('먹선 화면 — 서박사 캐릭터 배선', () => {
       expect(Number(m![1])).toBeLessThanOrEqual(48)
     }
     expect(count(scan, 'pose="a1_thumbs"')).toBe(1)
-    expect(before(scan, 'a1_thumbs', 300)).toContain('!personal.hasUnknown')
+    // ★ 세션82 F1 — 엄지 조건은 personalSummary.thumbs(= ok && 목표 밖 빨강 0 · ok 는 !hasUnknown) · 회색 금지는 정답 PS05·PS09 가 검증
+    expect(before(scan, 'a1_thumbs', 300)).toContain('myView.thumbs')
     // 주의 항목 목록(</ul>) «뒤»에 온다 — 문구를 밀어내지 않는다
     const ul = scan.indexOf('{personal.warnings.map(')
     expect(scan.indexOf('<CoachAvatar pose="c2_advice"')).toBeGreaterThan(scan.indexOf('</ul>', ul))
     const b4 = scan.lastIndexOf('<CoachAvatar pose="b4_think"')
-    expect(scan.slice(b4, b4 + 600)).toContain('판정하기 어려워요')
+    // ★ 세션82 F1 — 문구는 PS_WORDING.head_unknown(«판정하기 어려워요») · 화면은 myView.headline 을 그린다
+    expect(scan.slice(b4, b4 + 600)).toContain('myView.headline')
   })
   it('M10 내 제보 목록 d1_clipboard', () => {
     expect(reports).toContain('<CoachAvatar pose="d1_clipboard"')

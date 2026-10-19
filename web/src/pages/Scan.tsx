@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
-import { personalizeProduct } from '../domain/meokseon/personalize'
+import { personalSummary } from '../domain/meokseon/personalize'   // ★ 세션82 F1
 import { withGoals } from '../domain/goals/goals'
 import { loadEffectiveGoals } from '../lib/userGoals'
 import { MEAL_ENABLED } from '../lib/flags'
@@ -19,7 +19,7 @@ import CoachAvatar from '../components/CoachAvatar'
 import AdditiveList from '../components/AdditiveList'
 import { SIGNAL_V3_NOTICE, INGREDIENTS_TITLE, SIBLING_INGREDIENT_NOTE, SIBLING_NUTRITION_NOTE } from '../domain/meokseon/additiveSignal'
 import {
-  buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, describeAdditiveHeader, GRADE_HIDDEN_NOTICE,
+  buildAdditiveList, COLOR_LABEL, SHOW_RISK_GRADE, describeAdditiveCount, describeAdditiveHeader, additiveEmptyNote, GRADE_HIDDEN_NOTICE,
   type AdditiveColor,
 } from '../domain/meokseon/additives'
 import { assessProduct, GAP_HELP_TEXT } from '../domain/meokseon/productCompleteness'
@@ -147,6 +147,7 @@ export default function Scan() {
   const [kfindResults, setKfindResults] = useState<MsKfindItem[] | null>(null)   // ★ 세션80
   // ★ 세션81 결정 80-9 — 사용자 바코드 연결. linkFor = 연결을 기다리는 바코드(검색·품목 열기 사이 reset() 에도 «유지»)
   const [linkFor, setLinkFor] = useState<string | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)   // ★ 세션82 F5
   const [linkBusy, setLinkBusy] = useState(false)
   const [linkMsg, setLinkMsg] = useState<LinkOutcome | null>(null)
   const [myLinked, setMyLinked] = useState(false)   // 결과가 «회원님이 연결한 제품»(본인 연결 조회로 나온 것)인가
@@ -227,9 +228,9 @@ export default function Scan() {
     ? (managedGoals !== null ? withGoals(latestRecord.answers, managedGoals) : latestRecord.answers)
     : null
   // 개인화는 먹선 traffic_light 색을 소비(자체 임계 없음). 근거: 64 재평가 v1.
-  const personal = (result && personalAnswers)
-    ? personalizeProduct(result.nutrition, result.traffic_light ?? null, personalAnswers)
-    : null
+  // ★ 세션82 F1 — 요약(목표 밖 빨강 포함)은 personalSummary 가 정한다. 설문 없음이어도 빨강 줄은 계산(정답 eval_personal_summary_v1).
+  const myView = result ? personalSummary(result.nutrition, result.traffic_light ?? null, personalAnswers) : null
+  const personal = myView?.personal ?? null
 
   // 첨가물 «개별» 뷰 모델. 판정·문구는 전부 domain/meokseon/additives.ts 의 순수 함수다.
   // ★ 색별 개수도 여기서 «다시» 센다 — 서버 `risk_summary.by_color` 는 4색만 세므로
@@ -702,6 +703,16 @@ export default function Scan() {
    *   매직링크 왕복에 사진이 사라져 두 번 찍게 된다(reportAuth.ts ②).
    * ⚠ 「나중에 할게요」를 «반드시» 남긴다. 닫을 길 없는 벽은 스캔까지 막힌 것처럼 읽힌다.
    */
+  // ★ 세션82 F1 — 목표 밖(또는 설문 없음) 먹선 신호등 빨강 한 줄. 문구는 personalSummary 가 만든다.
+  function renderOtherRed(line: string) {
+    return (
+      <p data-testid="personal-other-red" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 14, margin: 'var(--space-2) 0 0' }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: 'var(--danger)' }} />
+        <span>{line}</span>
+      </p>
+    )
+  }
+
   function renderLoginGate() {
     return (
       <div
@@ -1176,7 +1187,7 @@ export default function Scan() {
           <span style={{ flex: 1, height: 1, background: 'var(--border)' }} /> 또는 이름으로 검색 <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
         </div>
         <form onSubmit={onSubmit} style={{ display: 'flex', gap: 'var(--space-2)' }}>
-          <input className="input-field" placeholder="예: 신라면" value={query} onChange={(e) => setQuery(e.target.value)} style={{ flex: 1 }} />
+          <input ref={searchInputRef} className="input-field" placeholder="예: 신라면" value={query} onChange={(e) => setQuery(e.target.value)} style={{ flex: 1 }} />
           <button type="submit" className="btn btn-secondary" style={{ width: 'auto', padding: 'var(--space-3) var(--space-5)' }} disabled={loading}>
             {loading ? '조회 중…' : '검색'}
           </button>
@@ -1283,7 +1294,7 @@ export default function Scan() {
               >이 제품 제보하기</button>
               {/* ★ 세션81 결정 80-9 — 사진 없이도: 이름으로 찾은 식약처 영양성분 DB 품목과 이 바코드를 잇는다 */}
               <button type="button" className="btn btn-secondary" data-testid="link-offer" style={{ marginLeft: 'var(--space-2)' }}
-                onClick={() => setLinkFor(notFound)}>{LINK_OFFER_BUTTON}</button>
+                onClick={() => { setLinkFor(notFound); setQuery(''); setTimeout(() => searchInputRef.current?.focus(), 0) }}>{LINK_OFFER_BUTTON}</button>   {/* ★ 세션82 F5 — 검색창에 남은 바코드 숫자를 비우고 커서를 둔다 */}
               {linkFor === notFound && <p data-testid="link-offer-hint" style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 'var(--space-2)' }}>{LINK_OFFER_HINT}</p>}
               {/* 로그인 게이트는 제보 버튼 «자리»에 뜬다. 사진 입력은 아직 열지 않는다. */}
               {loginGateOpen && renderLoginGate()}
@@ -1472,7 +1483,8 @@ export default function Scan() {
             </div>) })()}
 
           {/* ★ 세션80 R8 — 판매처 품목 영양이 비었을 때 식약처 K-FIND 값(참고 · 신호등에 쓰지 않음) */}
-          {kfindSupplementView(result) && (() => { const kv = kfindSupplementView(result)!; return (
+          {/* ★ 세션82 F3 — role 'compare'(판매처 값과 크게 다름) 카드는 «포장지 표시» 카드 바로 아래로 옮긴다(«아래 두 값을 비교»). */}
+          {result.web_label?.kfind_supplement?.role !== 'compare' && kfindSupplementView(result) && (() => { const kv = kfindSupplementView(result)!; return (
             <div className="survey-card" data-testid="kfind-supplement" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>{kv.title}</h3>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-2)' }}>영양성분{kv.basisLabel ? ` (${kv.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
@@ -1507,7 +1519,8 @@ export default function Scan() {
                   「등록된 첨가물 정보가 없어요」 한 줄만 남는다. 그건 침묵이 아니라 **오정보**다 —
                   라벨에는 있었고 우리가 그것을 잃은 것이다. 그 경우엔 목록 대신 경고를 낸다. */}
               {additiveView.total === 0 && additiveView.unlisted === 0 && !additiveView.derived ? (
-                <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>등록된 첨가물 정보가 없어요.</p>
+                // ★ 세션82(H v1.1) — «원재료 없음»(R3a)과 «대조했고 0건»(R3b)을 나눈다. 조건은 종전과 같다(total 0 · unlisted 0 · derived 없음).
+                <p data-testid="additive-empty" style={{ fontSize: 13, color: 'var(--text-muted)' }}>{additiveEmptyNote(additiveView)}</p>
               ) : (
                 <>
                   {SHOW_RISK_GRADE ? (
@@ -1564,10 +1577,18 @@ export default function Scan() {
               <div className="survey-card" data-testid="label-nutrition" style={{ marginBottom: 'var(--space-4)' }}>
                 <h3 className="survey-step-title" style={{ fontSize: 16 }}>영양정보 · 포장지 표시 ({lv.header})</h3>
                 <div style={{ fontSize: 13, lineHeight: 1.8 }}>{lv.rows.map((r) => <div key={r}>{r}</div>)}</div>
-                {lv.secondary && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-2) 0 0' }}>비교용 {lv.secondary} · 아래 표는 100 기준이에요</p>}
+                {lv.secondary && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-2) 0 0' }}>비교용 {lv.secondary} · 아래 표는 {basisPhrase(result.nutrition?.basis ?? null, result.product)}이에요</p>}   {/* ★ 세션82 F4 — 종전 «100 기준»(단위 빠짐) → 표 머리와 같은 basisPhrase */}
               </div>
             )
           })()}
+          {/* ★ 세션82 F3 — 비교 카드(식약처)를 판매처 «포장지 표시» 바로 아래에 */}
+          {result.web_label?.kfind_supplement?.role === 'compare' && kfindSupplementView(result) && (() => { const kv = kfindSupplementView(result)!; return (
+            <div className="survey-card" data-testid="kfind-supplement" style={{ marginBottom: 'var(--space-4)' }}>
+              <h3 className="survey-step-title" style={{ fontSize: 16 }}>{kv.title}</h3>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-1) 0 var(--space-2)' }}>영양성분{kv.basisLabel ? ` (${kv.basisLabel})` : ''} · 신호등 판정에는 쓰지 않아요</div>
+              <div style={{ fontSize: 13, lineHeight: 1.7 }}>{kv.rows.map((r) => <div key={r.label}>{r.label} {r.value}{r.unit}</div>)}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>{kv.sourceLine}</div>
+            </div>) })()}
 
           {result.nutrition && completeness?.nutrition.state === 'present' && (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
@@ -1664,15 +1685,15 @@ export default function Scan() {
             </div>
           )}
 
-          {/* 내 기준으로 보기 — 먹선 신호등 색 소비(자체 판정 없음). null=판정없음(안전 아님). */}
-          {personal && personal.applicable ? (
+          {/* 내 기준으로 보기 — 먹선 신호등 색 소비(자체 판정 없음). null=판정없음(안전 아님).
+              ★ 세션82 F1 — 문구·분기 정본 domain/meokseon/personalize.ts personalSummary(정답 IP/meokseon/eval_personal_summary_v1).
+              «먹선 신호등 기준 양호합니다» 금지(설문 범위만 봤으므로) · 목표 밖 빨강은 따로 한 줄. */}
+          {myView && personal && personal.applicable ? (
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>내 기준으로 보기</h3>
-              {personal.warnings.length > 0 ? (
+              {myView.mode === 'warn' ? (
                 <>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
-                    내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)
-                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>{myView.headline}</p>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
                     {personal.warnings.map((f) => (
                       <li key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', fontSize: 14 }}>
@@ -1681,23 +1702,29 @@ export default function Scan() {
                       </li>
                     ))}
                   </ul>
+                  {myView.otherRedLine && renderOtherRed(myView.otherRedLine)}
                   {/* 주의 항목 «아래»·작게 — 문구를 가리거나 밀어내지 않는다(혼내지 않음 · C2 팁). */}
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-2)' }}><CoachAvatar pose="c2_advice" size={48} /></div>
                 </>
-              ) : personal.judgedCount > 0 && !personal.hasUnknown ? (
-                // 엄지척은 «전부 판정 + 주의 0»에서만. 회색(판정 없음)이 섞이면 이 분기에 오지 않는다.
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <CoachAvatar pose="a1_thumbs" size={48} />
-                  <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>내 설문 기준으로 주의할 항목은 없어요. 먹선 신호등 기준 양호합니다. 🙆</p>
-                </div>
               ) : (
+                // 엄지척은 «설문 항목 전부 판정 + 주의 0 + 목표 밖 빨강 0»에서만(myView.thumbs).
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <CoachAvatar pose="b4_think" size={48} />
-                  <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)</p>
+                  {myView.thumbs ? <CoachAvatar pose="a1_thumbs" size={48} />
+                    : myView.mode === 'ok' ? <CoachAvatar pose="c2_advice" size={48} />
+                    : <CoachAvatar pose="b4_think" size={48} />}
+                  <div>
+                    <p style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{myView.headline}</p>
+                    {myView.otherRedLine && renderOtherRed(myView.otherRedLine)}
+                  </div>
                 </div>
               )}
             </div>
           ) : (
+            <>
+              {/* ★ 세션82 F1 — 설문 없음/관련 목표 없음이어도 빨강은 알린다(설문 유도 카드는 흐림 처리라 그 밖에 둔다). */}
+              {myView?.otherRedLine && (
+                <div className="survey-card" style={{ marginBottom: 'var(--space-3)' }}>{renderOtherRed(myView.otherRedLine)}</div>
+              )}
             <div className="survey-card" style={{ marginBottom: 'var(--space-4)', position: 'relative', overflow: 'hidden' }}>
               <h3 className="survey-step-title" style={{ fontSize: 16 }}>내 기준으로 보기</h3>
               <div style={{ filter: 'blur(5px)', userSelect: 'none', pointerEvents: 'none', color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.8 }}>
@@ -1713,6 +1740,7 @@ export default function Scan() {
                 </button>
               </div>
             </div>
+            </>
           )}
 
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>

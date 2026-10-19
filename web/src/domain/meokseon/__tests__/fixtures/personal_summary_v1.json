@@ -1,0 +1,557 @@
+{
+ "name": "eval_personal_summary_v1 («내 기준으로 보기» 요약 문구 · 목표 밖 빨강)",
+ "fixed_at": "2026-10-19 11:2x 세션82 · 구현 전 고정",
+ "why": "세션82 육안 확인: 웹 스캔은 신호등 색을 개인화 카드에서만 쓴다. 혈당관리 계정이 나트륨 2950mg(red) 제품에서 «주의할 항목은 없어요. 먹선 신호등 기준 양호합니다 🙆»를 봄 — 설문 범위만 판정하고 제품 전체가 양호한 것처럼 말함. 설문 없는 사용자는 빨강을 어디서도 못 봄.",
+ "rules": [
+  "R1 판정·색은 먹선 traffic_light 그대로 소비(64 v2 유지 · 자체 임계 없음).",
+  "R2 «양호합니다» 문구 금지(banned). ok 는 범위 한정 문구 head_ok — items = 설문으로 고른 limit 영양소 라벨(neutral 탄수·열량 제외) · 고정 순서 나트륨→당류→포화지방→트랜스지방→콜레스테롤 · '·'로 잇기.",
+  "R3 otherRedKeys = limit 영양소(sodium·sugars·sat_fat·trans_fat·cholesterol) 중 color==='red' 이면서 설문으로 고르지 않은 것 · 고정 순서. yellow·green·null·protein·fiber 는 넣지 않음.",
+  "R4 otherRedLine: 설문 적용(applicable) → red_outside · 설문 없음/관련 목표 없음 → red_plain · 비면 null. 조사 이/가 = 마지막 라벨 받침.",
+  "R5 mode: 설문 없음 → no_survey · applicable=false → not_applicable · warnings>0 → warn · judgedCount>0 && !hasUnknown → ok · 그 밖 → unknown. headline: warn/ok/unknown 만(no_survey·not_applicable 은 null · 기존 설문 유도 화면 유지).",
+  "R6 thumbs(엄지) = mode ok && otherRedKeys 비어 있음."
+ ],
+ "wording": {
+  "head_warn": "내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)",
+  "head_ok": "내 설문 기준으로 본 {items}: 먹선 신호등으로 주의 수준이 아니에요.",
+  "head_unknown": "이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)",
+  "red_outside": "설문 항목 밖이지만 {labels}{iga} 먹선 신호등 빨강이에요.",
+  "red_plain": "이 제품은 {labels}{iga} 먹선 신호등 빨강이에요.",
+  "banned": "먹선 신호등 기준 양호합니다"
+ },
+ "cases": [
+  {
+   "id": "PS01",
+   "why": "실측 반례 10-19: K-FIND 꼬치어묵(냉장) P120-104010400-1992 나트륨 2950mg red · 혈당관리 계정 → 종전 «양호합니다 🙆»",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 당류: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS02",
+   "why": "목표 안·밖 전부 green → 엄지(범위 한정 문구)",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "green"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 당류: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": true
+   }
+  },
+  {
+   "id": "PS03",
+   "why": "목표 안 red → 주의 목록 · 같은 영양소를 밖 빨강으로 중복하지 않음",
+   "answers": {
+    "기저질환": [
+     "고혈압"
+    ],
+    "목표": []
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "warn",
+    "headline": "내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)",
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS04",
+   "why": "목표 안 yellow + 목표 밖 red → 주의 + 밖 빨강 줄",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "yellow"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "warn",
+    "headline": "내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS05",
+   "why": "목표 영양소 판정 없음 + 밖 red → 판정 어려움 + 밖 빨강 줄(안전 문구 금지)",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": null
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "unknown",
+    "headline": "이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS06",
+   "why": "설문 없음 + red 2개 → 일반 빨강 줄(정해진 순서 · 조사는 마지막 낱말)",
+   "answers": null,
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "red"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "no_survey",
+    "headline": null,
+    "otherRedKeys": [
+     "sodium",
+     "saturated_fat"
+    ],
+    "otherRedLine": "이 제품은 나트륨·포화지방이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS07",
+   "why": "설문 없음 + 전부 green → 줄 없음",
+   "answers": null,
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "green"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "no_survey",
+    "headline": null,
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS08",
+   "why": "설문은 했지만 관련 목표 없음(피로회복) + 당류 red → «당류가»",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "피로회복"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "green"
+     },
+     "sugars": {
+      "color": "red"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "not_applicable",
+    "headline": null,
+    "otherRedKeys": [
+     "total_sugars"
+    ],
+    "otherRedLine": "이 제품은 당류가 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS09",
+   "why": "traffic_light 없음 → 판정 어려움 · 밖 빨강 없음(fail-open 금지)",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": null,
+   "expect": {
+    "mode": "unknown",
+    "headline": "이 제품은 먹선 신호등 정보가 부족해 내 기준으로 판정하기 어려워요. (안전하다는 뜻은 아니에요.)",
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS10",
+   "why": "고혈압 sodium green + 트랜스·콜레 red → 범위 문구 + 밖 빨강 2개",
+   "answers": {
+    "기저질환": [
+     "고혈압"
+    ],
+    "목표": []
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "green"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "red"
+     },
+     "cholesterol": {
+      "color": "red"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 나트륨: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [
+     "trans_fat",
+     "cholesterol"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 트랜스지방·콜레스테롤이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS11",
+   "why": "목표 밖 yellow 는 알리지 않음(빨강만) → 엄지 유지",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "혈당관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "yellow"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 당류: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": true
+   }
+  },
+  {
+   "id": "PS12",
+   "why": "protein/fiber red(권장 성분)는 빨강 줄 대상 아님",
+   "answers": null,
+   "trafficLight": {
+    "nutrients": {
+     "protein": {
+      "color": "red"
+     },
+     "fiber": {
+      "color": "red"
+     },
+     "sodium": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "no_survey",
+    "headline": null,
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS13",
+   "why": "고지혈증 전부 green + 나트륨 red → 항목 3개 나열",
+   "answers": {
+    "기저질환": [
+     "고지혈증"
+    ],
+    "목표": []
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 포화지방·트랜스지방·콜레스테롤: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS14",
+   "why": "판매처 신호등 off(traffic_light null) + 설문 없음 → 아무 줄 없음",
+   "answers": null,
+   "trafficLight": null,
+   "expect": {
+    "mode": "no_survey",
+    "headline": null,
+    "otherRedKeys": [],
+    "otherRedLine": null,
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS15",
+   "why": "당뇨 당류 red + 나트륨 red → 주의 + 밖 빨강",
+   "answers": {
+    "기저질환": [
+     "당뇨"
+    ],
+    "목표": []
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "red"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "warn",
+    "headline": "내 설문 기준으로 주의해서 볼 항목이에요. 판정은 먹선 영양 신호등 기준입니다. (진단이 아닌 생활관리 참고)",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  },
+  {
+   "id": "PS16",
+   "why": "체중관리(열량 neutral) → 항목 나열은 판정한 limit 만(당류)",
+   "answers": {
+    "기저질환": [],
+    "목표": [
+     "체중관리"
+    ]
+   },
+   "trafficLight": {
+    "nutrients": {
+     "sodium": {
+      "color": "red"
+     },
+     "sugars": {
+      "color": "green"
+     },
+     "sat_fat": {
+      "color": "green"
+     },
+     "trans_fat": {
+      "color": "green"
+     },
+     "cholesterol": {
+      "color": "green"
+     }
+    }
+   },
+   "expect": {
+    "mode": "ok",
+    "headline": "내 설문 기준으로 본 당류: 먹선 신호등으로 주의 수준이 아니에요.",
+    "otherRedKeys": [
+     "sodium"
+    ],
+    "otherRedLine": "설문 항목 밖이지만 나트륨이 먹선 신호등 빨강이에요.",
+    "thumbs": false
+   }
+  }
+ ]
+}
