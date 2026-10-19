@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
 import { personalSummary } from '../domain/meokseon/personalize'   // ★ 세션82 F1
+import { trafficCardView, TC_TITLE } from '../domain/meokseon/trafficCard'   // ★ 세션82 신호등 카드
 import { withGoals } from '../domain/goals/goals'
 import { loadEffectiveGoals } from '../lib/userGoals'
 import { MEAL_ENABLED } from '../lib/flags'
@@ -1684,6 +1685,38 @@ export default function Scan() {
               )}
             </div>
           )}
+
+          {/* ★ 세션82 — «먹선 영양 신호등» 카드(제이 10-19 «새로 넣어»). 뷰·문구 정본 domain/meokseon/trafficCard.ts
+              (정답 IP/meokseon/eval_traffic_card_v1). 색은 서버 traffic_light 그대로 · 텍스트·모양 병기 · 결측은 «정보 없음». */}
+          {(() => {
+            const tc = trafficCardView(result.traffic_light ?? null)
+            if (!tc) return null
+            const dot: Record<string, string> = { red: 'var(--danger)', yellow: 'var(--warning)', green: 'var(--success)', gray: 'var(--border-light)', none: 'var(--border-light)' }
+            return (
+              <div className="survey-card" data-testid="traffic-card" data-mode={tc.mode} style={{ marginBottom: 'var(--space-4)' }}>
+                <h3 className="survey-step-title" style={{ fontSize: 16 }}>{TC_TITLE}</h3>
+                {tc.rows.length > 0 && (
+                  <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse', marginTop: 'var(--space-1)' }}>
+                    <tbody>
+                      {tc.rows.map((r) => (
+                        <tr key={r.key} data-tone={r.tone} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                          <td style={{ padding: 'var(--space-2) 0', color: 'var(--text-secondary)' }}>{r.label}</td>
+                          <td style={{ padding: 'var(--space-2) 0', whiteSpace: 'nowrap' }}>
+                            <span aria-hidden="true" style={{ color: dot[r.tone], marginRight: 6 }}>{r.shape}</span>
+                            <strong style={{ fontWeight: r.tone === 'none' ? 400 : 600, color: r.tone === 'none' ? 'var(--text-muted)' : 'var(--text)' }}>{r.text}</strong>
+                          </td>
+                          <td style={{ padding: 'var(--space-2) 0', textAlign: 'right', fontSize: 12, color: 'var(--text-muted)' }}>{r.detail}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+                {tc.notes.map((n, i) => (
+                  <p key={i} style={{ fontSize: 12, color: 'var(--text-muted)', margin: 'var(--space-2) 0 0', lineHeight: 1.6 }}>{n}</p>
+                ))}
+              </div>
+            )
+          })()}
 
           {/* 내 기준으로 보기 — 먹선 신호등 색 소비(자체 판정 없음). null=판정없음(안전 아님).
               ★ 세션82 F1 — 문구·분기 정본 domain/meokseon/personalize.ts personalSummary(정답 IP/meokseon/eval_personal_summary_v1).

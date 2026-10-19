@@ -1,0 +1,79 @@
+{
+  "name": "eval_traffic_card_v1 (웹 스캔 «먹선 영양 신호등» 카드)",
+  "fixed_at": "2026-10-19 13:4x 세션82 · 구현 전 고정",
+  "decision": "제이 10-19 13:26 «새로 넣어» — 웹 스캔에 전 영양소 신호등 카드 신설(앱 result_screen 대응).",
+  "rules": [
+    "R1 색은 서버 traffic_light 그대로(웹 판정 없음 · 64 v2 원칙). traffic_light 없음 → 카드 없음(판매처 신호등 off·nutrition 미저장 경로 보존).",
+    "R2 is_excluded → 사유 문구 1줄(행 없음). is_withheld → 서버 context_messages[0](없으면 기본 문구) · 행 없음.",
+    "R3 행 8개 고정 순서: 나트륨·당류·포화지방·지방·트랜스지방·콜레스테롤(제한) · 단백질·식이섬유(권장). 결측·null → «정보 없음» ○(— 금지 · off_integration 11.1-4).",
+    "R4 색 단독 금지: 텍스트(제한 높음/보통/낮음 · 권장 많음/보통/적음) + 모양(▲◆●○) 병기(WCAG 1.4.1).",
+    "R5 근거: pct_dv → «1일 기준치의 N%»(소수 1자리) · per_100g/per_100ml → «100g당/100ml당 값+단위» · absolute → «값g» · 없으면 빈칸.",
+    "R6 안내 문구: context_messages 는 화이트리스트(«건조식품으로…»)만 · 발효·견과 «건강 유익/건강한 지방»은 가드레일(단정 표현) 충돌로 표시 안 함 · multi_serving.message 표시 · 정보 없음 행이 있으면 missing_note · 정상 카드 끝에 footer.",
+    "R7 8행 전부 정보 없음 또는 nutrients 비었음(제외·보류 아님) → 카드 없음."
+  ],
+  "wording": {
+    "title": "먹선 영양 신호등",
+    "footer": "영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요.",
+    "missing_note": "«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.",
+    "excluded": {
+      "alcohol": "주류는 영양 신호등 평가 대상이 아니에요.",
+      "supplement": "건강기능식품은 별도 기준이 적용돼 영양 신호등을 표시하지 않아요.",
+      "raw_ingredient": "원료 식품(미가공)은 영양 신호등 평가 대상이 아니에요.",
+      "_other": "이 제품은 영양 신호등 평가 대상이 아니에요."
+    },
+    "withheld_default": "라벨의 영양성분 기준을 확정하지 못해 판정을 보류했어요.",
+    "limit": {
+      "red": [
+        "높음",
+        "▲"
+      ],
+      "yellow": [
+        "보통",
+        "◆"
+      ],
+      "green": [
+        "낮음",
+        "●"
+      ]
+    },
+    "encourage": {
+      "green": [
+        "많음",
+        "●"
+      ],
+      "yellow": [
+        "보통",
+        "◆"
+      ],
+      "gray": [
+        "적음",
+        "○"
+      ]
+    },
+    "none": [
+      "정보 없음",
+      "○"
+    ],
+    "context_whitelist_prefix": [
+      "건조식품으로"
+    ]
+  },
+  "cases": [
+    {"id":"TC01","why":"실측 K-FIND 꼬치어묵(냉장) P120-104010400-1992 — 나트륨 red 가 화면 어디에도 안 보이던 사례","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"cholesterol":{"color":"green","basis":"pct_dv","pct_dv":7.7,"per_100":null,"amount":null,"data":"present"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":"green","basis":"pct_dv","pct_dv":21.8,"per_100":null,"amount":null,"data":"present"},"sat_fat":{"color":"green","basis":"pct_dv","pct_dv":6.7,"per_100":1,"amount":null,"data":"present"},"sodium":{"color":"red","basis":"pct_dv","pct_dv":147.5,"per_100":2950,"amount":null,"data":"present"},"sugars":{"color":"green","basis":"pct_dv","pct_dv":5,"per_100":5,"amount":null,"data":"present"},"total_fat":{"color":"yellow","basis":"per_100g","pct_dv":7.4,"per_100":4,"amount":null,"data":"present"},"trans_fat":{"color":"green","basis":"absolute","pct_dv":null,"per_100":null,"amount":0,"data":"present"}}},"expect":{"mode":"normal","rows":["나트륨|높음|▲|1일 기준치의 147.5%","당류|낮음|●|1일 기준치의 5%","포화지방|낮음|●|1일 기준치의 6.7%","지방|보통|◆|100g당 4g","트랜스지방|낮음|●|0g","콜레스테롤|낮음|●|1일 기준치의 7.7%","단백질|많음|●|1일 기준치의 21.8%","식이섬유|정보 없음|○|"],"notes":["«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC02","why":"실측 신라면 — 나트륨 등 결측(대표값 정책) · 결측은 «정보 없음»(— 금지)","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"sodium":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sugars":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":"red","basis":"pct_dv","pct_dv":29.6,"per_100":13.33,"amount":null,"data":"present"},"trans_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":"green","basis":"pct_dv","pct_dv":18.2,"per_100":null,"amount":null,"data":"present"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":"normal","rows":["나트륨|정보 없음|○|","당류|정보 없음|○|","포화지방|정보 없음|○|","지방|높음|▲|1일 기준치의 29.6%","트랜스지방|정보 없음|○|","콜레스테롤|정보 없음|○|","단백질|많음|●|1일 기준치의 18.2%","식이섬유|정보 없음|○|"],"notes":["«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC03","why":"실측 쇠고기 육포 — 건조 안내(화이트리스트) + 다회분 안내(서버 문구)","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":true,"context_messages":["건조식품으로 100g당 수치가 높게 표시됩니다. 1회 제공량 기준으로 판정하였습니다."],"multi_serving":{"servings_per_container":2,"message":"이 제품은 2회분입니다. 전량 섭취 시 수치가 2배가 됩니다."},"nutrients":{"sodium":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sugars":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":"green","basis":"pct_dv","pct_dv":2.8,"per_100":null,"amount":null,"data":"present"},"trans_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":"green","basis":"pct_dv","pct_dv":21.4,"per_100":null,"amount":null,"data":"present"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":"normal","rows":["나트륨|정보 없음|○|","당류|정보 없음|○|","포화지방|정보 없음|○|","지방|낮음|●|1일 기준치의 2.8%","트랜스지방|정보 없음|○|","콜레스테롤|정보 없음|○|","단백질|많음|●|1일 기준치의 21.4%","식이섬유|정보 없음|○|"],"notes":["건조식품으로 100g당 수치가 높게 표시됩니다. 1회 제공량 기준으로 판정하였습니다.","이 제품은 2회분입니다. 전량 섭취 시 수치가 2배가 됩니다.","«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC04","why":"주류 제외","traffic_light":{"is_excluded":true,"exclude_reason":"alcohol","is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{}},"expect":{"mode":"excluded","rows":[],"notes":["주류는 영양 신호등 평가 대상이 아니에요."]}},
+    {"id":"TC05","why":"건강기능식품 제외","traffic_light":{"is_excluded":true,"exclude_reason":"supplement","is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{}},"expect":{"mode":"excluded","rows":[],"notes":["건강기능식품은 별도 기준이 적용돼 영양 신호등을 표시하지 않아요."]}},
+    {"id":"TC06","why":"원료 식품 제외","traffic_light":{"is_excluded":true,"exclude_reason":"raw_ingredient","is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{}},"expect":{"mode":"excluded","rows":[],"notes":["원료 식품(미가공)은 영양 신호등 평가 대상이 아니에요."]}},
+    {"id":"TC07","why":"모르는 제외 사유 → 일반 문구","traffic_light":{"is_excluded":true,"exclude_reason":"weird","is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{}},"expect":{"mode":"excluded","rows":[],"notes":["이 제품은 영양 신호등 평가 대상이 아니에요."]}},
+    {"id":"TC08","why":"판정 보류(basis_unknown) → 서버 문구 그대로 · 행 없음","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":["이 라벨에서 영양성분이 무엇을 기준으로 적힌 것인지(총 내용량 당 / 100 g 당 / 1회 제공량 당) 확인하지 못했습니다. 기준을 모르는 상태로 계산하면 실제와 크게 달라질 수 있어 판정을 보류합니다."],"multi_serving":null,"nutrients":{"sodium":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"sugars":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"sat_fat":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"total_fat":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"trans_fat":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"cholesterol":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"protein":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"},"fiber":{"color":null,"pct_dv":null,"per_100":null,"basis":"unknown","data":"withheld"}},"is_withheld":true,"withhold_reason":"basis_unknown"},"expect":{"mode":"withheld","rows":[],"notes":["이 라벨에서 영양성분이 무엇을 기준으로 적힌 것인지(총 내용량 당 / 100 g 당 / 1회 제공량 당) 확인하지 못했습니다. 기준을 모르는 상태로 계산하면 실제와 크게 달라질 수 있어 판정을 보류합니다."]}},
+    {"id":"TC09","why":"판정 보류 · 서버 문구 없음 → 기본 문구","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{},"is_withheld":true,"withhold_reason":"x"},"expect":{"mode":"withheld","rows":[],"notes":["라벨의 영양성분 기준을 확정하지 못해 판정을 보류했어요."]}},
+    {"id":"TC10","why":"발효·견과 안내는 «단정 표현» 가드레일과 충돌 → 표시 안 함","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":["발효식품은 나트륨이 높으나, 유산균·식이섬유 등 건강 유익 성분이 함께 포함되어 있습니다.","지방 함량이 높지만, 불포화지방산이 풍부한 건강한 지방입니다."],"multi_serving":null,"nutrients":{"sodium":{"color":"red","basis":"per_100g","pct_dv":60,"per_100":1500,"amount":null,"data":"present"},"sugars":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"trans_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":"normal","rows":["나트륨|높음|▲|100g당 1500mg","당류|정보 없음|○|","포화지방|정보 없음|○|","지방|정보 없음|○|","트랜스지방|정보 없음|○|","콜레스테롤|정보 없음|○|","단백질|정보 없음|○|","식이섬유|정보 없음|○|"],"notes":["«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC11","why":"권장 성분 gray(5% 미만) → «적음» · 전부 판정됨 → missing_note 없음","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"sodium":{"color":"green","basis":"pct_dv","pct_dv":3,"per_100":null,"amount":null,"data":"present"},"sugars":{"color":"green","basis":"pct_dv","pct_dv":2,"per_100":null,"amount":null,"data":"present"},"sat_fat":{"color":"green","basis":"pct_dv","pct_dv":1,"per_100":null,"amount":null,"data":"present"},"total_fat":{"color":"green","basis":"pct_dv","pct_dv":2,"per_100":null,"amount":null,"data":"present"},"trans_fat":{"color":"green","basis":"absolute","pct_dv":null,"per_100":null,"amount":0,"data":"present"},"cholesterol":{"color":"green","basis":"pct_dv","pct_dv":0,"per_100":null,"amount":null,"data":"present"},"protein":{"color":"gray","basis":"pct_dv","pct_dv":2,"per_100":null,"amount":null,"data":"present"},"fiber":{"color":"gray","basis":"pct_dv","pct_dv":1,"per_100":null,"amount":null,"data":"present"}}},"expect":{"mode":"normal","rows":["나트륨|낮음|●|1일 기준치의 3%","당류|낮음|●|1일 기준치의 2%","포화지방|낮음|●|1일 기준치의 1%","지방|낮음|●|1일 기준치의 2%","트랜스지방|낮음|●|0g","콜레스테롤|낮음|●|1일 기준치의 0%","단백질|적음|○|1일 기준치의 2%","식이섬유|적음|○|1일 기준치의 1%"],"notes":["영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC12","why":"음료 per_100ml","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"sodium":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sugars":{"color":"red","basis":"per_100ml","pct_dv":30,"per_100":12,"amount":null,"data":"present"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"trans_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":"normal","rows":["나트륨|정보 없음|○|","당류|높음|▲|100ml당 12g","포화지방|정보 없음|○|","지방|정보 없음|○|","트랜스지방|정보 없음|○|","콜레스테롤|정보 없음|○|","단백질|정보 없음|○|","식이섬유|정보 없음|○|"],"notes":["«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}},
+    {"id":"TC13","why":"traffic_light 없음(판매처 신호등 off 등) → 카드 없음","traffic_light":null,"expect":{"mode":null,"rows":[],"notes":[]}},
+    {"id":"TC14","why":"nutrients 비었고 제외·보류도 아님 → 카드 없음","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{}},"expect":{"mode":null,"rows":[],"notes":[]}},
+    {"id":"TC15","why":"전부 정보 없음 → 카드 없음(빈 표만 남는 화면 금지)","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"sodium":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sugars":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"trans_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":null,"rows":[],"notes":[]}},
+    {"id":"TC16","why":"pct_dv 소수 → 소수 1자리 · 트랜스 0.3g yellow","traffic_light":{"is_excluded":false,"exclude_reason":null,"is_dried_exception":false,"context_messages":[],"multi_serving":null,"nutrients":{"sodium":{"color":"yellow","basis":"pct_dv","pct_dv":12.345,"per_100":null,"amount":null,"data":"present"},"sugars":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"sat_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"total_fat":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"trans_fat":{"color":"yellow","basis":"absolute","pct_dv":null,"per_100":null,"amount":0.3,"data":"present"},"cholesterol":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"protein":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"},"fiber":{"color":null,"basis":null,"pct_dv":null,"per_100":null,"amount":null,"data":"missing"}}},"expect":{"mode":"normal","rows":["나트륨|보통|◆|1일 기준치의 12.3%","당류|정보 없음|○|","포화지방|정보 없음|○|","지방|정보 없음|○|","트랜스지방|보통|◆|0.3g","콜레스테롤|정보 없음|○|","단백질|정보 없음|○|","식이섬유|정보 없음|○|"],"notes":["«정보 없음»은 값이 없어 판정하지 않은 항목이에요. 들어 있지 않다는 뜻이 아니에요.","영양소마다 따로 판정해요(종합 점수 아님) · KDRI·식약처 표시 기준 · 진단이 아닌 생활관리 참고예요."]}}
+  ]
+}
