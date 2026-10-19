@@ -260,7 +260,7 @@ export const SUPPLEMENTS: SupplementData[] = [
       "장건강": 1
     },
     "dosage_guide": {
-      "amount": "B-Complex 제품 1일 섭취량 기준 (비타민B6 하루 총 50mg 이하 · 니코틴산 형태 나이아신 35mg 이하)",
+      "amount": "B-Complex 제품 1일 섭취량 기준 · 식품·다른 영양제 포함 비타민B6 하루 총 50mg 이하 · 나이아신 상한은 니코틴산 35mg NE / 니코틴아미드 850mg NE (라벨에서 형태를 모르면 35mg 기준)",
       "timing": "아침 식후",
       "form": "B-Complex 형태(종합) 추천"
     },
@@ -305,7 +305,7 @@ export const SUPPLEMENTS: SupplementData[] = [
       "심혈관": 1
     },
     "dosage_guide": {
-      "amount": "250~350mg/일 (원소 마그네슘 기준 · 보충제 상한 350mg)",
+      "amount": "제품 1일 섭취량 기준 · 보충제·의약품으로 드시는 원소 마그네슘은 하루 합계 350mg 이하",
       "timing": "저녁 식후 또는 취침 1시간 전",
       "form": "글리시네이트·말레이트 형태 추천 (산화마그네슘보다 흡수율 4배)"
     },
@@ -696,7 +696,7 @@ export const SUPPLEMENTS: SupplementData[] = [
       "여성": 3
     },
     "dosage_guide": {
-      "amount": "18~35mg/일 (원소 철분 기준, 여성 기준 · 식사 포함 하루 총 45mg 이하)",
+      "amount": "제품 1일 섭취량 기준 · 식사와 영양제를 합한 하루 총 철 45mg 이하 · 보충 용량은 검사 결과·월경·임신 여부에 따라 의사·약사와 상의",
       "timing": "식간(공복)이 최적이나 위장 자극 시 식후 — 비타민C와 함께 복용",
       "form": "헴철 또는 피로인산철 추천 (황산철보다 흡수율 높고 부작용 적음)"
     },
@@ -907,7 +907,7 @@ export const SUPPLEMENTS: SupplementData[] = [
       "피로": 1
     },
     "dosage_guide": {
-      "amount": "천연 비타민E(d-알파-토코페롤) 기준 15mg(22 IU)/일 — 상한 540mg α-TE/일",
+      "amount": "천연 비타민E(d-알파-토코페롤) 기준 15mg(22 IU)/일 — 식사와 영양제를 합한 하루 총 상한 540mg α-TE",
       "timing": "지방 포함 식사와 함께 (아침 또는 점심 권장)",
       "form": "천연형(d-알파-토코페롤) > 합성형(dl-알파-토코페롤), 혼합 토코페롤 제품 권장"
     },

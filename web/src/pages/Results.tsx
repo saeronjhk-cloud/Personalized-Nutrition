@@ -1,10 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { RecommendationResult, SurveyAnswers, Supplement, ScoreBreakdown } from '../types'
 import { saveSurveyRecord } from '../lib/surveyHistory'
 import { useSurveyHistory } from '../lib/surveyHistoryRemote'
-import { SUPPLEMENT_CHECK_ENABLED } from '../lib/flags'
+import { SUPPLEMENT_CHECK_ENABLED, SUPP_UL_ENABLED } from '../lib/flags'
 import { reduceCheck } from '../domain/supplement/reduce_check'
+import { supplementCheckLines, UL_MIN_AGE } from '../domain/supplement/ul_check'
+import { dosesFor, doseProductsFor, type DoseStore } from '../domain/supplement/ul_dose'
+import { loadDoseStore, saveDoseStore } from '../lib/suppDoseStore'
+import SuppDoseForm from '../components/results/SuppDoseForm'
 
 interface Props {
   result: RecommendationResult | null
@@ -27,6 +31,9 @@ export default function Results({
 }: Props) {
   // 비교 카드용 기록 수 — 로그인 사용자는 서버 우선(IP/integration/survey_history_server_eval_v1.md)
   const { history: surveyHistory } = useSurveyHistory()
+  // 합계 점검 v0(플래그 OFF 기본) — 라벨 함량 입력은 기기 안 저장
+  const [doseStore, setDoseStore] = useState<DoseStore>(() => (SUPP_UL_ENABLED ? loadDoseStore() : {}))
+  const [doseOpen, setDoseOpen] = useState(false)
   if (error) {
     return (
       <div className="fade-in" style={{ paddingTop: '15vh', textAlign: 'center' }}>
@@ -164,14 +171,32 @@ export default function Results({
 
       {/* 지금 드시는 영양제 점검(감축형 v1 · 플래그 OFF 기본) — 판정·문구는 reduceCheck 한 곳 */}
       {(() => {
-        const lines = SUPPLEMENT_CHECK_ENABLED ? reduceCheck(answers) : []
-        if (lines.length === 0) return null
+        if (!SUPPLEMENT_CHECK_ENABLED) return null
+        const ulOn = SUPP_UL_ENABLED
+        const cur = answers?.현재복용영양제 ?? []
+        const lines = ulOn
+          ? supplementCheckLines(answers, dosesFor(doseStore, cur), true)
+          : reduceCheck(answers).map((l) => ({ key: l.id, text: l.text }))
+        const products = ulOn && typeof answers?.나이 === 'number' && answers.나이 >= UL_MIN_AGE ? doseProductsFor(cur) : []
+        if (lines.length === 0 && products.length === 0) return null
         return (
           <div className="survey-card" data-testid="supplement-check" style={{ marginBottom: 'var(--space-4)' }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>🔎 지금 드시는 영양제 점검</div>
-            <ul style={{ margin: 'var(--space-2) 0 0', paddingLeft: '1.1em', fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
-              {lines.map((l) => <li key={l.id}>{l.text}</li>)}
-            </ul>
+            {lines.length > 0 && (
+              <ul style={{ margin: 'var(--space-2) 0 0', paddingLeft: '1.1em', fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)' }}>
+                {lines.map((l) => <li key={l.key}>{l.text}</li>)}
+              </ul>
+            )}
+            {products.length > 0 && (
+              <button type="button" data-testid="supp-dose-toggle" onClick={() => setDoseOpen((o) => !o)}
+                style={{ marginTop: 'var(--space-2)', background: 'none', border: 'none', padding: 0, color: 'var(--accent)', fontSize: 13, cursor: 'pointer' }}>
+                {doseOpen ? '함량 입력 닫기' : '함량을 넣으면 하루 상한도 점검해 드려요 →'}
+              </button>
+            )}
+            {products.length > 0 && doseOpen && (
+              <SuppDoseForm products={products} store={doseStore}
+                onChange={(next) => { setDoseStore(next); saveDoseStore(next) }} />
+            )}
           </div>
         )
       })()}

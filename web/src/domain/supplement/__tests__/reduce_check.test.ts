@@ -45,7 +45,8 @@ describe("영양제 점검 v1.2 규칙·화면", () => {
   it("화면 연결 · 기본 OFF · 설문 문항 2개", () => {
     expect(SUPPLEMENT_CHECK_ENABLED).toBe(false);
     const res = readFileSync(resolve(__dirname, "../../../pages/Results.tsx"), "utf-8");
-    expect(res).toContain("SUPPLEMENT_CHECK_ENABLED ? reduceCheck(answers) : []");
+    expect(res).toContain("if (!SUPPLEMENT_CHECK_ENABLED) return null");
+    expect(res).toContain("reduceCheck(answers)");
     expect(res).toContain('data-testid="supplement-check"');
     expect(res).not.toContain("철분은 필요한 경우가");
     const q = readFileSync(resolve(__dirname, "../../../pages/Questions.tsx"), "utf-8");

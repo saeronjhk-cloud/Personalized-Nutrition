@@ -104,3 +104,10 @@ export const SUPPLEMENT_CHECK_ENABLED = import.meta.env.VITE_SUPPLEMENT_CHECK ==
  *   - 활성화: VITE_SUPP_DAILY=true
  */
 export const SUPP_DAILY_ENABLED = import.meta.env.VITE_SUPP_DAILY === 'true'
+
+/**
+ * SUPP_UL_ENABLED: «지금 드시는 영양제 점검» 상자에 영양제 함량 합계 점검(v0, KDRI-2025 UL) 추가. 기본 false.
+ *   - 문구·결정: IP/웹앱트랙_서박사_회신원문_용량안내U·합계점검Q_20261019.md · 평가셋 IP/evals/eval_supp_ul_v0.json
+ *   - 활성화: VITE_SUPP_UL=true (SUPPLEMENT_CHECK_ENABLED 도 켜져 있어야 화면에 보임)
+ */
+export const SUPP_UL_ENABLED = import.meta.env.VITE_SUPP_UL === 'true'
