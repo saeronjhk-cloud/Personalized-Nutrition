@@ -2,16 +2,19 @@
  * 영양제 함량 합계 점검 v0 (순수 · 결정론) — 사용자가 넣은 라벨 «1일 섭취량 기준 함량»을 성분별로 더해
  * 2025 KDRI 상한섭취량(UL) 이상일 때만 한 줄. 식사 몫은 더하지 않는다(실제 총섭취량을 과소평가할 수 있음).
  * 확정 문구·결정: IP/웹앱트랙_서박사_회신원문_용량안내U·합계점검Q_20261019.md (제이 B 통합안 10-19)
- * 평가셋: IP/evals/eval_supp_ul_v0.json (복사본 __tests__/fixtures/) · 기준 수치는 criteria/kdri.ts UL_V0 만(H134)
+ * v1(10-20): 니아신 형태별(니코틴산 35 / 니코틴아미드 850, 모름=35) · 설문 비타민B군·아연 제품 칸
+ * 평가셋: IP/evals/eval_supp_ul_v1.json (v0.2 승계) (복사본 __tests__/fixtures/) · 기준 수치는 criteria/kdri.ts UL_V0 만(H134)
  */
-import { UL_V0, type UlEntry } from "../criteria/kdri";
+import { UL_V0, NIACIN_UL_V1, type UlEntry } from "../criteria/kdri";
 import type { SurveyAnswers } from "../../types";
 import { reduceCandidates, REDUCE_MAX_LINES } from "./reduce_check";
 
-export type UlNutrientId = "vitamin_d" | "calcium" | "iron" | "zinc" | "vitamin_b6" | "vitamin_c" | "magnesium" | "folic_acid";
+export type UlNutrientId = "vitamin_d" | "calcium" | "iron" | "zinc" | "vitamin_b6" | "vitamin_c" | "magnesium" | "folic_acid" | "niacin";
+export type NiacinForm = "acid" | "amide" | "unknown";
+export type UlLineNutrient = UlNutrientId | "niacin_acid" | "niacin_amide";
 export type DoseUnit = "mg" | "μg" | "IU" | "μg DFE";
-export interface DoseEntry { n: UlNutrientId; v: unknown; u: DoseUnit }
-export interface UlLine { id: "UL"; n: UlNutrientId; sum: number; ul: number; text: string }
+export interface DoseEntry { n: UlNutrientId; v: unknown; u: DoseUnit; f?: NiacinForm }
+export interface UlLine { id: "UL"; n: UlLineNutrient; sum: number; ul: number; text: string; unknown?: boolean }
 
 /** 화면 이름 + 목적격 조사(을/를) — 읽는 소리 기준(비타민D=디, B6=식스, C=씨 → «를») */
 export const UL_LABEL: Record<UlNutrientId, { name: string; obj: "을" | "를" }> = {
@@ -23,7 +26,20 @@ export const UL_LABEL: Record<UlNutrientId, { name: string; obj: "을" | "를" }
   vitamin_c: { name: "비타민C", obj: "를" },
   magnesium: { name: "마그네슘", obj: "을" },
   folic_acid: { name: "합성 엽산", obj: "을" },
+  niacin: { name: "나이아신", obj: "을" },
 };
+
+/** 니아신 줄 이름 — 형태 모름이 하나라도 섞이면 «형태 모름» 표기(평가셋 N07) */
+export const NIACIN_LABEL = {
+  acid: { name: "나이아신(니코틴산)", obj: "을" },
+  amide: { name: "나이아신(니코틴아미드)", obj: "를" },
+  unknown: { name: "나이아신(형태 모름·니코틴산 기준)", obj: "을" },
+} as const;
+
+function lineText(name: string, obj: string, sum: number, ul: number, unit: string): string {
+  return UL_TEXT.replace("{name}", name).replace("{obj}", obj)
+    .replace("{sum}", fmt(sum)).replace("{ul}", fmt(ul)).split("{unit}").join(unit);
+}
 
 export const UL_TEXT =
   "입력하신 영양제의 {name}{obj} 합하면 하루 {sum}{unit}입니다. 영양제만으로도 2025 기준 상한({ul}{unit})에 도달했거나 넘으니, 총섭취량과 제품 조합을 확인해 주세요.";
@@ -49,6 +65,7 @@ export function fmt(x: number): string {
 export function sumDoses(doses: readonly DoseEntry[]): Partial<Record<UlNutrientId, number>> {
   const s: Partial<Record<UlNutrientId, number>> = {};
   for (const d of doses) {
+    if (d.n === "niacin") continue; // 니아신은 형태별로 ulCheck 에서 따로
     const c = toUlUnit(d.n, d.v, d.u);
     if (c === null) continue;
     s[d.n] = (s[d.n] ?? 0) + c;
@@ -68,9 +85,25 @@ export function ulCheck(sex: string | null | undefined, age: number | null | und
     const ul = e.ul(sex, age);
     if (sum + 1e-9 < ul) continue;
     const lab = UL_LABEL[id];
-    const text = UL_TEXT.replace("{name}", lab.name).replace("{obj}", lab.obj)
-      .replace("{sum}", fmt(sum)).replace("{ul}", fmt(ul)).split("{unit}").join(e.unit);
-    out.push({ id: "UL", n: id, sum, ul, text });
+    out.push({ id: "UL", n: id, sum, ul, text: lineText(lab.name, lab.obj, sum, ul, e.unit) });
+  }
+  // 니아신: 니코틴산(+모름) 묶음 vs 35 · 니코틴아미드 묶음 vs 850 — 서로 더하지 않음
+  let acid = 0, amide = 0, unknown = false, hasAcid = false, hasAmide = false;
+  for (const d of doses) {
+    if (d.n !== "niacin") continue;
+    const c = toUlUnit("niacin", d.v, d.u);
+    if (c === null) continue;
+    if (d.f === "amide") { amide += c; hasAmide = true; }
+    else { acid += c; hasAcid = true; if (d.f !== "acid") unknown = true; }
+  }
+  const U = NIACIN_UL_V1;
+  if (hasAcid && acid + 1e-9 >= U.acid) {
+    const lab = unknown ? NIACIN_LABEL.unknown : NIACIN_LABEL.acid;
+    out.push({ id: "UL", n: "niacin_acid", sum: acid, ul: U.acid, text: lineText(lab.name, lab.obj, acid, U.acid, U.unit), ...(unknown ? { unknown: true } : {}) });
+  }
+  if (hasAmide && amide + 1e-9 >= U.amide) {
+    const lab = NIACIN_LABEL.amide;
+    out.push({ id: "UL", n: "niacin_amide", sum: amide, ul: U.amide, text: lineText(lab.name, lab.obj, amide, U.amide, U.unit) });
   }
   return out;
 }

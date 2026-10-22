@@ -1,7 +1,7 @@
-/** 합계 점검 v0 — 라벨 «1일 섭취량 기준 함량» 입력(선택). 판정은 domain/supplement/ul_check.ts 한 곳. */
+/** 합계 점검 v1 (니아신 형태 선택 추가) — 라벨 «1일 섭취량 기준 함량» 입력(선택). 판정은 domain/supplement/ul_check.ts 한 곳. */
 import type { DoseStore, DoseValue } from '../../domain/supplement/ul_dose'
-import type { DOSE_PRODUCTS } from '../../domain/supplement/ul_dose'
-import { UL_NOTICE, type DoseUnit, type UlNutrientId } from '../../domain/supplement/ul_check'
+import { NIACIN_FORMS, type DOSE_PRODUCTS } from '../../domain/supplement/ul_dose'
+import { UL_NOTICE, type DoseUnit, type NiacinForm, type UlNutrientId } from '../../domain/supplement/ul_check'
 
 interface Props {
   products: typeof DOSE_PRODUCTS[number][]
@@ -14,7 +14,7 @@ export default function SuppDoseForm({ products, store, onChange }: Props) {
     const prev = store[pid]?.[n] ?? { v: '', u: units[0] }
     const nextVal = { ...prev, ...patch }
     const rec = { ...(store[pid] ?? {}) }
-    if (nextVal.v.trim() === '') delete rec[n]
+    if (nextVal.v.trim() === '' && !nextVal.f) delete rec[n]
     else rec[n] = nextVal
     onChange({ ...store, [pid]: rec })
   }
@@ -44,7 +44,13 @@ export default function SuppDoseForm({ products, store, onChange }: Props) {
                     onChange={(e) => set(p.id, f.n, { v: cur?.v ?? '', u: e.target.value as DoseUnit }, f.units)}>
                     {f.units.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
-                ) : <span style={{ width: 56 }}>{unit}</span>}
+                ) : <span style={{ width: 56 }}>{f.n === 'niacin' ? 'mg NE' : unit}</span>}
+                {f.forms ? (
+                  <select aria-label={`${p.label} ${f.label} 형태`} value={cur?.f ?? 'unknown'}
+                    onChange={(e) => set(p.id, f.n, { v: cur?.v ?? '', u: unit, f: e.target.value as NiacinForm }, f.units)}>
+                    {NIACIN_FORMS.filter((x) => f.forms!.includes(x.f)).map((x) => <option key={x.f} value={x.f}>{x.label}</option>)}
+                  </select>
+                ) : null}
               </label>
             )
           })}

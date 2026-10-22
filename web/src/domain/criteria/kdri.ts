@@ -40,3 +40,7 @@ export const UL_V0: readonly UlEntry[] = [
   { id: "magnesium", name: "마그네슘", unit: "mg", scope: "non_food_only", ul: () => 350 },
   { id: "folic_acid", name: "엽산(합성)", unit: "μg", scope: "synthetic_only", ul: () => 1000 },
 ];
+
+/** 니아신 UL (mg NE/일, 성인) — 형태별 따로 적용(총론 xxxvii). 니코틴아미드 2020 1,000 → 2025 850. 형태 모르면 니코틴산 기준(제이 결정 10-19 K2)
+ *  정본: IP/integration/kdri2025_v1/00_KDRI2025_상한섭취량_확인표_20261018.md 35·53행 */
+export const NIACIN_UL_V1 = { acid: 35, amide: 850, unit: "mg NE" } as const;
