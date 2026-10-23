@@ -3,6 +3,7 @@
  */
 
 import type { SurveyAnswers, RecommendationResult, Supplement, Persona, NutritionInfo, MonthlySummary } from '../types';
+import { isRecommendable } from './exclusions';
 import type { SupplementData, PersonaData } from './data';
 import {
   SUPPLEMENTS,
@@ -133,6 +134,7 @@ export function getRecommendations(
   for (const supp of SUPPLEMENTS) {
     // 차단 조건 체크
     if (current_ids.has(supp.id)) continue;
+    if (!isRecommendable(supp.id)) continue; // H149 식약처 기능성 근거 없는 원료 제외
     if (supp.blocked_conditions?.some((c: string) => conditions.includes(c))) continue;
 
     // 카테고리 점수 × 친화도

@@ -1,0 +1,475 @@
+{
+ "name": "not_recommended",
+ "version": "1.0",
+ "date": "2026-10-23",
+ "decision": "제이 10-23 17:40 «빼는 쪽으로 진행»",
+ "excluded": {
+  "lemon_balm": "수면·스트레스 기능성 인정 없음",
+  "red_clover": "고시·개별인정 없음"
+ },
+ "basis": "IP/integration/mfds_function_v1/00_식약처기능성문구_대조_20261023.md",
+ "simulation": "무작위 설문 3,000건(seed 42): 둘 중 하나 추천 528건(17.6%) · 레몬밤 169 · 레드클로버 360(1순위 124) · 운영 기록 11건 중 0건",
+ "rules": {
+  "R1": "제외 원료는 어떤 설문에서도 추천 목록에 없음(설문 엔진·홈 맞춤추천 공통 getRecommendations)",
+  "R2": "제외와 무관한 설문(X10~X13)은 추천 결과가 바뀌지 않음",
+  "R3": "SUPPLEMENTS 데이터는 남김(예전 기록 화면 호환)"
+ },
+ "cases": [
+  {
+   "id": "X01",
+   "label": "불면+불안 30대 여성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 34,
+    "증상": [
+     "cant_fall_asleep",
+     "wake_night",
+     "anxiety"
+    ],
+    "목표": [
+     "수면개선"
+    ]
+   },
+   "before": [
+    "gaba",
+    "magnesium",
+    "lemon_balm"
+   ],
+   "expected": [
+    "gaba",
+    "magnesium",
+    "vitamin_b"
+   ]
+  },
+  {
+   "id": "X02",
+   "label": "수면개선만 40대 남성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 45,
+    "증상": [
+     "cant_fall_asleep"
+    ],
+    "목표": [
+     "수면개선"
+    ]
+   },
+   "before": [
+    "gaba",
+    "magnesium",
+    "lemon_balm"
+   ],
+   "expected": [
+    "gaba",
+    "magnesium"
+   ]
+  },
+  {
+   "id": "X03",
+   "label": "스트레스·불안 20대 남성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 28,
+    "증상": [
+     "anxiety",
+     "low_mood"
+    ],
+    "목표": [
+     "수면개선",
+     "피로회복"
+    ]
+   },
+   "before": [
+    "magnesium",
+    "gaba",
+    "vitamin_b",
+    "lemon_balm",
+    "vitamin_d"
+   ],
+   "expected": [
+    "magnesium",
+    "vitamin_b",
+    "gaba",
+    "vitamin_d",
+    "red_ginseng"
+   ]
+  },
+  {
+   "id": "X04",
+   "label": "안면홍조 52세 여성 폐경",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 52,
+    "월경상태": "폐경",
+    "증상": [
+     "hot_flashes"
+    ],
+    "목표": [
+     "갱년기관리"
+    ]
+   },
+   "before": [
+    "red_clover",
+    "gamma_linolenic",
+    "saw_palmetto"
+   ],
+   "expected": [
+    "gamma_linolenic",
+    "calcium",
+    "saw_palmetto"
+   ]
+  },
+  {
+   "id": "X05",
+   "label": "갱년기관리+관절 58세 여성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 58,
+    "월경상태": "폐경",
+    "증상": [
+     "hot_flashes",
+     "joint_stiffness"
+    ],
+    "목표": [
+     "갱년기관리",
+     "근육증가"
+    ]
+   },
+   "before": [
+    "red_clover",
+    "calcium",
+    "msm",
+    "vitamin_k2"
+   ],
+   "expected": [
+    "calcium",
+    "msm",
+    "vitamin_k2",
+    "vitamin_d"
+   ]
+  },
+  {
+   "id": "X06",
+   "label": "갱년기관리 목표만 50세 여성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 50,
+    "증상": [],
+    "목표": [
+     "갱년기관리"
+    ]
+   },
+   "before": [
+    "red_clover",
+    "calcium",
+    "gamma_linolenic"
+   ],
+   "expected": [
+    "calcium",
+    "gamma_linolenic",
+    "vitamin_d"
+   ]
+  },
+  {
+   "id": "X07",
+   "label": "갱년기+수면 55세 여성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 55,
+    "월경상태": "폐경",
+    "증상": [
+     "hot_flashes",
+     "wake_night"
+    ],
+    "목표": [
+     "갱년기관리",
+     "수면개선"
+    ]
+   },
+   "before": [
+    "red_clover",
+    "gaba",
+    "magnesium",
+    "lemon_balm"
+   ],
+   "expected": [
+    "magnesium",
+    "gaba",
+    "gamma_linolenic",
+    "calcium"
+   ]
+  },
+  {
+   "id": "X08",
+   "label": "갱년기관리 60세 남성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 60,
+    "증상": [
+     "joint_stiffness"
+    ],
+    "목표": [
+     "갱년기관리"
+    ]
+   },
+   "before": [
+    "calcium",
+    "msm",
+    "red_clover"
+   ],
+   "expected": [
+    "calcium",
+    "msm",
+    "vitamin_k2"
+   ]
+  },
+  {
+   "id": "X09",
+   "label": "임산부 수면개선(레드클로버 차단 조건)",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [
+     "임산부_수유부"
+    ],
+    "가족력": [],
+    "성별": "female",
+    "나이": 32,
+    "증상": [
+     "cant_fall_asleep"
+    ],
+    "목표": [
+     "수면개선"
+    ]
+   },
+   "before": [
+    "magnesium"
+   ],
+   "expected": [
+    "magnesium"
+   ]
+  },
+  {
+   "id": "X10",
+   "label": "회귀: 피로 40대 남성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 42,
+    "증상": [
+     "chronic_fatigue",
+     "afternoon_slump"
+    ],
+    "목표": [
+     "피로회복"
+    ]
+   },
+   "before": [
+    "coq10",
+    "vitamin_b",
+    "iron",
+    "red_ginseng",
+    "vitamin_d"
+   ],
+   "expected": [
+    "coq10",
+    "vitamin_b",
+    "iron",
+    "red_ginseng",
+    "vitamin_d"
+   ]
+  },
+  {
+   "id": "X11",
+   "label": "회귀: 장건강 30대 여성",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 31,
+    "증상": [
+     "bloating",
+     "irregular_bowel"
+    ],
+    "목표": [
+     "소화장건강"
+    ]
+   },
+   "before": [
+    "probiotics"
+   ],
+   "expected": [
+    "probiotics"
+   ]
+  },
+  {
+   "id": "X12",
+   "label": "회귀: 눈건강 45세",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 45,
+    "증상": [
+     "eye_fatigue",
+     "dry_eyes"
+    ],
+    "목표": [
+     "눈건강"
+    ]
+   },
+   "before": [
+    "lutein",
+    "vitamin_b",
+    "coq10",
+    "vitamin_c",
+    "iron"
+   ],
+   "expected": [
+    "lutein",
+    "vitamin_b",
+    "coq10",
+    "vitamin_c",
+    "iron"
+   ]
+  },
+  {
+   "id": "X13",
+   "label": "회귀: 간건강 음주 매일",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "매일",
+    "현재복용영양제": [],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "male",
+    "나이": 48,
+    "증상": [],
+    "목표": [
+     "간건강"
+    ]
+   },
+   "before": [
+    "milk_thistle",
+    "headache_tree",
+    "omega3"
+   ],
+   "expected": [
+    "milk_thistle",
+    "headache_tree",
+    "omega3"
+   ]
+  },
+  {
+   "id": "X14",
+   "label": "현재 GABA 복용 + 불면(시너지 영향 확인)",
+   "answers": {
+    "신장": 165,
+    "체중": 62,
+    "체중변화": "변화없음",
+    "음주": "거의_안함",
+    "현재복용영양제": [
+     "gaba"
+    ],
+    "기저질환": [],
+    "가족력": [],
+    "성별": "female",
+    "나이": 38,
+    "증상": [
+     "cant_fall_asleep",
+     "anxiety"
+    ],
+    "목표": [
+     "수면개선"
+    ]
+   },
+   "before": [
+    "magnesium",
+    "lemon_balm",
+    "vitamin_b"
+   ],
+   "expected": [
+    "magnesium",
+    "vitamin_b",
+    "phosphatidylserine"
+   ]
+  }
+ ]
+}
