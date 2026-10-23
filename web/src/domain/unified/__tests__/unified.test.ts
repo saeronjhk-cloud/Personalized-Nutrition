@@ -60,9 +60,10 @@ describe("checkupResultsToScores (어댑터)", () => {
     expect(r.scores["간건강"]).toBe(10); // 8+8=16 → cap 10
   });
 
-  it("4. 비타민D low → 면역력 점수", () => {
+  it("4. 비타민D low → 비타민D결핍 전용 점수 (H150 — 비타민D 인정 기능성에 «면역» 없음)", () => {
     const r = checkupResultsToScores([cr("vitamin_D", "low", ["비타민D보충"])]);
-    expect(r.scores["면역력"]).toBe(8);
+    expect(r.scores["비타민D결핍"]).toBe(8);
+    expect(r.scores["면역력"]).toBeUndefined();
   });
 
   it("9. LDL watch → 심혈관 점수", () => {
@@ -106,6 +107,13 @@ describe("runUnifiedRecommendation (병합 추천)", () => {
       checkupResults: [cr("vitamin_D", "low", ["비타민D보충"])],
     });
     expect(res.recommendations.some((s) => s.id === "vitamin_d")).toBe(true);
+  });
+
+  it("4b. 검진만(철분 부족) → 철분 추천 (H150 전용 카테고리 «철분결핍»)", () => {
+    const res = runUnifiedRecommendation({
+      checkupResults: [cr("ferritin", "low", ["철분보충"])],
+    });
+    expect(res.recommendations.some((s) => s.id === "iron")).toBe(true);
   });
 
   it("9. 검진만(LDL 경계) → 심혈관 영양제 추천(오메가3)", () => {

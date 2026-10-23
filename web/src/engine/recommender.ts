@@ -4,6 +4,7 @@
 
 import type { SurveyAnswers, RecommendationResult, Supplement, Persona, NutritionInfo, MonthlySummary } from '../types';
 import { isRecommendable } from './exclusions';
+import { CLAIMS, allowedCategories } from './claims';
 import type { SupplementData, PersonaData } from './data';
 import {
   SUPPLEMENTS,
@@ -12,6 +13,7 @@ import {
   SUPPLEMENT_FOOD_AVOID,
   COUPANG_KEYWORDS,
   COUPANG_PARTNER_LINKS,
+  SYMPTOM_SCORE_MAP,
 } from './data';
 import {
   computeScores,
@@ -137,9 +139,16 @@ export function getRecommendations(
     if (!isRecommendable(supp.id)) continue; // H149 식약처 기능성 근거 없는 원료 제외
     if (supp.blocked_conditions?.some((c: string) => conditions.includes(c))) continue;
 
-    // 카테고리 점수 × 친화도
-    let total = 0;
-    for (const [cat, weight] of Object.entries(supp.affinity || {})) {
+    // H150 인정 기능성 카테고리만 — 표에 없거나 허용 카테고리·조건이 없으면 추천 안 함
+    const claim = CLAIMS[supp.id];
+    const allowed = allowedCategories(supp.id, answers.성별);
+    const condHit = !!claim?.condition && conditions.includes(claim.condition.id);
+    if (!claim || (allowed.size === 0 && !condHit)) continue;
+
+    // 카테고리 점수 × 친화도 (허용 카테고리만 · 검진 전용 카테고리는 claim.weights)
+    let total = condHit ? claim.condition!.score : 0;
+    for (const cat of allowed) {
+      const weight = (supp.affinity || {})[cat] ?? claim.weights?.[cat] ?? 0;
       total += (scores[cat] || 0) * (weight as number);
     }
 
@@ -157,6 +166,8 @@ export function getRecommendations(
     const matched: string[] = [];
     if (supp.symptom_indicators) {
       for (const ind of supp.symptom_indicators) {
+        const symCats = Object.keys(SYMPTOM_SCORE_MAP[ind] || {});
+        if (!symCats.some((c) => allowed.has(c))) continue; // H150 허용 카테고리 밖 증상은 보너스 없음
         if (symptoms.includes(ind)) {
           total += 8;
           matched.push(ind);

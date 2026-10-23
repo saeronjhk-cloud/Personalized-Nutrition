@@ -20,13 +20,11 @@ describe("추천 제외 원료 v1", () => {
     }
     expect(isRecommendable("gaba")).toBe(true);
   });
-  for (const c of EV.cases) {
-    it(`${c.id} ${c.label}`, () => {
-      expect(runRecommendation(c.answers).recommendations.map((r) => r.id)).toEqual(c.expected);
-    });
-  }
-  it("R2 제외와 무관한 설문은 결과 그대로", () => {
-    for (const c of EV.cases.filter((x) => !x.before.some((id) => id in EV.excluded))) expect(c.expected).toEqual(c.before);
+  it("평가셋 14건 어디에도 제외 원료 없음 (정확한 목록 기대값은 H150 이후 reco_claims 평가셋이 담당)", () => {
+    for (const c of EV.cases) {
+      const ids = runRecommendation(c.answers).recommendations.map((r) => r.id);
+      for (const ex of Object.keys(EV.excluded)) expect(ids).not.toContain(ex);
+    }
   });
   it("R1 무작위 설문 1,000건 어디에도 제외 원료 없음", () => {
     const SYM = Object.keys(SYMPTOM_SCORE_MAP), GO = GOAL_OPTIONS.map((g) => g.id), ALC = ["거의_안함", "주1-2회", "주3-4회", "매일"];
