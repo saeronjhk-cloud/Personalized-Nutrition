@@ -246,8 +246,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "⚙️",
     "description": "에너지 대사의 핵심 조효소. 만성 피로, 집중력 저하, 신경계 기능에 광범위하게 필요해요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "에너지 생성, 신경기능 유지, 피로 회복에 도움",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "탄수화물과 에너지 대사에 필요(비타민B1) · 체내 에너지 생성에 필요(비타민B2·나이아신)",
       "study": "Kennedy et al. (2016). Psychopharmacology, 211(1):55–68",
       "finding": "건강한 성인 남성 대상 무작위 이중맹검 시험. B군 비타민 복합 보충 후 피로 점수 및 인지 기능 유의미하게 개선.",
       "grade": "A"
@@ -286,8 +286,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "💤",
     "description": "스트레스·긴장으로 소모된 마그네슘 보충. 수면 질 개선, 근육 이완, 신경 안정에 도움돼요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "에너지 생성, 신경·근육 기능 유지에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "에너지 이용에 필요 · 신경과 근육 기능 유지에 필요",
       "study": "Abbasi B, et al. (2012). J Res Med Sci, 17(12):1161–1169",
       "finding": "불면증 노인 환자 46명 대상 8주 이중맹검 임상시험. 마그네슘 보충군에서 수면 효율, 수면 시간, 불면증 점수(ISI) 모두 유의미하게 개선.",
       "grade": "A"
@@ -340,8 +340,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🐟",
     "description": "혈중 중성지방 감소, 뇌·눈 건강, 항염 효과. 외식이 잦을수록 특히 중요해요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "혈중 중성지방 개선, 혈행 개선에 도움",
+      "mfds_type": "고시형 기능성 원료 (EPA 및 DHA 함유 유지)",
+      "mfds_function": "혈중 중성지질 개선·혈행 개선·기억력 개선·건조한 눈을 개선하여 눈 건강에 도움을 줄 수 있음",
       "study": "Bhatt DL, et al. (2019). REDUCE-IT Trial. N Engl J Med, 380:11–22",
       "finding": "8,179명 대상 대규모 무작위 임상시험. 고순도 EPA 보충 시 심혈관 이상 위험 25% 감소, 혈중 중성지방 유의미한 개선.",
       "grade": "A"
@@ -389,8 +389,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "☀️",
     "description": "실내 생활이 많은 현대인의 필수 비타민. 면역력·뼈 건강·기분 안정에 영향을 줘요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "칼슘·인 흡수 촉진, 면역기능 유지에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "칼슘과 인이 흡수되고 이용되는데 필요 · 뼈의 형성과 유지에 필요 · 골다공증 발생 위험 감소에 도움을 줌",
       "study": "Martineau AR, et al. (2017). BMJ, 356:i6583 (메타분석)",
       "finding": "11,321명 대상 25개 무작위 임상시험 메타분석. 비타민D 보충 시 급성 호흡기 감염 위험 12% 감소. 결핍자에서는 42% 감소.",
       "grade": "A"
@@ -438,7 +438,7 @@ export const SUPPLEMENTS: SupplementData[] = [
     "description": "장내 유익균 증식, 소화 개선, 면역력 강화. 장이 건강해야 몸 전체가 건강해요.",
     "evidence": {
       "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "장내 유익균 증식·유해균 억제에 도움",
+      "mfds_function": "유산균 증식 및 유해균 억제·배변활동 원활에 도움을 줄 수 있음",
       "study": "Hempel S, et al. (2012). JAMA, 307(18):1959–1969 (메타분석)",
       "finding": "82개 임상시험 메타분석. 유산균 섭취 그룹에서 장 기능 이상 비율 42% 유의미하게 감소.",
       "grade": "A"
@@ -477,8 +477,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌿",
     "description": "간세포 보호의 대명사. 음주·약물·환경독소로부터 간을 지키는 핵심 성분이에요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "간 기능 개선에 도움",
+      "mfds_type": "고시형 기능성 원료 (밀크씨슬 추출물)",
+      "mfds_function": "간 건강에 도움을 줄 수 있음",
       "study": "Saller R, et al. (2008). Drugs, 68(10):1–29 (체계적 문헌고찰)",
       "finding": "실리마린(밀크씨슬 활성 성분) 임상연구 체계적 고찰. 간 손상 지표(ALT·AST) 유의미한 감소 및 간세포 보호 효과 확인.",
       "grade": "A"
@@ -510,8 +510,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🍊",
     "description": "항산화의 기본. 면역력 강화, 피부 콜라겐 합성, 피로 회복에 다방면으로 활약해요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "항산화, 피부 건강, 면역기능 유지에 도움",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "결합조직 형성과 기능유지에 필요 · 철의 흡수에 필요 · 유해산소로부터 세포를 보호하는데 필요",
       "study": "Hemilä H & Chalker E. (2013). Cochrane Database Syst Rev (메타분석)",
       "finding": "29개 임상시험(11,306명) 메타분석. 비타민C 정기 복용 시 감기 지속기간 성인 8%, 아동 14% 단축. 멍·잇몸 출혈은 결핍의 초기 신호.",
       "grade": "A"
@@ -555,8 +555,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🍋",
     "description": "천연 허브로 수면 질 개선, 불안 완화. 자기 전 복용으로 자연스러운 수면 유도.",
     "evidence": {
-      "mfds_type": "개별인정형 기능성 원료 (인정번호 제2013-22호)",
-      "mfds_function": "수면의 질 개선에 도움",
+      "mfds_type": "인정 없음",
+      "mfds_function": "",
       "study": "Cases J, et al. (2011). Mediterr J Nutr Metab, 4(3):211–218",
       "finding": "불안·수면 장애 성인 225명 대상 15일 임상시험. 레몬밤 추출물 복용 후 불안 증상 18%, 불면 증상 42% 개선.",
       "grade": "B"
@@ -599,8 +599,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "✨",
     "description": "피부 탄력·보습, 관절 건강에 도움. 30대 이후 콜라겐 생성이 자연스럽게 줄어들어요.",
     "evidence": {
-      "mfds_type": "개별인정형 기능성 원료",
-      "mfds_function": "피부 보습에 도움",
+      "mfds_type": "개별인정형 기능성 원료 (저분자콜라겐펩타이드 등)",
+      "mfds_function": "피부 보습에 도움을 줄 수 있음",
       "study": "Proksch E, et al. (2014). Skin Pharmacol Physiol, 27(1):47–55",
       "finding": "건강한 여성 69명 대상 8주 이중맹검 임상시험. 저분자 콜라겐 펩타이드 복용 후 피부 탄력 15%, 보습도 유의미하게 개선.",
       "grade": "A"
@@ -638,7 +638,7 @@ export const SUPPLEMENTS: SupplementData[] = [
     "description": "세포 에너지 생산의 핵심 조효소. 극심한 피로, 스태미나 저하에 효과적이에요.",
     "evidence": {
       "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "항산화에 도움",
+      "mfds_function": "항산화·높은 혈압 감소에 도움을 줄 수 있음",
       "study": "Mizuno K, et al. (2008). Nutrition, 24(4):293–299",
       "finding": "만성피로 호소 성인 대상 8주 무작위 임상시험. CoQ10 보충군에서 피로 점수(VAS) 및 주관적 피로감 유의미하게 감소.",
       "grade": "A"
@@ -677,8 +677,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🩸",
     "description": "빈혈 예방, 산소 운반 능력 향상. 특히 여성·채식주의자에게 중요한 영양소예요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "혈액 생성, 산소 운반에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "체내 산소운반과 혈액생성에 필요 · 에너지 생성에 필요",
       "study": "Vaucher P, et al. (2012). CMAJ, 184(11):1247–1254",
       "finding": "페리틴 낮은 월경 여성 198명 대상 12주 무작위 임상시험. 철분 보충 후 피로 점수 48% 개선.",
       "grade": "A"
@@ -730,8 +730,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🛡️",
     "description": "면역의 최전선. 감기·바이러스 저항력, 피부 재생, 남성 건강에도 중요한 미네랄이에요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "면역기능, 세포분열에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "정상적인 면역기능에 필요 · 정상적인 세포분열에 필요",
       "study": "Hemilä H. (2011). Open Respir Med J, 5:51–58 (메타분석)",
       "finding": "아연 관련 13개 임상시험 메타분석. 감기 발병 24시간 이내 복용 시 감기 지속기간 33% 단축.",
       "grade": "A"
@@ -771,8 +771,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🧘",
     "description": "뇌의 흥분을 억제하는 천연 안정제. 스트레스 완화, 숙면 유도에 도움돼요.",
     "evidence": {
-      "mfds_type": "개별인정형 기능성 원료 (인정번호 제2018-4호)",
-      "mfds_function": "스트레스 완화, 수면의 질 개선에 도움",
+      "mfds_type": "개별인정형 기능성 원료 (L-글루탐산발효 가바분말, 제2022-19호)",
+      "mfds_function": "수면의 질 개선에 도움을 줄 수 있음",
       "study": "Byun JI, et al. (2018). J Clin Neurol, 14(3):291–295",
       "finding": "수면장애 성인 40명 대상 4주 무작위 이중맹검 임상시험. GABA 보충 후 수면 잠복기 5.3분 단축, 수면 효율 유의미하게 개선.",
       "grade": "A"
@@ -815,8 +815,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌳",
     "description": "음주 후 간 보호, 숙취 해소. 식약처 인정 성분으로 간 손상 보호에 탁월해요.",
     "evidence": {
-      "mfds_type": "개별인정형 기능성 원료",
-      "mfds_function": "음주로 인한 피로 회복에 도움",
+      "mfds_type": "개별인정형 기능성 원료 (헛개나무과병추출분말)",
+      "mfds_function": "알콜성 손상으로부터 간을 보호하는데 도움을 줄 수 있음",
       "study": "Song YO, et al. (2011). Food Chem Toxicol, 49(7):1550–1555",
       "finding": "동물 모델 및 세포 실험에서 헛개나무 추출물의 간세포 보호 효과(ALT·AST 감소) 및 항산화 활성 확인.",
       "grade": "B"
@@ -852,8 +852,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🤱",
     "description": "임신 초기 필수 영양소. 태아 신경관 발달에 매우 중요하며 임신 계획 중에도 복용 권장해요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "세포분열, 태아 신경관 발달에 도움",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "세포와 혈액생성에 필요 · 태아 신경관의 정상 발달에 필요",
       "study": "MRC Vitamin Study Research Group. (1991). Lancet, 338(8760):131–137",
       "finding": "신경관 결손 위험 여성 1,817명 대상 무작위 임상시험. 엽산 보충 시 신경관 결손 발생률 72% 감소.",
       "grade": "A"
@@ -890,8 +890,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌻",
     "description": "강력한 지용성 항산화제. 세포막 산화 손상을 막고 피부 노화 방지와 면역 기능을 지원해요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "항산화에 도움",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "유해산소로부터 세포를 보호하는데 필요",
       "study": "Sies H, et al. (2019). Nat Rev Mol Cell Biol, 20:674–688",
       "finding": "비타민E(토코페롤)는 지질 과산화 억제를 통해 세포막 산화 손상을 방지하며, 면역세포 활성 및 항염 기능 지원이 다수 연구에서 확인됨.",
       "grade": "B"
@@ -936,7 +936,7 @@ export const SUPPLEMENTS: SupplementData[] = [
     "description": "면역력 향상과 피로 개선의 대표 성분. 스트레스 반응 조절과 활력 회복에 도움을 줍니다.",
     "evidence": {
       "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "면역력 증진, 피로 개선, 항산화에 도움",
+      "mfds_function": "면역력 증진·피로개선·혈소판 응집억제를 통한 혈액흐름·기억력 개선·항산화·갱년기 여성의 건강에 도움을 줄 수 있음",
       "study": "Kim SH, et al. (2013). J Ginseng Res, 37(1):123–133",
       "finding": "홍삼 추출물 8주 복용 시 NK세포 활성 유의미하게 증가, 피로 지표(VAS) 개선 — 다수 RCT 및 코호트 연구에서 일관된 결과 확인.",
       "grade": "B"
@@ -976,8 +976,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🦴",
     "description": "뼈와 치아의 기본 재료. 근육 수축, 신경 전달, 혈액 응고에도 필수적인 미네랄이에요.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "뼈와 치아 형성에 필요, 신경 및 근육 기능 유지에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "뼈와 치아 형성에 필요 · 신경과 근육 기능 유지에 필요 · 정상적인 혈액응고에 필요 · 골다공증 발생 위험 감소에 도움을 줌",
       "study": "Reid IR, et al. (2008). Lancet, 372(9638):543–544",
       "finding": "칼슘 보충제 복용 시 골밀도 유지 및 골절 위험 감소 — 특히 폐경 이후 여성과 50대 이상에서 효과 뚜렷.",
       "grade": "A"
@@ -1033,8 +1033,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "👁️",
     "description": "눈 황반의 핵심 색소. 청색광 차단, 황반변성 예방, 눈 피로 개선에 도움을 줍니다.",
     "evidence": {
-      "mfds_type": "고시형 기능성 원료",
-      "mfds_function": "노화로 인한 황반변성 위험 감소에 도움",
+      "mfds_type": "고시형 기능성 원료 (마리골드꽃추출물)",
+      "mfds_function": "노화로 인해 감소될 수 있는 황반색소밀도를 유지하여 눈 건강에 도움을 줌",
       "study": "AREDS2 Research Group. (2013). JAMA, 309(19):2005–2015",
       "finding": "4,203명 대규모 임상시험. 루테인·지아잔틴 보충 시 황반변성 진행 위험 18~25% 감소. 디지털 눈 피로 감소 효과도 다수 연구에서 확인.",
       "grade": "A"
@@ -1075,8 +1075,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🩸",
     "description": "인슐린 민감성 향상, 혈당 조절 보조. 식약처 인정 기능성 원료.",
     "evidence": {
-      "mfds_type": "고시형",
-      "mfds_function": "체내 탄수화물·지방·단백질 대사에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "",
       "study": "Anderson RA, et al. (1997). Diabetes, 46(11):1786-1791",
       "finding": "180명 2형 당뇨 환자 대상 4개월 무작위 임상시험. 크롬 보충 시 HbA1c, 공복혈당 유의미하게 감소.",
       "grade": "A"
@@ -1116,8 +1116,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🍃",
     "description": "코로솔산 성분이 혈당 흡수 억제. 식약처 개별인정 원료.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "식후 혈당 상승 억제에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "식후 혈당상승 억제에 도움을 줄 수 있음",
       "study": "Fukushima M, et al. (2006). J Ethnopharmacol, 104(3):326-331",
       "finding": "당뇨 환자 대상 코로솔산 혈당 강하 효과 확인.",
       "grade": "B"
@@ -1154,8 +1154,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌴",
     "description": "전립선 건강의 대표 성분. 중년 남성 배뇨 기능 개선.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "전립선 건강에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "전립선 건강의 유지에 도움을 줄 수 있음",
       "study": "Wilt T, et al. (2000). Cochrane Database Syst Rev",
       "finding": "18개 RCT 메타분석, 배뇨 증상 개선 확인.",
       "grade": "A"
@@ -1188,8 +1188,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌻",
     "description": "달맞이꽃종자유의 핵심 성분. 월경 전 불편함 완화, 피부 건강 개선.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "월경 전 변화에 의한 불편함 개선에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "혈중 콜레스테롤 개선·혈행 개선·월경 전 변화에 의한 불편한 상태 개선·면역과민반응에 의한 피부상태 개선에 도움을 줄 수 있음",
       "study": "Khoo SK, et al. (2008). Complement Ther Med, 16(4):196-203",
       "finding": "PMS 여성 대상 RCT, GLA 복용 후 증상 유의미하게 감소.",
       "grade": "B"
@@ -1231,8 +1231,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "💪",
     "description": "관절 건강과 연골 보호. 식약처 인정 관절 건강 기능성 원료.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "관절 및 연골 건강에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "관절 및 연골건강에 도움을 줄 수 있음",
       "study": "Kim LS, et al. (2006). Osteoarthritis Cartilage, 14(3):286-294",
       "finding": "50명 골관절염 환자 12주 RCT, 관절 통증·기능 유의미하게 개선.",
       "grade": "A"
@@ -1274,8 +1274,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🍋",
     "description": "체지방 감소 도움. 식약처 인정 기능성 원료. 탄수화물→지방 전환 억제.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "체지방 감소에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "탄수화물이 지방으로 합성되는 것을 억제하여 체지방 감소에 도움을 줌",
       "study": "Onakpoya I, et al. (2011). J Obes, 2011:509038",
       "finding": "12개 RCT 메타분석, 체지방 감소 효과 확인 (단기).",
       "grade": "B"
@@ -1312,8 +1312,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🦴",
     "description": "칼슘을 뼈로 보내고 혈관 석회화 방지. 비타민D와 필수 파트너.",
     "evidence": {
-      "mfds_type": "고시형",
-      "mfds_function": "정상적인 혈액 응고, 뼈 건강에 필요",
+      "mfds_type": "고시형 영양성분 (비타민K)",
+      "mfds_function": "정상적인 혈액응고에 필요 · 뼈의 구성에 필요",
       "study": "Knapen MH, et al. (2013). Osteoporos Int, 24(9):2499-2507",
       "finding": "폐경 여성 244명 3년 RCT, MK-7 보충 시 골밀도 유지·혈관 탄력 개선.",
       "grade": "A"
@@ -1354,8 +1354,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🛡️",
     "description": "강력한 항산화 미네랄. 갑상선 기능, 면역력, 정자 건강에 중요.",
     "evidence": {
-      "mfds_type": "고시형",
-      "mfds_function": "유해산소로부터 세포 보호에 필요",
+      "mfds_type": "고시형 영양성분",
+      "mfds_function": "유해산소로부터 세포를 보호하는데 필요",
       "study": "Rayman MP. (2012). Lancet, 379(9822):1256-1268",
       "finding": "셀레늄 보충이 면역 기능 향상, 갑상선 기능 지원에 유효.",
       "grade": "A"
@@ -1398,8 +1398,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🌺",
     "description": "식물성 에스트로겐. 갱년기 안면홍조, 골밀도 저하 완화.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "갱년기 여성 건강에 도움",
+      "mfds_type": "인정 없음",
+      "mfds_function": "",
       "study": "Tice JA, et al. (2003). JAMA, 290(2):207-214",
       "finding": "252명 폐경 여성 RCT, 이소플라본 보충 후 안면홍조 빈도 감소.",
       "grade": "B"
@@ -1449,8 +1449,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🧠",
     "description": "미토콘드리아 생합성 촉진. 인지 기능 개선, 뇌 건강 지원.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "인지 기능 개선에 도움",
+      "mfds_type": "개별인정형 기능성 원료 (피롤로퀴놀린퀴논이나트륨염 NOVAQ®, 제2025-56호, 2025.11.17)",
+      "mfds_function": "노화로 인해 저하된 인지기능 개선에 도움을 줄 수 있음",
       "study": "Itoh Y, et al. (2016). Funct Foods Health Dis, 6(7):416-427",
       "finding": "건강한 중년 성인 41명 12주 RCT, PQQ 보충 후 기억력·주의력 유의미하게 개선.",
       "grade": "B"
@@ -1486,8 +1486,8 @@ export const SUPPLEMENTS: SupplementData[] = [
     "emoji": "🧠",
     "description": "뇌세포막의 핵심 인지질. 기억력 개선, 인지 기능 유지에 도움.",
     "evidence": {
-      "mfds_type": "개별인정형",
-      "mfds_function": "인지력 개선에 도움",
+      "mfds_type": "고시형 기능성 원료",
+      "mfds_function": "노화로 인해 저하된 인지력 개선·자외선에 의한 피부 손상으로부터 피부 건강 유지·피부보습에 도움을 줄 수 있음",
       "study": "Kato-Kataoka A, et al. (2010). J Clin Biochem Nutr, 47(3):246-255",
       "finding": "건강한 노인 78명 6개월 RCT, 포스파티딜세린 보충 후 기억력 유의미하게 개선.",
       "grade": "A"
