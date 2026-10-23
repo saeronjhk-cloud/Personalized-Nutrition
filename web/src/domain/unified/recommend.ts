@@ -5,6 +5,7 @@
  */
 
 import type { SurveyAnswers, RecommendationResult, Supplement } from "../../types";
+import { trackB, labsFromCheckup } from "../nutrient/track_b";
 import type { CategoryResult } from "../checkup/engine";
 import type { SupplementData } from "../../engine/data";
 import {
@@ -164,5 +165,6 @@ export function runUnifiedRecommendation(input: UnifiedInput): UnifiedResult {
     referralKeys: checkupSig.referralKeys,
     dietLowConfidence: dietSig.lowConfidence,
     sources: { survey: !!survey, checkup: !!checkup, diet: !!input.dietSummary },
+    nutrient_track: trackB(baseAnswers, { labs: labsFromCheckup(checkup), excludeIds: recommendations.map((r) => r.id) }),
   };
 }

@@ -1,6 +1,6 @@
 {
  "name": "reco_claims",
- "version": "1.0",
+ "version": "1.1",
  "date": "2026-10-23",
  "rule": "H150 인정 기능성 카테고리만 추천 (정본 대응표 IP/evals/eval_claim_categories_v1.json)",
  "decision": "제이 10-23 18:13 P1·P3·P4",
@@ -281,9 +281,11 @@
    "before_v0": [
     "magnesium"
    ],
-   "expected": [
+   "expected": [],
+   "expected_v1_0": [
     "folic_acid"
-   ]
+   ],
+   "note": "v1.1: 엽산은 트랙 B 로 이관(H154)"
   },
   {
    "id": "X10",
@@ -510,9 +512,13 @@
    },
    "before_v0": null,
    "expected": [
+    "red_ginseng"
+   ],
+   "expected_v1_0": [
     "red_ginseng",
     "folic_acid"
-   ]
+   ],
+   "note": "v1.1: 엽산은 트랙 B 로 이관(H154)"
   },
   {
    "id": "X18",

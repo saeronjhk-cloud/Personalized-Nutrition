@@ -9,6 +9,7 @@ import { supplementCheckLines, UL_MIN_AGE } from '../domain/supplement/ul_check'
 import { dosesFor, doseProductsFor, type DoseStore } from '../domain/supplement/ul_dose'
 import { loadDoseStore, saveDoseStore } from '../lib/suppDoseStore'
 import SuppDoseForm from '../components/results/SuppDoseForm'
+import NutrientTrack from '../components/results/NutrientTrack'
 
 interface Props {
   result: RecommendationResult | null
@@ -207,7 +208,11 @@ export default function Results({
         맞춤 추천 영양제
         <span className="results-section-count">{recommendations.length}종</span>
       </div>
-      {recommendations.length === 0 ? (
+      {recommendations.length === 0 && ((result.nutrient_track?.products.length ?? 0) > 0 || (result.nutrient_track?.cards.length ?? 0) > 0) ? (
+        <p data-testid="no-track-a" style={{ fontSize: 14, color: 'var(--text-secondary)', margin: 'var(--space-2) 0' }}>
+          선택하신 고민에 맞는 식약처 인정 기능성 원료는 해당이 없어요. 아래 영양소 점검을 확인해 보세요.
+        </p>
+      ) : recommendations.length === 0 ? (
         <div className="results-no-recs" style={{
           background: 'linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%)',
           border: '1px solid #c6f6d5',
@@ -229,6 +234,8 @@ export default function Results({
       ) : recommendations.map((supp: Supplement) => (
         <SupplementCard key={supp.id} supp={supp} />
       ))}
+
+      <NutrientTrack track={result.nutrient_track} />
 
       {/* 월간 비용 */}
       <div className="results-cost-card">

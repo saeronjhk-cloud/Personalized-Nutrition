@@ -18,9 +18,7 @@ export const FUNCTIONAL_NEED_TO_CATEGORY: Record<string, string> = {
   혈압조절: "심혈관",
   간건강: "간건강",
   체지방감소: "체중관리",
-  // H150 — 검진 결핍 신호는 그 영양소만 받는 전용 카테고리(철·비타민D 인정 기능성에 «피로»·«면역» 없음)
-  철분보충: "철분결핍",
-  비타민D보충: "비타민D결핍",
+  // 철분보충·비타민D보충 은 카테고리로 보내지 않음 — 트랙 B(domain/nutrient/track_b.ts labsFromCheckup)가 직접 읽음 (H150·H154)
 };
 
 /**

@@ -60,10 +60,9 @@ describe("checkupResultsToScores (어댑터)", () => {
     expect(r.scores["간건강"]).toBe(10); // 8+8=16 → cap 10
   });
 
-  it("4. 비타민D low → 비타민D결핍 전용 점수 (H150 — 비타민D 인정 기능성에 «면역» 없음)", () => {
+  it("4. 비타민D low → 트랙 A 카테고리 점수 없음 (트랙 B 가 직접 읽음 · H154)", () => {
     const r = checkupResultsToScores([cr("vitamin_D", "low", ["비타민D보충"])]);
-    expect(r.scores["비타민D결핍"]).toBe(8);
-    expect(r.scores["면역력"]).toBeUndefined();
+    expect(r.scores).toEqual({});
   });
 
   it("9. LDL watch → 심혈관 점수", () => {
@@ -106,14 +105,18 @@ describe("runUnifiedRecommendation (병합 추천)", () => {
     const res = runUnifiedRecommendation({
       checkupResults: [cr("vitamin_D", "low", ["비타민D보충"])],
     });
-    expect(res.recommendations.some((s) => s.id === "vitamin_d")).toBe(true);
+    expect(res.nutrient_track?.products.map((p) => p.id)).toContain("vitamin_d"); // 트랙 B (H154)
   });
 
-  it("4b. 검진만(철분 부족) → 철분 추천 (H150 전용 카테고리 «철분결핍»)", () => {
-    const res = runUnifiedRecommendation({
+  it("4b. 검진만(철분 부족) — 가임기 여성은 트랙 B 철, 남성은 상담 카드 (H154)", () => {
+    const female = runUnifiedRecommendation({
+      surveyAnswers: { 성별: "female", 나이: 30, 신장: 160, 체중: 55, 체중변화: "변화없음", 월경상태: "정상", 증상: [], 목표: [], 현재복용영양제: [], 기저질환: [], 가족력: [] },
       checkupResults: [cr("ferritin", "low", ["철분보충"])],
     });
-    expect(res.recommendations.some((s) => s.id === "iron")).toBe(true);
+    expect(female.nutrient_track?.products.map((p) => p.id)).toContain("iron");
+    const male = runUnifiedRecommendation({ profile: { sex: "male", age: 50 }, checkupResults: [cr("ferritin", "low", ["철분보충"])] });
+    expect(male.nutrient_track?.products.map((p) => p.id)).not.toContain("iron");
+    expect(male.nutrient_track?.cards.map((c) => c.id)).toContain("CARE_IRON");
   });
 
   it("9. 검진만(LDL 경계) → 심혈관 영양제 추천(오메가3)", () => {

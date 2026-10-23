@@ -12,7 +12,7 @@ import type { SurveyAnswers } from "../../types";
 
 interface Case { id: string; label: string; answers: SurveyAnswers; expected: string[] }
 const EV = JSON.parse(readFileSync(resolve(__dirname, "fixtures/eval_reco_claims_v1.json"), "utf-8")) as { cases: Case[] };
-const EMPTY = ["vitamin_c", "vitamin_b", "vitamin_e", "selenium", "chromium", "lemon_balm", "red_clover"];
+const EMPTY = ["vitamin_c", "vitamin_b", "vitamin_e", "selenium", "chromium", "lemon_balm", "red_clover", "iron", "folic_acid"];
 
 describe("H150 인정 기능성 대응표", () => {
   it("엔진 30종 모두 대응표에 있음 · 근거 문장 있음", () => {
@@ -25,10 +25,11 @@ describe("H150 인정 기능성 대응표", () => {
     expect(allowedCategories("red_ginseng", "female").has("갱년기")).toBe(true);
     expect([...allowedCategories("gaba", "female")]).toEqual(["수면"]);
   });
-  it("검진 철분·비타민D 신호는 전용 카테고리", () => {
-    expect(FUNCTIONAL_NEED_TO_CATEGORY["철분보충"]).toBe("철분결핍");
-    expect(FUNCTIONAL_NEED_TO_CATEGORY["비타민D보충"]).toBe("비타민D결핍");
-    expect(allowedCategories("iron", "male")).toEqual(new Set(["철분결핍"]));
+  it("검진 철분·비타민D 신호는 트랙 A 카테고리로 가지 않음(트랙 B 가 직접 읽음 · H154)", () => {
+    expect(FUNCTIONAL_NEED_TO_CATEGORY["철분보충"]).toBeUndefined();
+    expect(FUNCTIONAL_NEED_TO_CATEGORY["비타민D보충"]).toBeUndefined();
+    expect(allowedCategories("iron", "female").size).toBe(0);
+    expect(allowedCategories("folic_acid", "female").size).toBe(0);
   });
 });
 
@@ -54,7 +55,6 @@ describe("H150 무작위 설문 1,000건 성질", () => {
       }
       if (a.성별 === "female") expect(ids).not.toContain("saw_palmetto");
       for (const e of EMPTY) expect(ids).not.toContain(e);
-      if (!preg) expect(ids).not.toContain("folic_acid");
     }
   });
 });

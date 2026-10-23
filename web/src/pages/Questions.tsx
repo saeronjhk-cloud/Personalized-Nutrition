@@ -173,12 +173,17 @@ function StepBody({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
           <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             {[['정상', '정상'], ['불규칙', '불규칙'], ['폐경', '폐경']].map(([val, label]) => (
               <div key={val} className={`radio-card ${answers.월경상태 === val ? 'selected' : ''}`}
-                onClick={() => onUpdate({ 월경상태: val })} style={{ flex: 1 }}>
+                onClick={() => onUpdate(val === '폐경' ? { 월경상태: val, 월경량: undefined } : { 월경상태: val })} style={{ flex: 1 }}>
                 <div className="radio-dot" />
                 <span style={{ fontSize: 14 }}>{label}</span>
               </div>
             ))}
           </div>
+          {(answers.월경상태 === '정상' || answers.월경상태 === '불규칙') && (
+            <OptRow testid="q-menses-amount" label="월경량이 많은 편인가요?" value={answers.월경량}
+              options={[['보통', '보통이에요'], ['많음', '많아요(대형 패드를 자주 갈거나 7일 이상)']] as const}
+              onPick={(v) => onUpdate({ 월경량: v })} />
+          )}
         </div>
       )}
 
@@ -401,11 +406,44 @@ function StepDiet({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpd
         ))}
       </div>
 
+      <OptRow testid="q-dairy" label="우유·요구르트·치즈를 얼마나 드세요?" value={answers.유제품섭취}
+        options={[['거의_안함', '거의 안 먹어요'], ['주몇번', '일주일에 몇 번'], ['매일', '거의 매일']] as const}
+        onPick={(v) => onUpdate({ 유제품섭취: v })} />
+      <OptRow testid="q-meat" label="고기·생선·달걀을 얼마나 드세요?" value={answers.육류어패류섭취}
+        options={[['거의_안함', '거의 안 먹어요'], ['주몇번', '일주일에 몇 번'], ['매일', '거의 매일']] as const}
+        onPick={(v) => onUpdate({ 육류어패류섭취: v })} />
+      <OptRow testid="q-veg" label="채소·과일을 얼마나 드세요?" value={answers.채소과일섭취}
+        options={[['거의_안함', '거의 안 먹어요'], ['하루1회', '하루 한 번 정도'], ['매끼', '거의 매 끼니']] as const}
+        onPick={(v) => onUpdate({ 채소과일섭취: v })} />
+      <OptRow testid="q-vegan" label="채식을 하시나요?" value={answers.채식유형}
+        options={[['아님', '아니요'], ['일부', '채식(유제품·달걀은 먹어요)'], ['비건', '완전 채식(비건)']] as const}
+        onPick={(v) => onUpdate({ 채식유형: v })} />
+
       <button className="btn btn-primary" onClick={onNext} style={{ marginTop: 'var(--space-5)' }}>다음 →</button>
     </div>
   )
 }
 
+
+/* ── 트랙 B 선택 문항 공통 행 (10-23 · 명세 IP/integration/nutrient_track_b_v1) — 다시 누르면 선택 해제 ── */
+function OptRow<T extends string>({ label, value, options, onPick, testid }: {
+  label: string; value: T | undefined; options: readonly (readonly [T, string])[]; onPick: (v: T | undefined) => void; testid: string
+}) {
+  return (
+    <div className="input-group" data-testid={testid} style={{ marginTop: 'var(--space-3)' }}>
+      <label>{label} <span style={{ fontWeight: 400, fontSize: 12, color: 'var(--text-muted)' }}>(선택)</span></label>
+      <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+        {options.map(([v, text]) => (
+          <div key={v} className={`radio-card ${value === v ? 'selected' : ''}`}
+            onClick={() => onPick(value === v ? undefined : v)} style={{ flex: 1, minWidth: 96 }}>
+            <div className="radio-dot" />
+            <span style={{ fontSize: 14 }}>{text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 /* ── Q8: 알코올/흡연 ── */
 function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; onUpdate: (p: Partial<SurveyAnswers>) => void; onNext: () => void }) {
@@ -431,13 +469,19 @@ function StepAlcohol({ answers, onUpdate, onNext }: { answers: SurveyAnswers; on
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)', marginBottom: 'var(--space-5)' }}>
         {drinkOptions.map(o => (
           <div key={o.value} className={`radio-card ${answers.음주 === o.value ? 'selected' : ''}`}
-            onClick={() => onUpdate({ 음주: o.value })}>
+            onClick={() => onUpdate(o.value === '거의_안함' ? { 음주: o.value, 음주량: undefined } : { 음주: o.value })}>
             <div className="radio-dot" />
             <span>{o.label}</span>
           </div>
         ))}
       </div>
 
+      {answers.음주 && answers.음주 !== '거의_안함' && (
+        <OptRow testid="q-drink-amount" label="한 번 마실 때 양은 어느 정도예요?" value={answers.음주량}
+          options={[['적게', '소주 반 병 미만'], ['보통', '소주 반~1병'], ['많이', '소주 1병 이상']] as const}
+          onPick={(v) => onUpdate({ 음주량: v })} />
+      )}
+      <div style={{ height: 'var(--space-4)' }} />
       <div style={{ fontWeight: 500, marginBottom: 'var(--space-2)', fontSize: 14 }}>흡연 여부</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {smokeOptions.map(o => (
@@ -554,6 +598,13 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
         ))}
       </div>
 
+      {answers.성별 === 'female' && answers.나이 >= 14 && answers.나이 <= 55 && (
+        <OptRow testid="q-pregnancy" label="임신·수유 중이거나 준비 중인가요?" value={answers.임신단계}
+          options={[['해당없음', '해당 없어요'], ['임신준비', '임신 준비 중'], ['임신중', '임신 중'], ['수유중', '수유 중']] as const}
+          onPick={(v) => onUpdate({ 임신단계: v })} />
+      )}
+      <div style={{ height: 'var(--space-4)' }} />
+
       {/* 영양제 점검 v1.2 문항은 플래그와 함께 켜진다 — OFF 면 예전 약 이름 칸 그대로 */}
       {SUPPLEMENT_CHECK_ENABLED && (
       <div className="input-group" data-testid="meds-yn">
@@ -561,7 +612,7 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
           {([['있음', '있어요'], ['없음', '없어요']] as const).map(([v, label]) => (
             <div key={v} className={`radio-card ${answers.복용약있음 === v ? 'selected' : ''}`}
-              onClick={() => onUpdate(v === '없음' ? { 복용약있음: v, 복용약물: undefined } : { 복용약있음: v })} style={{ flex: 1 }}>
+              onClick={() => onUpdate(v === '없음' ? { 복용약있음: v, 복용약물: undefined, 해당약물: undefined } : { 복용약있음: v })} style={{ flex: 1 }}>
               <div className="radio-dot" />
               <span style={{ fontSize: 14 }}>{label}</span>
             </div>
@@ -576,6 +627,22 @@ function StepConditions({ answers, onUpdate, onSubmit }: { answers: SurveyAnswer
           <input type="text" className="input-field" placeholder="예: 혈압약, 당뇨약, 갑상선약..."
             value={answers.복용약물 || ''}
             onChange={e => onUpdate({ 복용약물: e.target.value || undefined })} />
+          <div data-testid="q-drugs" style={{ marginTop: 'var(--space-3)' }}>
+            <div style={{ fontSize: 13, marginBottom: 'var(--space-2)' }}>아래 약을 3개월 이상 드시나요? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>(해당하는 것만)</span></div>
+            <div className="grid-2">
+              {([['위산억제제', '위장약(위산억제제: ○○프라졸 등)'], ['메트포르민', '당뇨약(메트포르민)']] as const).map(([v, text]) => {
+                const cur = answers.해당약물 || []
+                const on = cur.includes(v)
+                return (
+                  <div key={v} className={`check-card ${on ? 'selected' : ''}`}
+                    onClick={() => { const next = on ? cur.filter(x => x !== v) : [...cur, v]; onUpdate({ 해당약물: next.length ? next : undefined }) }}>
+                    <div className="check-icon">✓</div>
+                    <span className="check-text">{text}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       )}
 

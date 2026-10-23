@@ -5,6 +5,14 @@
 import type { SurveyAnswers, RecommendationResult, Supplement, Persona, NutritionInfo, MonthlySummary } from '../types';
 import { isRecommendable } from './exclusions';
 import { CLAIMS, allowedCategories } from './claims';
+import { trackB } from '../domain/nutrient/track_b';
+
+/** H153 임신단계 «임신중»·«수유중» 은 기저질환 «임산부_수유부» 와 같게 (차단 조건·임산부 페르소나) */
+export function effectiveConditions(answers: SurveyAnswers): string[] {
+  const base = answers.기저질환 || [];
+  const preg = answers.임신단계 === '임신중' || answers.임신단계 === '수유중';
+  return preg && !base.includes('임산부_수유부') ? [...base, '임산부_수유부'] : base;
+}
 import type { SupplementData, PersonaData } from './data';
 import {
   SUPPLEMENTS,
@@ -43,7 +51,7 @@ export function getPersona(answers: SurveyAnswers, scores: Record<string, number
 
   const age = answers.나이 || 30;
   const gender = answers.성별 || 'male';
-  const conditions = answers.기저질환 || [];
+  const conditions = effectiveConditions(answers);
   const alcohol = answers.음주 || '거의_안함';
   const exercise = answers.운동 || '거의_안함';
 
@@ -129,7 +137,7 @@ export function getRecommendations(
 ): Array<[SupplementData, string[]]> {
   const { current_ids = new Set(), max_recs = persona?.max_recommendations || 5 } = options || {};
   const symptoms = answers.증상 || [];
-  const conditions = answers.기저질환 || [];
+  const conditions = effectiveConditions(answers);
 
   const scored: Array<{ total: number; supp: SupplementData; matched: string[] }> = [];
 
@@ -285,5 +293,6 @@ export function runRecommendation(answers: SurveyAnswers): RecommendationResult 
     nutrition_info,
     monthly_summary,
     warnings: [],
+    nutrient_track: trackB(answers, { excludeIds: recommendations.map((r) => r.id) }),
   };
 }

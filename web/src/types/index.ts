@@ -26,6 +26,15 @@ export interface SurveyAnswers {
   /** 철분을 진단·의사·약사 권고로 복용하는지(철분 선택 시만 · 서박사 P3) */
   철분권고?: "예" | "아니오";
   가족력: string[];
+  /** 트랙 B 신설 문항(10-23, 모두 선택) — 명세 IP/integration/nutrient_track_b_v1 */
+  유제품섭취?: "거의_안함" | "주몇번" | "매일";
+  육류어패류섭취?: "거의_안함" | "주몇번" | "매일";
+  채소과일섭취?: "거의_안함" | "하루1회" | "매끼";
+  채식유형?: "아님" | "일부" | "비건";
+  음주량?: "적게" | "보통" | "많이";
+  월경량?: "보통" | "많음";
+  임신단계?: "해당없음" | "임신준비" | "임신중" | "수유중";
+  해당약물?: string[];
   음식상세?: Record<string, string>;
   혈액검사?: Record<string, number>;
 }
@@ -93,6 +102,8 @@ export interface RecommendationResult {
   nutrition_info: NutritionInfo;
   monthly_summary: MonthlySummary;
   warnings: string[];
+  /** 트랙 B «부족하기 쉬운 영양소» (H154) */
+  nutrient_track?: import('../domain/nutrient/track_b').TrackBResult;
 }
 
 export interface SymptomItem {
